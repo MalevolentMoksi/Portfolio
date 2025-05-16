@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio - Projet détaillé</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="particles-js"></div>
+  <img src="../Images/Destiny-2-Pyramids2.jpg" alt="Image d'arrière-plan" id="background">
+  <header>
+    <h1>Titre du Projet</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html" id="BoutAccueil">Accueil</a></li>
+        <li><a href="projets.html">Projets</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="project-detail">
+      <h2>Description</h2>
+      <p> Ce projet de SAE S1.01/02, intitulé <strong>« Classification automatique »</strong>, 
+        visait à améliorer un système de tri de dépêches d'actualité en développant une méthode de génération automatique de lexiques.
+        Contrairement à la première partie où les lexiques étaient manuels, nous avons ici expérimenté l'<em>apprentissage automatique</em> 
+        afin de générer des lexiques plus pertinents et d’améliorer la précision du système de classification.
+      
+      Binôme : Paolo Colombat, Enzo Morello</p>
+    </section>
+
+    <section id="skills">
+      <h2>Compétences</h2>
+      <ul>
+        <li>Manipulation de structures de données en Java (ArrayList, objets personnalisés)</li>
+        <li>Analyse de texte et traitement de chaînes</li>
+        <li>Écriture et lecture de fichiers</li>
+        <li>Conception d’algorithmes de pondération</li>
+        <li>Comparaison expérimentale de méthodes d’IA</li>
+      </ul>
+    </section>
+
+    <section id="techniques">
+      <h2>Compétences Techniques & Savoir-Faire</h2>
+      <ul>
+        <li>Utilisation de Java pour la classification textuelle</li>
+        <li>Calcul de scores discriminants pour les mots</li>
+        <li>Application d’heuristiques pour pondérer les lexiques</li>
+        <li>Optimisation par tri et recherche dichotomique</li>
+        <li>Comparaison avec la méthode K-NN simplifiée</li>
+      </ul>
+    </section>
+
+    <section id="objectives">
+      <h2>Objectifs</h2>
+      <ul>
+        <li>Automatiser la génération de lexiques à partir de dépêches catégorisées</li>
+        <li>Calculer un score pour chaque mot en fonction de sa fréquence et spécificité</li>
+        <li>Attribuer des poids aux mots selon leur pertinence</li>
+        <li>Évaluer les performances du système avec ces lexiques sur des données de test</li>
+        <li>Comparer avec la méthode des K plus proches voisins</li>
+      </ul>
+    </section>
+
+    <section id="group-work">
+      <h2>Travail en groupe</h2>
+      <p>
+        Le projet a été réalisé en binôme. Nous avons réparti les tâches comme suit : 
+        l’un travaillait principalement sur les algorithmes de traitement de texte et de calcul de scores,
+         tandis que l’autre gérait la structure du code, les tests et les comparaisons de méthodes. Nous avons effectué une relecture mutuelle avant chaque étape importante.
+
+         Je me suis occupé principalement de la première partie et sur ce qui demandait le plus de travail "itératif" (augmenter empiriquement un score).
+         Notamment, mon camarade a passé beaucoup de temps sur la méthode KNN (discutablement la plus difficile) et à pu me l'expliquer après.
+      </p>
+    </section>
+
+    <section id="individual-work">
+      <h2>Travail individuel</h2>
+      Personnellement, j’ai implémenté plusieurs comme méthodes <code>initDico</code>, <code>calculScores</code> et <code>poidsPourScore</code>,
+       tout en documentant clairement les choix algorithmiques faits pour le calcul des scores et l'attribution des poids.
+       J’ai aussi participé à l’écriture du rapport en anglais et à la préparation de la présentation orale.
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Enzo Morello</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
