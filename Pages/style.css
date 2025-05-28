@@ -275,39 +275,41 @@
     z-index: 1;
   }
 
-  /* ===== Footer Styles ===== */
-.site-footer {
-  padding: 2rem 0;
-  background-color: var(--secondary-bg, #222);
-}
-
 .footer-bubbles {
   display: flex;
   justify-content: center;
-  gap: 1.5rem;
+  gap: 1rem;
+  margin: 0 auto;
+  padding: 0.5rem 0;
 }
 
 .bubble {
   display: grid;
   place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.5rem;   /* Reduced from 3.5rem */
+  height: 2.5rem;  /* Reduced from 3.5rem */
   border-radius: 50%;
-  background-color: var(--primary-bg, #fff);
+  background-color: var(--bg-color, #222);
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition: transform 0.2s, background-color 0.2s;
 }
 
 .bubble:hover {
   transform: scale(1.1);
-  background-color: var(--primary-accent, #f0f0f0);
+  background-color: var(--primary-color);
 }
 
 .bubble img {
-  width: 1.5rem;
-  height: 1.5rem;
-  filter: invert(0.1);
+  width: 1.2rem;  /* Reduced from 1.5rem */
+  height: 1.2rem;
+  filter: invert(0.85);
+  transition: filter 0.2s;
 }
+
+.bubble:hover img {
+  filter: invert(0.05);
+}
+
 
 
   /* 1. Card-style pour chaque section */
