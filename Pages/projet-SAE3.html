@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../Images/favicon.svg" type="image/svg+xml">
+  <title>Portfolio - Projet détaillé</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div id="particles-js"></div>
+  <img src="../Images/SpaceStation.png" alt="Image d'arrière-plan" id="background">
+  <header>
+    <h1>SAE 1.03 Installation d’un poste pour le développement | Carte mentale &amp; Présentation</h1>
+    <nav>
+      <ul>
+        <li><a href="../index.html" id="BoutAccueil">Accueil</a></li>
+        <li><a href="projets.html">Projets</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="project-detail">
+      <h2>Description</h2>
+      <p>
+        La SAE&nbsp;1.03, intitulée <strong>«&nbsp;Installation d’un poste pour le développement&nbsp;»</strong>, avait
+        pour objectif de préparer pas à pas un environnement de développement complet&nbsp;: choix et installation du
+        système d’exploitation, mise à jour et sécurisation de la machine, déploiement des outils (IDE, compilateurs,
+        gestion de versions) et configuration réseau. Ce travail pratique s’est conclu par la réalisation d’une
+        <em>carte mentale</em>.
+        <br><br>
+        Réalisé individuellement (1<sup>re</sup> année BUT&nbsp;Informatique).
+      </p>
+    </section>
+
+    <section id="skills">
+      <h2>Compétences</h2>
+      <ul>
+        <li><strong>AC&nbsp;1</strong> Identifier les différents composants (matériels et logiciels) d’un système numérique
+          <ul>
+            <li>Repérer et nommer les éléments d’une carte mère&nbsp;: CPU, RAM, chipset, bus, ports E/S…</li>
+            <li>Distinguer micrologiciel, système d’exploitation, pilotes, librairies et applications</li>
+          </ul>
+        </li>
+
+        <li><strong>AC&nbsp;2</strong> Utiliser les fonctionnalités de base d’un système multitâches&nbsp;/ multi‑utilisateurs
+          <ul>
+            <li>Naviguer dans l’arborescence Unix&nbsp;(<code>cd</code>, <code>ls</code>, <code>pwd</code>, complétion)</li>
+            <li>Gérer processus et permissions&nbsp;(<code>ps</code>, <code>kill</code>, <code>chmod</code>, <code>chown</code>, <code>sudo</code>)</li>
+          </ul>
+        </li>
+
+        <li><strong>AC&nbsp;3</strong> Installer et configurer un système d’exploitation et des outils de développement
+          <ul>
+            <li>Créer un support USB bootable (Ventoy) et installer Ubuntu&nbsp;22.04&nbsp;LTS dans VirtualBox</li>
+            <li>Installer JDK&nbsp;17, GCC, Python&nbsp;3, Git, VS&nbsp;Code, IntelliJ&nbsp;IDEA, Node.js</li>
+            <li>Configurer les variables d’environnement, les raccourcis clavier et l’intégration Git dans l’IDE</li>
+          </ul>
+        </li>
+
+        <li><strong>AC&nbsp;4</strong> Configurer un poste de travail dans un réseau d’entreprise
+          <ul>
+            <li>Paramétrer l’adressage&nbsp;IP/DNS, rejoindre le Wi‑Fi/filiaire de l’IUT, configurer le proxy&nbsp;APT</li>
+            <li>Générer une paire de clés&nbsp;SSH et cloner un dépôt GitLab&nbsp;UGA</li>
+            <li>Accéder aux ressources partagées&nbsp;: imprimantes, partages Samba/NFS</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section id="techniques">
+      <h2>Compétences Techniques &amp; Savoir‑Faire</h2>
+      <ul>
+        <li>Création de supports démarrables (Ventoy, Rufus) et configuration UEFI/Secure Boot</li>
+        <li>Partitionnement disque &amp; installation en dual‑boot ou machine virtuelle (VirtualBox)</li>
+        <li>Mise à jour système&nbsp;: <code>apt</code>, <code>snap</code>, activation du pare‑feu&nbsp;UFW</li>
+        <li>Installation et paramétrage des IDE&nbsp;: Visual&nbsp;Studio&nbsp;Code (extensions Python/Java), IntelliJ&nbsp;IDEA</li>
+        <li>Mise en place de Git / GitLab&nbsp;: <code>git init</code>, conventions de commit, intégration CI/CD</li>
+        <li>Script Bash d’automatisation&nbsp;: installation des paquets, sauvegarde de la configuration</li>
+        <li>Outils de communication&nbsp;: conception d’une carte mentale avec <em>XMind</em>, préparation de slides (Canva)</li>
+        <li>Validation de l’environnement par la compilation et l’exécution d’un projet Java, C et Python</li>
+      </ul>
+    </section>
+
+    <section id="objectives">
+      <h2>Objectifs</h2>
+      <ul>
+        <li>Documenter et ordonner les étapes d’installation d’un poste de développement (OS + IDE)</li>
+        <li>Concevoir une carte mentale claire, hiérarchisée et colorée pour vulga­riser la procédure</li>
+        <li>Rédiger un guide synthétique expliquant chaque commande et choix technique</li>
+      </ul>
+    </section>
+
+    <section id="group-work">
+      <h2>Collaboration</h2>
+      <p>
+        Bien que l’évaluation soit individuelle, plusieurs séances d’atelier ont permis d’échanger des bonnes pratiques :
+        revue croisée des cartes mentales, entraide pour le partitionnement disque et la configuration du proxy. Ces
+        discussions ont enrichi mon propre guide et m’ont aidé à clarifier l’ordre des étapes.
+      </p>
+    </section>
+
+    <section id="individual-work">
+      <h2>Travail personnel</h2>
+      <p>
+        J’ai&nbsp;:
+        <ul>
+          <li>réalisé l’installation complète d’Ubuntu&nbsp;22.04 dans VirtualBox puis en dual‑boot&nbsp;;</li>
+          <li>écrit un script Bash automatisant l’installation des dépendances (Git, Java, Python, VS&nbsp;Code) ;</li>
+          <li>créé la carte mentale avec <em>XMind</em>, en appliquant une lecture horaire et un code couleur cohérent ;</li>
+        </ul>
+      </p>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          Enzo Morello &copy; 2025
+        </div>
+        <div class="footer-center footer-bubbles">
+          <a href="https://github.com/MalevolentMoksi" class="bubble" target="_blank" rel="noopener" aria-label="GitHub">
+            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg" alt="GitHub">
+          </a>
+          <a href="mailto:enzo.morello@etu.univ-grenoble-alpes.fr" class="bubble" aria-label="Email">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="24" height="24" rx="12" fill="none"/>
+              <path d="M4 8l8 6 8-6M4 8v8a2 2 0 002 2h12a2 2 0 002-2V8M4 8l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="https://gricad-gitlab.univ-grenoble-alpes.fr/morelloe" class="bubble" target="_blank" rel="noopener" aria-label="GitLab">
+            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg" alt="GitLab">
+          </a>
+        </div>
+        <div class="footer-right" id="footer-fun">
+          <span id="footer-clock" style="font-family:monospace;font-size:1.2rem"></span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+      function updateFooterClock() {
+        const el = document.getElementById('footer-clock');
+        if (!el) return;
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+      setInterval(updateFooterClock, 1000);
+      updateFooterClock();
+    </script>
+  </main>
+</body>
+
+</html>
