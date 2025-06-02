@@ -99,6 +99,22 @@ header h1 {
   color: var(--primary-color);
 }
 
+h1 {
+  font-size: 2.6rem;                /* Taille très visible */
+  color: var(--primary-color);      /* Doré : déjà présent */
+  font-weight: 900;
+  text-shadow: 0 3px 18px #000b,    /* Ombre noire douce */
+               0 0 2px #fff8dc99;   /* Halo clair/doré */
+  letter-spacing: 0.05em;
+  margin-top: 1.5rem;
+  margin-bottom: 1.2rem;
+  background: linear-gradient(90deg, #ffe17e 30%, var(--primary-color) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+
 /* Navigation */
 nav ul {
   display: flex;
@@ -401,4 +417,23 @@ main {
 /* Section box shadow */
 main section {
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+
+#main-title.typing::after {
+  content: "|";
+  animation: blink 0.85s steps(1) infinite;
+  color: var(--primary-color);
+  margin-left: 3px;
+  font-weight: 400;
+  font-size: 0.95em;
+  opacity: 0.85;
+}
+#main-title::after {
+  content: ""; /* Pas de curseur si la classe 'typing' est absente */
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }

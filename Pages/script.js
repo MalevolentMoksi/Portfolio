@@ -197,6 +197,27 @@ if (bg) {
   updateParallax();
 }
 
+// Typing effect pour le h1, curseur disparaît à la fin
+document.addEventListener("DOMContentLoaded", function () {
+  const el = document.getElementById("main-title");
+  if (!el) return;
+
+  const fullText = el.textContent;
+  el.textContent = "";
+  el.classList.add("typing"); // Ajoute la classe qui active le curseur
+
+  let i = 0;
+  function typeLetter() {
+    if (i <= fullText.length) {
+      el.textContent = fullText.slice(0, i);
+      i++;
+      setTimeout(typeLetter, 50);
+    } else {
+      el.classList.remove("typing"); // Enlève le curseur après
+    }
+  }
+  typeLetter();
+});
 
 
 
