@@ -526,17 +526,16 @@ main section {
   pointer-events: none;
 }
 
-/* ====================== */
-/* 1) GRILLE 2×2          */
-/* ====================== */
+/* ============================= */
+/* 1) GRILLE 2×2 de vidéos       */
+/* ============================= */
 .video-gallery {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* exactement 2 colonnes */
-  gap: 1rem;                              /* espacement entre items */
+  gap: 1rem;                             /* espace entre items */
   margin-top: 1.5rem;
 }
 
-/* Chaque item contient le wrapper + légende */
 .video-item {
   display: flex;
   flex-direction: column;
@@ -544,73 +543,136 @@ main section {
   text-align: center;
 }
 
-/* ====================== */
-/* 2) CONTENEUR VIDÉO     */
-/* ====================== */
-/* 
-   - background-color : fond noir avant que la vidéo ne joue,
-   - padding ou ratio pour forcer une hauteur uniforme (ex : 16:9),
-   - position: relative (pour pseudo-élément « play »).
-*/
+/* ============================= */
+/* 2) CONTENEUR VIDÉO SANS RATIO  */
+/* ============================= */
 .video-wrapper {
   position: relative;
-  width: 100%;
-  /* Option A : on fixe la hauteur à un ratio 16:9 via padding-bottom */
-  padding-bottom: 56.25%;      /* 16/9 = 0.5625 → 56.25% du width */
-  background-color: #000;
-  overflow: hidden;            /* on masque tout ce qui dépasse */
+  width: 100%;                /* occupe la largeur du parent (.video-item) */
+  overflow: hidden;           /* masque tout dépassement */
   border: 1px solid #444;
   border-radius: 4px;
+  /* On supprime padding-bottom et background-color noir */
 }
 
-/* La balise <video> remplit tout le .video-wrapper */
 .video-wrapper video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  background: transparent;  /* la vidéo prendra le dessus dès qu'on jouera */
+  width: 100%;    /* la vidéo s’étire en largeur du container */
+  height: auto;   /* ratio natif de la vidéo maintenu */
+  display: block; /* supprime l’espace blanc en dessous */
 }
 
-/* ====================== */
-/* 3) ICÔNE “PLAY” EN CSS  */
-/* ====================== */
-/* 
-   On ajoute un triangle blanc centré dans .video-wrapper.
-   Si la vidéo n'est pas encore lancée, on voit le triangle sur fond noir.
-   Dès que la vidéo se charge/commence, le contenu vidéo vient par-dessus.
-*/
-.video-wrapper::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;    /* taille du triangle */
-  height: 40px;
-  background-image: 
-    url("data:image/svg+xml;utf8,\<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>\<polygon points='35,25 75,50 35,75' fill='white'/>\</svg>");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  pointer-events: none; /* laisse passer le clic sur les contrôles vidéo */
-}
 
-/* 
-  Astuce : tant qu’on n'a pas cliqué, on voit l’overlay. 
-  Dès que la vidéo est en lecture, le premier frame recouvre le fond + l’icône.
-  Sur certains navigateurs, il peut parfois rester un bref flash. Si besoin, 
-  vous pouvez écouter en JS l’événement “playing” et cacher ce ::before, 
-  mais la plupart du temps les navigateurs remplacent directement le fond.
-*/
 
-/* ====================== */
-/* 4) LÉGENDE SOUS Vidéo   */
-/* ====================== */
+
+/* ============================= */
+/* 3) LÉGENDE SOUS CHAQUE VIDÉO  */
+/* ============================= */
 .video-item .caption {
   margin-top: 0.5rem;
   font-size: 0.9rem;
   color: #ddd;
+}
+
+
+/* ========================= *
+ *  Barre de progression    *
+ * ========================= */
+
+/* Conteneur gris, toute la largeur disponible, hauteur fixe */
+.progress-container {
+  width: 100%;
+  background-color: #333;  /* gris sombre */
+  height: 4px;             /* épaisseur de la barre */
+  margin-top: 0.25rem;     /* petit écart entre vidéo et barre */
+  overflow: hidden;        /* au cas où */
+  border-radius: 2px;      /* coins arrondis si vous voulez */
+}
+
+/* La “vraie” partie colorée ; on part à 0 % de largeur */
+.progress {
+  width: 0%;
+  height: 100%;
+  background-color: #f1c40f;  /* couleur or / jaune (ou celle de votre thème) */
+  transition: width 0.1s linear; /* pour une mise à jour fluide */
+  border-radius: 2px;
+}
+
+/* ============================= */
+/* 4) EFFET “POP” AU HOVER       */
+/* ============================= */
+/* On transforme (scale) tout le bloc vidéo+barre+légende sur hover */
+
+.video-item {
+  position: relative;                 /* pour que le z-index fonctionne */
+  transition: transform 0.75s ease;    /* animation douce du scale */
+  z-index: 1;                         /* valeur de base */
+}
+
+.video-item:hover {
+  transform: scale(1.2);             /* on agrandit de 40 % */
+  z-index: 10;                        /* on remonte au-dessus des voisins */
+}
+
+/* === Dropdown doré + bordure animée "click me" === */
+
+.bot-fonctionnement {
+  border: 2px solid #FFD700;
+  border-radius: 8px;
+  padding: 0.5rem;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.06);
+  transition: background 0.3s;
+  position: relative;
+  margin-bottom: 2rem;
+  animation: goldenPulse 3.5s infinite alternate;
+}
+
+@keyframes goldenPulse {
+  0% {
+    box-shadow: 0 0 0 0 #FFD70033;
+    border-color: #FFD700;
+  }
+  50% {
+    box-shadow: 0 0 4px 1px #FFD70055;
+    border-color: #FFD700;
+  }
+  100% {
+    box-shadow: 0 0 0 0 #FFD70033;
+    border-color: #FFD700;
+  }
+}
+
+
+.bot-fonctionnement summary {
+  outline: none;
+  list-style: none;
+  font-weight: bold;
+  font-size: 1.15rem;
+  color: #8a6d1d; /* Or foncé */
+  cursor: pointer;
+  background: none;
+  padding: 0.25em 0;
+  transition: color 0.3s;
+}
+
+.bot-fonctionnement summary::before {
+  content: "▶ ";
+  display: inline-block;
+  color: #FFD700;
+  font-size: 1.2em;
+  vertical-align: middle;
+  margin-right: 0.1em;
+  transition: transform 0.2s;
+}
+
+.bot-fonctionnement[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.bot-fonctionnement[open] summary {
+  color: #f5bc00;
+}
+
+/* Un peu d'espace pour le contenu */
+.bot-fonctionnement > div {
+  margin-top: 0.5rem;
 }

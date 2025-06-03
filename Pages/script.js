@@ -242,3 +242,55 @@ document.addEventListener("DOMContentLoaded", () => {
     target.textContent = randomString(GLITCH_LENGTH);
   }, INTERVAL);
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  // On récupère toutes les vidéos “hover-play” de la page
+  const hoverVideos = document.querySelectorAll(".hover-play");
+
+  hoverVideos.forEach(video => {
+    // Pour chaque vidéo, on va récupérer la DIV .progress associée
+    // Celle-ci se trouve dans le même .video-item :
+    const progressBar = video
+      .closest(".video-item")
+      .querySelector(".progress");
+
+    // Lorsque la souris entre dans le conteneur vidéo, on lance la lecture
+    video.addEventListener("mouseenter", () => {
+      // video.play() renvoie une promesse ; on peut l’ignorer si elle échoue
+      video.play().catch(_ => {});
+    });
+
+    // Lorsque la souris sort, on met en pause (on ne change PAS currentTime)
+    video.addEventListener("mouseleave", () => {
+      video.pause();
+    });
+
+    // À chaque ‘timeupdate’ (c-à-d quand currentTime évolue),
+    // on recalcule le pourcentage lu
+    video.addEventListener("timeupdate", () => {
+      if (!video.duration) return; // au cas où la vidéo n’est pas encore chargée
+      const pourcentage = (video.currentTime / video.duration) * 100;
+      // On ajuste dynamiquement la largeur de .progress
+      progressBar.style.width = `${pourcentage}%`;
+    });
+
+    // Quand les métadonnées sont chargées, on peut éventuellement
+    // initialiser la barre à 0 (inutile si c'est déjà 0, mais c’est plus sûr)
+    video.addEventListener("loadedmetadata", () => {
+      progressBar.style.width = "0%";
+    });
+
+    // Si la vidéo “boucle” (loop = true), on veut que la barre reparte à 0
+    // dès qu’elle atteint la fin (finished). L’événement ‘ended’ n’est pas
+    // déclenché si loop=true, donc on peut écouter “timeupdate” et
+    // détecter quand currentTime + petit epsilon >= duration :
+    video.addEventListener("timeupdate", () => {
+      if (video.currentTime >= video.duration - 0.05) {
+        // on remet strictement à 0 pour éviter un clignotement tardif
+        progressBar.style.width = "0%";
+      }
+    });
+  });
+});
+
+

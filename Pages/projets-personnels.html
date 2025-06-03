@@ -24,96 +24,124 @@
   </header>
 
   <main>
-    <section id="personal-projects">
-      <!-- Projet 1 : Bot Discord -->
+    <!-- Projet 1 : Bot Discord -->
+    <section>
       <article class="project">
-        <h2>Bot Discord “Moksi's Bazaar”</h2>
+        <h2>Bot Discord <i>“Moksi's Bazaar”</i></h2>
         <img src="../Images/discord-bot-icon.png" alt="Icône du Bot Discord" style="max-width:150px;">
+
+        <!-- Présentation concise -->
         <p>
-          Développement d’un bot Discord en Python capable d’automatiser des tâches, modérer un serveur et fournir des
-          commandes interactives.
+          <strong>Moksi's Bazaar</strong> est un bot Discord entièrement développé en JavaScript (discord.js),
+          qui offre à la fois un système de monnaie virtuelle et plusieurs mini‐jeux de casino :
+          blackjack, roulette et machine à sous. Les utilisateurs dans un serveur Discord peuvent miser, gagner des
+          crédits et suivre leur
+          classement en temps réel.
         </p>
         <ul>
           <li><b>Compétences :</b> API Discord, programmation événementielle, gestion des permissions</li>
-          <li><b>Techniques :</b> Python (discord.py), hébergement, gestion d’events, logs</li>
+          <li><b>Techniques :</b> Python (discord.py), hébergement, gestion d’events, logs, SQL</li>
         </ul>
         <a href="https://github.com/TON_GITHUB/BOT" class="btn" target="_blank">Voir le code sur GitHub</a>
 
-        <!-- ===== Galerie 2×2 de mini-vidéos MP4 (sans poster) ===== -->
+        <!-- ===== Galerie 2×2 de mini‐vidéos MP4 (hover → play) ===== -->
         <div class="video-gallery">
           <div class="video-item">
             <div class="video-wrapper">
-              <video preload="none" muted loop playsinline controls>
+              <video class="hover-play" preload="metadata" muted loop playsinline>
                 <source src="../Videos/blackjack.mp4" type="video/mp4">
                 Votre navigateur ne supporte pas la balise vidéo.
               </video>
             </div>
-            <p class="caption">Commande “!shop” (affichage du magasin)</p>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption">Jeu de Blackjack</p>
           </div>
 
           <div class="video-item">
             <div class="video-wrapper">
-              <video preload="none" muted loop playsinline controls>
-                <source src="Videos/bot-feature2.mp4" type="video/mp4">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="../Videos/roulette.mp4" type="video/mp4">
                 Votre navigateur ne supporte pas la balise vidéo.
               </video>
             </div>
-            <p class="caption">Modération automatique (suppression de spam)</p>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption">Jeu de Roulette</p>
           </div>
 
           <div class="video-item">
             <div class="video-wrapper">
-              <video preload="none" muted loop playsinline controls>
-                <source src="Videos/bot-feature3.mp4" type="video/mp4">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="../Videos/currency.mp4" type="video/mp4">
                 Votre navigateur ne supporte pas la balise vidéo.
               </video>
             </div>
-            <p class="caption">Commande “!stats” (stats du serveur)</p>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption">Fonds &amp; Classement</p>
           </div>
 
           <div class="video-item">
             <div class="video-wrapper">
-              <video preload="none" muted loop playsinline controls>
-                <source src="Videos/bot-feature4.mp4" type="video/mp4">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="../Videos/slots.mp4" type="video/mp4">
                 Votre navigateur ne supporte pas la balise vidéo.
               </video>
             </div>
-            <p class="caption">Interaction “reaction roles”</p>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption">Jeu de Machine à Sous</p>
           </div>
         </div>
         <!-- ===== fin de la galerie ===== -->
+
+        <!-- Nouvelle section repliable “Fonctionnement du Bot” -->
+        <details class="bot-fonctionnement" style="margin-top:2rem;">
+          <summary style="font-size:1.2rem; font-weight:bold; cursor:pointer;">
+            Fonctionnement du Bot
+          </summary>
+
+          <div style="margin-top:1rem;">
+            <p>
+              Le bot est hébergé sur <strong>Railway</strong> grâce à une instance GitHub 24/7.
+              Une base de données <strong>PostgreSQL</strong> (intégrée à Railway) stocke en temps réel :
+            </p>
+            <ul>
+              <li>Les <em>identifiants</em> Discord de chaque utilisateur</li>
+              <li>Les <em>soldes</em> (crédits) et leur historique</li>
+              <li>Les <em>statuts de participation</em> aux différents jeux (mise, gains/pertes)</li>
+            </ul>
+            <p>
+              Dès qu’un utilisateur envoie une commande (par exemple <code>!blackjack</code> ou <code>!roulette</code>),
+              le bot interroge la table <code>users</code> pour vérifier le <em>solde</em>,
+              met à jour les données appropriées selon les résultats,
+              puis renvoie un message Discord détaillé (embed) affichant l’évolution du profil et du classement.
+            </p>
+
+            <!-- Screenshot Railway centré -->
+            <div style="text-align:center; margin-top:1rem;">
+              <img src="../Images/railway-dashboard.png" alt="Tableau de bord Railway pour le bot Discord"
+                style="max-width:100%; border: 1px solid var(--primary-color); border-radius:4px;">
+              <figcaption style="font-size:0.85rem; color:var(--text-color); margin-top:0.25rem;">
+                Aperçu du dashboard Railway&nbsp;: gestion des variables d’environnement &amp; métriques PostgreSQL
+              </figcaption>
+            </div>
+          </div>
+        </details>
       </article>
+    </section>
 
+    <hr>
 
-
-
-      <hr>
-
-      <!-- Projet 2 : Jeux Scratch -->
-      <article class="project">
-        <h2>Jeux réalisés sur Scratch</h2>
-        <img src="../Images/scratch-logo.png" alt="Logo Scratch" style="max-width:140px;">
-        <p>
-          En CM2, j'ai été introduit au logiciel en ligne Scratch par mon professeur.
-          Cela a consommé une bonne parti de mon temps personnel que j'ai passé à faire des jeux jusqu'en 20 <br>
-          <b>Exemples :</b> <i>Space Invaders Custom</i>, <i>Platformer</i>, <i>Jeu de réflexion</i>…
-        </p>
-        <ul>
-          <li><b>Compétences :</b> Logique algorithmique, design d’interfaces, animations, gestion de variables et de
-            sprites</li>
-          <li><b>Techniques :</b> Utilisation avancée de Scratch, optimisation des scripts, adaptation aux feedbacks
-            utilisateurs</li>
-        </ul>
-        <a href="https://scratch.mit.edu/users/TON_PSEUDO/" class="btn" target="_blank">Voir mon profil Scratch</a>
-      </article>
-
-      <hr>
-
-      <!-- Projet 3 : Dessins personnels -->
+    <!-- Projet 2 : Dessins personnels -->
+    <section>
       <article class="project">
         <h2>Dessins personnels</h2>
-
-        <!-- 3×2 grid of images -->
 
         <!-- Texte d'intro pour la galerie de dessins -->
         <div class="drawings-intro">
@@ -132,7 +160,8 @@
 
           <div class="drawing-item">
             <img class="zoomable" src="../Images/drawings/Goat.jpg" alt="Illustration rapide au crayon">
-            <p>Goat de Cult of the Lamb – Illustration rapide au crayon</p>
+            <p>Goat de Cult of the Lamb – Illustr
+ation rapide au crayon</p>
           </div>
 
           <div class="drawing-item">
@@ -155,6 +184,60 @@
             <p>Exo Stranger de Destiny 2 – Illustration numérique</p>
           </div>
         </div>
+      </article>
+    </section>
+
+    <hr>
+
+    <!-- Projet 3 : Jeux réalisés sur Scratch -->
+    <section>
+      <article class="project">
+        <h2>Jeux réalisés sur Scratch</h2>
+        <img src="../Images/scratch-logo.png" alt="Logo Scratch" style="max-width:140px;">
+        <p>
+          En CM2, j'ai été introduit au logiciel en ligne Scratch par mon professeur.
+          Cela a consommé une bonne partie de mon temps personnel que j'ai passé à faire des jeux jusqu'en 2020. <br>
+          <b>Exemples :</b> <i>Space Invaders Custom</i>, <i>Platformer</i>, <i>Jeu de réflexion</i>…
+        </p>
+        <ul>
+          <li><b>Compétences :</b> Logique algorithmique, design d’interfaces, animations, gestion de variables et de
+            sprites</li>
+          <li><b>Techniques :</b> Utilisation avancée de Scratch, optimisation des scripts, adaptation aux feedbacks
+            utilisateurs</li>
+        </ul>
+        <a href="https://scratch.mit.edu/users/TON_PSEUDO/" class="btn" target="_blank">Voir mon profil Scratch</a>
+
+        <!-- ===== Galerie 2×1 de mini‐vidéos MP4 (hover → play) ===== -->
+        <div class="video-gallery" style="margin-top:1.5rem;">
+          <!-- 1ʳᵉ vidéo : Space Invaders Custom -->
+          <div class="video-item">
+            <div class="video-wrapper">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="../Videos/stickman.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la balise vidéo.
+              </video>
+            </div>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption"><i>"Stickman Adventure"</i></p>
+          </div>
+
+          <!-- 2ᵉ vidéo : Platformer -->
+          <div class="video-item">
+            <div class="video-wrapper">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="../Videos/RPG.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la balise vidéo.
+              </video>
+            </div>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption"><i>"RPG 1.2v"</i></p>
+          </div>
+        </div>
+        <!-- ===== fin de la galerie ===== -->
       </article>
     </section>
   </main>
