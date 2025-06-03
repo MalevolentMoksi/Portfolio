@@ -3,7 +3,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // ======== 1. Define track file names and figure out correct path prefix ========
-  const trackFiles = ['browser.m4a', 'deepstone.m4a', 'wildriver.m4a'];
+  const trackFiles = ['deepstone.m4a', 'browser.m4a', 'wildriver.m4a'];
 
   // Determine whether the current page is inside /Pages/ or not, to set the path to Music/
   // If the pathname contains '/Pages/', we need '../Music/<filename>'. Otherwise 'Music/<filename>'.
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let progressThrottle = 0;
   audio.addEventListener('timeupdate', () => {
     progressThrottle++;
-    if (progressThrottle % 2 === 0) { // roughly every 200ms
+    if (progressThrottle % 2 === 0) { // roughly every 20ms
       localStorage.setItem(STORAGE_KEYS.CURRENT_TIME, audio.currentTime.toString());
       updateProgressBar();
     }
@@ -428,13 +428,13 @@ particlesJS('particles-js', {
   "retina_detect": true
 });
 
-// Parallax on the full-screen background image
+// Parallax on the full-screen background image (now more pronounced)
 const bg = document.getElementById('background');
 if (bg) {
   // target offsets and current positions
   let mouseX = 0, mouseY = 0, posX = 0, posY = 0;
-  const friction = 1 / 10;      // lower = slower, more easing
-  const depth = 0.02;           // motion multiplier
+  const friction = 1 / 12;    // lower = slower/easing; tweak as you like
+  const depth = 0.06;         // ↑ 0.06 → about 36px shift if screen is 1200px wide
 
   // track cursor displacement relative to center
   window.addEventListener('mousemove', e => {
@@ -444,15 +444,17 @@ if (bg) {
     mouseY = y * depth;
   });
 
-  // smooth-step each frame
+  // smooth‐step each frame
   function updateParallax() {
     posX += (mouseX - posX) * friction;
     posY += (mouseY - posY) * friction;
-    bg.style.transform = `scale(1.1) translate(${posX}px, ${posY}px)`;
+    // ↑ bump zoom from 1.1 → 1.15 for extra impact
+    bg.style.transform = `scale(1.15) translate(${posX}px, ${posY}px)`;
     requestAnimationFrame(updateParallax);
   }
   updateParallax();
 }
+
 
 // Typing effect pour le h1, curseur disparaît à la fin
 document.addEventListener("DOMContentLoaded", function () {

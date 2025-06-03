@@ -121,35 +121,47 @@ nav ul {
   justify-content: center;
   gap: 15px;
 }
+/* ===================== */
+/* Punchier Header Links */
+/* ===================== */
 nav ul li a {
   display: inline-block;
-  padding: 0.55em 1.4em;
-  border-radius: 8px;                /* Coins un peu arrondis */
-  background: rgba(212, 175, 55, 0.13); /* Doré discret, transparent */
+  padding: 0.6em 1.5em;                              /* slightly more padding */
+  border-radius: 8px;
+  background: rgba(212, 175, 55, 0.13);
   color: var(--primary-color);
   font-weight: 600;
-  font-size: 1.07rem;
+  font-size: 1.08rem;                                /* a hair larger for impact */
   border: 2px solid var(--primary-color);
-  box-shadow: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);          /* subtle lifted look at rest */
   letter-spacing: 0.03em;
   text-decoration: none;
-  transition: 
-    background 0.18s cubic-bezier(.39,.58,.57,1.25),
-    color 0.14s, 
-    border 0.18s;
-  margin: 0 7px;
-  text-shadow: none;
+  transition:
+    transform 0.14s cubic-bezier(0.2, 1, 0.3, 1),
+    background 0.18s cubic-bezier(.39, .58, .57, 1.25),
+    color 0.14s,
+    border-color 0.14s,
+    box-shadow 0.14s ease-out;
+  margin: 0 8px;                                     /* a bit wider gap */
   position: relative;
 }
 
 nav ul li a:hover,
 nav ul li a:focus {
-  background: rgba(212, 175, 55, 0.38);   /* Doré plus marqué au survol */
-  color: #fff8dc;                         /* Blanc cassé */
+  background: rgba(212, 175, 55, 0.45);               /* stronger gold on hover */
+  color: #fff8dc;                                     /* off‐white text */
   border-color: #fff8dc;
-  box-shadow: 0 2px 12px #d4af3740;
-  transform: translateY(-1.5px) scale(1.04);
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4);     /* deeper glow */
+  transform: translateY(-2px) scale(1.06);            /* more pronounced lift */
 }
+
+nav ul li a:active {
+  /* “Press‐in” effect */
+  background: rgba(212, 175, 55, 0.6);                /* even richer gold on click */
+  transform: translateY(0) scale(0.98);               /* briefly shrink/“press” */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);           /* smaller shadow to look pressed */
+}
+
 
 /* Main container */
 main {
@@ -256,25 +268,6 @@ footer {
   color: var(--text-color);
   position: relative;
   z-index: 1;
-}
-
-/* Back-to-top button */
-#back-to-top {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  display: none;
-  background: var(--primary-color);
-  color: var(--bg-color);
-  border: none;
-  padding: 10px 15px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 18px;
-  transition: opacity 0.3s;
-}
-#back-to-top:hover {
-  opacity: 0.8;
 }
 
 /* Particles.js container */
@@ -783,19 +776,41 @@ main section {
   margin-left: 8px;
 }
 
+/* ============================ */
+/* Punchier Media‐Player Buttons */
+/* ============================ */
 #music-player .controls button {
-  background: none;
-  border: none;
+  background: rgba(212, 175, 55, 0.1);   /* very translucent gold circle behind the icon */
+  border: 2px solid var(--primary-color);
+  border-radius: 50%;
+  width: 32px;                           /* make them square so icon is centered */
+  height: 32px;
   color: var(--primary-color);
   font-size: 1.2rem;
   cursor: pointer;
   margin: 2px 0;
-  transition: transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.12s cubic-bezier(0.2, 1, 0.3, 1),
+    box-shadow 0.12s ease-out,
+    background 0.15s ease-in-out;
 }
 
 #music-player .controls button:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  background: rgba(212, 175, 55, 0.2);   /* brighten the circle on hover */
+  box-shadow: 0 3px 8px rgba(212, 175, 55, 0.4);
 }
+
+#music-player .controls button:active {
+  transform: scale(0.9);                 /* quick “press‐in” */
+  background: rgba(212, 175, 55, 0.35);  /* even denser gold circle on click */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 /* Move the progress bar up and inset it 4px from each side of #music-player */
 #music-player .progress-container {
   position: absolute;
