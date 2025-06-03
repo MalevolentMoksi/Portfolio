@@ -676,3 +676,7 @@ main section {
 .bot-fonctionnement > div {
   margin-top: 0.5rem;
 }
+
+@view-transition {
+  navigation: auto;
+}

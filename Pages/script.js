@@ -294,3 +294,24 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+document.addEventListener('DOMContentLoaded', function () {
+  // Native View Transition API for Chrome/Edge
+  if (document.startViewTransition) {
+    document.addEventListener('click', function (e) {
+      const a = e.target.closest('a');
+      if (!a) return;
+      const url = new URL(a.href, location);
+      // Only handle same-origin, not anchors, not new tabs/windows
+      if (
+        url.origin !== location.origin ||
+        a.target === '_blank' ||
+        a.href.includes('#') ||
+        e.ctrlKey || e.metaKey || e.shiftKey || e.altKey
+      ) return;
+      e.preventDefault();
+      document.startViewTransition(() => {
+        window.location = a.href;
+      });
+    });
+  }
+});
