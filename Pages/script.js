@@ -127,46 +127,87 @@ document.addEventListener('DOMContentLoaded', () => {
     pictureDataURL: '' // fallback blank
   }));
 
-  trackFiles.forEach((filename, idx) => {
-    // Build an absolute URL that includes the repoName on GitHub Pages
-    const absoluteURL = `${window.location.origin}/${repoName}/Music/${filename}`;
+// === 0) Trouver la racine du projet ===
+// window.location.pathname donne par ex. "/index.html" ou "/Pages/projets.html" en local
+// ou "/P2.01-Portfolio/Pages/projets.html" sur GitHub Pages.
 
-    new jsmediatags.Reader(absoluteURL)
-      .setTagsToRead(["title", "artist", "picture"])
-      .read({
-        onSuccess: tag => {
-          const tags = tag.tags;
-          trackMeta[idx].title = tags.title || 'Unknown Title';
-          trackMeta[idx].artist = tags.artist || 'Unknown Artist';
+let basePath = "";
+const pathName = window.location.pathname;
 
-          if (tags.picture && tags.picture.data && tags.picture.format) {
-            const { data, format } = tags.picture;
-            const byteArray = new Uint8Array(data);
-            let binaryString = '';
-            byteArray.forEach(b => {
-              binaryString += String.fromCharCode(b);
-            });
-            const base64String = window.btoa(binaryString);
-            trackMeta[idx].pictureDataURL = `data:${format};base64,${base64String}`;
-          } else {
-            trackMeta[idx].pictureDataURL = '';
-          }
+// Si on est sur GitHub Pages (ex. "/P2.01-Portfolio/Pages/projets.html"), 
+//   on veut extraire "/P2.01-Portfolio".
+if (pathName.includes("/Pages/")) {
+  basePath = pathName.split("/Pages/")[0];
+} else {
+  // Cas local (= pas de “/Pages/” dans l’URL) ou page à la racine (index.html)
+  // On retire simplement le dernier segment ("/index.html", ou "/projets.html", etc.)
+  const lastSlashIndex = pathName.lastIndexOf("/");
+  basePath = pathName.substring(0, lastSlashIndex);
+  // Exemple : pathName="/index.html" → lastSlashIndex=0 → basePath=""
+  //           pathName="/projets-personnels.html" → lastSlashIndex=0 → basePath=""
+  //           pathName="/Pages/test.html" n’arrive pas ici car le if l’attrape avant.
+}
 
-          if (idx === currentTrackIndex) {
-            updateTrackInfoDisplay();
-          }
-        },
-        onError: error => {
-          console.warn(`jsmediatags error for ${absoluteURL}:`, error);
-          trackMeta[idx].title = filename;
-          trackMeta[idx].artist = '';
-          trackMeta[idx].pictureDataURL = '';
-          if (idx === currentTrackIndex) {
-            updateTrackInfoDisplay();
-          }
+// Optionnel : si on veut s’assurer qu’il n’y a pas de slash final, on peut faire
+// basePath = basePath.replace(/\/$/, "");
+// Mais dans nos exemples, basePath vaut "" ou "/P2.01-Portfolio", sans slash en fin.
+
+// Pour vérifier : 
+console.log("🚀 basePath déterminé = ", basePath);
+
+
+  // === Boucle de lecture des tags ===
+trackFiles.forEach((filename, idx) => {
+  // Construire l’URL finale vers Music/<filename>
+  //  → window.location.origin   = "http://127.0.0.1:5500" ou "https://malevolentmoksi.github.io"
+  //  → basePath                 = "" (local) ou "/P2.01-Portfolio" (GitHub)
+  //  → on ajoute "/Music/" + filename
+  const absoluteURL = window.location.origin + basePath + "/Music/" + filename;
+
+  // Affiche dans la console pour debug
+  console.log(`🔍 Lecture tags pour ${filename} à l’adresse →`, absoluteURL);
+
+  new jsmediatags.Reader(absoluteURL)
+    .setTagsToRead(["title", "artist", "picture"])
+    .read({
+      onSuccess: tag => {
+        console.log(`✅ jsmediatags tags pour ${filename}:`, tag.tags);
+
+        // Titre (fallback sur filename)
+        trackMeta[idx].title = tag.tags.title || filename;
+        trackMeta[idx].artist = tag.tags.artist || "";
+
+        // Extraction et conversion de la pochette en DataURL
+        if (tag.tags.picture) {
+          const { data, format } = tag.tags.picture;
+          let binary = "";
+          data.forEach(byte => {
+            binary += String.fromCharCode(byte);
+          });
+          const base64String = window.btoa(binary);
+          trackMeta[idx].pictureDataURL = `data:${format};base64,${base64String}`;
+        } else {
+          trackMeta[idx].pictureDataURL = "";
         }
-      });
-  });
+
+        // Si c’est la piste en cours, on affiche immédiatement
+        if (idx === currentTrackIndex) {
+          updateTrackInfoDisplay();  // votre fonction existante pour titre/artiste
+          updateAlbumArtDisplay();   // voir juste après
+        }
+      },
+      onError: error => {
+        console.warn(`❌ jsmediatags error pour ${absoluteURL}:`, error);
+        trackMeta[idx].title = filename;
+        trackMeta[idx].artist = "";
+        trackMeta[idx].pictureDataURL = "";
+        if (idx === currentTrackIndex) {
+          updateTrackInfoDisplay();
+          updateAlbumArtDisplay();
+        }
+      }
+    });
+});
 
   // ======== 6. Build & insert the player’s HTML structure ========
   const playerContainer = document.createElement('div');
