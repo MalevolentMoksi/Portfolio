@@ -873,3 +873,49 @@ main section {
   border-radius: 2px;            /* round the filled portion, too */
   transition: width 0.1s linear;
 }
+
+/* ---------------------------------------- *
+ *  Return-to-Top Button (perfect circle)   *
+ * ---------------------------------------- */
+
+#back-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;                    /* fixed width */
+  height: 50px;                   /* fixed height */
+  display: none;                  /* hidden by default */
+  background: var(--primary-color) /* your golden color */;
+  color: var(--bg-color);         /* dark text/icon inside */
+  border: none;
+  border-radius: 50%;             /* full circle */
+  cursor: pointer;
+  font-size: 24px;                /* larger arrow */
+  line-height: 1;                 /* reset line-height */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+
+  /* flex-center the arrow character inside */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#back-to-top.show {
+  display: flex;      /* show as flex container */
+  opacity: 1;
+}
+
+#back-to-top.hide {
+  opacity: 0;
+}
+
+#back-to-top:hover {
+  opacity: 0.85;
+  transform: translateY(-3px);
+}
+
+/* If you prefer a slightly different arrow, you can swap in a Unicode arrow: */
+/* #back-to-top::before { content: "⬆"; font-size: 24px; }

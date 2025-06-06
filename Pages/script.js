@@ -345,6 +345,49 @@ trackFiles.forEach((filename, idx) => {
   updateTrackInfoDisplay();
   updatePlayPauseButton();
   updateProgressBar();
+
+  // --------------------------
+// Return‐to‐Top Button Logic
+// --------------------------
+const backToTopBtn = document.getElementById('back-to-top');
+if (backToTopBtn) {
+  // On scroll: toggle classes + inline display
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 100) {
+      if (!backToTopBtn.classList.contains('show')) {
+        backToTopBtn.classList.remove('hide');
+        backToTopBtn.style.display = 'block';   // ← clear any previous inline "display:none"
+        backToTopBtn.classList.add('show');
+      }
+    } else {
+      if (backToTopBtn.classList.contains('show')) {
+        backToTopBtn.classList.remove('show');
+        backToTopBtn.classList.add('hide');
+        // After the fade‐out transition, hide it completely
+        setTimeout(() => {
+          if (backToTopBtn.classList.contains('hide')) {
+            backToTopBtn.style.display = 'none';
+          }
+        }, 300); // must match your CSS transition duration
+      }
+    }
+  });
+
+  // On click: scroll smoothly to top
+  backToTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // If page loads already scrolled down, make sure the button is visible
+  if (window.scrollY > 100) {
+    backToTopBtn.style.display = 'block';
+    backToTopBtn.classList.add('show');
+  }
+}
+// --------------------------
+// End Return‐to‐Top Button Logic
+// --------------------------
+
 });
 
 
@@ -648,3 +691,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 });
+
+
