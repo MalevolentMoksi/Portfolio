@@ -930,29 +930,34 @@ main section {
   margin-bottom: 0.5rem;
 }
 
-/* * CE SÉLECTEUR EST MAINTENANT PLUS SPÉCIFIQUE (1 ID, 2 classes)
- * pour écraser la règle #project-list .project img (1 ID, 1 classe)
+/*
+ * Sélecteur très spécifique pour écraser la règle #project-list .project img
  */
 #project-list .project .project-tech img {
   width: 30px !important;  /* Taille fixe pour les logos */
   height: 30px !important; /* Taille fixe */
   aspect-ratio: 1/1 !important; /* Assure qu'ils sont carrés */
   
-  /* Filtre magique pour transformer le noir (#000) en doré (#d4af37) */
+  /* !! CORRECTION : Supprime la bordure héritée !! */
+  border: none !important; 
+  
+  /* Filtre pour transformer le noir (#000) en doré (#d4af37) */
   filter: invert(79%) sepia(39%) saturate(1450%) hue-rotate(358deg) brightness(89%) contrast(89%);
   
   opacity: 0.85; /* Légèrement adouci */
   transition: transform 0.2s ease, opacity 0.2s ease;
   
-  /* On réinitialise les styles hérités de la règle plus générale */
+  /* Réinitialisation des autres styles hérités */
   box-shadow: none;
   transform: none; 
-  margin: 0; /* Réinitialise la marge */
+  margin: 0;
   object-fit: contain; /* Assure que le logo n'est pas déformé */
 }
 
 /* Effet au survol d'un logo */
 #project-list .project .project-tech img:hover {
   transform: scale(1.25); /* Agrandit le logo au survol */
-  opacity: 1; /* Opacité complète */
+  opacity: 1;
+  /* On s'assure qu'aucun box-shadow n'est ajouté au survol */
+  box-shadow: none !important; 
 }
