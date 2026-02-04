@@ -1,0 +1,82 @@
+/* ============================================
+   Layout & Container Styles
+   ============================================ */
+
+/* Fixed background image with parallax */
+#background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: var(--z-background);
+  opacity: 0.3;
+  transform: scale(1.15);
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Particles.js container */
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-background);
+  pointer-events: none;
+}
+
+/* Main container */
+main {
+  max-width: var(--container-max-width);
+  margin: var(--space-lg) auto;
+  padding: var(--space-lg);
+  background-color: var(--color-secondary);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #333;
+  position: relative;
+  z-index: var(--z-base);
+}
+
+/* Section spacing */
+section {
+  margin-bottom: var(--space-xl);
+}
+
+section:last-child {
+  margin-bottom: 0;
+}
+
+/* Horizontal rule */
+hr {
+  border: none;
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
+  margin: var(--space-xl) 0;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  main {
+    margin: var(--space-sm) auto;
+    padding: var(--space-md);
+  }
+  
+  section {
+    margin-bottom: var(--space-lg);
+  }
+  
+  hr {
+    margin: var(--space-lg) 0;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    margin: 0;
+    padding: var(--space-sm);
+    border-left: none;
+    border-right: none;
+  }
+}

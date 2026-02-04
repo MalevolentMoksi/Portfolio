@@ -1,0 +1,208 @@
+/* ============================================
+   Project Components Styles
+   ============================================ */
+
+#project-list .project {
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: var(--border-radius-sm);
+  transition: 
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
+}
+
+#project-list .project:hover {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  transform: translateY(-2px);
+}
+
+#project-list .project img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-sm);
+  margin: var(--space-md) 0;
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  transition: 
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+#project-list .project img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+/* Project technology icons */
+.project-tech {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.project-tech img {
+  width: 30px;
+  height: 30px;
+  aspect-ratio: 1/1;
+  object-fit: contain;
+  filter: invert(79%) sepia(39%) saturate(1450%) hue-rotate(358deg) brightness(89%) contrast(89%);
+  opacity: 0.85;
+  transition: 
+    transform var(--transition-base),
+    opacity var(--transition-base);
+  /* Reset inherited styles */
+  border: none;
+  box-shadow: none;
+  margin: 0;
+}
+
+.project-tech img:hover {
+  transform: scale(1.25);
+  opacity: 1;
+  box-shadow: none;
+}
+
+/* Presentation grid (homepage) */
+.presentation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+.presentation-block {
+  padding: var(--space-md);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: var(--border-radius-sm);
+  transition: box-shadow 0.25s;
+}
+
+.presentation-block:hover {
+  box-shadow: 0 0 18px var(--color-primary), 0 2px 16px rgba(0, 0, 0, 0.28);
+}
+
+/* Title with logo (personal projects) */
+.title-with-logo {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  position: relative;
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.title-with-logo::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50px;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: 2px;
+}
+
+.title-with-logo h2 {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.title-with-logo h2::before {
+  display: none;
+}
+
+.title-with-logo img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.title-with-logo img:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Video items (personal projects) */
+.video-item {
+  position: relative;
+  margin: var(--space-md) 0;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+}
+
+.hover-play {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: pointer;
+}
+
+.video-item .progress-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.video-item .progress {
+  height: 100%;
+  background: var(--color-primary);
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+/* Responsive Projects */
+@media (max-width: 768px) {
+  #project-list .project {
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+  
+  .presentation-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  .project-tech {
+    gap: 10px;
+  }
+  
+  .project-tech img {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  #project-list .project {
+    padding: var(--space-sm);
+  }
+  
+  .project-tech img {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .title-with-logo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .title-with-logo img {
+    width: 40px;
+    height: 40px;
+  }
+}

@@ -1,0 +1,47 @@
+/* ============================================
+   Main Stylesheet - Imports all modules
+   ============================================ */
+
+/* Core styles */
+@import './_variables.css';
+@import './_base.css';
+@import './_layout.css';
+@import './_typography.css';
+
+/* Components */
+@import './components/_header.css';
+@import './components/_footer.css';
+@import './components/_buttons.css';
+@import './components/_music-player.css';
+@import './components/_projects.css';
+
+/* Effects & animations */
+@import './_effects.css';
+
+/* ============================================
+   Legacy compatibility & page-specific styles
+   ============================================ */
+
+/* Contact section */
+#contact ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+#contact li {
+  margin-bottom: var(--space-sm);
+}
+
+/* Overview section (project details) */
+#overview,
+#skills,
+#tools,
+#achievements {
+  margin-bottom: var(--space-xl);
+}
+
+/* Ensure all images are responsive by default */
+img:not([width]):not([height]) {
+  max-width: 100%;
+  height: auto;
+}

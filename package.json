@@ -1,0 +1,25 @@
+{
+  "name": "p2.01-portfolio",
+  "version": "2.0.0",
+  "description": "Portfolio professionnel - Enzo Morello",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "prettier --write \"src/**/*.{js,css,html}\""
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "vite-plugin-html": "^3.2.0",
+    "prettier": "^3.1.0"
+  },
+  "dependencies": {},
+  "keywords": [
+    "portfolio",
+    "student",
+    "web-development"
+  ],
+  "author": "Enzo Morello",
+  "license": "MIT"
+}

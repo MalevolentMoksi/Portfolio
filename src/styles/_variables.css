@@ -1,0 +1,82 @@
+/* ============================================
+   CSS Variables & Theme Configuration
+   ============================================ */
+
+:root {
+  /* Color Palette */
+  --color-primary: #d4af37;       /* Gold - accents, borders, particles */
+  --color-secondary: #1a1a1a;     /* Dark gray - main backgrounds */
+  --color-text: #e0e0e0;          /* Light gray - body text */
+  --color-bg: #000;               /* Black - page background */
+  --color-accent-light: #fff8dc;  /* Cream - gradient endpoints */
+  --color-accent-pale: #ffe17e;   /* Pale gold - gradient starts */
+  
+  /* Spacing Scale */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  
+  /* Typography */
+  --font-family-base: 'Roboto', sans-serif;
+  --font-size-base: 1rem;
+  --font-size-h1: 2.6rem;
+  --font-size-h2: 2rem;
+  --font-size-h3: 1.5rem;
+  --line-height-base: 1.6;
+  
+  /* Layout */
+  --container-max-width: 800px;
+  --border-radius-sm: 6px;
+  --border-radius-md: 8px;
+  
+  /* Animations */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Effects */
+  --parallax-friction: 0.083;     /* 1/12 */
+  --parallax-depth: 0.06;
+  --animation-typing-speed: 50ms;
+  
+  /* Z-Index Scale */
+  --z-background: -1;
+  --z-base: 1;
+  --z-header: 10;
+  --z-music-player: 100;
+  --z-cursor-trail: 9999;
+  
+  /* Responsive Breakpoints */
+  --breakpoint-mobile: 320px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  --breakpoint-wide: 1440px;
+}
+
+/* Dark Mode Support (future enhancement) */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-bg: #f5f5f5;
+    --color-text: #333;
+    --color-secondary: #fff;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0s;
+    --transition-base: 0s;
+    --transition-slow: 0s;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

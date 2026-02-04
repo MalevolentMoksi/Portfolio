@@ -1,0 +1,126 @@
+/* ============================================
+   Visual Effects & Animations
+   ============================================ */
+
+/* Cursor trail (replaced with CSS-only solution) */
+#cursor-trail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 8px;
+  background: linear-gradient(to right, var(--color-primary), transparent);
+  pointer-events: none;
+  z-index: var(--z-cursor-trail);
+  transform-origin: left center;
+  opacity: 0.8;
+  filter: blur(2px);
+}
+
+/* Global image hover effects */
+img {
+  transition: 
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+img:hover {
+  transform: scale(0.99);
+  box-shadow: 0 0 10px var(--color-primary);
+}
+
+/* Email glitch effect */
+.email-glitch {
+  position: relative;
+  display: inline-block;
+}
+
+.local-part {
+  font-family: monospace;
+  color: var(--color-primary);
+  animation: glitch-text 400ms steps(10) infinite;
+}
+
+@keyframes glitch-text {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Fade-in animation for sections */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Pulse animation for highlighted elements */
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(212, 175, 55, 0);
+  }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Smooth page transitions (View Transitions API) */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
+/* Loading spinner (for future use) */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(212, 175, 55, 0.2);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reduce motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  #cursor-trail,
+  .local-part {
+    animation: none;
+  }
+  
+  img:hover {
+    transform: none;
+  }
+}

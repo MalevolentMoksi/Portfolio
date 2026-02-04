@@ -1,0 +1,111 @@
+/* ============================================
+   Header Component Styles
+   ============================================ */
+
+header {
+  background: rgba(26, 26, 26, 0.7);
+  padding: var(--space-lg);
+  border-bottom: 2px solid var(--color-primary);
+  text-align: center;
+  position: relative;
+  z-index: var(--z-header);
+  backdrop-filter: blur(10px);
+}
+
+header h1 {
+  margin-bottom: var(--space-sm);
+}
+
+header h3,
+header h4 {
+  margin-bottom: var(--space-xs);
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+/* Typing effect cursor */
+.typing::after {
+  content: '|';
+  display: inline-block;
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Navigation */
+nav ul {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--space-md);
+}
+
+nav ul li a {
+  display: inline-block;
+  padding: 0.6em 1.5em;
+  border-radius: var(--border-radius-md);
+  background: rgba(212, 175, 55, 0.13);
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 1.08rem;
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.03em;
+  transition:
+    transform var(--transition-fast),
+    background 0.18s cubic-bezier(0.39, 0.58, 0.57, 1.25),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+nav ul li a:hover,
+nav ul li a:focus-visible {
+  background: rgba(212, 175, 55, 0.45);
+  color: var(--color-accent-light);
+  border-color: var(--color-accent-light);
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4);
+  transform: translateY(-2px) scale(1.06);
+}
+
+nav ul li a:active {
+  background: rgba(212, 175, 55, 0.6);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Current page indicator */
+nav ul li a[aria-current="page"] {
+  background: rgba(212, 175, 55, 0.3);
+  border-color: var(--color-accent-light);
+}
+
+/* Responsive Navigation */
+@media (max-width: 768px) {
+  header {
+    padding: var(--space-md);
+  }
+  
+  nav ul li a {
+    padding: 0.5em 1em;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  nav ul {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+  }
+  
+  nav ul li a {
+    width: 100%;
+    text-align: center;
+  }
+}

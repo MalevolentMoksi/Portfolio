@@ -1,0 +1,127 @@
+/* ============================================
+   Typography Styles
+   ============================================ */
+
+/* Headings with gradient effect */
+h1 {
+  font-size: var(--font-size-h1);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-md);
+  background: linear-gradient(90deg, var(--color-accent-pale) 30%, var(--color-primary) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.7), 0 0 2px rgba(255, 248, 220, 0.6);
+}
+
+/* Fallback for high contrast mode (accessibility) */
+@media (prefers-contrast: high) {
+  h1 {
+    background: none;
+    -webkit-text-fill-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+h2,
+h3 {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent-light));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Fallback for high contrast mode */
+@media (prefers-contrast: high) {
+  h2,
+  h3 {
+    background: none;
+    -webkit-text-fill-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  margin-bottom: var(--space-md);
+  position: relative;
+  padding-bottom: var(--space-sm);
+}
+
+h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50px;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: 2px;
+}
+
+h3 {
+  font-size: var(--font-size-h3);
+  margin-bottom: var(--space-sm);
+}
+
+/* Paragraphs */
+p {
+  margin-bottom: var(--space-sm);
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/* Strong & emphasis */
+strong {
+  font-weight: 600;
+  color: var(--color-accent-light);
+}
+
+em {
+  font-style: italic;
+  color: var(--color-accent-light);
+}
+
+/* Lists */
+ul,
+ol {
+  padding-left: var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+
+li {
+  margin-bottom: var(--space-xs);
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  h2 {
+    font-size: 1.3rem;
+  }
+  
+  h3 {
+    font-size: 1.1rem;
+  }
+}
