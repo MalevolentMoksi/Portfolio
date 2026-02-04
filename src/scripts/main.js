@@ -6,6 +6,7 @@
 import MusicPlayer from './music-player.js';
 import VisualEffects from './effects.js';
 import UIEnhancements from './ui-enhancements.js';
+import Lightbox from './lightbox.js';
 
 class Portfolio {
   constructor() {
@@ -31,6 +32,11 @@ class Portfolio {
     
     // Initialize UI enhancements
     this.ui = new UIEnhancements();
+    
+    // Initialize lightbox (for gallery pages)
+    if (document.querySelector('.zoomable')) {
+      this.lightbox = new Lightbox();
+    }
     
     // Add skip-to-content link for accessibility
     this.addSkipLink();

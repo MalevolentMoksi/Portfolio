@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <title>Portfolio - Projet détaillé</title>`n  <meta name="description" content="Portfolio d'Enzo Morello - Projets et réalisations">
+  <link rel="stylesheet" href="/styles/main.css">
+</head>
+
+<body>`n  <!-- Accessibility: Skip to main content -->`n  <a href="#main" class="skip-to-content">Aller au contenu principal</a>`n
+  <div id="particles-js"></div>
+  <img src="/assets/images/europa_compressed.jpg" width="800" height="450" loading="lazy" alt="Image d'arrière-plan" id="background">
+  <header>
+    <h1 id="main-title">Projets personnels</h1>
+    <nav aria-label="Navigation principale">
+      <ul>
+        <li><a href="/index.html" id="BoutAccueil">Accueil</a></li>
+        <li><a href="/projets.html">Projets</a></li>
+        <li><a href="/projets-personnels.html">Projets personnels</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section id="presentation">
+      <h2>Présentation</h2>
+      <p>
+        Voici quelques projets personnels que j'ai réalisés, principalement pour m'amuser et apprendre de nouvelles
+        compétences.
+        Ils reflètent mon intérêt pour la programmation, le design et la créativité.
+        <p> <b>PS : Cette page contient des vidéos qui se jouent au survol de la souris! </b></p>
+      </p>
+    </section>
+    <section>
+      <article class="project">
+        <h2>Bot Discord <i>“Moksi's Bazaar”</i></h2>
+        <img src="/assets/images/discordBotIcon.png" loading="lazy" alt="Icône du Bot Discord" style="max-width:150px;">
+
+        <p>
+          <strong>Moksi's Bazaar</strong> est un bot Discord entièrement développé en JavaScript (discord.js),
+          qui offre plusieurs services et jeux réunis sur une même plateforme textuelle.
+          à la fois un système de monnaie virtuelle et plusieurs mini‐jeux de casino :
+          blackjack, roulette, machine à sous, etc. Les utilisateurs dans un serveur Discord peuvent miser, gagner des
+          crédits et suivre leur
+          classement en temps réel.
+          Le bot est également capable de communication : relié à une IA externe, il peut répondre aux utilisateurs, avoir des
+          conversations avec eux, et se souvenir des interactions, stockant même des niveaux de relations selon si les utilisateurs ont été 
+          aimables ou non, et étant en réaction plus aimable en retour (ou plus hostile).
+        </p>
+        <ul>
+          <li><b>Compétences :</b> API Discord, programmation événementielle, gestion des permissions</li>
+          <li><b>Techniques :</b> Python (discord.py), hébergement, gestion d’events, logs, SQL</li>
+        </ul>
+        <a href="https://github.com/MalevolentMoksi/Moksi-Bazaar" class="btn" target="_blank">Voir le code sur GitHub</a>
+
+        <div class="video-gallery">
+          <div class="video-item">
+            <div class="video-wrapper">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="/assets/videos/blackjack.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la balise vidéo.
+              </video>
+            </div>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption">Jeu de Blackjack</p>
+          </div>
+
+          <div class="video-item">
+            <div class="video-wrapper">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="/assets/videos/roulette.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la balise vidéo.
+              </video>
+            </div>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption">Jeu de Roulette</p>
+          </div>
+
+          <div class="video-item">
+            <div class="video-wrapper">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="/assets/videos/currency.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la balise vidéo.
+              </video>
+            </div>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption">Fonds &amp; Classement</p>
+          </div>
+
+          <div class="video-item">
+            <div class="video-wrapper">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="/assets/videos/slots.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la balise vidéo.
+              </video>
+            </div>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption">Jeu de Machine à Sous</p>
+          </div>
+        </div>
+        <details class="bot-fonctionnement" style="margin-top:2rem;">
+          <summary style="font-size:1.2rem; font-weight:bold; cursor:pointer;">
+            Fonctionnement du Bot
+          </summary>
+
+          <div style="margin-top:1rem;">
+            <p>
+              Le bot est hébergé sur <strong>Railway</strong> grâce à une instance GitHub 24/7.
+              Une base de données <strong>PostgreSQL</strong> (intégrée à Railway) stocke en temps réel :
+            </p>
+            <ul>
+              <li>Les <em>identifiants</em> Discord de chaque utilisateur</li>
+              <li>Les <em>soldes</em> (crédits) et leur historique</li>
+              <li>Les <em>statuts de participation</em> aux différents jeux (mise, gains/pertes)</li>
+            </ul>
+            <p>
+              Dès qu’un utilisateur envoie une commande (par exemple <code>!blackjack</code> ou <code>!roulette</code>),
+              le bot interroge la table <code>users</code> pour vérifier le <em>solde</em>,
+              met à jour les données appropriées selon les résultats,
+              puis renvoie un message Discord détaillé (embed) affichant l’évolution du profil et du classement.
+            </p>
+
+            <div style="text-align:center; margin-top:1rem;">
+              <img src="/assets/images/railway-dashboard.png" loading="lazy" alt="Tableau de bord Railway pour le bot Discord"
+                style="max-width:100%; border: 1px solid var(--primary-color); border-radius:4px;">
+              <figcaption style="font-size:0.85rem; color:var(--text-color); margin-top:0.25rem;">
+                Aperçu du dashboard Railway&nbsp;: gestion des variables d’environnement &amp; métriques PostgreSQL
+              </figcaption>
+            </div>
+          </div>
+        </details>
+      </article>
+    </section>
+
+    <hr>
+
+    <section>
+      <article class="project">
+        <h2>Dessins personnels</h2>
+
+        <div class="drawings-intro">
+          <p>
+            Depuis Janvier 2025, je me suis lancé dans le dessin numérique et traditionnel. Voici quelques-unes de mes
+            illustrations, réalisées au crayon (2H à 6B) ou numériquement.
+          
+          </p>
+          <p>J'explore différents styles et techniques, mais cela reste avant tout un hobby pour moi.</p>
+        </div>
+
+        <div class="drawings-grid">
+          <div class="drawing-item">
+            <img class="zoomable" src="/assets/images/drawings/ADA1.jpg" width="800" height="450" loading="lazy" alt="ADA-1 de Destiny 2 au crayon">
+            <p>ADA-1 de Destiny 2 – Portrait au crayon</p>
+          </div>
+
+          <div class="drawing-item">
+            <img class="zoomable" src="/assets/images/drawings/Goat.jpg" width="800" height="450" loading="lazy" alt="Illustration rapide au crayon">
+            <p>Goat de Cult of the Lamb – Illustration rapide au crayon</p>
+          </div>
+
+          <div class="drawing-item">
+            <img class="zoomable" src="/assets/images/drawings/EBray.jpg" width="800" height="450" loading="lazy" alt="Illustration au crayon">
+            <p>Exo Stranger de Destiny 2 – Illustration au crayon</p>
+          </div>
+
+          <div class="drawing-item">
+            <img class="zoomable" src="/assets/images/drawings/CaptainComm.webp" width="800" height="450" loading="lazy" alt="Illustration numérique">
+            <p>Commission – Illustration numérique</p>
+          </div>
+
+          <div class="drawing-item">
+            <img class="zoomable" src="/assets/images/drawings/GoatLamb.jpg" width="800" height="450" loading="lazy" alt="Dessin au stylo">
+            <p>Goat &amp; Lamb de Cult of the Lamb – Illustration au crayon</p>
+          </div>
+
+          <div class="drawing-item">
+            <img class="zoomable" src="/assets/images/drawings/ElsiePortrait.webp" width="800" height="450" loading="lazy" alt="Illustration numérique">
+            <p>Exo Stranger de Destiny 2 – Illustration numérique</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <hr>
+
+    <section>
+      <article class="project">
+        
+        <div class="title-with-logo">
+          <h2>Jeux réalisés sur Scratch</h2>
+          <img src="/assets/images/ScratchLogo.png" width="800" height="450" loading="lazy" alt="Logo Scratch">
+        </div>
+         
+        <p>
+          En CM2, j'ai été introduit au logiciel en ligne Scratch par mon professeur.
+          Cela a consommé une bonne partie de mon temps personnel que j'ai passé à faire des jeux jusqu'en 2020. <br>
+          Le programme permet de programmer de manière ludique, avec des blocs de code visuels.
+          J'ai fabriqué plusieurs jeux avec le programme, tous plutôt rugueux mais certains sont encore jouables aujourd'hui.
+        </p>
+        <ul>
+          <li><b>Compétences :</b> Logique algorithmique, design d’interfaces, animations, gestion de variables et de
+            sprites</li>
+          <li><b>Techniques :</b> Utilisation avancée de Scratch, optimisation des scripts, adaptation aux feedbacks
+            utilisateurs</li>
+        </ul>
+        <a href="https://scratch.mit.edu/users/Sup3rSh00t3r/" class="btn" target="_blank">Voir mon profil Scratch</a>
+       
+        <div class="video-gallery" style="margin-top:1.5rem;">
+          <div class="video-item">
+            <div class="video-wrapper">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="/assets/videos/stickman.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la balise vidéo.
+              </video>
+            </div>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption"><i>"Stickman Adventure"</i></p>
+          </div>
+
+          <div class="video-item">
+            <div class="video-wrapper">
+              <video class="hover-play" preload="metadata" muted loop playsinline>
+                <source src="/assets/videos/RPG.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la balise vidéo.
+              </video>
+            </div>
+            <div class="progress-container">
+              <div class="progress"></div>
+            </div>
+            <p class="caption"><i>"RPG 1.2v"</i></p>
+          </div>
+        </div>
+        </article>
+    </section>
+  </main>
+
+  <div id="lightbox-overlay" class="hidden">
+    <span id="lightbox-close">&times;</span>
+    <img id="lightbox-img" src="" alt="Aperçu agrandi">
+    <p id="lightbox-caption"></p>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        Enzo Morello &copy; 2026
+      </div>
+      <div class="footer-center footer-bubbles">
+        <a href="https://github.com/MalevolentMoksi" class="bubble" target="_blank" rel="noopener" aria-label="GitHub">
+          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg" alt="GitHub">
+        </a>
+        <a href="" class="bubble" aria-label="Email">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="12" fill="none" />
+            <path d="M4 8l8 6 8-6M4 8v8a2 2 0 002 2h12a2 2 0 002-2V8M4 8l8 6 8-6" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+        <a href="https://gricad-gitlab.univ-grenoble-alpes.fr/morelloe" class="bubble" target="_blank" rel="noopener"
+          aria-label="GitLab">
+          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg" alt="GitLab">
+        </a>
+      </div>
+      <div class="footer-right" id="footer-fun">
+        <span id="footer-clock" style="font-family:monospace;font-size:1.2rem"></span>
+      </div>
+    </div>
+  </footer>
+
+<button id="back-to-top" aria-label="Retour en haut de la page" aria-label="Retour en haut">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+       xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 4L12 20M12 4L6 10M12 4L18 10"
+          stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js" defer></script>
+  <script type="module" src="/scripts/main.js"></script>
+  
+</body>
+
+</html>

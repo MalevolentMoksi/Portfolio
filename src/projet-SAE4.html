@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <title>Portfolio – Projet - Création d’une base de données</title>`n  <meta name="description" content="Portfolio d'Enzo Morello - Projets et réalisations">
+  <link rel="stylesheet" href="/styles/main.css">
+</head>
+
+<body>`n  <!-- Accessibility: Skip to main content -->`n  <a href="#main" class="skip-to-content">Aller au contenu principal</a>`n
+  <div id="particles-js"></div>
+  <img src="/assets/images/ClairObscurSwords.jpg" width="800" height="450" loading="lazy" alt="Image d'arrière-plan" id="background">
+  <header>
+    <h1 id="main-title">Projet – Création d’une base de données</h1>
+    <nav aria-label="Navigation principale">
+      <ul>
+        <li><a href="/index.html" id="BoutAccueil">Accueil</a></li>
+        <li><a href="/projets.html">Projets</a></li>
+        <li><a href="/projets-personnels.html">Projets personnels</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- ===================================================== -->
+    <!-- DESCRIPTION                                           -->
+    <!-- ===================================================== -->
+    <section id="project-detail">
+      <h2>Description</h2>
+      <p>
+        Réalisée au <strong>semestre 1 du BUT Informatique</strong>, le projet avait pour but de concevoir
+        et de mettre en place, en <strong>binôme</strong>, une base de données complète pour le club de bowling
+        <em>SuperBall</em>. À partir d’un cahier des charges et d’un <abbr title="Schéma Entités‑Associations">SEA</abbr>
+        fournis, nous avons :
+      </p>
+      <ul>
+        <li>Dérivé le <strong>schéma relationnel (SLR)</strong> en appliquant les règles de traduction vues en cours ;</li>
+        <li>Écrit un script <code>create.sql</code> créant les tables, clés primaires / étrangères, <code>CHECK</code>,
+          <code>NOT&nbsp;NULL</code>, contraintes d’unicité ;</li>
+        <li>Rédigé un script <code>test.sql</code> peuplant la base puis vérifiant l’intégrité via des insertions
+          invalides ;</li>
+        <li>Développé des requêtes SQL répondant à six besoins métier (planning des pistes, stock de chaussures,
+          disponibilité, etc.) ;</li>
+        <li>Fait évoluer la base lors de l’<strong>étape 3</strong> : gestion du remplacement d’une piste, extension du
+          nombre maximum de parties et bilan critique du projet.</li>
+      </ul>
+      <p>Résultat : une base PostgreSQL robuste, documentée (PDF) et livrée avec scripts de création, suppression et
+        jeu d’essai.</p>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- COMPÉTENCES                                           -->
+    <!-- ===================================================== -->
+    <!-- ===== Compétences SAE 1.04 ===== -->
+<section id="skills">
+  <h2>Compétences mobilisées</h2>
+  <ul>
+    <li>Mettre à jour et interroger une base de données relationnelle (en requêtes directes ou via une application)</li>
+    <li>Visualiser des données</li>
+    <li>Concevoir une base de données relationnelle à partir d’un cahier des charges</li>
+  </ul>
+</section>
+
+
+    <!-- ===================================================== -->
+    <!-- OBJECTIFS                                             -->
+    <!-- ===================================================== -->
+    <section id="objectives">
+      <h2>Objectifs pédagogiques</h2>
+      <ul>
+        <li>Mettre en pratique la <strong>méthodologie de conception BD</strong> vue en cours (SEA → SLR → SQL) ;</li>
+        <li>Maîtriser les <strong>contraintes d’intégrité</strong> côté SGBD plutôt que dans le code applicatif ;</li>
+        <li>Savoir <strong>peupler</strong> et <strong>interroger</strong> une base afin de répondre à des besoins concrets ;</li>
+        <li>Apprendre à <strong>faire évoluer</strong> un schéma existant sans casser les données.</li>
+      </ul>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- TECHNIQUES                                            -->
+    <!-- ===================================================== -->
+    <section id="techniques">
+      <h2>Compétences techniques &amp; savoir‑faire</h2>
+      <ul>
+        <li>Conception EA / Merise avec <em>DB‑Diagram.io</em> puis export PDF</li>
+        <li>PostgreSQL 15, <code>psql</code>, <em>pgAdmin 4</em>, <em>DBeaver</em></li>
+        <li>Contraintes : <strong>CHECK</strong>, clés composites, <abbr title="Foreign Key">FK</abbr>, index</li>
+        <li>Requêtes avancées : window functions, <code>INTERVAL</code>, vues matérialisées</li>
+        <li>Versioning GitLab ; livrables packagés en <code>.zip</code></li>
+        <li>Bilan rédigé en LaTeX (<code>bilan.pdf</code>) avec analyse critique</li>
+      </ul>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- GROUPE                                                -->
+    <!-- ===================================================== -->
+    <section id="group-work">
+      <h2>Organisation en binôme</h2>
+      <p>
+        Répartition des tâches : mon binôme s’est concentré sur <code>create.sql</code> / <code>drop.sql</code>,
+        moi sur le <strong>SLR</strong>, les requêtes métier et le bilan. Revues de code hebdomadaires sur GitLab.</p>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- INDIVIDUEL                                            -->
+    <!-- ===================================================== -->
+    <section id="individual-work">
+      <h2>Contributions personnelles</h2>
+      <ul>
+        <li>Conception du schéma relationnel (diagramme & justification)</li>
+        <li>Écriture / optimisation des requêtes <em>B1.1 → B2</em> (≤ 5 ms)</li>
+        <li>Automatisation des tests via conteneur Docker PostgreSQL</li>
+        <li>Présentation orale de 5 minutes (slides Canva)</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-left">Enzo Morello © 2026</div>
+      <div class="footer-center footer-bubbles">
+        <a href="https://github.com/MalevolentMoksi" class="bubble" target="_blank" rel="noopener" aria-label="GitHub">
+          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg" alt="GitHub">
+        </a>
+        <a href="" class="bubble" aria-label="Email">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="12" fill="none" />
+            <path d="M4 8l8 6 8-6M4 8v8a2 2 0 002 2h12a2 2 0 002-2V8M4 8l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+        <a href="https://gricad-gitlab.univ-grenoble-alpes.fr/morelloe" class="bubble" target="_blank" rel="noopener"
+          aria-label="GitLab">
+          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg" alt="GitLab">
+        </a>
+      </div>
+      <div class="footer-right" id="footer-fun">
+        <span id="footer-clock" style="font-family:monospace;font-size:1.2rem"></span>
+      </div>
+    </div>
+  </footer>
+
+<button id="back-to-top" aria-label="Retour en haut de la page" aria-label="Retour en haut">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+       xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 4L12 20M12 4L6 10M12 4L18 10"
+          stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js" defer></script>
+  <script type="module" src="/scripts/main.js"></script>
+  
+</body>
+
+</html>

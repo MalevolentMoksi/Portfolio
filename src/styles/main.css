@@ -14,6 +14,7 @@
 @import './components/_buttons.css';
 @import './components/_music-player.css';
 @import './components/_projects.css';
+@import './components/_personal-projects.css';
 
 /* Effects & animations */
 @import './_effects.css';
