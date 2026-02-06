@@ -20,6 +20,7 @@
 @import './components/_loading.css';
 @import './components/_breadcrumbs.css';
 @import './components/_project-pagination.css';
+@import './components/_filter-bar.css';
 
 /* Effects & animations */
 @import './_effects.css';
