@@ -1,0 +1,5 @@
+<!-- diamond-shaped gold favicon (64 × 64 viewBox) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Rotate a square 45° to make a diamond -->
+  <polygon points="32 0 64 32 32 64 0 32" fill="#d4af37"/>
+</svg>
