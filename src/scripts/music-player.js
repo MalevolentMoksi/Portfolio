@@ -3,6 +3,8 @@
  * Handles persistent background music with localStorage state management
  */
 
+import { getAssetPath } from '../utils/assetPath.js';
+
 class MusicPlayer {
   constructor(trackFiles) {
     this.trackFiles = trackFiles;
@@ -51,7 +53,7 @@ class MusicPlayer {
   
   setupAudio() {
     this.audio.preload = 'metadata';
-    this.audio.src = `/assets/music/${this.trackFiles[this.currentTrackIndex]}`;
+    this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
     this.audio.muted = true; // Start muted for autoplay policy
     
     // Event listeners
@@ -129,7 +131,7 @@ class MusicPlayer {
     }
     
     this.trackFiles.forEach((filename, idx) => {
-      const url = `/assets/music/${filename}`;
+      const url = getAssetPath(`assets/music/${filename}`);
 
       fetch(url)
         .then((response) => {
@@ -256,7 +258,7 @@ class MusicPlayer {
     localStorage.setItem(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
     localStorage.setItem(this.STORAGE_KEYS.CURRENT_TIME, '0');
     
-    this.audio.src = `/assets/music/${this.trackFiles[this.currentTrackIndex]}`;
+    this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
     this.updateTrackInfo();
     
     if (!this.isPaused) {
@@ -279,7 +281,7 @@ class MusicPlayer {
     const meta = this.trackMeta[this.currentTrackIndex];
     this.elements.title.textContent = meta.title;
     this.elements.artist.textContent = meta.artist;
-    this.elements.albumArt.src = meta.pictureDataURL || '/assets/images/favicon.svg';
+    this.elements.albumArt.src = meta.pictureDataURL || getAssetPath('assets/images/favicon.svg');
     
     // Apply scrolling animation if text overflows
     this.applyScrollIfOverflow(this.elements.title.parentElement);
@@ -330,7 +332,7 @@ class MusicPlayer {
     return {
       title: this.formatTitle(filename),
       artist: 'Unknown Artist',
-      pictureDataURL: '/assets/images/favicon.svg',
+      pictureDataURL: getAssetPath('assets/images/favicon.svg'),
     };
   }
 }

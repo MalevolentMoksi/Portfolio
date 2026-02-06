@@ -1,5 +1,11 @@
-const ProjetsPersonnels = () => (
-  <>
+import useDocumentMeta from '@/hooks/useDocumentMeta.js';
+import { getAssetPath } from '@/utils/assetPath.js';
+
+const ProjetsPersonnels = () => {
+  useDocumentMeta('Projets Personnels | Portfolio', 'Mes projets personnels et illustrations');
+
+  return (
+    <>
     <section id="presentation">
       <h2>Presentation</h2>
       <p>
@@ -16,7 +22,7 @@ const ProjetsPersonnels = () => (
       <article className="project">
         <h2>Bot Discord <i>"Moksi's Bazaar"</i></h2>
         <img
-          src="/assets/images/discordBotIcon.png"
+            src={getAssetPath('assets/images/discordBotIcon.png')}
           loading="lazy"
           alt="Icone du Bot Discord"
           style={{ maxWidth: '280px', marginBottom: '1.5rem' }}
@@ -50,7 +56,7 @@ const ProjetsPersonnels = () => (
           <div className="video-item">
             <div className="video-wrapper">
               <video className="hover-play" preload="metadata" muted loop playsInline>
-                <source src="/assets/videos/blackjack.mp4" type="video/mp4" />
+                  <source src={getAssetPath('assets/videos/blackjack.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
             </div>
@@ -63,7 +69,7 @@ const ProjetsPersonnels = () => (
           <div className="video-item">
             <div className="video-wrapper">
               <video className="hover-play" preload="metadata" muted loop playsInline>
-                <source src="/assets/videos/roulette.mp4" type="video/mp4" />
+                  <source src={getAssetPath('assets/videos/roulette.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
             </div>
@@ -76,7 +82,7 @@ const ProjetsPersonnels = () => (
           <div className="video-item">
             <div className="video-wrapper">
               <video className="hover-play" preload="metadata" muted loop playsInline>
-                <source src="/assets/videos/currency.mp4" type="video/mp4" />
+                  <source src={getAssetPath('assets/videos/currency.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
             </div>
@@ -89,7 +95,7 @@ const ProjetsPersonnels = () => (
           <div className="video-item">
             <div className="video-wrapper">
               <video className="hover-play" preload="metadata" muted loop playsInline>
-                <source src="/assets/videos/slots.mp4" type="video/mp4" />
+                  <source src={getAssetPath('assets/videos/slots.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
             </div>
@@ -124,7 +130,7 @@ const ProjetsPersonnels = () => (
 
             <div style={{ textAlign: 'center', marginTop: '1rem' }}>
               <img
-                src="/assets/images/railway-dashboard.png"
+                  src={getAssetPath('assets/images/railway-dashboard.png')}
                 loading="lazy"
                 alt="Tableau de bord Railway pour le bot Discord"
                 style={{
@@ -167,7 +173,7 @@ const ProjetsPersonnels = () => (
           <div className="drawing-item">
             <img
               className="zoomable"
-              src="/assets/images/drawings/ADA1.jpg"
+                src={getAssetPath('assets/images/drawings/ADA1.jpg')}
               width="800"
               height="450"
               loading="lazy"
@@ -179,7 +185,7 @@ const ProjetsPersonnels = () => (
           <div className="drawing-item">
             <img
               className="zoomable"
-              src="/assets/images/drawings/Goat.jpg"
+                src={getAssetPath('assets/images/drawings/Goat.jpg')}
               width="800"
               height="450"
               loading="lazy"
@@ -191,7 +197,7 @@ const ProjetsPersonnels = () => (
           <div className="drawing-item">
             <img
               className="zoomable"
-              src="/assets/images/drawings/EBray.jpg"
+                src={getAssetPath('assets/images/drawings/EBray.jpg')}
               width="800"
               height="450"
               loading="lazy"
@@ -203,7 +209,7 @@ const ProjetsPersonnels = () => (
           <div className="drawing-item">
             <img
               className="zoomable"
-              src="/assets/images/drawings/CaptainComm.webp"
+                src={getAssetPath('assets/images/drawings/CaptainComm.webp')}
               width="800"
               height="450"
               loading="lazy"
@@ -215,7 +221,7 @@ const ProjetsPersonnels = () => (
           <div className="drawing-item">
             <img
               className="zoomable"
-              src="/assets/images/drawings/GoatLamb.jpg"
+                src={getAssetPath('assets/images/drawings/GoatLamb.jpg')}
               width="800"
               height="450"
               loading="lazy"
@@ -227,7 +233,7 @@ const ProjetsPersonnels = () => (
           <div className="drawing-item">
             <img
               className="zoomable"
-              src="/assets/images/drawings/ElsiePortrait.webp"
+                src={getAssetPath('assets/images/drawings/ElsiePortrait.webp')}
               width="800"
               height="450"
               loading="lazy"
@@ -245,7 +251,7 @@ const ProjetsPersonnels = () => (
       <article className="project">
         <div className="title-with-logo">
           <h2>Jeux realises sur Scratch</h2>
-          <img src="/assets/images/ScratchLogo.png" width="800" height="450" loading="lazy" alt="Logo Scratch" />
+            <img src={getAssetPath('assets/images/ScratchLogo.png')} width="800" height="450" loading="lazy" alt="Logo Scratch" />
         </div>
 
         <p>
@@ -274,7 +280,7 @@ const ProjetsPersonnels = () => (
           <div className="video-item">
             <div className="video-wrapper">
               <video className="hover-play" preload="metadata" muted loop playsInline>
-                <source src="/assets/videos/stickman.mp4" type="video/mp4" />
+                  <source src={getAssetPath('assets/videos/stickman.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
             </div>
@@ -289,7 +295,7 @@ const ProjetsPersonnels = () => (
           <div className="video-item">
             <div className="video-wrapper">
               <video className="hover-play" preload="metadata" muted loop playsInline>
-                <source src="/assets/videos/RPG.mp4" type="video/mp4" />
+                  <source src={getAssetPath('assets/videos/RPG.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
             </div>
@@ -309,7 +315,7 @@ const ProjetsPersonnels = () => (
       <img id="lightbox-img" src="" alt="Apercu agrandi" />
       <p id="lightbox-caption"></p>
     </div>
-  </>
-);
-
+    </>
+  );
+};
 export default ProjetsPersonnels;

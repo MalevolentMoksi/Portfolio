@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom';
+import useDocumentMeta from '@/hooks/useDocumentMeta.js';
+import { getAssetPath } from '@/utils/assetPath.js';
 
-const Projets = () => (
+const Projets = () => {
+  useDocumentMeta('Projets | Portfolio', 'Mes projets scolaires et professionnels');
+  
+  return (
   <section id="project-list">
     <h2>
       <em>Mes Projets</em>
@@ -11,7 +16,7 @@ const Projets = () => (
       <h2>Application d'organisation de banquets</h2>
       <p>Projet plus avance en groupe de 6.</p>
       <img
-        src="/assets/images/banquets-MEGASAE.webp"
+        src={getAssetPath('assets/images/banquets-MEGASAE.webp')}
         alt="Interface de l'application de gestion de banquets"
         loading="lazy"
         width="800"
@@ -31,7 +36,7 @@ const Projets = () => (
           height="30"
         />
         <img
-          src="/assets/images/JavaFX.svg"
+          src={getAssetPath('assets/images/JavaFX.svg')}
           loading="lazy"
           alt="JavaFX"
           title="JavaFX"
@@ -83,7 +88,7 @@ const Projets = () => (
     <article className="project">
       <h2>Recueil de besoins | Decouverte de l'environnement economique et ecologique</h2>
       <img
-        src="/assets/images/6508-sopra-lille-bata-ext-102.jpg"
+        src={getAssetPath('assets/images/6508-sopra-lille-bata-ext-102.jpg')}
         alt="Batiment Sopra Steria"
         loading="lazy"
         width="800"
@@ -140,7 +145,7 @@ const Projets = () => (
     <article className="project">
       <h2>Installation d'un poste pour le developpement</h2>
       <img
-        src="/assets/images/PosteTravailLinux.png"
+        src={getAssetPath('assets/images/PosteTravailLinux.png')}
         alt="Configuration d'un poste de travail Linux Debian"
         loading="lazy"
         width="800"
@@ -203,7 +208,7 @@ const Projets = () => (
     <article className="project">
       <h2>Implementation d'un besoin client | Comparaison d'approches algorithmiques</h2>
       <img
-        src="/assets/images/algorithm.jpg"
+        src={getAssetPath('assets/images/algorithm.jpg')}
         alt="Illustration algorithmes"
         loading="lazy"
         width="800"
@@ -234,6 +239,7 @@ const Projets = () => (
       <Link to="/projet-SAE12" className="btn">En savoir plus</Link>
     </article>
   </section>
-);
+  );
+};
 
 export default Projets;

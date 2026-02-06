@@ -11,6 +11,7 @@ import ProjetSAE56 from './pages/ProjetSAE56.jsx';
 
 const App = () => (
   <BrowserRouter 
+    basename="/Portfolio/"
     future={{
       v7_startTransition: true,
       v7_relativeSplatPath: true,
