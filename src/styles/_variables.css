@@ -53,6 +53,12 @@
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 1024px;
   --breakpoint-wide: 1440px;
+
+  /* Legacy variable aliases */
+  --primary-color: var(--color-primary);
+  --secondary-color: var(--color-secondary);
+  --text-color: var(--color-text);
+  --bg-color: var(--color-bg);
 }
 
 /* Dark Mode Support (future enhancement) */

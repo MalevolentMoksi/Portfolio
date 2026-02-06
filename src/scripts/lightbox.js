@@ -43,26 +43,37 @@ class Lightbox {
   attachListeners() {
     // Zoomable images
     document.querySelectorAll('.zoomable').forEach((img) => {
+      if (img.dataset.lightboxInit === 'true') return;
+      img.dataset.lightboxInit = 'true';
       img.style.cursor = 'pointer';
       img.addEventListener('click', () => this.open(img));
     });
     
     // Close button
-    this.closeBtn.addEventListener('click', () => this.close());
+    if (this.closeBtn && this.closeBtn.dataset.lightboxInit !== 'true') {
+      this.closeBtn.dataset.lightboxInit = 'true';
+      this.closeBtn.addEventListener('click', () => this.close());
+    }
     
     // Click outside to close
-    this.overlay.addEventListener('click', (e) => {
-      if (e.target === this.overlay) {
-        this.close();
-      }
-    });
+    if (this.overlay && this.overlay.dataset.lightboxInit !== 'true') {
+      this.overlay.dataset.lightboxInit = 'true';
+      this.overlay.addEventListener('click', (e) => {
+        if (e.target === this.overlay) {
+          this.close();
+        }
+      });
+    }
     
     // ESC key to close
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !this.overlay.classList.contains('hidden')) {
-        this.close();
-      }
-    });
+    if (document.documentElement.dataset.lightboxKeyInit !== 'true') {
+      document.documentElement.dataset.lightboxKeyInit = 'true';
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !this.overlay.classList.contains('hidden')) {
+          this.close();
+        }
+      });
+    }
   }
   
   open(img) {

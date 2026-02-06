@@ -2,6 +2,8 @@
    Main Stylesheet - Imports all modules
    ============================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+
 /* Core styles */
 @import './_variables.css';
 @import './_base.css';

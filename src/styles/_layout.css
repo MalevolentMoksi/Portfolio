@@ -24,8 +24,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: var(--z-background);
-  pointer-events: none;
+  z-index: 0;
+  pointer-events: auto;
 }
 
 /* Main container */
@@ -43,6 +43,13 @@ main {
 /* Section spacing */
 section {
   margin-bottom: var(--space-xl);
+}
+
+main section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2.5rem;
 }
 
 section:last-child {

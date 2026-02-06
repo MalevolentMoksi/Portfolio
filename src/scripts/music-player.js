@@ -18,11 +18,7 @@ class MusicPlayer {
     };
     
     // Track metadata cache
-    this.trackMeta = trackFiles.map(() => ({
-      title: 'Loading...',
-      artist: '',
-      pictureDataURL: '',
-    }));
+    this.trackMeta = trackFiles.map((filename) => this.createFallbackMeta(filename));
     
     // DOM elements (initialized after render)
     this.elements = {};
@@ -134,36 +130,59 @@ class MusicPlayer {
     
     this.trackFiles.forEach((filename, idx) => {
       const url = `/assets/music/${filename}`;
-      
-      window.jsmediatags.read(url, {
-        onSuccess: (tag) => {
-          this.trackMeta[idx].title = tag.tags.title || filename.replace('.m4a', '');
-          this.trackMeta[idx].artist = tag.tags.artist || 'Unknown Artist';
-          
-          // Extract album art
-          if (tag.tags.picture) {
-            const { data, format } = tag.tags.picture;
-            let binary = '';
-            for (let i = 0; i < data.length; i++) {
-              binary += String.fromCharCode(data[i]);
+
+      fetch(url)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          try {
+            window.jsmediatags.read(blob, {
+              onSuccess: (tag) => {
+                this.trackMeta[idx].title = tag.tags.title || this.formatTitle(filename);
+                this.trackMeta[idx].artist = tag.tags.artist || 'Unknown Artist';
+
+                // Extract album art
+                if (tag.tags.picture) {
+                  const { data, format } = tag.tags.picture;
+                  let binary = '';
+                  for (let i = 0; i < data.length; i++) {
+                    binary += String.fromCharCode(data[i]);
+                  }
+                  const base64String = window.btoa(binary);
+                  this.trackMeta[idx].pictureDataURL = `data:${format};base64,${base64String}`;
+                }
+
+                if (idx === this.currentTrackIndex) {
+                  this.updateTrackInfo();
+                }
+              },
+              onError: (error) => {
+                console.warn(`Failed to read metadata for ${filename}:`, error);
+                this.trackMeta[idx] = this.createFallbackMeta(filename);
+                if (idx === this.currentTrackIndex) {
+                  this.updateTrackInfo();
+                }
+              },
+            });
+          } catch (error) {
+            console.warn(`Failed to initialize metadata reader for ${filename}:`, error);
+            this.trackMeta[idx] = this.createFallbackMeta(filename);
+            if (idx === this.currentTrackIndex) {
+              this.updateTrackInfo();
             }
-            const base64String = window.btoa(binary);
-            this.trackMeta[idx].pictureDataURL = `data:${format};base64,${base64String}`;
           }
-          
-          // Update UI if this is current track
+        })
+        .catch((error) => {
+          console.warn(`Failed to fetch metadata for ${filename}:`, error);
+          this.trackMeta[idx] = this.createFallbackMeta(filename);
           if (idx === this.currentTrackIndex) {
             this.updateTrackInfo();
           }
-        },
-        onError: (error) => {
-          console.warn(`Failed to read metadata for ${filename}:`, error);
-          this.trackMeta[idx].title = filename.replace('.m4a', '');
-          if (idx === this.currentTrackIndex) {
-            this.updateTrackInfo();
-          }
-        },
-      });
+        });
     });
   }
   
@@ -174,13 +193,15 @@ class MusicPlayer {
     container.setAttribute('aria-label', 'Lecteur de musique');
     
     container.innerHTML = `
-      <img class="album-art" src="" alt="Pochette de l'album" />
-      <div class="track-info">
-        <div class="text-wrapper">
-          <span class="title"></span>
-        </div>
-        <div class="text-wrapper">
-          <span class="artist"></span>
+      <div class="player-main">
+        <img class="album-art" src="" alt="Pochette de l'album" />
+        <div class="track-info">
+          <div class="text-wrapper">
+            <span class="title"></span>
+          </div>
+          <div class="text-wrapper">
+            <span class="artist"></span>
+          </div>
         </div>
       </div>
       <div class="controls">
@@ -252,10 +273,13 @@ class MusicPlayer {
   }
   
   updateTrackInfo() {
+    if (!this.elements.title || !this.elements.artist || !this.elements.albumArt) {
+      return;
+    }
     const meta = this.trackMeta[this.currentTrackIndex];
     this.elements.title.textContent = meta.title;
     this.elements.artist.textContent = meta.artist;
-    this.elements.albumArt.src = meta.pictureDataURL || '';
+    this.elements.albumArt.src = meta.pictureDataURL || '/assets/images/favicon.svg';
     
     // Apply scrolling animation if text overflows
     this.applyScrollIfOverflow(this.elements.title.parentElement);
@@ -271,6 +295,7 @@ class MusicPlayer {
   }
   
   updateProgressBar() {
+    if (!this.elements.progressBar) return;
     if (!this.audio.duration || this.audio.duration === Infinity) return;
     const percent = (this.audio.currentTime / this.audio.duration) * 100;
     this.elements.progressBar.style.width = `${percent}%`;
@@ -294,6 +319,19 @@ class MusicPlayer {
     localStorage.setItem(this.STORAGE_KEYS.CURRENT_TIME, this.audio.currentTime.toString());
     localStorage.setItem(this.STORAGE_KEYS.IS_PAUSED, this.audio.paused.toString());
     localStorage.setItem(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
+  }
+
+  formatTitle(filename) {
+    const baseName = filename.replace(/\.[^/.]+$/, '');
+    return baseName.replace(/[-_]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  createFallbackMeta(filename) {
+    return {
+      title: this.formatTitle(filename),
+      artist: 'Unknown Artist',
+      pictureDataURL: '/assets/images/favicon.svg',
+    };
   }
 }
 

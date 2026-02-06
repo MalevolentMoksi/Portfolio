@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="Images/favicon.svg" type="image/svg+xml">
+  <title>Portfolio - Accueil</title>
+  <link rel="stylesheet" href="Pages/style.css">
+</head>
+
+<body>
+  <div id="particles-js"></div>
+  <img src="Images/risk-of-rain-2-launch-update.jpg" alt="Image d'arrière-plan" id="background">
+  <header>
+    <h1 id="main-title">Enzo MORELLO</h1>
+    <h3>Etudiant en IUT2</h3>
+    <h4>Souhaiterait être Développeur d'applications</h4>
+    <nav>
+      <ul>
+        <li><a href="index.html" id="BoutAccueil">Accueil</a></li>
+        <li><a href="Pages/projets.html">Projets</a></li>
+        <li><a href="Pages/projets-personnels.html">Projets personnels</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="presentation">
+      <h2>Présentation</h2>
+      <div class="presentation-grid">
+        <div class="presentation-block" id="about">
+          <h3>À propos de moi</h3>
+          <p>Étudiant en 2ème année de BUT Informatique à l'IUT2 de Grenoble spécialisé dans le développement d'applications. Passionné par l'alliance entre la logique technique et l'ergonomie visuelle , j'espère pouvoir mettre ma curiosité et ma méthode au service de projets innovants.</p>
+        </div>
+        <div class="presentation-block" id="skills">
+          <h3>Compétences</h3>
+          <ul>
+            <li>Réaliser, Concevoir, Optimiser et Administrer en :</li>
+            <li>Java, JavaScript, Python, SQL</li>
+            <li>HTML/CSS, JavaFX</li>
+            <li>Git, Maven, Linux</li>
+          </ul>
+        </div>
+        <div class="presentation-block" id="achievements">
+          <h3>Mon parcours</h3>
+          <strong>Baccalauréat Général - Mention Bien</strong><br>
+    Lycée Les Iscles, Manosque | Juin 2024 <br>
+    <em>Spécialités : Mathématiques et Sciences de l'Ingénieur.</em>
+        </div>
+        <div class="presentation-block" id="hobbies">
+          <h3>Centres d'intérêt</h3>
+          <ul>
+            <li>Art traditionnel et digital</li>
+            <li>Jeux-Vidéos</li>
+            <li>Découverte de musique</li>
+            <li>Cinématographie</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <ul>
+        <li>
+          Email :
+          <a href="index.html" class="email-glitch" aria-label="Adresse masquée">
+            <span class="local-part" data-text="██████████"></span>@etu.univ-grenoble-alpes.fr
+          </a>
+        </li>
+
+        <li>Profil Gitlab: <a
+            href="https://gricad-gitlab.univ-grenoble-alpes.fr/morelloe">gricad-gitlab.univ-grenoble-alpes.fr/morelloe</a>
+        </li>
+      </ul>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        Enzo Morello &copy; 2026
+      </div>
+      <div class="footer-center footer-bubbles">
+        <a href="https://github.com/MalevolentMoksi" class="bubble" target="_blank" rel="noopener" aria-label="GitHub">
+          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg" alt="GitHub">
+        </a>
+        <a href="" class="bubble" aria-label="Email">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="12" fill="none" />
+            <path d="M4 8l8 6 8-6M4 8v8a2 2 0 002 2h12a2 2 0 002-2V8M4 8l8 6 8-6" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+        <a href="https://gricad-gitlab.univ-grenoble-alpes.fr/morelloe" class="bubble" target="_blank" rel="noopener"
+          aria-label="GitLab">
+          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg" alt="GitLab">
+        </a>
+      </div>
+      <div class="footer-right" id="footer-fun">
+        <span id="footer-clock" style="font-family:monospace;font-size:1.2rem"></span>
+      </div>
+    </div>
+  </footer>
+
+
+
+
+  <button id="back-to-top" aria-label="Retour en haut">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+       xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 4L12 20M12 4L6 10M12 4L18 10"
+          stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+  <script src="Pages/script.js"></script>
+  <script>
+    function updateFooterClock() {
+      const el = document.getElementById('footer-clock');
+      if (!el) return;
+      const now = new Date();
+      el.textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    setInterval(updateFooterClock, 1000);
+    updateFooterClock();
+  </script>
+
+</body>
+
+</html>

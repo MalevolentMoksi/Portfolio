@@ -21,7 +21,12 @@ class UIEnhancements {
     const element = document.getElementById('main-title');
     if (!element) return;
     
-    const fullText = element.textContent;
+    const fullText = element.dataset.originalText || element.textContent;
+    element.dataset.originalText = fullText;
+    if (element.dataset.typedText === fullText && element.dataset.typed === 'true') {
+      return;
+    }
+    element.dataset.typedText = fullText;
     element.textContent = '';
     element.classList.add('typing');
     
@@ -33,6 +38,7 @@ class UIEnhancements {
         setTimeout(typeLetter, 50);
       } else {
         element.classList.remove('typing');
+        element.dataset.typed = 'true';
       }
     };
     
@@ -41,7 +47,8 @@ class UIEnhancements {
   
   initEmailGlitch() {
     const target = document.querySelector('.local-part');
-    if (!target) return;
+    if (!target || target.dataset.glitchInit === 'true') return;
+    target.dataset.glitchInit = 'true';
     
     const GLITCH_LENGTH = 10;
     const GLITCH_CHARS = '█▓▒░';
@@ -59,7 +66,8 @@ class UIEnhancements {
   
   initBackToTop() {
     const button = document.getElementById('back-to-top');
-    if (!button) return;
+    if (!button || button.dataset.backToTopInit === 'true') return;
+    button.dataset.backToTopInit = 'true';
     
     // Show/hide based on scroll position
     const toggleVisibility = () => {
@@ -98,6 +106,8 @@ class UIEnhancements {
     const hoverVideos = document.querySelectorAll('.hover-play');
     
     hoverVideos.forEach((video) => {
+      if (video.dataset.hoverInit === 'true') return;
+      video.dataset.hoverInit = 'true';
       const progressBar = video.closest('.video-item')?.querySelector('.progress');
       if (!progressBar) return;
       
@@ -145,7 +155,8 @@ class UIEnhancements {
   
   initFooterClock() {
     const clockElement = document.getElementById('footer-clock');
-    if (!clockElement) return;
+    if (!clockElement || clockElement.dataset.clockInit === 'true') return;
+    clockElement.dataset.clockInit = 'true';
     
     const updateClock = () => {
       const now = new Date();
@@ -162,6 +173,9 @@ class UIEnhancements {
   initViewTransitions() {
     // Native View Transition API for Chrome/Edge
     if (!document.startViewTransition) return;
+    if (document.documentElement.dataset.spaMode === 'true') return;
+    if (document.documentElement.dataset.viewTransitionInit === 'true') return;
+    document.documentElement.dataset.viewTransitionInit = 'true';
     
     document.addEventListener('click', (e) => {
       const link = e.target.closest('a');

@@ -32,10 +32,27 @@ ol {
   list-style: none;
 }
 
+main ul,
+main ol {
+  padding-left: 1.2rem;
+}
+
+main ul {
+  list-style: disc;
+}
+
+main ol {
+  list-style: decimal;
+}
+
 /* Reset links */
 a {
-  color: inherit;
+  color: var(--primary-color);
   text-decoration: none;
+}
+
+a:hover {
+  color: #ff9100;
 }
 
 /* Reset buttons */

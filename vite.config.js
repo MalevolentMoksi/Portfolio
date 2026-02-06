@@ -1,25 +1,18 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 export default defineConfig({
+  plugins: [react()],
   root: 'src',
-  base: './',
+  base: '/',
   publicDir: '../public',
   
   build: {
     outDir: '../dist',
     emptyOutDir: true,
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'src/index.html'),
-        projets: resolve(__dirname, 'src/projets.html'),
-        'projets-personnels': resolve(__dirname, 'src/projets-personnels.html'),
-        'projet-MEGASAE': resolve(__dirname, 'src/projet-MEGASAE.html'),
-        'projet-SAE12': resolve(__dirname, 'src/projet-SAE12.html'),
-        'projet-SAE3': resolve(__dirname, 'src/projet-SAE3.html'),
-        'projet-SAE4': resolve(__dirname, 'src/projet-SAE4.html'),
-        'projet-SAE56': resolve(__dirname, 'src/projet-SAE56.html'),
-      },
+      input: resolve(__dirname, 'src/index.html'),
     },
     // Optimize assets
     assetsInlineLimit: 4096, // Inline small assets as base64
@@ -46,6 +39,9 @@ export default defineConfig({
     port: 3000,
     open: true,
     host: true,
+    middlewareMode: false,
+    // Enable SPA fallback to index.html for routing
+    historyApiFallback: true,
   },
   
   preview: {
