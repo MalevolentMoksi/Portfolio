@@ -1,3 +1,5 @@
+import ProjectPagination from '@/components/ProjectPagination.jsx';
+
 const ProjetSAE3 = () => (
   <>
     <section id="project-detail">
@@ -104,6 +106,8 @@ const ProjetSAE3 = () => (
         <li>cree la carte mentale avec XMind, en appliquant une lecture horaire et un code couleur coherent ;</li>
       </ul>
     </section>
+    
+    <ProjectPagination currentPath="/projet-SAE3" />
   </>
 );
 

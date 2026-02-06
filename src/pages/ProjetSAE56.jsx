@@ -1,3 +1,5 @@
+import ProjectPagination from '@/components/ProjectPagination.jsx';
+
 const ProjetSAE56 = () => (
   <>
     <section id="project-overview">
@@ -202,6 +204,8 @@ const ProjetSAE56 = () => (
         </li>
       </ul>
     </section>
+    
+    <ProjectPagination currentPath="/projet-SAE56" />
   </>
 );
 

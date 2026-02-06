@@ -1,3 +1,5 @@
+import ProjectPagination from '@/components/ProjectPagination.jsx';
+
 const ProjetSAE12 = () => (
   <>
     <section id="project-detail">
@@ -66,6 +68,8 @@ const ProjetSAE12 = () => (
         participe a l'ecriture du rapport en anglais et a la preparation de la presentation orale.
       </p>
     </section>
+    
+    <ProjectPagination currentPath="/projet-SAE12" />
   </>
 );
 

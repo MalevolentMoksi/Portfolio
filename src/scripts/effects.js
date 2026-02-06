@@ -24,10 +24,14 @@ class VisualEffects {
       return;
     }
     
+    // Réduit le nombre de particules sur mobile pour les performances
+    const isMobile = window.innerWidth <= 768;
+    const particleCount = isMobile ? 40 : 80;
+    
     particlesJS('particles-js', {
       particles: {
         number: {
-          value: 80,
+          value: particleCount,
           density: { enable: true, value_area: 800 },
         },
         color: { value: '#d4af37' },

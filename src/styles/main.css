@@ -17,6 +17,9 @@
 @import './components/_music-player.css';
 @import './components/_projects.css';
 @import './components/_personal-projects.css';
+@import './components/_loading.css';
+@import './components/_breadcrumbs.css';
+@import './components/_project-pagination.css';
 
 /* Effects & animations */
 @import './_effects.css';

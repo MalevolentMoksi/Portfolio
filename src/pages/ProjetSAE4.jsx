@@ -1,3 +1,5 @@
+import ProjectPagination from '@/components/ProjectPagination.jsx';
+
 const ProjetSAE4 = () => (
   <>
     <section id="project-detail">
@@ -81,6 +83,8 @@ const ProjetSAE4 = () => (
         <li>Presentation orale de 5 minutes (slides Canva)</li>
       </ul>
     </section>
+    
+    <ProjectPagination currentPath="/projet-SAE4" />
   </>
 );
 

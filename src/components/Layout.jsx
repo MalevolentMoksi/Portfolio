@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import BackToTopButton from './BackToTopButton.jsx';
+import Breadcrumbs from './Breadcrumbs.jsx';
 import Footer from './Footer.jsx';
 import useDocumentMeta from '../hooks/useDocumentMeta.js';
 import usePortfolioModules from '../hooks/usePortfolioModules.js';
@@ -67,6 +69,11 @@ const Layout = () => {
   useDocumentMeta(config.metaTitle, config.metaDescription);
   usePortfolioModules(trackFiles);
 
+  // Scroll to top quando la route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <>
       <a href="#main" className="skip-to-content">Aller au contenu principal</a>
@@ -103,6 +110,7 @@ const Layout = () => {
       </header>
 
       <main id="main">
+        <Breadcrumbs />
         <Outlet />
       </main>
 

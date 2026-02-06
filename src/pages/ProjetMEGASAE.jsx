@@ -1,3 +1,5 @@
+import ProjectPagination from '@/components/ProjectPagination.jsx';
+
 const ProjetMEGASAE = () => (
   <>
     <section id="overview">
@@ -157,6 +159,8 @@ const ProjetMEGASAE = () => (
         d'une revue de risques hebdomadaire a permis de reduire drastiquement les retards potentiels.
       </p>
     </section>
+    
+    <ProjectPagination currentPath="/projet-MEGASAE" />
   </>
 );
 
