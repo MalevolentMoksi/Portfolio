@@ -6,8 +6,8 @@ const ProjetsPersonnels = () => {
 
   return (
     <>
-    <section id="presentation">
-      <h2>Presentation</h2>
+    <section id="presentation" aria-labelledby="personal-projects-title">
+      <h2 id="personal-projects-title">Presentation</h2>
       <p>
         Voici quelques projets personnels que j'ai realises, principalement pour m'amuser et
         apprendre de nouvelles competences. Ils refletent mon interet pour la programmation, le
@@ -18,13 +18,13 @@ const ProjetsPersonnels = () => {
       </p>
     </section>
 
-    <section>
+    <section aria-labelledby="discord-bot-title">
       <article className="project">
-        <h2>Bot Discord <i>"Moksi's Bazaar"</i></h2>
+        <h2 id="discord-bot-title">Bot Discord <i>"Moksi's Bazaar"</i></h2>
         <img
             src={getAssetPath('assets/images/discordBotIcon.png')}
           loading="lazy"
-          alt="Icone du Bot Discord"
+          alt="Icone du Bot Discord Moksi's Bazaar"
           style={{ maxWidth: '280px', marginBottom: '1.5rem' }}
         />
 
@@ -48,19 +48,20 @@ const ProjetsPersonnels = () => {
           className="btn"
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="Voir le code du Bot Discord sur GitHub (ouvre dans une nouvelle fenetre)"
         >
           Voir le code sur GitHub
         </a>
 
-        <div className="video-gallery">
+        <div className="video-gallery" role="region" aria-label="Demonstrations video du bot Discord">
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline>
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Demonstration du jeu de Blackjack">
                   <source src={getAssetPath('assets/videos/blackjack.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
             </div>
-            <div className="progress-container">
+            <div className="progress-container" aria-hidden="true">
               <div className="progress"></div>
             </div>
             <p className="caption">Jeu de Blackjack</p>
@@ -68,12 +69,12 @@ const ProjetsPersonnels = () => {
 
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline>
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Demonstration du jeu de Roulette">
                   <source src={getAssetPath('assets/videos/roulette.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
             </div>
-            <div className="progress-container">
+            <div className="progress-container" aria-hidden="true">
               <div className="progress"></div>
             </div>
             <p className="caption">Jeu de Roulette</p>

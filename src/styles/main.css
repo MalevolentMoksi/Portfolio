@@ -21,6 +21,8 @@
 @import './components/_breadcrumbs.css';
 @import './components/_project-pagination.css';
 @import './components/_filter-bar.css';
+@import './components/_contact-form.css';
+@import './components/_lightbox.css';
 
 /* Effects & animations */
 @import './_effects.css';

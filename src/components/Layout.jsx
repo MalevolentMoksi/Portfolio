@@ -95,15 +95,15 @@ const Layout = () => {
         <nav aria-label="Navigation principale">
           <ul>
             <li>
-              <NavLink to="/" end>
+              <NavLink to="/" end aria-current={({ isActive }) => isActive ? "page" : undefined}>
                 Accueil
               </NavLink>
             </li>
             <li>
-              <NavLink to="/projets">Projets</NavLink>
+              <NavLink to="/projets" aria-current={({ isActive }) => isActive ? "page" : undefined}>Projets</NavLink>
             </li>
             <li>
-              <NavLink to="/projets-personnels">Projets personnels</NavLink>
+              <NavLink to="/projets-personnels" aria-current={({ isActive }) => isActive ? "page" : undefined}>Projets personnels</NavLink>
             </li>
           </ul>
         </nav>
