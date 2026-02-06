@@ -1,4 +1,4 @@
-# P2.01 Portfolio - Enzo Morello
+# Portfolio - Enzo Morello
 
 Portfolio professionnel moderne présentant mes projets académiques et personnels. Application React monopage (SPA) avec React Router v6, développée avec Vite 5 et optimisée pour tous les appareils.
 
