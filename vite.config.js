@@ -5,7 +5,7 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [react()],
   root: 'src',
-  base: '/P2.01-Portfolio/',
+  base: '/Portfolio/',
   publicDir: '../public',
   
   build: {
