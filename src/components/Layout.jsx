@@ -87,7 +87,7 @@ const Layout = () => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const transitionStart = 0;
-      const transitionEnd = 300;
+      const transitionEnd = 180;
       
       // Calculate linear progress from 0 to 1
       const linearProgress = Math.min(Math.max((scrollY - transitionStart) / (transitionEnd - transitionStart), 0), 1);
