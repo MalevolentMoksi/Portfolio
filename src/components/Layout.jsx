@@ -76,7 +76,10 @@ const Layout = () => {
 
   // Scroll to top when route changes
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Use requestAnimationFrame to defer until browser is ready
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
   }, [location.pathname]);
 
   // Track scroll position for progressive header transition
@@ -95,9 +98,6 @@ const Layout = () => {
       
       setScrollProgress(easedProgress);
     };
-
-    // Initialize on mount
-    handleScroll();
     
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);

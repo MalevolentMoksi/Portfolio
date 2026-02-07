@@ -90,12 +90,9 @@ class UIEnhancements {
       }
     });
     
-    // Smooth scroll to top
+    // Scroll to top (using CSS scroll-behavior: smooth for global smoothing)
     button.addEventListener('click', () => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
+      window.scrollTo(0, 0);
     });
     
     // Initial check

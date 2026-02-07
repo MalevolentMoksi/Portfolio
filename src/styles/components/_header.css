@@ -13,6 +13,7 @@ header.header--main {
   display: flex;
   flex-direction: column;
   align-items: center;
+  contain: layout;
   /* Removed transitions - now using progressive scroll values */
 }
 
