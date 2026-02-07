@@ -7,8 +7,9 @@ import HamburgerMenu from './HamburgerMenu.jsx';
 import useDocumentMeta from '../hooks/useDocumentMeta.js';
 import usePortfolioModules from '../hooks/usePortfolioModules.js';
 import { getAssetPath } from '../utils/assetPath.js';
+import { discoverMusicTracks } from '../utils/discoverMusicTracks.js';
 
-const trackFiles = ['deepstone.m4a', 'browser.m4a', 'wildriver.m4a'];
+const trackFiles = discoverMusicTracks();
 
 const pageConfig = {
   '/': {

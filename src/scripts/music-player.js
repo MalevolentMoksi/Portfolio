@@ -14,6 +14,7 @@ class MusicPlayer {
     this.isLoading = false;
     this.isMuted = false;
     this.savedVolume = 0.7; // Default volume
+    this.isQueueOpen = false; // Track queue menu state
     
     // Storage keys
     this.STORAGE_KEYS = {
@@ -211,53 +212,66 @@ class MusicPlayer {
       return;
     }
     
-    this.trackFiles.forEach((filename, idx) => {
+    // Fetch all tracks in parallel immediately
+    const metadataPromises = this.trackFiles.map((filename, idx) => {
       const url = getAssetPath(`assets/music/${filename}`);
-
-      fetch(url)
+      
+      return fetch(url)
         .then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
           return response.blob();
         })
         .then((blob) => {
-          try {
-            window.jsmediatags.read(blob, {
-              onSuccess: (tag) => {
-                this.trackMeta[idx].title = tag.tags.title || this.formatTitle(filename);
-                this.trackMeta[idx].artist = tag.tags.artist || 'Unknown Artist';
+          return new Promise((resolve) => {
+            try {
+              window.jsmediatags.read(blob, {
+                onSuccess: (tag) => {
+                  this.trackMeta[idx].title = tag.tags.title || this.formatTitle(filename);
+                  this.trackMeta[idx].artist = tag.tags.artist || 'Unknown Artist';
 
-                // Extract album art
-                if (tag.tags.picture) {
-                  const { data, format } = tag.tags.picture;
-                  let binary = '';
-                  for (let i = 0; i < data.length; i++) {
-                    binary += String.fromCharCode(data[i]);
+                  // Extract album art
+                  if (tag.tags.picture) {
+                    const { data, format } = tag.tags.picture;
+                    let binary = '';
+                    for (let i = 0; i < data.length; i++) {
+                      binary += String.fromCharCode(data[i]);
+                    }
+                    const base64String = window.btoa(binary);
+                    this.trackMeta[idx].pictureDataURL = `data:${format};base64,${base64String}`;
                   }
-                  const base64String = window.btoa(binary);
-                  this.trackMeta[idx].pictureDataURL = `data:${format};base64,${base64String}`;
-                }
 
-                if (idx === this.currentTrackIndex) {
-                  this.updateTrackInfo();
-                }
-              },
-              onError: (error) => {
-                console.warn(`Failed to read metadata for ${filename}:`, error);
-                this.trackMeta[idx] = this.createFallbackMeta(filename);
-                if (idx === this.currentTrackIndex) {
-                  this.updateTrackInfo();
-                }
-              },
-            });
-          } catch (error) {
-            console.warn(`Failed to initialize metadata reader for ${filename}:`, error);
-            this.trackMeta[idx] = this.createFallbackMeta(filename);
-            if (idx === this.currentTrackIndex) {
-              this.updateTrackInfo();
+                  if (idx === this.currentTrackIndex) {
+                    this.updateTrackInfo();
+                  }
+                  
+                  // Refresh queue menu if open to show updated metadata
+                  if (this.isQueueOpen) {
+                    this.populateQueueMenu();
+                  }
+                  
+                  resolve();
+                },
+                onError: (error) => {
+                  console.warn(`Failed to read metadata for ${filename}:`, error);
+                  this.trackMeta[idx] = this.createFallbackMeta(filename);
+                  if (idx === this.currentTrackIndex) {
+                    this.updateTrackInfo();
+                  }
+                  if (this.isQueueOpen) {
+                    this.populateQueueMenu();
+                  }
+                  resolve();
+                },
+              });
+            } catch (error) {
+              console.warn(`Failed to initialize metadata reader for ${filename}:`, error);
+              this.trackMeta[idx] = this.createFallbackMeta(filename);
+              if (idx === this.currentTrackIndex) {
+                this.updateTrackInfo();
+              }
+              resolve();
             }
-          }
+          });
         })
         .catch((error) => {
           console.warn(`Failed to fetch metadata for ${filename}:`, error);
@@ -265,7 +279,17 @@ class MusicPlayer {
           if (idx === this.currentTrackIndex) {
             this.updateTrackInfo();
           }
+          if (this.isQueueOpen) {
+            this.populateQueueMenu();
+          }
         });
+    });
+    
+    // Once all metadata completes, refresh queue to show all loaded data
+    Promise.all(metadataPromises).then(() => {
+      if (this.isQueueOpen) {
+        this.populateQueueMenu();
+      }
     });
   }
   
@@ -292,6 +316,9 @@ class MusicPlayer {
         </div>
       </div>
       <div class="controls">
+        <button id="queue-btn" aria-label="Afficher la file de lecture" class="icon-btn" title="File de lecture">
+          <i class="fa-solid fa-list"></i>
+        </button>
         <button id="play-pause-btn" aria-label="Lecture/Pause" class="icon-btn">
           <svg class="play-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M8 5v14l11-7z"/>
@@ -308,6 +335,11 @@ class MusicPlayer {
           <i class="fa-solid fa-volume-low volume-low" style="display:none;"></i>
           <i class="fa-solid fa-volume-xmark volume-muted" style="display:none;"></i>
         </button>
+      </div>
+      <div class="queue-menu" style="display: none;">
+        <div class="queue-list" role="listbox" aria-label="Liste des pistes">
+          <!-- Populated dynamically -->
+        </div>
       </div>
       <div class="volume-control-container" style="display: none;">
         <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="70" aria-label="Volume">
@@ -328,9 +360,12 @@ class MusicPlayer {
       artist: container.querySelector('.artist'),
       playPauseBtn: container.querySelector('#play-pause-btn'),
       nextBtn: container.querySelector('#next-btn'),
+      queueBtn: container.querySelector('#queue-btn'),
       muteBtn: container.querySelector('#mute-btn'),
       volumeSlider: container.querySelector('#volume-slider'),
       volumeControlContainer: container.querySelector('.volume-control-container'),
+      queueMenu: container.querySelector('.queue-menu'),
+      queueList: container.querySelector('.queue-list'),
       loadingIndicator: container.querySelector('.loading-indicator'),
       currentTime: container.querySelector('.current-time'),
       duration: container.querySelector('.duration'),
@@ -341,11 +376,13 @@ class MusicPlayer {
     this.updateTrackInfo();
     this.updatePlayPauseButton();
     this.updateVolumeButton();
+    this.populateQueueMenu();
   }
   
   attachEventListeners() {
     this.elements.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
     this.elements.nextBtn.addEventListener('click', () => this.nextTrack());
+    this.elements.queueBtn.addEventListener('click', () => this.toggleQueue());
     this.elements.muteBtn.addEventListener('click', () => this.toggleMute());
     this.elements.volumeSlider.addEventListener('input', (e) => this.setVolume(e.target.value / 100));
     this.elements.muteBtn.addEventListener('mouseenter', () => {
@@ -355,6 +392,13 @@ class MusicPlayer {
       this.elements.volumeControlContainer.style.display = 'none';
     });
     this.elements.progressContainer.addEventListener('click', (e) => this.seek(e));
+    
+    // Close queue menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (this.isQueueOpen && !e.target.closest('#music-player')) {
+        this.closeQueue();
+      }
+    });
   }
   
   updateLoadingState() {
@@ -515,6 +559,110 @@ class MusicPlayer {
     } else {
       wrapper.classList.remove('scrolling');
     }
+  }
+
+  toggleQueue() {
+    if (this.isQueueOpen) {
+      this.closeQueue();
+    } else {
+      this.openQueue();
+    }
+  }
+
+  openQueue() {
+    this.isQueueOpen = true;
+    this.elements.queueMenu.style.display = 'block';
+    this.elements.queueBtn.setAttribute('aria-expanded', 'true');
+    this.elements.queueMenu.classList.add('open');
+    // Force refresh queue to show latest metadata
+    this.populateQueueMenu();
+    this.updateQueueHighlight();
+  }
+
+  closeQueue() {
+    this.isQueueOpen = false;
+    this.elements.queueMenu.classList.remove('open');
+    this.elements.queueBtn.setAttribute('aria-expanded', 'false');
+    setTimeout(() => {
+      this.elements.queueMenu.style.display = 'none';
+    }, 300); // Wait for animation to finish
+  }
+
+  populateQueueMenu() {
+    if (!this.elements.queueList) return;
+    
+    this.elements.queueList.innerHTML = this.trackFiles.map((filename, index) => {
+      const meta = this.trackMeta[index];
+      const isCurrentTrack = index === this.currentTrackIndex;
+      const liClass = isCurrentTrack ? 'queue-item current' : 'queue-item';
+      
+      // Build aria-label from current metadata
+      const ariaLabel = isCurrentTrack ? `${meta.title} (actuellement en cours de lecture)` : meta.title;
+      
+      return `
+        <div class="${liClass}" 
+             role="option" 
+             aria-label="${ariaLabel}"
+             data-track-index="${index}" 
+             style="cursor: pointer; padding: 8px 10px; border-left: 3px solid transparent; display: flex; align-items: center; gap: 8px;">
+          <img src="${meta.pictureDataURL}" alt="" style="width: 40px; height: 40px; border-radius: 4px; flex-shrink: 0; object-fit: cover;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="color: var(--color-primary); font-weight: 600; font-size: 0.8rem; flex-shrink: 0;">${index === this.currentTrackIndex ? '▶' : ''}</span>
+              <div style="min-width: 0; flex: 1;">
+                <div style="font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.title}</div>
+                <div style="font-size: 0.8rem; color: rgba(212, 175, 55, 0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.artist}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    // Add click listeners to queue items
+    this.elements.queueList.querySelectorAll('.queue-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const trackIndex = parseInt(item.dataset.trackIndex, 10);
+        this.selectTrack(trackIndex);
+      });
+    });
+    
+    this.updateQueueHighlight();
+  }
+
+  selectTrack(trackIndex) {
+    if (trackIndex < 0 || trackIndex >= this.trackFiles.length) return;
+    
+    this.currentTrackIndex = trackIndex;
+    localStorage.setItem(this.STORAGE_KEYS.TRACK_INDEX, trackIndex.toString());
+    localStorage.setItem(this.STORAGE_KEYS.CURRENT_TIME, '0');
+    this.savedTime = 0; // Reset saved time so onLoadedMetadata doesn't restore old time
+    
+    this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
+    this.audio.currentTime = 0; // Reset playback to start of track
+    this.updateTrackInfo();
+    this.populateQueueMenu();
+    
+    if (!this.isPaused) {
+      this.audio.play().catch(() => {
+        // Playback failed
+      });
+    }
+  }
+
+  updateQueueHighlight() {
+    const queueItems = this.elements.queueList.querySelectorAll('.queue-item');
+    queueItems.forEach((item, index) => {
+      if (index === this.currentTrackIndex) {
+        item.classList.add('current');
+        item.style.borderLeftColor = 'var(--color-primary)';
+        item.style.backgroundColor = 'rgba(212, 175, 55, 0.1)';
+      } else {
+        item.classList.remove('current');
+        item.style.borderLeftColor = 'transparent';
+        item.style.backgroundColor = 'transparent';
+      }
+    });
   }
   
   saveState() {

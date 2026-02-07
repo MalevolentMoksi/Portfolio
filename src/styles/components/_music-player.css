@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Main container for album art and info */
@@ -377,6 +377,82 @@
     font-size: 13px;
   }
 }
+
+/* Queue Menu Styles */
+.queue-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.99) 0%, rgba(40, 40, 40, 0.98) 100%);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 
+              0 0 30px rgba(212, 175, 55, 0.2);
+  backdrop-filter: blur(10px);
+  min-width: 320px;
+  max-width: 380px;
+  max-height: 500px;
+  overflow-y: auto;
+  z-index: calc(var(--z-music-player) + 1);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all var(--transition-base) ease-out;
+}
+
+.queue-menu.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.queue-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.queue-item {
+  padding: 8px 10px;
+  border-left: 3px solid transparent;
+  transition: all var(--transition-fast);
+  color: var(--color-text);
+  background-color: transparent;
+}
+
+.queue-item:hover {
+  background-color: rgba(212, 175, 55, 0.08);
+  border-left-color: var(--color-primary);
+}
+
+.queue-item.current {
+  background-color: rgba(212, 175, 55, 0.15);
+  border-left-color: var(--color-primary);
+}
+
+.queue-item.current > div > span {
+  color: var(--color-primary);
+}
+
+/* Queue menu scrollbar styling */
+.queue-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.queue-menu::-webkit-scrollbar-track {
+  background: rgba(212, 175, 55, 0.1);
+  border-radius: 3px;
+}
+
+.queue-menu::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.4);
+  border-radius: 3px;
+}
+
+.queue-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.6);
+}
+
 
 /* Mini player mode for very small screens */
 @media (max-width: 360px) {
