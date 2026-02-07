@@ -34,7 +34,7 @@ const Projets = () => {
                   {project.technologies.map((tech) => (
                     <div key={tech.name} role="listitem">
                       <img
-                        src={getAssetPath(tech.icon)}
+                        src={tech.icon.startsWith('http') ? tech.icon : getAssetPath(tech.icon)}
                         alt={tech.name}
                         title={tech.name}
                         loading="lazy"
