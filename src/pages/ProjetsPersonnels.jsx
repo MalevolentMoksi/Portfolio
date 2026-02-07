@@ -7,11 +7,11 @@ const ProjetsPersonnels = () => {
   return (
     <>
     <section id="presentation" aria-labelledby="personal-projects-title">
-      <h2 id="personal-projects-title">Presentation</h2>
+      <h2 id="personal-projects-title">Présentation</h2>
       <p>
-        Voici quelques projets personnels que j'ai realises, principalement pour m'amuser et
-        apprendre de nouvelles competences. Ils refletent mon interet pour la programmation, le
-        design et la creativite.
+        Voici quelques projets personnels que j'ai réalisés, principalement pour m'amuser et
+        apprendre de nouvelles compétences. Ils reflètent mon intérêt pour la programmation, le
+        design et la créativité.
       </p>
       <p>
         <strong>PS : Cette page contient des videos qui se jouent au survol de la souris !</strong>
@@ -29,19 +29,19 @@ const ProjetsPersonnels = () => {
         />
 
         <p>
-          <strong>Moksi's Bazaar</strong> est un bot Discord entierement developpe en JavaScript
-          (discord.js), qui offre plusieurs services et jeux reunis sur une meme plateforme
-          textuelle. A la fois un systeme de monnaie virtuelle et plusieurs mini-jeux de casino :
-          blackjack, roulette, machine a sous, etc. Les utilisateurs dans un serveur Discord peuvent
-          miser, gagner des credits et suivre leur classement en temps reel. Le bot est egalement
-          capable de communication : relie a une IA externe, il peut repondre aux utilisateurs,
-          avoir des conversations avec eux, et se souvenir des interactions, stockant meme des
-          niveaux de relations selon si les utilisateurs ont ete aimables ou non, et etant en
-          reaction plus aimable en retour (ou plus hostile).
+          <strong>Moksi's Bazaar</strong> est un bot Discord entièrement développé en JavaScript
+          (discord.js), qui offre plusieurs services et jeux réunis sur une même plateforme
+          textuelle. À la fois un système de monnaie virtuelle et plusieurs mini-jeux de casino :
+          blackjack, roulette, machine à sous, etc. Les utilisateurs dans un serveur Discord peuvent
+          miser, gagner des crédits et suivre leur classement en temps réel. Le bot est également
+          capable de communication : relié à une IA externe, il peut répondre aux utilisateurs,
+          avoir des conversations avec eux, et se souvenir des interactions, stockant même des
+          niveaux de relations selon si les utilisateurs ont été aimables ou non, et étant en
+          réaction plus aimable en retour (ou plus hostile).
         </p>
         <ul>
-          <li><strong>Competences :</strong> API Discord, programmation evenementielle, gestion des permissions</li>
-          <li><strong>Techniques :</strong> Python (discord.py), hebergement, gestion d'events, logs, SQL</li>
+          <li><strong>Compétences :</strong> API Discord, programmation événementielle, gestion des permissions</li>
+          <li><strong>Techniques :</strong> Python (discord.py), hébergement, gestion d'events, logs, SQL</li>
         </ul>
         <a
           href="https://github.com/MalevolentMoksi/Moksi-Bazaar"
@@ -53,7 +53,7 @@ const ProjetsPersonnels = () => {
           Voir le code sur GitHub
         </a>
 
-        <div className="video-gallery" role="region" aria-label="Demonstrations video du bot Discord">
+        <div className="video-gallery" role="region" aria-label="Démonstrations vidéo du bot Discord">
           <div className="video-item">
             <div className="video-wrapper">
               <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Demonstration du jeu de Blackjack">
@@ -103,7 +103,7 @@ const ProjetsPersonnels = () => {
             <div className="progress-container">
               <div className="progress"></div>
             </div>
-            <p className="caption">Jeu de Machine a Sous</p>
+            <p className="caption">Jeu de Machine à Sous</p>
           </div>
         </div>
 
@@ -114,19 +114,19 @@ const ProjetsPersonnels = () => {
 
           <div style={{ marginTop: '1rem' }}>
             <p>
-              Le bot est heberge sur <strong>Railway</strong> grace a une instance GitHub 24/7.
-              Une base de donnees <strong>PostgreSQL</strong> (integree a Railway) stocke en temps reel :
+              Le bot est hébergé sur <strong>Railway</strong> grâce à une instance GitHub 24/7.
+              Une base de données <strong>PostgreSQL</strong> (intégrée à Railway) stocke en temps réel :
             </p>
             <ul>
               <li>Les <em>identifiants</em> Discord de chaque utilisateur</li>
-              <li>Les <em>soldes</em> (credits) et leur historique</li>
-              <li>Les <em>statuts de participation</em> aux differents jeux (mise, gains/pertes)</li>
+              <li>Les <em>soldes</em> (crédits) et leur historique</li>
+              <li>Les <em>statuts de participation</em> aux différents jeux (mise, gains/pertes)</li>
             </ul>
             <p>
               Des qu'un utilisateur envoie une commande (par exemple <code>!blackjack</code> ou
-              <code>!roulette</code>), le bot interroge la table <code>users</code> pour verifier le
-              <em>solde</em>, met a jour les donnees appropriees selon les resultats, puis renvoie un
-              message Discord detaille (embed) affichant l'evolution du profil et du classement.
+              <code>!roulette</code>), le bot interroge la table <code>users</code> pour vérifier le
+              <em>solde</em>, met à jour les données appropriées selon les résultats, puis renvoie un
+              message Discord détaillé (embed) affichant l'évolution du profil et du classement.
             </p>
 
             <div style={{ textAlign: 'center', marginTop: '1rem' }}>
@@ -147,7 +147,7 @@ const ProjetsPersonnels = () => {
                   marginTop: '0.25rem',
                 }}
               >
-                Apercu du dashboard Railway : gestion des variables d'environnement &amp; metriques
+                Aperçu du dashboard Railway : gestion des variables d'environnement &amp; métriques
                 PostgreSQL
               </figcaption>
             </div>
@@ -164,10 +164,10 @@ const ProjetsPersonnels = () => {
 
         <div className="drawings-intro">
           <p>
-            Depuis Janvier 2025, je me suis lance dans le dessin numerique et traditionnel. Voici
-            quelques-unes de mes illustrations, realisees au crayon (2H a 6B) ou numeriquement.
+            Depuis Janvier 2025, je me suis lancé dans le dessin numérique et traditionnel. Voici
+            quelques-unes de mes illustrations, réalisées au crayon (2H à 6B) ou numériquement.
           </p>
-          <p>J'explore differents styles et techniques, mais cela reste avant tout un hobby pour moi.</p>
+          <p>J'explore différents styles et techniques, mais cela reste avant tout un hobby pour moi.</p>
         </div>
 
         <div className="drawings-grid">
@@ -251,25 +251,25 @@ const ProjetsPersonnels = () => {
     <section>
       <article className="project">
         <div className="title-with-logo">
-          <h2>Jeux realises sur Scratch</h2>
+          <h2>Jeux réalisés sur Scratch</h2>
             <img src={getAssetPath('assets/images/ScratchLogo.png')} width="800" height="450" loading="lazy" alt="Logo Scratch" />
         </div>
 
         <p>
-          En CM2, j'ai ete introduit au logiciel en ligne Scratch par mon professeur. Cela a
-          consomme une bonne partie de mon temps personnel que j'ai passe a faire des jeux jusqu'en
+          En CM2, j'ai été introduit au logiciel en ligne Scratch par mon professeur. Cela a
+          consommé une bonne partie de mon temps personnel que j'ai passé à faire des jeux jusqu'en
           2020. <br />
-          Le programme permet de programmer de maniere ludique, avec des blocs de code visuels. J'ai
-          fabrique plusieurs jeux avec le programme, tous plutot rugueux mais certains sont encore
+          Le programme permet de programmer de manière ludique, avec des blocs de code visuels. J'ai
+          fabriqué plusieurs jeux avec le programme, tous plutôt rugueux mais certains sont encore
           jouables aujourd'hui.
         </p>
         <ul>
           <li>
-            <strong>Competences :</strong> Logique algorithmique, design d'interfaces, animations,
+            <strong>Compétences :</strong> Logique algorithmique, design d'interfaces, animations,
             gestion de variables et de sprites
           </li>
           <li>
-            <strong>Techniques :</strong> Utilisation avancee de Scratch, optimisation des scripts,
+            <strong>Techniques :</strong> Utilisation avancée de Scratch, optimisation des scripts,
             adaptation aux feedbacks utilisateurs
           </li>
         </ul>
@@ -313,7 +313,7 @@ const ProjetsPersonnels = () => {
 
     <div id="lightbox-overlay" className="hidden">
       <span id="lightbox-close">&times;</span>
-      <img id="lightbox-img" src="" alt="Apercu agrandi" />
+      <img id="lightbox-img" src="" alt="Aperçu agrandi" />
       <p id="lightbox-caption"></p>
     </div>
     </>

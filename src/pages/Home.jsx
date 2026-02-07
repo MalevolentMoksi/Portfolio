@@ -7,22 +7,22 @@ const Home = () => {
   return (
     <>
       <section id="presentation" aria-labelledby="presentation-title">
-        <h2 id="presentation-title">Presentation</h2>
+        <h2 id="presentation-title">Présentation</h2>
         <div className="presentation-grid">
           <article className="presentation-block" id="about" aria-labelledby="about-title">
-            <h3 id="about-title">A propos de moi</h3>
+            <h3 id="about-title">À propos de moi</h3>
             <p>
-              Etudiant en 2eme annee de BUT Informatique a l'IUT2 de Grenoble specialise dans
-              le developpement d'applications. Passionne par l'alliance entre la logique
-              technique et l'ergonomie visuelle, j'espere pouvoir mettre ma curiosite et ma
-              methode au service de projets innovants.
+              Étudiant en 2ème année de BUT Informatique à l'IUT2 de Grenoble spécialisé dans
+              le développement d'applications. Passionné par l'alliance entre la logique
+              technique et l'ergonomie visuelle, j'espère pouvoir mettre ma curiosité et ma
+              méthode au service de projets innovants.
             </p>
           </article>
 
           <article className="presentation-block" id="skills" aria-labelledby="skills-title">
-            <h3 id="skills-title">Competences</h3>
+            <h3 id="skills-title">Compétences</h3>
             <ul>
-              <li>Realiser, Concevoir, Optimiser et Administrer en :</li>
+              <li>Réaliser, Concevoir, Optimiser et Administrer en :</li>
               <li>Java, JavaScript, Python, SQL</li>
               <li>HTML/CSS, JavaFX</li>
               <li>Git, Maven, Linux</li>
@@ -32,20 +32,20 @@ const Home = () => {
           <article className="presentation-block" id="achievements" aria-labelledby="achievements-title">
             <h3 id="achievements-title">Mon parcours</h3>
             <p>
-              <strong>Baccalaureat General - Mention Bien</strong>
+              <strong>Baccalauréat Général - Mention Bien</strong>
               <br />
-              Lycee Les Iscles, Manosque | Juin 2024
+              Lycée Les Iscles, Manosque | Juin 2024
               <br />
-              <em>Specialites : Mathematiques et Sciences de l'Ingenieur.</em>
+              <em>Spécialités : Mathématiques et Sciences de l'Ingénieur.</em>
             </p>
           </article>
 
           <article className="presentation-block" id="hobbies" aria-labelledby="hobbies-title">
-            <h3 id="hobbies-title">Centres d'interet</h3>
+            <h3 id="hobbies-title">Centres d'intérêt</h3>
             <ul>
               <li>Art traditionnel et digital</li>
-              <li>Jeux-Video</li>
-              <li>Decouverte de musique</li>
+              <li>Jeux-Vidéo</li>
+              <li>Découverte de musique</li>
               <li>Cinematographie</li>
             </ul>
           </article>
@@ -58,7 +58,7 @@ const Home = () => {
           <ul>
             <li>
               Email :
-              <a href="#" className="email-glitch" aria-label="Adresse email masquee pour eviter le spam">
+              <a href="#" className="email-glitch" aria-label="Adresse email masquée pour éviter le spam">
                 <span className="local-part" data-text="##########"></span>@etu.univ-grenoble-alpes.fr
               </a>
             </li>

@@ -20,7 +20,7 @@ const Projets = () => {
               <h2 id={`project-title-${project.id}`}>{project.title}</h2>
               <img
                 src={getAssetPath(project.image)}
-                alt={`Apercu du projet : ${project.title}`}
+                alt={`Aperçu du projet : ${project.title}`}
                 loading="lazy"
                 width="800"
                 height="450"

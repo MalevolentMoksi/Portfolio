@@ -3,7 +3,7 @@
    ============================================ */
 
 header.header--main {
-  background: rgba(26, 26, 26, 0.92);
+  background: rgba(26, 26, 26, 0.62);
   padding: var(--space-lg);
   border-bottom: 2px solid var(--color-primary);
   position: sticky;
