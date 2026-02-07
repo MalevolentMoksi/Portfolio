@@ -12,6 +12,7 @@
 
 /* Components */
 @import './components/_header.css';
+@import './components/_hamburger-menu.css';
 @import './components/_footer.css';
 @import './components/_buttons.css';
 @import './components/_music-player.css';

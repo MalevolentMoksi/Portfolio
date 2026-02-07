@@ -2,25 +2,196 @@
    Header Component Styles
    ============================================ */
 
-header {
-  background: rgba(26, 26, 26, 0.7);
+header.header--main {
+  background: rgba(26, 26, 26, 0.92);
   padding: var(--space-lg);
   border-bottom: 2px solid var(--color-primary);
-  text-align: center;
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: var(--z-header);
   backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: 
+    padding var(--transition-slow),
+    gap var(--transition-slow);
 }
 
-header h1 {
+/* Full state (top of page) */
+header.header--main.header--full {
+  padding: var(--space-lg);
+}
+
+/* Compact state (scrolled) */
+header.header--main.header--compact {
+  padding: var(--space-sm) var(--space-lg);
+}
+
+header.header--main.header--compact .header--hero {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+header.header--main .header--hero {
+  transition: opacity var(--transition-slow);
+  opacity: 1;
+}
+
+header.header--main.header--compact .header--nav-desktop {
+  margin: 0;
+  transition: margin var(--transition-slow);
+}
+
+/* Branding Section */
+.header--branding {
+  position: absolute;
+  left: var(--space-lg);
+  top: var(--space-lg);
+  display: flex;
+  align-items: center;
+  transition: top var(--transition-slow), left var(--transition-slow);
+}
+
+header.header--main.header--compact .header--branding {
+  top: var(--space-sm);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: var(--color-primary);
+  transition: all var(--transition-fast);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-md);
+}
+
+.brand-logo:hover,
+.brand-logo:focus-visible {
+  color: var(--color-accent-light);
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent-pale));
+  color: var(--color-secondary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+}
+
+.brand-logo:hover .logo-icon,
+.brand-logo:focus-visible .logo-icon {
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+  transform: scale(1.05);
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Desktop Navigation */
+.header--nav-desktop {
+  display: none;
+  width: 100%;
+  margin: var(--space-md) 0;
+  transition: margin var(--transition-slow);
+}
+
+.header--nav-desktop ul {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.header--nav-desktop ul li a {
+  display: inline-block;
+  padding: 0.6em 1.5em;
+  border-radius: var(--border-radius-md);
+  background: rgba(212, 175, 55, 0.13);
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 1.08rem;
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  transition:
+    transform var(--transition-fast),
+    background 0.18s cubic-bezier(0.39, 0.58, 0.57, 1.25),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.header--nav-desktop ul li a:hover,
+.header--nav-desktop ul li a:focus-visible {
+  background: rgba(212, 175, 55, 0.45);
+  color: var(--color-accent-light);
+  border-color: var(--color-accent-light);
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4);
+  transform: translateY(-2px) scale(1.06);
+}
+
+.header--nav-desktop ul li a:active {
+  background: rgba(212, 175, 55, 0.6);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.header--nav-desktop ul li a[aria-current="page"] {
+  background: rgba(212, 175, 55, 0.3);
+  border-color: var(--color-accent-light);
+}
+
+/* Hero Section (Title & Subtitles) */
+.header--hero {
+  text-align: center;
+  transition: all var(--transition-base);
+  width: 100%;
+  margin-top: var(--space-md);
+}
+
+.header--hero h1 {
   margin-bottom: var(--space-sm);
+  margin-top: 0;
 }
 
-header h3,
-header h4 {
+.header--hero h3,
+.header--hero h4 {
   margin-bottom: var(--space-xs);
+  margin-top: 0;
   font-weight: 400;
   opacity: 0.9;
+}
+
+/* Hamburger Menu Positioning */
+.hamburger-toggle {
+  position: absolute;
+  right: var(--space-lg);
+  top: var(--space-lg);
+  transition: top var(--transition-slow), right var(--transition-slow);
+}
+
+header.header--main.header--compact .hamburger-toggle {
+  top: var(--space-sm);
 }
 
 /* Typing effect cursor */
@@ -36,76 +207,121 @@ header h4 {
   50% { opacity: 0; }
 }
 
-/* Navigation */
-nav ul {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-sm);
-  flex-wrap: wrap;
-  margin-top: var(--space-md);
+/* Show desktop nav on larger screens */
+@media (min-width: 769px) {
+  .header--nav-desktop {
+    display: block;
+  }
 }
 
-nav ul li a {
-  display: inline-block;
-  padding: 0.6em 1.5em;
-  border-radius: var(--border-radius-md);
-  background: rgba(212, 175, 55, 0.13);
-  color: var(--color-primary);
-  font-weight: 600;
-  font-size: 1.08rem;
-  border: 2px solid var(--color-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  letter-spacing: 0.03em;
-  transition:
-    transform var(--transition-fast),
-    background 0.18s cubic-bezier(0.39, 0.58, 0.57, 1.25),
-    color var(--transition-fast),
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-nav ul li a:hover,
-nav ul li a:focus-visible {
-  background: rgba(212, 175, 55, 0.45);
-  color: var(--color-accent-light);
-  border-color: var(--color-accent-light);
-  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4);
-  transform: translateY(-2px) scale(1.06);
-}
-
-nav ul li a:active {
-  background: rgba(212, 175, 55, 0.6);
-  transform: translateY(0) scale(0.98);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-/* Current page indicator */
-nav ul li a[aria-current="page"] {
-  background: rgba(212, 175, 55, 0.3);
-  border-color: var(--color-accent-light);
-}
-
-/* Responsive Navigation */
+/* Responsive for tablet */
 @media (max-width: 768px) {
-  header {
+  header.header--main {
     padding: var(--space-md);
   }
-  
-  nav ul li a {
-    padding: 0.5em 1em;
+
+  header.header--main.header--compact {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .header--branding {
+    left: var(--space-md);
+    top: var(--space-md);
+  }
+
+  header.header--main.header--compact .header--branding {
+    top: var(--space-sm);
+    left: var(--space-md);
+  }
+
+  .hamburger-toggle {
+    right: var(--space-md);
+    top: var(--space-md);
+  }
+
+  header.header--main.header--compact .hamburger-toggle {
+    top: var(--space-sm);
+    right: var(--space-md);
+  }
+
+  .brand-logo {
+    padding: 0.4rem 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .logo-text {
+    font-size: 0.85rem;
+  }
+
+  .header--hero h1 {
+    font-size: var(--font-size-h2);
+  }
+
+  .header--hero h3,
+  .header--hero h4 {
     font-size: 1rem;
   }
 }
 
+/* Responsive for mobile */
 @media (max-width: 480px) {
-  nav ul {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-xs);
+  header.header--main {
+    padding: var(--space-sm);
   }
-  
-  nav ul li a {
-    width: 100%;
-    text-align: center;
+
+  header.header--main.header--compact {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .header--branding {
+    left: var(--space-sm);
+    top: var(--space-sm);
+  }
+
+  header.header--main.header--compact .header--branding {
+    top: var(--space-xs);
+    left: var(--space-sm);
+  }
+
+  .hamburger-toggle {
+    right: var(--space-sm);
+    top: var(--space-sm);
+  }
+
+  header.header--main.header--compact .hamburger-toggle {
+    top: var(--space-xs);
+    right: var(--space-sm);
+  }
+
+  .brand-logo {
+    padding: 0.4rem 0.6rem;
+    gap: 0.4rem;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .header--hero h1 {
+    font-size: 1.8rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .header--hero h3,
+  .header--hero h4 {
+    font-size: 0.9rem;
+    margin-bottom: 0;
   }
 }

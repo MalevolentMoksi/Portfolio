@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import BackToTopButton from './BackToTopButton.jsx';
 import Breadcrumbs from './Breadcrumbs.jsx';
 import Footer from './Footer.jsx';
+import HamburgerMenu from './HamburgerMenu.jsx';
 import useDocumentMeta from '../hooks/useDocumentMeta.js';
 import usePortfolioModules from '../hooks/usePortfolioModules.js';
 import { getAssetPath } from '../utils/assetPath.js';
@@ -11,7 +12,7 @@ const trackFiles = ['deepstone.m4a', 'browser.m4a', 'wildriver.m4a'];
 
 const pageConfig = {
   '/': {
-    heading: 'Enzo MORELLO',
+    heading: 'Portfolio de Enzo MORELLO',
     subheading: 'Etudiant en IUT2',
     subheadingAlt: "Souhaiterait etre Developpeur d'applications",
     backgroundSrc: getAssetPath('assets/images/risk-of-rain-2-launch-update.jpg'),
@@ -65,14 +66,26 @@ const pageConfig = {
 const Layout = () => {
   const location = useLocation();
   const config = pageConfig[location.pathname] || pageConfig['/'];
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useDocumentMeta(config.metaTitle, config.metaDescription);
   usePortfolioModules(trackFiles);
 
-  // Scroll to top quando la route change
+  // Scroll to top when route changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  // Track scroll position for compact header state
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 80;
+      setIsScrolled(scrolled);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
@@ -88,11 +101,17 @@ const Layout = () => {
         loading="lazy"
       />
 
-      <header>
-        <h1 id="main-title">{config.heading}</h1>
-        {config.subheading ? <h3>{config.subheading}</h3> : null}
-        {config.subheadingAlt ? <h4>{config.subheadingAlt}</h4> : null}
-        <nav aria-label="Navigation principale">
+      <header className={`header--main ${isScrolled ? 'header--compact' : 'header--full'}`}>
+        {/* Branding Section */}
+        <div className="header--branding">
+          <NavLink to="/" className="brand-logo" aria-label="Accueil - Enzo MORELLO">
+            <span className="logo-icon">EM</span>
+            <span className="logo-text">ENZO MORELLO</span>
+          </NavLink>
+        </div>
+
+        {/* Desktop Navigation */}
+        <nav className="header--nav-desktop" aria-label="Navigation principale">
           <ul>
             <li>
               <NavLink to="/" end aria-current={({ isActive }) => isActive ? "page" : undefined}>
@@ -107,6 +126,16 @@ const Layout = () => {
             </li>
           </ul>
         </nav>
+
+        {/* Mobile Hamburger Menu */}
+        <HamburgerMenu />
+
+        {/* Page Title & Subtitle */}
+        <div className="header--hero">
+          <h1 id="main-title">{config.heading}</h1>
+          {config.subheading ? <h3>{config.subheading}</h3> : null}
+          {config.subheadingAlt ? <h4>{config.subheadingAlt}</h4> : null}
+        </div>
       </header>
 
       <main id="main">

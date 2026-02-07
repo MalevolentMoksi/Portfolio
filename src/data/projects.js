@@ -84,7 +84,7 @@ export const academicProjects = [
     category: 'SAE 4',
     description: 'Conception, implémentation et optimisation d\'une base de données relationnelle.',
     teamSize: 'En trinôme',
-    image: '/assets/images/database.jpg',
+    image: '/assets/images/bases-de-donnees-1024x734.jpg',
     tags: ['SQL', 'PostgreSQL', 'Docker', 'Base de données'],
     technologies: [
       { name: 'PostgreSQL', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg' },

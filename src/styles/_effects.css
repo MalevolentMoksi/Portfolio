@@ -40,6 +40,11 @@ img:hover {
   animation: glitch-text 400ms steps(10) infinite;
 }
 
+/* Typing effect - prevent scroll anchoring warnings from rapid DOM updates */
+#main-title.typing {
+  overflow-anchor: none;
+}
+
 @keyframes glitch-text {
   0%, 100% {
     opacity: 1;
