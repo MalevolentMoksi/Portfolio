@@ -22,12 +22,14 @@ const pageConfig = {
   },
   '/projets': {
     heading: 'Portfolio - Projets',
+    subheading: 'Projets académiques et professionnels',
     backgroundSrc: getAssetPath('assets/images/destiny-2-landshaft-fentezi.webp'),
     metaTitle: 'Portfolio - Projets Académiques',
     metaDescription: "Découvrez mes projets académiques réalisés à l'IUT2 de Grenoble",
   },
   '/projets-personnels': {
     heading: 'Projets personnels',
+    subheading: 'Créations et explorations créatives',
     backgroundSrc: getAssetPath('assets/images/europa_compressed.jpg'),
     metaTitle: 'Portfolio - Projets personnels',
     metaDescription: "Portfolio d'Enzo Morello - Projets personnels et créations",
