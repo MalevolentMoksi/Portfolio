@@ -31,12 +31,14 @@
   background: var(--color-secondary);
   border-radius: var(--border-radius-sm);
   overflow: hidden;
-  border: 2px solid rgba(212, 175, 55, 0.2);
-  transition: border-color var(--transition-base);
+  border: 2px solid rgba(212, 175, 55, 0.35);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }
 
 .video-wrapper:hover {
-  border-color: rgba(212, 175, 55, 0.5);
+  border-color: rgba(212, 175, 55, 0.65);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
 }
 
 .video-wrapper video {
@@ -160,6 +162,51 @@
   margin-top: var(--space-md);
   text-align: center;
   max-width: 600px;
+}
+
+/* Discord Bot Project Styling */
+.bot-icon {
+  max-width: 280px;
+  margin-bottom: 1.5rem;
+}
+
+.bot-features-list {
+  margin-bottom: 1.5rem;
+}
+
+.bot-details-content {
+  margin-top: 1rem;
+}
+
+.bot-section-heading {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.bot-compact-list {
+  font-size: 0.95rem;
+}
+
+.bot-dashboard-container {
+  text-align: center;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.bot-dashboard-image {
+  max-width: 100%;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+}
+
+.bot-dashboard-caption {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  margin-top: 0.5rem;
+}
+
+.video-gallery-spaced {
+  margin-top: 1.5rem;
 }
 
 /* Bot functionality details */

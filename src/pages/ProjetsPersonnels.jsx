@@ -25,23 +25,23 @@ const ProjetsPersonnels = () => {
             src={getAssetPath('assets/images/discordBotIcon.png')}
           loading="lazy"
           alt="Icone du Bot Discord Moksi's Bazaar"
-          style={{ maxWidth: '280px', marginBottom: '1.5rem' }}
+          className="bot-icon"
         />
 
         <p>
-          <strong>Moksi's Bazaar</strong> est un bot Discord entièrement développé en JavaScript
-          (discord.js), qui offre plusieurs services et jeux réunis sur une même plateforme
-          textuelle. À la fois un système de monnaie virtuelle et plusieurs mini-jeux de casino :
-          blackjack, roulette, machine à sous, etc. Les utilisateurs dans un serveur Discord peuvent
-          miser, gagner des crédits et suivre leur classement en temps réel. Le bot est également
-          capable de communication : relié à une IA externe, il peut répondre aux utilisateurs,
-          avoir des conversations avec eux, et se souvenir des interactions, stockant même des
-          niveaux de relations selon si les utilisateurs ont été aimables ou non, et étant en
-          réaction plus aimable en retour (ou plus hostile).
+          <strong>Moksi's Bazaar</strong> est un bot Discord complet développé en <strong>JavaScript/Node.js</strong> (discord.js v14),
+          combinant casino, features sociales et IA conversationnelle. Le bot offre :
         </p>
+        <ul className="bot-features-list">
+          <li><strong>15+ mini-jeux de casino</strong> : blackjack (vs dealer), roulette, machine à sous, craps, high/low, slots progressifs, duels PvP, gacha, et même Tetris</li>
+          <li><strong>Système économique persistant</strong> : monnaie virtuelle avec auto-seeding ($10k), classements par serveur, historique de transactions</li>
+          <li><strong>IA conversationnelle avancée</strong> : intégrée à OpenRouter (DeepSeek), analyse d'images en temps réel, adaptation de personnalité selon l'attitude de l'utilisateur (hostile ↔ friendly)</li>
+          <li><strong>Système de relations multi-utilisateurs</strong> : suivi des sentiments, niveaux d'attitude (friendly, neutral, annoyed), mémoire des conversations</li>
+          <li><strong>Infrastructure 24/7</strong> : hébergée sur Railway (Docker), base PostgreSQL persistante avec 8 tables optimisées</li>
+        </ul>
         <ul>
-          <li><strong>Compétences :</strong> API Discord, programmation événementielle, gestion des permissions</li>
-          <li><strong>Techniques :</strong> Python (discord.py), hébergement, gestion d'events, logs, SQL</li>
+          <li><strong>Compétences :</strong> Architecture logicielle, programmation asynchrone, gestion d'états complexes, optimisation API</li>
+          <li><strong>Techniques :</strong> JavaScript (Node.js, discord.js v14), PostgreSQL (8 tables), Docker, Railway, OpenRouter API, Slash Commands, Button Collectors</li>
         </ul>
         <a
           href="https://github.com/MalevolentMoksi/Moksi-Bazaar"
@@ -109,46 +109,56 @@ const ProjetsPersonnels = () => {
 
         <details className="bot-fonctionnement">
           <summary>
-            Fonctionnement du Bot
+            Architecture &amp; Fonctionnement Technique
           </summary>
 
-          <div style={{ marginTop: '1rem' }}>
+          <div className="bot-details-content">
+            <h4 className="bot-section-heading">Infrastructure &amp; Déploiement</h4>
             <p>
-              Le bot est hébergé sur <strong>Railway</strong> grâce à une instance GitHub 24/7.
-              Une base de données <strong>PostgreSQL</strong> (intégrée à Railway) stocke en temps réel :
-            </p>
-            <ul>
-              <li>Les <em>identifiants</em> Discord de chaque utilisateur</li>
-              <li>Les <em>soldes</em> (crédits) et leur historique</li>
-              <li>Les <em>statuts de participation</em> aux différents jeux (mise, gains/pertes)</li>
-            </ul>
-            <p>
-              Des qu'un utilisateur envoie une commande (par exemple <code>!blackjack</code> ou
-              <code>!roulette</code>), le bot interroge la table <code>users</code> pour vérifier le
-              <em>solde</em>, met à jour les données appropriées selon les résultats, puis renvoie un
-              message Discord détaillé (embed) affichant l'évolution du profil et du classement.
+              Le bot est déployé sur <strong>Railway</strong> via Docker (Node 22-slim), assurant une disponibilité 24/7. 
+              Une base de données <strong>PostgreSQL</strong> (intégrée à Railway) persiste l'ensemble des données utilisateur.
             </p>
 
-            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+            <h4 className="bot-section-heading">Système de Base de Données</h4>
+            <p>PostgreSQL contient <strong>8 tables structurées</strong> :</p>
+            <ul className="bot-compact-list">
+              <li><code>balances</code> : solde virtuel par utilisateur (auto-seeding $10k)</li>
+              <li><code>user_preferences</code> : contexte utilisateur, attitude, sentiment score</li>
+              <li><code>conversation_memories</code> : historique des messages pour contexte IA (auto-cleanup après 1000 lignes)</li>
+              <li><code>media_cache</code> : cache des descriptions d'images (optimise coûts API OpenRouter)</li>
+              <li><code>reminders</code> : système de rappels persistants avec scheduling</li>
+              <li><code>pending_duels</code> : défis PvP en attente, survit aux redémarrages</li>
+              <li><code>user_cooldowns</code> : cooldowns persistants pour éviter spam</li>
+              <li><code>sleepy_counts</code> : stats de commande par serveur</li>
+            </ul>
+
+            <h4 className="bot-section-heading">Architecture Logicielle</h4>
+            <ul className="bot-compact-list">
+              <li><strong>Slash Commands (discord.js v14)</strong> : 20+ commandes auto-registerées par serveur (pas de délai global)</li>
+              <li><strong>Button Collectors</strong> : jeux multi-tours (blackjack, roulette) avec interface interactive</li>
+              <li><strong>Événements asynchrones</strong> : gestion des interactions utilisateur et mises à jour en temps réel</li>
+              <li><strong>Intégration IA</strong> : OpenRouter API (DeepSeek pour chat, Gemini 2.0 pour analyse d'images)</li>
+              <li><strong>Sentiment Tracking</strong> : système d'adaptation de personnalité basé sur historique de conversation</li>
+            </ul>
+
+            <h4 className="bot-section-heading">Flux d'Exécution d'une Commande</h4>
+            <ol className="bot-compact-list">
+              <li>Utilisateur appelle une commande slash (ex: <code>/bj bet 500</code>)</li>
+              <li>Bot interroge <code>balances</code> pour vérifier le solde</li>
+              <li>Logique du jeu s'exécute avec button collectors pour les actions du joueur</li>
+              <li>Résultats mis à jour dans PostgreSQL</li>
+              <li>Embed Discord personnalisé avec couleurs/emoji selon le résultat renvoyé</li>
+            </ol>
+
+            <div className="bot-dashboard-container">
               <img
                   src={getAssetPath('assets/images/railway-dashboard.png')}
                 loading="lazy"
                 alt="Tableau de bord Railway pour le bot Discord"
-                style={{
-                  maxWidth: '100%',
-                  border: '1px solid var(--primary-color)',
-                  borderRadius: '4px',
-                }}
+                className="bot-dashboard-image"
               />
-              <figcaption
-                style={{
-                  fontSize: '0.85rem',
-                  color: 'var(--text-color)',
-                  marginTop: '0.25rem',
-                }}
-              >
-                Aperçu du dashboard Railway : gestion des variables d'environnement &amp; métriques
-                PostgreSQL
+              <figcaption className="bot-dashboard-caption">
+                Dashboard Railway : suivi des variables d'environnement, métriques PostgreSQL, &amp; logs applicatifs
               </figcaption>
             </div>
           </div>
@@ -277,7 +287,7 @@ const ProjetsPersonnels = () => {
           Voir mon profil Scratch
         </a>
 
-        <div className="video-gallery" style={{ marginTop: '1.5rem' }}>
+        <div className="video-gallery video-gallery-spaced">
           <div className="video-item">
             <div className="video-wrapper">
               <video className="hover-play" preload="metadata" muted loop playsInline>
