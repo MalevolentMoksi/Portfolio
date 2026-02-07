@@ -155,6 +155,25 @@ header.header--main .header--nav-desktop {
   margin-top: var(--space-md);
 }
 
+.header--hero-home {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
+  align-items: center;
+  gap: var(--space-lg);
+  text-align: left;
+}
+
+.header--hero-home .header--hero-text {
+  justify-self: center;
+  text-align: left;
+}
+
+.header--hero-scene {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .header--hero h1 {
   margin-bottom: var(--space-sm);
   margin-top: 0;
@@ -252,6 +271,15 @@ header.header--main.header--compact .hamburger-toggle {
   .header--hero h3,
   .header--hero h4 {
     font-size: 1rem;
+  }
+
+  .header--hero-home {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .header--hero-home .header--hero-text {
+    text-align: center;
   }
 }
 

@@ -8,6 +8,7 @@ import useDocumentMeta from '../hooks/useDocumentMeta.js';
 import usePortfolioModules from '../hooks/usePortfolioModules.js';
 import { getAssetPath } from '../utils/assetPath.js';
 import { discoverMusicTracks } from '../utils/discoverMusicTracks.js';
+import { ReadingTimeProvider } from '../contexts/ReadingTimeContext.jsx';
 
 const trackFiles = discoverMusicTracks();
 
@@ -165,8 +166,10 @@ const Layout = () => {
       </header>
 
       <main id="main">
-        <Breadcrumbs />
-        <Outlet />
+        <ReadingTimeProvider>
+          <Breadcrumbs />
+          <Outlet />
+        </ReadingTimeProvider>
       </main>
 
       <Footer />

@@ -30,6 +30,21 @@ class MusicPlayer {
     
     // DOM elements (initialized after render)
     this.elements = {};
+
+    // Visualizer state
+    this.visualizer = {
+      initialized: false,
+      rafId: null,
+      analyser: null,
+      audioContext: null,
+      mediaSource: null,
+      ctx: null,
+      bufferLength: 0,
+      dataArray: null,
+      width: 0,
+      height: 0,
+      reducedMotion: false,
+    };
     
     this.init();
   }
@@ -39,6 +54,7 @@ class MusicPlayer {
     this.setupAudio();
     this.loadAllMetadata();
     this.render();
+    this.setupVisualizer();
     this.attachEventListeners();
   }
   
@@ -98,6 +114,7 @@ class MusicPlayer {
     console.error(`Erreur lors du chargement de la piste: ${this.trackFiles[this.currentTrackIndex]}`);
     this.isLoading = false;
     this.updateLoadingState();
+    this.stopVisualizer();
   }
   
   handleKeyboardShortcuts(e) {
@@ -187,12 +204,14 @@ class MusicPlayer {
     this.isPaused = true;
     localStorage.setItem(this.STORAGE_KEYS.IS_PAUSED, 'true');
     this.updatePlayPauseButton();
+    this.stopVisualizer();
   }
   
   onPlay() {
     this.isPaused = false;
     localStorage.setItem(this.STORAGE_KEYS.IS_PAUSED, 'false');
     this.updatePlayPauseButton();
+    this.startVisualizer();
   }
   
   attemptAutoplay() {
@@ -315,6 +334,9 @@ class MusicPlayer {
           </div>
         </div>
       </div>
+      <div class="visualizer" aria-hidden="true">
+        <canvas class="music-visualizer"></canvas>
+      </div>
       <div class="controls">
         <button id="queue-btn" aria-label="Afficher la file de lecture" class="icon-btn" title="File de lecture">
           <i class="fa-solid fa-list"></i>
@@ -371,6 +393,8 @@ class MusicPlayer {
       duration: container.querySelector('.duration'),
       progressBar: container.querySelector('.progress'),
       progressContainer: container.querySelector('.progress-container'),
+      visualizerCanvas: container.querySelector('.music-visualizer'),
+      visualizerContainer: container.querySelector('.visualizer'),
     };
     
     this.updateTrackInfo();
@@ -516,6 +540,142 @@ class MusicPlayer {
     if (this.elements.duration) {
       this.elements.duration.textContent = this.formatTime(this.audio.duration);
     }
+  }
+
+  setupVisualizer() {
+    if (this.visualizer.initialized) return;
+    if (!this.elements.visualizerCanvas) return;
+
+    this.visualizer.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.visualizer.ctx = this.elements.visualizerCanvas.getContext('2d');
+    this.visualizer.initialized = true;
+
+    this.resizeVisualizer();
+    this.renderIdleWave();
+
+    this.visualizer.handleResize = () => this.resizeVisualizer();
+    window.addEventListener('resize', this.visualizer.handleResize);
+  }
+
+  ensureVisualizerContext() {
+    if (this.visualizer.audioContext || this.visualizer.reducedMotion) return;
+
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+
+    this.visualizer.audioContext = new AudioContext();
+    this.visualizer.analyser = this.visualizer.audioContext.createAnalyser();
+    this.visualizer.analyser.fftSize = 2048;
+    this.visualizer.analyser.smoothingTimeConstant = 0.75;
+    this.visualizer.analyser.minDecibels = -90;
+    this.visualizer.analyser.maxDecibels = -5;
+
+    this.visualizer.mediaSource = this.visualizer.audioContext.createMediaElementSource(this.audio);
+    this.visualizer.mediaSource.connect(this.visualizer.analyser);
+    this.visualizer.analyser.connect(this.visualizer.audioContext.destination);
+
+    this.visualizer.bufferLength = this.visualizer.analyser.frequencyBinCount;
+    this.visualizer.dataArray = new Uint8Array(this.visualizer.bufferLength);
+    this.visualizer.freqData = new Uint8Array(this.visualizer.bufferLength);
+  }
+
+  resizeVisualizer() {
+    if (!this.visualizer.ctx || !this.elements.visualizerCanvas) return;
+
+    const rect = this.elements.visualizerCanvas.getBoundingClientRect();
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    const width = Math.max(1, Math.floor(rect.width));
+    const height = Math.max(1, Math.floor(rect.height));
+
+    this.elements.visualizerCanvas.width = Math.floor(width * pixelRatio);
+    this.elements.visualizerCanvas.height = Math.floor(height * pixelRatio);
+    this.visualizer.ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+    this.visualizer.width = width;
+    this.visualizer.height = height;
+    this.renderIdleWave();
+  }
+
+  renderIdleWave() {
+    if (!this.visualizer.ctx) return;
+
+    const { ctx, width, height } = this.visualizer;
+    ctx.clearRect(0, 0, width, height);
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, height / 2);
+    ctx.lineTo(width, height / 2);
+    ctx.stroke();
+  }
+
+  startVisualizer() {
+    if (this.visualizer.reducedMotion) return;
+    if (!this.visualizer.ctx) return;
+
+    this.ensureVisualizerContext();
+    if (!this.visualizer.analyser || !this.visualizer.dataArray) return;
+
+    if (this.visualizer.audioContext?.state === 'suspended') {
+      this.visualizer.audioContext.resume().catch(() => {});
+    }
+
+    if (this.visualizer.rafId) return;
+
+    const draw = () => {
+      this.visualizer.rafId = window.requestAnimationFrame(draw);
+      this.visualizer.analyser.getByteTimeDomainData(this.visualizer.dataArray);
+      this.visualizer.analyser.getByteFrequencyData(this.visualizer.freqData);
+
+      const { ctx, width, height, bufferLength, dataArray, freqData } = this.visualizer;
+      let sum = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        sum += freqData[i];
+      }
+
+      const energy = Math.min(1, sum / (bufferLength * 180));
+      const amplitude = height * (0.2 + energy * 0.9);
+
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.lineWidth = 2.2 + energy * 2.2;
+      ctx.strokeStyle = `rgba(212, 175, 55, ${0.6 + energy * 0.4})`;
+      ctx.shadowBlur = 10 + energy * 18;
+      ctx.shadowColor = 'rgba(212, 175, 55, 0.85)';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      const sliceWidth = width / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = (dataArray[i] - 128) / 128;
+        const y = height / 2 + v * amplitude;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    };
+
+    this.visualizer.rafId = window.requestAnimationFrame(draw);
+  }
+
+  stopVisualizer() {
+    if (this.visualizer.rafId) {
+      window.cancelAnimationFrame(this.visualizer.rafId);
+      this.visualizer.rafId = null;
+    }
+    this.renderIdleWave();
   }
   
   onLoadedMetadata() {

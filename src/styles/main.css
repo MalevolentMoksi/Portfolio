@@ -24,6 +24,7 @@
 @import './components/_filter-bar.css';
 @import './components/_contact-form.css';
 @import './components/_lightbox.css';
+@import './components/_three-scene.css';
 
 /* Effects & animations */
 @import './_effects.css';

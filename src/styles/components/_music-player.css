@@ -50,6 +50,33 @@
   justify-content: flex-start;
 }
 
+/* Waveform visualizer */
+.visualizer {
+  width: 100%;
+  height: 46px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(0, 0, 0, 0.35));
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.visualizer::after {
+  content: '';
+  position: absolute;
+  inset: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.08);
+  pointer-events: none;
+}
+
+.music-visualizer {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .text-wrapper {
   overflow: hidden;
 }

@@ -4,6 +4,11 @@
   margin-bottom: var(--space-lg);
   padding: var(--space-sm) 0;
   font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
 .breadcrumbs ol {
@@ -46,6 +51,15 @@
   font-weight: 500;
 }
 
+.reading-time {
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
 /* Focus states pour accessibilité */
 .breadcrumbs a:focus-visible {
   outline: 2px solid var(--color-accent);
@@ -58,6 +72,7 @@
   .breadcrumbs {
     font-size: 0.85rem;
     margin-bottom: var(--space-md);
+    justify-content: flex-start;
   }
   
   .breadcrumbs ol {

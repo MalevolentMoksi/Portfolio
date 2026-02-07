@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useReadingTime } from '@/contexts/ReadingTimeContext.jsx';
 
 /**
  * Breadcrumbs Component
@@ -6,6 +7,7 @@ import { Link, useLocation } from 'react-router-dom';
  */
 const Breadcrumbs = () => {
   const location = useLocation();
+  const { readingTime } = useReadingTime();
   const pathnames = location.pathname.split('/').filter((x) => x);
 
   // Mapping des chemins vers des labels lisibles
@@ -70,6 +72,11 @@ const Breadcrumbs = () => {
           );
         })}
       </ol>
+      {readingTime ? (
+        <span className="reading-time" aria-live="polite">
+          {readingTime} min read
+        </span>
+      ) : null}
     </nav>
   );
 };
