@@ -116,6 +116,7 @@ class VisualEffects {
       posX += (mouseX - posX) * friction;
       posY += (mouseY - posY) * friction;
       this.background.style.transform = `scale(1.15) translate(${posX}px, ${posY}px)`;
+      this.background.style.filter = 'blur(4px)';
       requestAnimationFrame(updateParallax);
     };
     

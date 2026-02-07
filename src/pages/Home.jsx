@@ -63,7 +63,7 @@ const Home = () => {
               </a>
             </li>
             <li>
-              Profil Gitlab :
+              Profil Gitlab : {' '}
               <a
                 href="https://gricad-gitlab.univ-grenoble-alpes.fr/morelloe"
                 target="_blank"

@@ -13,8 +13,9 @@
   z-index: var(--z-background);
   opacity: 0.3;
   transform: scale(1.15);
-  will-change: transform;
   pointer-events: none;
+  filter: blur(2px);
+  -webkit-filter: blur(2px);
 }
 
 /* Particles.js container */
@@ -33,11 +34,13 @@ main {
   max-width: var(--container-max-width);
   margin: var(--space-lg) auto;
   padding: var(--space-lg);
-  background-color: var(--color-secondary);
+  background-color: rgba(26, 26, 26, 0.85);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border: 1px solid #333;
   position: relative;
   z-index: var(--z-base);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 /* Section spacing */
@@ -50,6 +53,8 @@ main section {
   border-radius: 8px;
   padding: 1.5rem 2rem;
   margin-bottom: 2.5rem;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 section:last-child {

@@ -67,7 +67,7 @@ const pageConfig = {
 const Layout = () => {
   const location = useLocation();
   const config = pageConfig[location.pathname] || pageConfig['/'];
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useDocumentMeta(config.metaTitle, config.metaDescription);
   usePortfolioModules(trackFiles);
@@ -77,13 +77,26 @@ const Layout = () => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Track scroll position for compact header state
+  // Track scroll position for progressive header transition
   useEffect(() => {
     const handleScroll = () => {
-      const scrolled = window.scrollY > 80;
-      setIsScrolled(scrolled);
+      const scrollY = window.scrollY;
+      const transitionStart = 0;
+      const transitionEnd = 300;
+      
+      // Calculate linear progress from 0 to 1
+      const linearProgress = Math.min(Math.max((scrollY - transitionStart) / (transitionEnd - transitionStart), 0), 1);
+      
+      // Apply ease-out cubic function for smooth deceleration at the end
+      // This makes the transition slow down naturally instead of stopping abruptly
+      const easedProgress = 1 - Math.pow(1 - linearProgress, 3);
+      
+      setScrollProgress(easedProgress);
     };
 
+    // Initialize on mount
+    handleScroll();
+    
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -102,7 +115,17 @@ const Layout = () => {
         loading="lazy"
       />
 
-      <header className={`header--main ${isScrolled ? 'header--compact' : 'header--full'}`}>
+      <header 
+        className="header--main"
+        style={{
+          '--scroll-progress': scrollProgress,
+          '--header-padding': `${2 - (scrollProgress * 1.25)}rem`,
+          '--hero-opacity': Math.max(0, 1 - (scrollProgress * 1.5)),
+          '--hero-scale': 1 - (scrollProgress * 0.15),
+          '--hero-pointer': scrollProgress > 0.3 ? 'none' : 'auto',
+          '--branding-top': `${2 - (scrollProgress * 1)}rem`,
+        }}
+      >
         {/* Branding Section */}
         <div className="header--branding">
           <NavLink to="/" className="brand-logo" aria-label="Accueil - Enzo MORELLO">
@@ -131,7 +154,7 @@ const Layout = () => {
         {/* Mobile Hamburger Menu */}
         <HamburgerMenu />
 
-        {/* Page Title & Subtitle */}
+        {/* Page Title & Subtitle - Always in DOM, hidden via CSS */}
         <div className="header--hero">
           <h1 id="main-title">{config.heading}</h1>
           {config.subheading ? <h3>{config.subheading}</h3> : null}

@@ -4,7 +4,7 @@
 
 header.header--main {
   background: rgba(26, 26, 26, 0.62);
-  padding: var(--space-lg);
+  padding: var(--header-padding, var(--space-lg));
   border-bottom: 2px solid var(--color-primary);
   position: sticky;
   top: 0;
@@ -13,49 +13,34 @@ header.header--main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: 
-    padding var(--transition-slow),
-    gap var(--transition-slow);
+  /* Removed transitions - now using progressive scroll values */
 }
 
-/* Full state (top of page) */
-header.header--main.header--full {
-  padding: var(--space-lg);
-}
-
-/* Compact state (scrolled) */
-header.header--main.header--compact {
-  padding: var(--space-sm) var(--space-lg);
-}
-
-header.header--main.header--compact .header--hero {
-  display: none;
-  opacity: 0;
-  pointer-events: none;
-}
-
+/* Hero section with progressive fade based on scroll */
 header.header--main .header--hero {
-  transition: opacity var(--transition-slow);
-  opacity: 1;
+  opacity: var(--hero-opacity, 1);
+  transform: scale(var(--hero-scale, 1));
+  pointer-events: var(--hero-pointer, auto);
+  max-height: calc(500px * (1 - var(--scroll-progress, 0)));
+  overflow: hidden;
+  transition: 
+    max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-header.header--main.header--compact .header--nav-desktop {
-  margin: 0;
-  transition: margin var(--transition-slow);
+/* Progressive nav margin adjustment */
+header.header--main .header--nav-desktop {
+  margin: calc(var(--space-md) * (1 - var(--scroll-progress, 0))) 0;
 }
 
 /* Branding Section */
 .header--branding {
   position: absolute;
   left: var(--space-lg);
-  top: var(--space-lg);
+  top: var(--branding-top, var(--space-lg));
   display: flex;
   align-items: center;
-  transition: top var(--transition-slow), left var(--transition-slow);
-}
-
-header.header--main.header--compact .header--branding {
-  top: var(--space-sm);
+  /* Removed transitions - now using progressive scroll values */
 }
 
 .brand-logo {
