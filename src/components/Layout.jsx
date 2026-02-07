@@ -15,7 +15,7 @@ const pageConfig = {
   '/': {
     heading: 'Portfolio de Enzo MORELLO',
     subheading: 'Étudiant en IUT2',
-    subheadingAlt: "Souhaiterait être Développeur d'applications",
+    subheadingAlt: "en Parcours Développeur d'applications",
     backgroundSrc: getAssetPath('assets/images/risk-of-rain-2-launch-update.jpg'),
     metaTitle: 'Portfolio - Enzo Morello',
     metaDescription: "Portfolio d'Enzo Morello, étudiant en BUT Informatique à l'IUT2 de Grenoble",
