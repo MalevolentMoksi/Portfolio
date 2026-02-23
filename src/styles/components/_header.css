@@ -25,6 +25,9 @@ header.header--main .header--hero {
   pointer-events: var(--hero-pointer, auto);
   max-height: calc(500px * (1 - var(--scroll-progress, 0)));
   overflow: hidden;
+  /* Pré-promotion GPU : évite le stutter du premier frame en préparant
+     les couches de compositing avant la première interaction scroll */
+  will-change: opacity, transform;
   /* Pas de transition : les valeurs sont pilotées directement par le scroll via rAF.
      Une transition CSS ici créerait un décalage qui cause le sautillement. */
 }
@@ -272,7 +275,7 @@ header.header--main .header--nav-desktop {
 /* Responsive for mobile */
 @media (max-width: 480px) {
   header.header--main {
-    padding: var(--space-sm);
+    padding: calc((var(--space-sm) + var(--space-md)) / 2) var(--space-sm);
   }
 
   .header--branding {

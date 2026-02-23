@@ -88,30 +88,36 @@ const Layout = () => {
   useEffect(() => {
     let ticking = false;
 
+    const applyProgress = (scrollY) => {
+      const transitionEnd = 180;
+      const linearProgress = Math.min(Math.max(scrollY / transitionEnd, 0), 1);
+      // Ease-out cubique : décélération naturelle en fin de transition
+      const p = 1 - Math.pow(1 - linearProgress, 3);
+
+      const header = headerRef.current;
+      if (header) {
+        header.style.setProperty('--scroll-progress', p);
+        header.style.setProperty('--header-padding', `${2 - p * 1.25}rem`);
+        header.style.setProperty('--hero-opacity', Math.max(0, 1 - p * 1.5));
+        header.style.setProperty('--hero-scale', 1 - p * 0.15);
+        header.style.setProperty('--hero-pointer', p > 0.3 ? 'none' : 'auto');
+      }
+    };
+
     const handleScroll = () => {
       if (ticking) return;
       ticking = true;
-
       requestAnimationFrame(() => {
-        const scrollY = window.scrollY;
-        const transitionEnd = 180;
-
-        const linearProgress = Math.min(Math.max(scrollY / transitionEnd, 0), 1);
-        // Ease-out cubique : décélération naturelle en fin de transition
-        const p = 1 - Math.pow(1 - linearProgress, 3);
-
-        const header = headerRef.current;
-        if (header) {
-          header.style.setProperty('--scroll-progress', p);
-          header.style.setProperty('--header-padding', `${2 - p * 1.25}rem`);
-          header.style.setProperty('--hero-opacity', Math.max(0, 1 - p * 1.5));
-          header.style.setProperty('--hero-scale', 1 - p * 0.15);
-          header.style.setProperty('--hero-pointer', p > 0.3 ? 'none' : 'auto');
-        }
-
+        applyProgress(window.scrollY);
         ticking = false;
       });
     };
+
+    // Initialise les variables CSS dès le montage pour éviter le flash
+    // lors du premier scroll (sans ça, le premier événement bascule de
+    // valeurs de fallback CSS vers des styles inline — une recalculation
+    // visible d'un seul frame)
+    applyProgress(window.scrollY);
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
