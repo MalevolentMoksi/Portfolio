@@ -25,6 +25,40 @@ npm run dev
 
 Le site sera accessible à `http://localhost:5173`
 
+## ✉️ Configuration du formulaire de contact
+
+Le formulaire React (`src/components/ContactForm.jsx`) envoie les messages via Formspree.
+
+### 1. Configurer la destination email dans Formspree
+
+1. Connecter le formulaire Formspree à l'adresse `enzo.morello@etu.univ-grenoble-alpes.fr`
+2. Vérifier l'email dans Formspree (mail de confirmation)
+3. Activer les protections anti-spam Formspree (captcha/filtrage)
+
+### 2. Configurer l'endpoint côté projet
+
+Créer un fichier `.env` à la racine du projet (à partir de `.env.example`) :
+
+```bash
+# macOS / Linux
+cp .env.example .env
+
+# Windows PowerShell
+Copy-Item .env.example .env
+```
+
+Puis définir l'endpoint Formspree :
+
+```env
+VITE_FORMSPREE_ENDPOINT=https://formspree.io/f/votre_form_id
+```
+
+### 3. Notes sécurité
+
+- L'email de destination n'est pas exposé dans le frontend.
+- L'endpoint Formspree est public (normal pour un formulaire client-side), mais le formulaire inclut un honeypot + délai anti-bot.
+- Pour une protection avancée (rate limiting serveur), migrer vers une API serverless dédiée.
+
 ## 📦 Scripts disponibles
 
 | Commande | Description |

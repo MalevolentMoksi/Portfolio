@@ -22,6 +22,14 @@
   gap: 8px;
 }
 
+.honeypot-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 .contact-form label {
   color: var(--color-primary);
   font-weight: 600;
