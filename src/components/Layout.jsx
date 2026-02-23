@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import BackToTopButton from './BackToTopButton.jsx';
 import Breadcrumbs from './Breadcrumbs.jsx';
@@ -70,7 +70,7 @@ const pageConfig = {
 const Layout = () => {
   const location = useLocation();
   const config = pageConfig[location.pathname] || pageConfig['/'];
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const headerRef = useRef(null);
 
   useDocumentMeta(config.metaTitle, config.metaDescription);
   usePortfolioModules(trackFiles);
@@ -83,23 +83,36 @@ const Layout = () => {
     });
   }, [location.pathname]);
 
-  // Track scroll position for progressive header transition
+  // Mise à jour progressive de l'en-tête au défilement
+  // Utilise rAF + mutation directe du DOM (évite les re-renders React)
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const transitionStart = 0;
-      const transitionEnd = 180;
-      
-      // Calculate linear progress from 0 to 1
-      const linearProgress = Math.min(Math.max((scrollY - transitionStart) / (transitionEnd - transitionStart), 0), 1);
-      
-      // Apply ease-out cubic function for smooth deceleration at the end
-      // This makes the transition slow down naturally instead of stopping abruptly
-      const easedProgress = 1 - Math.pow(1 - linearProgress, 3);
-      
-      setScrollProgress(easedProgress);
+      if (ticking) return;
+      ticking = true;
+
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        const transitionEnd = 180;
+
+        const linearProgress = Math.min(Math.max(scrollY / transitionEnd, 0), 1);
+        // Ease-out cubique : décélération naturelle en fin de transition
+        const p = 1 - Math.pow(1 - linearProgress, 3);
+
+        const header = headerRef.current;
+        if (header) {
+          header.style.setProperty('--scroll-progress', p);
+          header.style.setProperty('--header-padding', `${2 - p * 1.25}rem`);
+          header.style.setProperty('--hero-opacity', Math.max(0, 1 - p * 1.5));
+          header.style.setProperty('--hero-scale', 1 - p * 0.15);
+          header.style.setProperty('--hero-pointer', p > 0.3 ? 'none' : 'auto');
+        }
+
+        ticking = false;
+      });
     };
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -118,16 +131,9 @@ const Layout = () => {
         loading="lazy"
       />
 
-      <header 
+      <header
+        ref={headerRef}
         className="header--main"
-        style={{
-          '--scroll-progress': scrollProgress,
-          '--header-padding': `${2 - (scrollProgress * 1.25)}rem`,
-          '--hero-opacity': Math.max(0, 1 - (scrollProgress * 1.5)),
-          '--hero-scale': 1 - (scrollProgress * 0.15),
-          '--hero-pointer': scrollProgress > 0.3 ? 'none' : 'auto',
-          '--branding-top': `${2 - (scrollProgress * 1)}rem`,
-        }}
       >
         {/* Branding Section */}
         <div className="header--branding">

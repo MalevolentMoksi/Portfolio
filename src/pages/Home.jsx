@@ -56,12 +56,12 @@ const Home = () => {
         <h2 id="contact-title">Contact</h2>
         <div className="contact-info">
           <ul>
-            <li>
+            {/* <li>
               Email :
               <a href="#" className="email-glitch" aria-label="Adresse email masquée pour éviter le spam">
                 <span className="local-part" data-text="##########"></span>@etu.univ-grenoble-alpes.fr
               </a>
-            </li>
+            </li> */}
             <li>
               Profil Gitlab : {' '}
               <a

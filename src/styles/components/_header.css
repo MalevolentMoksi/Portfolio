@@ -21,12 +21,12 @@ header.header--main {
 header.header--main .header--hero {
   opacity: var(--hero-opacity, 1);
   transform: scale(var(--hero-scale, 1));
+  transform-origin: top center;
   pointer-events: var(--hero-pointer, auto);
   max-height: calc(500px * (1 - var(--scroll-progress, 0)));
   overflow: hidden;
-  transition: 
-    max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Pas de transition : les valeurs sont pilotées directement par le scroll via rAF.
+     Une transition CSS ici créerait un décalage qui cause le sautillement. */
 }
 
 /* Progressive nav margin adjustment */
@@ -38,10 +38,11 @@ header.header--main .header--nav-desktop {
 .header--branding {
   position: absolute;
   left: var(--space-lg);
-  top: var(--branding-top, var(--space-lg));
+  /* Interpole de la position haute vers le centre vertical selon le scroll */
+  top: calc((1 - var(--scroll-progress, 0)) * var(--space-lg) + 50% * var(--scroll-progress, 0));
+  transform: translateY(calc(-50% * var(--scroll-progress, 0)));
   display: flex;
   align-items: center;
-  /* Removed transitions - now using progressive scroll values */
 }
 
 .brand-logo {
@@ -94,7 +95,7 @@ header.header--main .header--nav-desktop {
   display: none;
   width: 100%;
   margin: var(--space-md) 0;
-  transition: margin var(--transition-slow);
+  /* Pas de transition : margin piloté en direct par --scroll-progress */
 }
 
 .header--nav-desktop ul {
@@ -150,9 +151,11 @@ header.header--main .header--nav-desktop {
 /* Hero Section (Title & Subtitles) */
 .header--hero {
   text-align: center;
-  transition: all var(--transition-base);
+  /* Pas de transition : propriétés pilotées par scroll en direct */
   width: 100%;
-  margin-top: var(--space-md);
+  /* Réduit à 0 quand compact pour que le padding reste symétrique
+     et que la nav soit centrée verticalement */
+  margin-top: calc(var(--space-md) * (1 - var(--scroll-progress, 0)));
 }
 
 .header--hero-home {
@@ -191,12 +194,9 @@ header.header--main .header--nav-desktop {
 .hamburger-toggle {
   position: absolute;
   right: var(--space-lg);
-  top: var(--space-lg);
-  transition: top var(--transition-slow), right var(--transition-slow);
-}
-
-header.header--main.header--compact .hamburger-toggle {
-  top: var(--space-sm);
+  /* Interpole de la position haute vers le centre vertical selon le scroll */
+  top: calc((1 - var(--scroll-progress, 0)) * var(--space-lg) + 50% * var(--scroll-progress, 0));
+  transform: translateY(calc(-50% * var(--scroll-progress, 0)));
 }
 
 /* Typing effect cursor */
@@ -225,28 +225,14 @@ header.header--main.header--compact .hamburger-toggle {
     padding: var(--space-md);
   }
 
-  header.header--main.header--compact {
-    padding: var(--space-sm) var(--space-md);
-  }
-
   .header--branding {
     left: var(--space-md);
-    top: var(--space-md);
-  }
-
-  header.header--main.header--compact .header--branding {
-    top: var(--space-sm);
-    left: var(--space-md);
+    top: calc((1 - var(--scroll-progress, 0)) * var(--space-md) + 50% * var(--scroll-progress, 0));
   }
 
   .hamburger-toggle {
     right: var(--space-md);
-    top: var(--space-md);
-  }
-
-  header.header--main.header--compact .hamburger-toggle {
-    top: var(--space-sm);
-    right: var(--space-md);
+    top: calc((1 - var(--scroll-progress, 0)) * var(--space-md) + 50% * var(--scroll-progress, 0));
   }
 
   .brand-logo {
@@ -289,28 +275,14 @@ header.header--main.header--compact .hamburger-toggle {
     padding: var(--space-sm);
   }
 
-  header.header--main.header--compact {
-    padding: var(--space-xs) var(--space-sm);
-  }
-
   .header--branding {
     left: var(--space-sm);
-    top: var(--space-sm);
-  }
-
-  header.header--main.header--compact .header--branding {
-    top: var(--space-xs);
-    left: var(--space-sm);
+    top: calc((1 - var(--scroll-progress, 0)) * var(--space-sm) + 50% * var(--scroll-progress, 0));
   }
 
   .hamburger-toggle {
     right: var(--space-sm);
-    top: var(--space-sm);
-  }
-
-  header.header--main.header--compact .hamburger-toggle {
-    top: var(--space-xs);
-    right: var(--space-sm);
+    top: calc((1 - var(--scroll-progress, 0)) * var(--space-sm) + 50% * var(--scroll-progress, 0));
   }
 
   .brand-logo {
