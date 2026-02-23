@@ -65,6 +65,7 @@
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
   transition: all var(--transition-duration) var(--transition-easing);
+  -webkit-user-select: none;
   user-select: none;
 }
 

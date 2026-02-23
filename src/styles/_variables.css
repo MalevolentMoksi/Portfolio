@@ -55,6 +55,17 @@
   --breakpoint-desktop: 1024px;
   --breakpoint-wide: 1440px;
 
+  /* Accent alias (used by newer components: breadcrumbs, filter-bar, pagination, loading) */
+  --color-accent: var(--color-primary);
+
+  /* Border-radius aliases (short names used by newer components) */
+  --radius-sm: var(--border-radius-sm);
+  --radius-md: var(--border-radius-md);
+
+  /* Transition aliases (split duration/easing for components that reference them separately) */
+  --transition-duration: 0.3s;
+  --transition-easing: ease;
+
   /* Legacy variable aliases */
   --primary-color: var(--color-primary);
   --secondary-color: var(--color-secondary);
@@ -62,14 +73,14 @@
   --bg-color: var(--color-bg);
 }
 
-/* Dark Mode Support (future enhancement) */
-@media (prefers-color-scheme: light) {
-  :root {
-    --color-bg: #f5f5f5;
-    --color-text: #333;
-    --color-secondary: #fff;
-  }
-}
+/*
+ * NOTE : Le thème clair est désactivé volontairement.
+ * Le site est conçu en dark-only ; activer prefers-color-scheme: light
+ * cassait l'affichage (éléments blancs sur fond sombre) chez les
+ * utilisateurs ayant un OS en mode clair.
+ * Si un vrai mode clair est souhaité, il faudra adapter TOUTES les
+ * couleurs hardcodées (rgba(26,26,26,…), etc.) en parallèle.
+ */
 
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {

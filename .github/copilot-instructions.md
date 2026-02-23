@@ -1,0 +1,154 @@
+# P2.01 Portfolio - AI Coding Agent Instructions
+
+## Project Overview
+
+Modern student portfolio website (React SPA). **Feb 2026 Architecture**: Single-page React application with React Router v6, legacy JS modules for effects/music, and modular CSS. Features persistent music player, particle effects, interactive UI, responsive gallery with lightbox.
+
+## Critical Architecture: React SPA + Legacy Modules
+
+### Application Core
+- **`src/main.jsx`** - React entry point (renders `<App />` to DOM)
+- **`src/index.html`** - Single SPA template
+- **`src/App.jsx`** - Route definition (BrowserRouter + 8 routes via React Router v6)
+- **Routing paths**: `/`, `/projets`, `/projets-personnels`, `/projet-MEGASAE/SAE12/SAE3/SAE4/SAE56`
+- **Layout.jsx** - Shared header/footer wrapping all pages via `<Outlet />`
+
+### Pages Directory (`src/pages/*.jsx`)
+8 React components: `Home.jsx`, `Projets.jsx`, `ProjetsPersonnels.jsx`, `ProjetMEGASAE.jsx`, `ProjetSAE12.jsx`, `ProjetSAE3.jsx`, `ProjetSAE4.jsx`, `ProjetSAE56.jsx`
+
+### Custom Hooks (`src/hooks/`)
+- **`useDocumentMeta(title, description)`** - Updates `<title>` and `<meta description>` per page (SEO)
+- **`usePortfolioModules(trackFiles)`** - Lazy-initializes legacy JS modules (music-player, effects, ui-enhancements, lightbox) on route change
+
+### Legacy JavaScript Modules (`src/scripts/`)
+These coexist with React, initialized via `usePortfolioModules` hook in `Layout.jsx`:
+- **`music-player.js`** - Persistent audio, localStorage state throttling (1 write/sec)
+- **`effects.js`** - particles.js integration, parallax, mouse tracking
+- **`ui-enhancements.js`** - Typing animation (#main-title), email glitch (.local-part), back-to-top (#back-to-top), video hover
+- **`lightbox.js`** - Gallery zoom for `.zoomable` class images
+
+### CSS Modules (`src/styles/`)
+- **`main.css`** - Central import that bundles all via `@import`
+- **Core**: `_variables.css` (CSS custom properties), `_base.css`, `_layout.css`, `_typography.css`, `_effects.css`
+- **Components** (6 files): `_header.css`, `_footer.css`, `_buttons.css`, `_music-player.css`, `_projects.css`, `_personal-projects.css`
+- **Dark theme**: Gold accent (#d4af37), CSS variables centralized
+
+### Assets (`public/assets/`)
+- Images: `public/assets/images/` + `drawings/` subfolder
+- Music: `public/assets/music/` (deepstone.m4a, browser.m4a, wildriver.m4a)
+- Videos: `public/assets/videos/`
+
+## Key Implementation Patterns
+
+### React + React Router
+```jsx
+// App.jsx defines routes; Layout.jsx wraps with <Outlet />
+// All pages live in src/pages/ and are route components
+// Navigation: use React Router <Link> or `useNavigate()` hook
+```
+
+### Meta Tags & SEO
+```jsx
+// Each page calls useDocumentMeta() to set title/description:
+import useDocumentMeta from '@/hooks/useDocumentMeta.js';
+export default Home = () => {
+  useDocumentMeta('Home | Portfolio', 'Student portfolio...');
+  return <section>...</section>;
+};
+```
+
+### Legacy Module Initialization (React Integration)
+```jsx
+// Layout.jsx initializes legacy JS modules once on mount:
+const [trackFiles] = useState(['deepstone.m4a', 'browser.m4a', 'wildriver.m4a']);
+usePortfolioModules(trackFiles);
+// This creates singleton instances (musicPlayerInstance, visualEffectsInstance)
+// Modules reinitialize on route change (useEffect in usePortfolioModules)
+```
+
+### Music Player Persistence
+- **Class**: `MusicPlayer` - constructor accepts track array
+- **localStorage keys**: `music-currentTrack`, `music-currentTime`, `music-isPaused`
+- **Throttling**: 1 write/sec max (efficient I/O, not 60/sec)
+- **Autoplay**: Starts muted, unmutes on first user interaction (browser compliance)
+- **To add tracks**: Pass `['track1.m4a', 'track2.m4a']` to `usePortfolioModules()` in Layout.jsx
+
+### Legacy Effects Module
+- **Particles.js**: Gold (#d4af37) configured in `initParticles()`
+- **Parallax**: `friction = 1/12`, `depth = 0.06` in `initParallax()`
+- **Graceful**: Only initializes if DOM elements exist (no errors if missing)
+
+### UI Enhancements (DOM Targets)
+- **Typing animation**: `#main-title h1` (50ms per char)
+- **Email glitch**: `.local-part` element (400ms rotation)
+- **Back-to-top**: `#back-to-top` button (shows at `scrollY > 300px`)
+- **Video hover**: `.hover-play` videos with `.progress` bar
+
+### CSS Architecture
+- **Variables**: Centralized in `_variables.css` (`--primary-color: #d4af37`, etc.)
+- **Component isolation**: Each `.css` file = one concern (no specificity wars)
+- **Responsive**: Mobile-first in `_layout.css` with `@media (min-width: ...)`
+- **Import order**: All files imported in `main.css`
+- **Cross-browser CSS**: Use PostCSS + Autoprefixer when needed to add vendor prefixes automatically (instead of hand-maintaining prefixes in every file)
+
+## Common Development Tasks
+
+### Adding a New Project Page
+1. Create `src/pages/ProjetNEW.jsx` (copy pattern from `ProjetSAE12.jsx`)
+2. Import it in `src/App.jsx` and add route: `<Route path="projet-NEW" element={<ProjetNEW />} />`
+3. Add card to `Projets.jsx` page listing (or `ProjetsPersonnels.jsx` if personal)
+4. Call `useDocumentMeta('Title', 'Description')` in the new page component
+
+### Adding a Music Track
+1. Place `.m4a` file in `public/assets/music/filename.m4a`
+2. Update `Layout.jsx`: modify `trackFiles` array passed to `usePortfolioModules()`
+3. Player auto-reads ID3 tags for metadata
+
+### Modifying Styles
+- **Global theme**: Edit `src/styles/_variables.css` (CSS custom properties)
+- **Page-specific**: Add classes in relevant `components/_page.css` file
+- **Component CSS**: Import in JSX if needed: `import '@styles/components/_buttons.css'`
+- **Compatibility pass**: If new CSS features may have browser support gaps (e.g. `backdrop-filter`, `user-select`, `appearance`, advanced gradients), ensure PostCSS + Autoprefixer is active before validating on multiple browsers
+- Structure prevents cascading conflicts; no `!important` needed
+
+### Debugging Build Issues
+- **TypeErrors in React**: Check imports in `src/App.jsx` and pages (route components)
+- **Missing styles**: Verify import in `main.css`; check CSS file in `src/styles/`
+- **Cross-browser regressions**: Verify `postcss.config.js` includes `autoprefixer` and that `browserslist` is defined in `package.json` when compatibility issues appear on Firefox/Chrome/Safari
+- **Legacy module errors**: Check `usePortfolioModules()` in `Layout.jsx` and DOM targets (e.g., `#main-title` exists)
+- **Build fails**: Run `npm run build` (HMR in dev hides some errors); test with `npm run preview`
+- **Asset 404s**: Verify path in code is `/assets/...` (absolute, not relative)
+
+## Conventions
+
+- **Language**: French content + French code comments
+- **File naming**: `PascalCase.jsx` for React components, `camelCase.js` for utilities/hooks, `_kebab-case.css` for styles
+- **React patterns**: Functional components + hooks; import from `'react-router-dom'` for navigation
+- **Relative imports**: Use module aliases `@/`, `@styles/`, `@assets/` (defined in vite.config.js)
+- **Asset paths**: Always absolute (`/assets/images/...`, `/assets/music/...`) in code and HTML
+- **Accessibility**: Use semantic HTML (`<header>`, `<main>`, `<article>`), `aria-` attributes where needed
+
+## Testing Workflow
+
+1. **Development**: `npm run dev` → http://localhost:3000 with HMR (changes auto-reload)
+2. **Build test**: `npm run build` → Check `/dist/` folder contains `index.html` and assets
+3. **Production preview**: `npm run preview` → Run production build locally, verify routes and assets load
+4. **Key tests**:
+   - Music player persists across page navigation
+   - Meta tags change per page (check DevTools `<head>`)
+   - Legacy effects (particles, typing, glitch) appear on first page load
+   - Images in `/assets/images/` load (check Network tab for 404s)
+   - Mobile responsive: test at 375px, 1024px widths
+
+## Critical Files Reference
+
+| File | Purpose |
+|------|---------|
+| [vite.config.js](vite.config.js) | Vite 5 build config, path aliases (`@`, `@styles`, etc.), React plugin |
+| [src/App.jsx](src/App.jsx) | React Router orchestrator - defines all 8 routes |
+| [src/components/Layout.jsx](src/components/Layout.jsx) | Shared header/footer, initializes legacy modules, wraps pages via `<Outlet />` |
+| [src/hooks/useDocumentMeta.js](src/hooks/useDocumentMeta.js) | Hook for per-page SEO (title, description) |
+| [src/hooks/usePortfolioModules.js](src/hooks/usePortfolioModules.js) | Hook for lazy-loading legacy JS modules (music, effects, UI) |
+| [src/styles/_variables.css](src/styles/_variables.css) | CSS custom properties (colors, spacing, theme) |
+| [src/styles/main.css](src/styles/main.css) | Central CSS import aggregator |
+| [package.json](package.json) | React 18, React Router 6, Vite 5 dependencies

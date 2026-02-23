@@ -149,6 +149,7 @@
   font-size: 3rem;
   color: var(--color-primary);
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
   transition: transform var(--transition-fast);
 }
@@ -228,6 +229,7 @@
   transition: all var(--transition-base);
   display: flex;
   align-items: center;
+  -webkit-user-select: none;
   user-select: none;
 }
 

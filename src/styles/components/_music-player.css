@@ -14,6 +14,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 
               0 0 20px rgba(212, 175, 55, 0.15);
   z-index: var(--z-music-player);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
@@ -65,7 +66,10 @@
 .visualizer::after {
   content: '';
   position: absolute;
-  inset: 6px 8px;
+  top: 6px;
+  right: 8px;
+  bottom: 6px;
+  left: 8px;
   border-radius: 8px;
   border: 1px solid rgba(212, 175, 55, 0.08);
   pointer-events: none;
@@ -416,6 +420,7 @@
   border-radius: var(--border-radius-md);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 
               0 0 30px rgba(212, 175, 55, 0.2);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   min-width: 320px;
   max-width: 380px;

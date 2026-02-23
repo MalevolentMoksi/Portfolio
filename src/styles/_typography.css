@@ -9,11 +9,15 @@ h1 {
   letter-spacing: 0.05em;
   margin-top: var(--space-md);
   margin-bottom: var(--space-md);
+  /* Fallback color visible si background-clip: text échoue */
+  color: var(--color-primary);
   background: linear-gradient(90deg, var(--color-accent-pale) 30%, var(--color-primary) 100%);
-  background-clip: text;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.7), 0 0 2px rgba(255, 248, 220, 0.6);
+  /* text-shadow ne fonctionne pas avec background-clip: text ; utiliser filter à la place */
+  -webkit-filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
 }
 
 /* Fallback for high contrast mode (accessibility) */
@@ -27,9 +31,11 @@ h1 {
 
 h2,
 h3 {
+  /* Fallback color */
+  color: var(--color-primary);
   background: linear-gradient(90deg, var(--color-primary), var(--color-accent-light));
-  background-clip: text;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

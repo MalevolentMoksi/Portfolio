@@ -11,6 +11,8 @@ export default defineConfig({
   build: {
     outDir: '../dist',
     emptyOutDir: true,
+    // Cible des navigateurs récents (3 dernières versions)
+    target: ['es2020', 'chrome90', 'firefox88', 'safari14', 'edge90'],
     rollupOptions: {
       input: resolve(__dirname, 'src/index.html'),
     },

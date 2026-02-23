@@ -84,7 +84,8 @@ img:hover {
   animation: pulse 2s infinite;
 }
 
-/* Smooth page transitions (View Transitions API) */
+/* Smooth page transitions (View Transitions API) — Chrome 111+ only */
+/* Navigateurs non-compatibles ignorent ces règles automatiquement */
 @view-transition {
   navigation: auto;
 }
