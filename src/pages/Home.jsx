@@ -73,6 +73,17 @@ const Home = () => {
                 gricad-gitlab.univ-grenoble-alpes.fr/morelloe
               </a>
             </li>
+            <li>
+              Profil LinkedIn : {' '}
+              <a
+                href="http://www.linkedin.com/in/enzo-morello-28a364392"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Profil LinkedIn (ouvre dans une nouvelle fenetre)"
+              >
+                www.linkedin.com/in/enzo-morello-28a364392
+              </a>
+            </li>
           </ul>
         </div>
         <ContactForm />
