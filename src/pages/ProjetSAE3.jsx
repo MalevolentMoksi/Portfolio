@@ -48,7 +48,7 @@ const ProjetSAE3 = () => {
             <li>
               Installer et configurer un système d'exploitation et des outils de développement
               <ul>
-                <li>Créer un support USB açmorçable (Ventoy) et installer Ubuntu 22.04 LTS dans VirtualBox</li>
+                <li>Créer un support USB amorçable (Ventoy) et installer Ubuntu 22.04 LTS dans VirtualBox</li>
                 <li>Installer JDK 17, GCC, Python 3, Git, VS Code, IntelliJ IDEA, Node.js</li>
                 <li>Configurer les variables d'environnement, les raccourcis clavier et l'intégration Git dans l'IDE</li>
               </ul>
@@ -68,7 +68,7 @@ const ProjetSAE3 = () => {
         <section id="techniques">
           <h2>Compétences Techniques & Savoir-Faire</h2>
           <ul>
-            <li>Création de supports açmorçables (Ventoy, Rufus) et configuration UEFI/Secure Boot</li>
+            <li>Création de supports amorçables (Ventoy, Rufus) et configuration UEFI/Secure Boot</li>
             <li>Partitionnement disque & installation en dual-boot ou machine virtuelle (VirtualBox)</li>
             <li>Mise à jour système : <code>apt</code>, <code>snap</code>, activation du pare-feu UFW</li>
             <li>

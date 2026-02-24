@@ -158,10 +158,10 @@ const ProjetMEGASAE = () => {
         <section id="conclusion">
           <h2>Resultat & bilan</h2>
           <p>
-            La version 1.0 est livree : creation / import de banquets, gestion des invites, menus
+            La version 1.0 est livrée : creation / import de banquets, gestion des invites, menus
             dynamiques adaptes aux restrictions alimentaires, generation PDF d'invitations et export
             complet JSON. Le projet a atteint 92 % des user stories, une couverture de tests de 81 % et a
-            ete presente lors de la soutenance finale avec succes (note 18/20). Les principaux defis ont
+            été presentée lors de la soutenance finale avec succes (note 18/20). Les principaux defis ont
             porte sur la synchronisation des modules et le respect du temps imparti ; la mise en place
             d'une revue de risques hebdomadaire a permis de reduire drastiquement les retards potentiels.
           </p>

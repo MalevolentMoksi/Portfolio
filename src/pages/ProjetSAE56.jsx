@@ -13,7 +13,7 @@ const ProjetSAE56 = () => {
           <h2>Contexte du projet</h2>
           <p>
             Chaque équipe (3 ou 4 étudiants) choisit une entreprise du secteur numérique (Capgemini,
-            Sopra Stera, Atos, ...) et réalise un site web institutionnel à destination d'un public non
+            Sopra Steria, Atos, ...) et réalise un site web institutionnel à destination d'un public non
             technique (élèves de 3e), pour présenter de façon sobre et vulgarisée l'activité,
             l'organisation, les valeurs, la transition numérique et écologique de l'entreprise.
           </p>
