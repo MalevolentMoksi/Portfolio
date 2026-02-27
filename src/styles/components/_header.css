@@ -1,10 +1,14 @@
 /* ============================================
    Header Component Styles
-   ============================================ */
+   ============================================
+   Compact mode : la classe .header--compact est basculée une seule fois
+   par seuil de défilement (Layout.jsx). Le navigateur gère l'animation
+   via des transitions CSS optimisées — zéro mise à jour par frame,
+   zéro boucle de rétroaction layout. */
 
 header.header--main {
   background: rgba(26, 26, 26, 0.62);
-  padding: var(--header-padding, var(--space-lg));
+  padding: var(--space-lg);
   border-bottom: 2px solid var(--color-primary);
   position: sticky;
   top: 0;
@@ -14,38 +18,60 @@ header.header--main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Removed transitions - now using progressive scroll values */
+  transition: padding 0.3s ease-out;
 }
 
-/* Hero section with progressive fade based on scroll */
+header.header--main.header--compact {
+  padding: 0.75rem;
+}
+
+/* ---- Hero section ---- */
 header.header--main .header--hero {
-  opacity: var(--hero-opacity, 1);
-  transform: scale(var(--hero-scale, 1));
-  transform-origin: top center;
-  pointer-events: var(--hero-pointer, auto);
-  max-height: calc(500px * (1 - var(--scroll-progress, 0)));
   overflow: hidden;
-  /* Pré-promotion GPU : évite le stutter du premier frame en préparant
-     les couches de compositing avant la première interaction scroll */
-  will-change: opacity, transform;
-  /* Pas de transition : les valeurs sont pilotées directement par le scroll via rAF.
-     Une transition CSS ici créerait un décalage qui cause le sautillement. */
+  will-change: opacity, transform, max-height;
+  max-height: 500px;
+  opacity: 1;
+  transform: scale(1);
+  transform-origin: top center;
+  pointer-events: auto;
+  transition:
+    max-height 0.3s ease-out,
+    opacity 0.25s ease-out,
+    transform 0.25s ease-out,
+    margin-top 0.3s ease-out;
 }
 
-/* Progressive nav margin adjustment */
+header.header--main.header--compact .header--hero {
+  max-height: 0;
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none;
+  margin-top: 0;
+}
+
+/* ---- Desktop nav margin ---- */
 header.header--main .header--nav-desktop {
-  margin: calc(var(--space-md) * (1 - var(--scroll-progress, 0))) 0;
+  margin: var(--space-md) 0;
+  transition: margin 0.3s ease-out;
 }
 
-/* Branding Section */
+header.header--main.header--compact .header--nav-desktop {
+  margin: 0;
+}
+
+/* ---- Branding ---- */
 .header--branding {
   position: absolute;
   left: var(--space-lg);
-  /* Interpole de la position haute vers le centre vertical selon le scroll */
-  top: calc((1 - var(--scroll-progress, 0)) * var(--space-lg) + 50% * var(--scroll-progress, 0));
-  transform: translateY(calc(-50% * var(--scroll-progress, 0)));
+  top: var(--space-lg);
   display: flex;
   align-items: center;
+  transition: top 0.3s ease-out, transform 0.3s ease-out;
+}
+
+header.header--main.header--compact .header--branding {
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .brand-logo {
@@ -93,12 +119,11 @@ header.header--main .header--nav-desktop {
   white-space: nowrap;
 }
 
-/* Desktop Navigation */
+/* ---- Desktop Navigation ---- */
 .header--nav-desktop {
   display: none;
   width: 100%;
   margin: var(--space-md) 0;
-  /* Pas de transition : margin piloté en direct par --scroll-progress */
 }
 
 .header--nav-desktop ul {
@@ -151,14 +176,11 @@ header.header--main .header--nav-desktop {
   border-color: var(--color-accent-light);
 }
 
-/* Hero Section (Title & Subtitles) */
+/* ---- Hero Section (Title & Subtitles) ---- */
 .header--hero {
   text-align: center;
-  /* Pas de transition : propriétés pilotées par scroll en direct */
   width: 100%;
-  /* Réduit à 0 quand compact pour que le padding reste symétrique
-     et que la nav soit centrée verticalement */
-  margin-top: calc(var(--space-md) * (1 - var(--scroll-progress, 0)));
+  margin-top: var(--space-md);
 }
 
 .header--hero-home {
@@ -193,16 +215,15 @@ header.header--main .header--nav-desktop {
   opacity: 0.9;
 }
 
-/* Hamburger Menu Positioning */
-.hamburger-toggle {
-  position: absolute;
-  right: var(--space-lg);
-  /* Interpole de la position haute vers le centre vertical selon le scroll */
-  top: calc((1 - var(--scroll-progress, 0)) * var(--space-lg) + 50% * var(--scroll-progress, 0));
-  transform: translateY(calc(-50% * var(--scroll-progress, 0)));
+/* ---- Hamburger toggle compact centering ----
+   Le positionnement de base est défini dans _hamburger-menu.css ;
+   ici on ne gère que le compact-mode avec une spécificité plus haute. */
+header.header--main.header--compact .hamburger-toggle {
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-/* Typing effect cursor */
+/* ---- Typing effect cursor ---- */
 .typing::after {
   content: '|';
   display: inline-block;
@@ -215,27 +236,26 @@ header.header--main .header--nav-desktop {
   50% { opacity: 0; }
 }
 
-/* Show desktop nav on larger screens */
+/* ---- Show desktop nav on larger screens ---- */
 @media (min-width: 769px) {
   .header--nav-desktop {
     display: block;
   }
 }
 
-/* Responsive for tablet */
+/* ---- Responsive — tablet ---- */
 @media (max-width: 768px) {
   header.header--main {
     padding: var(--space-md);
   }
 
-  .header--branding {
-    left: var(--space-md);
-    top: calc((1 - var(--scroll-progress, 0)) * var(--space-md) + 50% * var(--scroll-progress, 0));
+  header.header--main.header--compact {
+    padding: 0.75rem;
   }
 
-  .hamburger-toggle {
-    right: var(--space-md);
-    top: calc((1 - var(--scroll-progress, 0)) * var(--space-md) + 50% * var(--scroll-progress, 0));
+  .header--branding {
+    left: var(--space-md);
+    top: var(--space-md);
   }
 
   .brand-logo {
@@ -272,20 +292,19 @@ header.header--main .header--nav-desktop {
   }
 }
 
-/* Responsive for mobile */
+/* ---- Responsive — mobile ---- */
 @media (max-width: 480px) {
   header.header--main {
     padding: calc((var(--space-sm) + var(--space-md)) / 2) var(--space-sm);
   }
 
-  .header--branding {
-    left: var(--space-sm);
-    top: calc((1 - var(--scroll-progress, 0)) * var(--space-sm) + 50% * var(--scroll-progress, 0));
+  header.header--main.header--compact {
+    padding: 0.75rem var(--space-sm);
   }
 
-  .hamburger-toggle {
-    right: var(--space-sm);
-    top: calc((1 - var(--scroll-progress, 0)) * var(--space-sm) + 50% * var(--scroll-progress, 0));
+  .header--branding {
+    left: var(--space-sm);
+    top: var(--space-sm);
   }
 
   .brand-logo {

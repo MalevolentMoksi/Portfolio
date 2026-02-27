@@ -15,6 +15,7 @@ class MusicPlayer {
     this.isMuted = false;
     this.savedVolume = 0.7; // Default volume
     this.isQueueOpen = false; // Track queue menu state
+    this.isRetracted = false; // Track retract/collapse state
     
     // Storage keys
     this.STORAGE_KEYS = {
@@ -23,6 +24,7 @@ class MusicPlayer {
       IS_PAUSED: 'music-isPaused',
       VOLUME: 'music-volume',
       MUTED: 'music-muted',
+      RETRACTED: 'music-retracted',
     };
     
     // Track metadata cache
@@ -78,6 +80,9 @@ class MusicPlayer {
     
     // Load muted state
     this.isMuted = localStorage.getItem(this.STORAGE_KEYS.MUTED) === 'true';
+    
+    // Load retracted state
+    this.isRetracted = localStorage.getItem(this.STORAGE_KEYS.RETRACTED) === 'true';
   }
   
   setupAudio() {
@@ -319,6 +324,9 @@ class MusicPlayer {
     container.setAttribute('aria-label', 'Lecteur de musique');
     
     container.innerHTML = `
+      <button id="player-retract-btn" aria-label="R\u00e9duire le lecteur" title="R\u00e9duire">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
       <div class="player-main">
         <img class="album-art" src="" alt="Pochette de l'album" />
         <div class="track-info">
@@ -373,6 +381,14 @@ class MusicPlayer {
     `;
     
     document.body.appendChild(container);
+
+    // Peek tab — separate fixed element shown when player is retracted
+    const peekBtn = document.createElement('button');
+    peekBtn.id = 'player-peek-btn';
+    peekBtn.setAttribute('aria-label', 'Afficher le lecteur');
+    peekBtn.setAttribute('title', 'Afficher le lecteur');
+    peekBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+    document.body.appendChild(peekBtn);
     
     // Cache DOM elements
     this.elements = {
@@ -384,6 +400,8 @@ class MusicPlayer {
       nextBtn: container.querySelector('#next-btn'),
       queueBtn: container.querySelector('#queue-btn'),
       muteBtn: container.querySelector('#mute-btn'),
+      retractBtn: container.querySelector('#player-retract-btn'),
+      peekBtn,
       volumeSlider: container.querySelector('#volume-slider'),
       volumeControlContainer: container.querySelector('.volume-control-container'),
       queueMenu: container.querySelector('.queue-menu'),
@@ -401,6 +419,14 @@ class MusicPlayer {
     this.updatePlayPauseButton();
     this.updateVolumeButton();
     this.populateQueueMenu();
+
+    // Restore retracted state without re-saving to localStorage
+    if (this.isRetracted) {
+      this.elements.container.classList.add('retracted');
+      this.elements.peekBtn.classList.add('visible');
+      this.elements.retractBtn.setAttribute('aria-label', 'Afficher le lecteur');
+      this.elements.retractBtn.querySelector('i').className = 'fa-solid fa-chevron-right';
+    }
   }
   
   attachEventListeners() {
@@ -423,6 +449,13 @@ class MusicPlayer {
         this.closeQueue();
       }
     });
+
+    // Retract controls
+    this.elements.retractBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleRetract();
+    });
+    this.elements.peekBtn.addEventListener('click', () => this.unretract());
   }
   
   updateLoadingState() {
@@ -825,12 +858,41 @@ class MusicPlayer {
     });
   }
   
+  toggleRetract() {
+    if (this.isRetracted) {
+      this.unretract();
+    } else {
+      this.retract();
+    }
+  }
+
+  retract() {
+    this.isRetracted = true;
+    this.elements.container.classList.add('retracted');
+    this.elements.peekBtn.classList.add('visible');
+    this.elements.retractBtn.setAttribute('aria-label', 'Afficher le lecteur');
+    this.elements.retractBtn.querySelector('i').className = 'fa-solid fa-chevron-right';
+    localStorage.setItem(this.STORAGE_KEYS.RETRACTED, 'true');
+    // Close queue if open while retracting
+    if (this.isQueueOpen) this.closeQueue();
+  }
+
+  unretract() {
+    this.isRetracted = false;
+    this.elements.container.classList.remove('retracted');
+    this.elements.peekBtn.classList.remove('visible');
+    this.elements.retractBtn.setAttribute('aria-label', 'R\u00e9duire le lecteur');
+    this.elements.retractBtn.querySelector('i').className = 'fa-solid fa-chevron-left';
+    localStorage.setItem(this.STORAGE_KEYS.RETRACTED, 'false');
+  }
+
   saveState() {
     localStorage.setItem(this.STORAGE_KEYS.CURRENT_TIME, this.audio.currentTime.toString());
     localStorage.setItem(this.STORAGE_KEYS.IS_PAUSED, this.audio.paused.toString());
     localStorage.setItem(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
     localStorage.setItem(this.STORAGE_KEYS.VOLUME, this.audio.volume.toString());
     localStorage.setItem(this.STORAGE_KEYS.MUTED, this.isMuted.toString());
+    localStorage.setItem(this.STORAGE_KEYS.RETRACTED, this.isRetracted.toString());
   }
 
   formatTitle(filename) {

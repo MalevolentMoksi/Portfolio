@@ -14,8 +14,8 @@
   z-index: 1001;
   position: absolute;
   right: var(--space-lg);
-  top: calc((1 - var(--scroll-progress, 0)) * var(--space-lg) + 50% * var(--scroll-progress, 0));
-  transform: translateY(calc(-50% * var(--scroll-progress, 0)));
+  top: var(--space-lg);
+  transition: top 0.3s ease-out, transform 0.3s ease-out;
 }
 
 .hamburger-toggle span {
@@ -134,7 +134,7 @@
   .hamburger-toggle {
     display: flex;
     right: var(--space-md);
-    top: calc((1 - var(--scroll-progress, 0)) * var(--space-md) + 50% * var(--scroll-progress, 0));
+    top: var(--space-md);
   }
 
   .hamburger-nav {
@@ -150,7 +150,7 @@
 @media (max-width: 480px) {
   .hamburger-toggle {
     right: var(--space-sm);
-    top: calc((1 - var(--scroll-progress, 0)) * var(--space-sm) + 50% * var(--scroll-progress, 0));
+    top: var(--space-sm);
   }
 
   .hamburger-nav {

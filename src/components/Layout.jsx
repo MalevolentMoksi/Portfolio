@@ -83,41 +83,37 @@ const Layout = () => {
     });
   }, [location.pathname]);
 
-  // Mise à jour progressive de l'en-tête au défilement
-  // Utilise rAF + mutation directe du DOM (évite les re-renders React)
+  // Bascule compact/expanded via une classe CSS unique (pas de mise à jour par frame).
+  // Hystérésis : compact à > 80px, expand à < 30px — empêche le clignotement au seuil.
+  // La transition visuelle est entièrement gérée par le CSS (0.3s, browser-optimized).
   useEffect(() => {
     let ticking = false;
+    let isCompact = false;
 
-    const applyProgress = (scrollY) => {
-      const transitionEnd = 180;
-      const linearProgress = Math.min(Math.max(scrollY / transitionEnd, 0), 1);
-      // Ease-out cubique : décélération naturelle en fin de transition
-      const p = 1 - Math.pow(1 - linearProgress, 3);
-
-      const header = headerRef.current;
-      if (header) {
-        header.style.setProperty('--scroll-progress', p);
-        header.style.setProperty('--header-padding', `${2 - p * 1.25}rem`);
-        header.style.setProperty('--hero-opacity', Math.max(0, 1 - p * 1.5));
-        header.style.setProperty('--hero-scale', 1 - p * 0.15);
-        header.style.setProperty('--hero-pointer', p > 0.3 ? 'none' : 'auto');
-      }
-    };
+    const COMPACT_THRESHOLD = 80;
+    const EXPAND_THRESHOLD = 30;
 
     const handleScroll = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        applyProgress(window.scrollY);
+        const header = headerRef.current;
+        if (header) {
+          const scrollY = window.scrollY;
+          if (!isCompact && scrollY > COMPACT_THRESHOLD) {
+            header.classList.add('header--compact');
+            isCompact = true;
+          } else if (isCompact && scrollY < EXPAND_THRESHOLD) {
+            header.classList.remove('header--compact');
+            isCompact = false;
+          }
+        }
         ticking = false;
       });
     };
 
-    // Initialise les variables CSS dès le montage pour éviter le flash
-    // lors du premier scroll (sans ça, le premier événement bascule de
-    // valeurs de fallback CSS vers des styles inline — une recalculation
-    // visible d'un seul frame)
-    applyProgress(window.scrollY);
+    // Vérifier la position initiale (rechargement en milieu de page)
+    handleScroll();
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
