@@ -17,6 +17,10 @@
 }
 
 /* Point rouge quand le robot a besoin d'attention */
+.pet-btn {
+  position: relative;
+}
+
 .pet-btn--attention::after {
   content: '';
   position: absolute;
