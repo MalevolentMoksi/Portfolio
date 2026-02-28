@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 /* ── Configuration des moods ─────────────────────── */
 export const MOODS = {
   default:   { label: 'Default',   emoji: '◆', color: '#d4af37', rgb: '212, 175, 55' },
-  hacker:    { label: 'Hacker',    emoji: '>', color: '#00ff41', rgb: '0, 255, 65' },
+  hacker:    { label: 'Terminal',    emoji: '>', color: '#00ff41', rgb: '0, 255, 65' },
   vaporwave: { label: 'Vaporwave', emoji: '~', color: '#ff71ce', rgb: '255, 113, 206' },
 };
 
