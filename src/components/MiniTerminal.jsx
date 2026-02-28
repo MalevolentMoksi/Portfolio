@@ -35,6 +35,7 @@ const HELP_TEXT = `Commandes disponibles :
   skills    — compétences techniques
   joke      — une blague de dev
   date      — date et heure actuelles
+  pet       — état du robot
   clear     — effacer le terminal`;
 
 const ABOUT_TEXT = `Enzo Morello — Étudiant en BUT Informatique à l'IUT2 de Grenoble.
@@ -135,6 +136,29 @@ const MiniTerminal = () => {
       case 'date':
         newLines.push({ type: 'system', text: new Date().toLocaleString('fr-FR') });
         break;
+
+      case 'pet': {
+        const petStats = window.getPetStats?.();
+        if (!petStats) {
+          newLines.push({
+            type: 'system',
+            text: localStorage.getItem('pet-spawned') === 'false'
+              ? '🤖 Robot rappelé. Invoque-le via l\'icône robot dans la barre.'
+              : '🤖 Robot pas encore adopté ! Clique sur l\'icône robot dans la barre.',
+          });
+        } else {
+          const bar = (val) => {
+            const filled = Math.round(val / 10);
+            return '█'.repeat(filled) + '░'.repeat(10 - filled);
+          };
+          const labels = { happy: 'Heureux 😊', content: 'Content', sad: 'Triste 😢' };
+          newLines.push({
+            type: 'system',
+            text: `🤖 État du robot :\n  Faim    : [${bar(petStats.hunger)}] ${petStats.hunger}%\n  Bonheur : [${bar(petStats.happiness)}] ${petStats.happiness}%\n  Humeur  : ${labels[petStats.mood] || petStats.mood}`,
+          });
+        }
+        break;
+      }
 
       case 'clear':
         setLines([]);

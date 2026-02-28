@@ -1,0 +1,435 @@
+/* ============================================
+   Pet Button — robot libre qui se balade
+   ============================================ */
+
+/* ---- Icône header ---- */
+.pet-icon {
+  transition: transform 0.2s ease;
+}
+
+@keyframes pet-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+
+.pet-icon--bob {
+  animation: pet-bob 1.2s ease-in-out infinite;
+}
+
+/* Point rouge quand le robot a besoin d'attention */
+.pet-btn--attention::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff5f57;
+  animation: pet-attention-pulse 1.5s ease infinite;
+}
+
+@keyframes pet-attention-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.6; transform: scale(0.8); }
+}
+
+/* Bouton quand robot est despawn */
+.pet-btn--off {
+  opacity: 0.4;
+}
+
+/* ========== Robot qui se balade ========== */
+
+.pet-wanderer {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  z-index: calc(var(--z-lightbox) - 1);
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  transition: none;              /* position gérée par JS */
+  animation: pet-spawn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pet-spawn {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Flip horizontal géré en JSX (transform sur .pet-svg-wrap) */
+
+/* .pet-svg-wrap : wrapper glow + idle float animation target */
+.pet-svg-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pet-glow-breathe 4s ease-in-out infinite;
+}
+
+/* Hover : renforce le glow sur le wrapper */
+.pet-wanderer:hover .pet-svg-wrap {
+  animation: pet-glow-breathe-hover 2.4s ease-in-out infinite;
+}
+
+/* ---- Robot SVG — couleur suit le mood ---- */
+.pet-robot {
+  --pet-color: var(--color-primary);
+  --pet-bg: #080808;
+  color: var(--pet-color);
+  filter:
+    drop-shadow(0 0 1px rgba(var(--color-primary-rgb), 0.28))
+    drop-shadow(0 0 3px rgba(var(--color-primary-rgb), 0.12));
+}
+
+/* ---- Glow breathe keyframes ---- */
+@keyframes pet-glow-breathe {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 1px rgba(var(--color-primary-rgb), 0.2))
+      drop-shadow(0 0 3px rgba(var(--color-primary-rgb), 0.08));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 2px rgba(var(--color-primary-rgb), 0.35))
+      drop-shadow(0 0 5px rgba(var(--color-primary-rgb), 0.14));
+  }
+}
+
+@keyframes pet-glow-breathe-hover {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 2px rgba(var(--color-primary-rgb), 0.3))
+      drop-shadow(0 0 5px rgba(var(--color-primary-rgb), 0.14));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 3px rgba(var(--color-primary-rgb), 0.4))
+      drop-shadow(0 0 7px rgba(var(--color-primary-rgb), 0.18));
+  }
+}
+
+/* ---- LED chest indicators ---- */
+.pet-led {
+  animation: pet-led-blink 2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.pet-led--alt {
+  animation-delay: 1s;
+}
+
+@keyframes pet-led-blink {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+/* ---- Forehead loader bar ---- */
+.pet-loader-bar {
+  transform-origin: left center;
+  transform-box: fill-box;
+  animation: pet-loader-slide 3s ease-in-out infinite;
+}
+
+@keyframes pet-loader-slide {
+  0%   { transform: scaleX(0.25); opacity: 0.7; }
+  40%  { transform: scaleX(0.9);  opacity: 1; }
+  70%  { transform: scaleX(0.55); opacity: 0.85; }
+  100% { transform: scaleX(0.25); opacity: 0.7; }
+}
+
+/* ---- Micro-circuit corner dots ---- */
+.pet-circuit-dot {
+  animation: pet-circuit-pulse 5s ease-in-out infinite;
+}
+
+@keyframes pet-circuit-pulse {
+  0%, 100% { opacity: 0.22; }
+  50%       { opacity: 0.45; }
+}
+
+/* ---- Eye pupil inner glow ---- */
+.pet-eye-pupil {
+  filter: drop-shadow(0 0 1.5px currentColor);
+}
+
+body[data-mood="hacker"] .pet-robot {
+  --pet-color: #00ff41;
+}
+
+body[data-mood="vaporwave"] .pet-robot {
+  --pet-color: #ff71ce;
+}
+
+/* ---- Animations du robot ---- */
+@keyframes pet-shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-3px); }
+  40%      { transform: translateX(3px); }
+  60%      { transform: translateX(-2px); }
+  80%      { transform: translateX(2px); }
+}
+
+@keyframes pet-bounce {
+  0%, 100% { transform: translateY(0); }
+  30%      { transform: translateY(-6px); }
+  50%      { transform: translateY(0); }
+  70%      { transform: translateY(-3px); }
+}
+
+@keyframes pet-antenna-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.pet-robot--shake {
+  animation: pet-shake 0.5s ease-in-out infinite;
+}
+
+.pet-robot--bounce {
+  animation: pet-bounce 0.6s ease;
+}
+
+.pet-robot--antenna-spin .pet-antenna-tip {
+  animation: pet-antenna-spin 0.8s linear infinite;
+  transform-origin: 24px 0.5px;
+}
+
+/* ========== HUD flottant (click-on-pet) ========== */
+
+.pet-hud {
+  position: fixed;
+  width: max-content;
+  min-width: 210px;
+  max-width: min(300px, calc(100vw - 16px));
+  background: rgba(8, 8, 8, 0.96);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+  border-radius: 10px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(var(--color-primary-rgb), 0.08);
+  z-index: calc(var(--z-lightbox) - 1);
+  animation: pet-hud-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  pointer-events: auto;
+}
+
+@keyframes pet-hud-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Header du HUD */
+.pet-hud-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.12);
+  background: rgba(30, 30, 30, 0.9);
+}
+
+.pet-hud-title {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+  user-select: none;
+  letter-spacing: 0.04em;
+}
+
+.pet-hud-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pet-hud-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ---- Texte d'humeur ---- */
+.pet-mood-text {
+  text-align: center;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0.4rem 0.6rem 0;
+  font-style: italic;
+  min-height: 1.2em;
+}
+
+/* ---- Mood badge ---- */
+.pet-hud-status {
+  display: flex;
+  justify-content: center;
+  padding: 0.35rem 0.6rem 0;
+}
+
+.pet-hud-mood-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  padding: 0.18rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 1px solid currentColor;
+  opacity: 0.9;
+  user-select: none;
+}
+
+.pet-hud-mood-badge--happy   { color: #7be47b; background: rgba(123, 228, 123, 0.1); }
+.pet-hud-mood-badge--content { color: rgba(var(--color-primary-rgb), 1); background: rgba(var(--color-primary-rgb), 0.08); }
+.pet-hud-mood-badge--sad     { color: #f08080; background: rgba(240, 128, 128, 0.1); }
+
+/* ---- Needs / tip hints ---- */
+.pet-hud-needs,
+.pet-hud-tip {
+  margin: 0.35rem 0.6rem 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  font-size: 0.66rem;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.pet-hud-needs {
+  color: #f08080;
+  background: rgba(240, 128, 128, 0.08);
+  border: 1px solid rgba(240, 128, 128, 0.2);
+}
+
+.pet-hud-tip {
+  color: rgba(var(--color-primary-rgb), 0.75);
+  background: rgba(var(--color-primary-rgb), 0.06);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.15);
+}
+
+/* ---- Barres de stats ---- */
+.pet-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem 0.5rem;
+}
+
+.pet-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pet-stat-icon {
+  font-size: 0.8rem;
+  width: 1.3em;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.pet-stat-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pet-stat-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--color-primary);
+  transition: width 0.4s ease;
+}
+
+.pet-stat-fill--critical {
+  background: #f08080;
+}
+
+.pet-stat-value {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+  width: 2.4em;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Boutons d'action ---- */
+.pet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.5rem 0.6rem;
+  border-top: 1px solid rgba(var(--color-primary-rgb), 0.08);
+  margin-top: 0.2rem;
+}
+
+.pet-action-btn {
+  flex: 1;
+  padding: 0.35rem 0.2rem;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+  border-radius: 7px;
+  background: rgba(var(--color-primary-rgb), 0.06);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-family: inherit;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.pet-action-btn:hover:not(:disabled) {
+  background: rgba(var(--color-primary-rgb), 0.18);
+  border-color: rgba(var(--color-primary-rgb), 0.4);
+  transform: translateY(-1px);
+}
+
+.pet-action-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.pet-action-btn:disabled {
+  opacity: 0.4;
+  cursor: wait;
+}
+
+/* Countdown badge inside disabled action buttons */
+.pet-cd-badge {
+  display: inline-block;
+  margin-left: 0.25em;
+  font-size: 0.58rem;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 480px) {
+  .pet-hud {
+    min-width: 0;
+    max-width: calc(100vw - 16px);
+  }
+
+  .pet-action-btn {
+    font-size: 0.64rem;
+    padding: 0.3rem 0.15rem;
+  }
+}
+
+

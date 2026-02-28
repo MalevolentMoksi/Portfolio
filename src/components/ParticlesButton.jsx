@@ -111,6 +111,7 @@ const effects = {
     });
 
     setTimeout(() => smoothRestore(1200), 600);
+    window.petReact?.('scared');
   },
 
   /**
@@ -123,6 +124,7 @@ const effects = {
     const cx = Math.random() * window.innerWidth;
     const cy = Math.random() * window.innerHeight;
     let active = true;
+    window.petReact?.('excited');
 
     const pull = () => {
       if (!active) return;
@@ -173,6 +175,8 @@ const effects = {
       });
     }
 
+    window.petReact?.('dizzy');
+
     // Uniformiser TOUTES les particules (nouvelles incluses) à stormSpeed
     // en préservant leur direction individuelle
     pJS.particles.array.forEach((pt) => {
@@ -208,6 +212,7 @@ const effects = {
     const pJS = getPJS();
     if (!pJS) return;
     let active = true;
+    window.petReact?.('dizzy');
 
     const fall = () => {
       if (!active) return;
