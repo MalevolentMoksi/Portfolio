@@ -13,6 +13,7 @@ const BASE_SPEED = 0.6;       // px/frame en balade
 const MAX_SPEED = 1.2;        // px/frame max en balade
 const MAGNET_RADIUS = 200;    // rayon d'attraction au curseur
 const MAGNET_SPEED = 2.5;     // px/frame max sous attraction
+const DRAG_FAST_THRESHOLD = 8; // vitesse (px/frame) à partir de laquelle scale + spin s'activent
 
 const LS = {
   hunger: 'pet-hunger',
@@ -490,6 +491,16 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   useEffect(() => { petMoodRef.current = petMood; }, [petMood]);
   // Hysteresis: +1/frame moving right, -1/frame moving left. Flip commits after ±15 frames (~0.5 s).
   const flipHysteresisRef = useRef(0);
+  // Drag
+  const isDraggingRef      = useRef(false);
+  const dragOffsetRef      = useRef({ x: 0, y: 0 });
+  const dragHasMovedRef    = useRef(false);
+  const dragScaredFiredRef = useRef(false);
+  const dragSpeedRef       = useRef(0);
+  const dragRotRef         = useRef(0);
+  const [isDragging,    setIsDragging]    = useState(false);
+  const [dragSpeed,     setDragSpeed]     = useState(0);
+  const [dragRotation,  setDragRotation]  = useState(0);
 
   /* ── Suivi du curseur ── */
   useEffect(() => {
@@ -504,7 +515,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   /* ── Boucle d'animation RAF ── */
   useEffect(() => {
     const tick = () => {
-      if (hudOpen) { rafRef.current = requestAnimationFrame(tick); return; }
+      if (hudOpen || isDraggingRef.current) { rafRef.current = requestAnimationFrame(tick); return; }
 
       const p = posRef.current;
       const v = velRef.current;
@@ -674,6 +685,74 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
 
   const toggleHud = () => setHudOpen((h) => !h);
 
+  /* ── Drag — pointer capture ── */
+  const handleDragStart = useCallback((e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    isDraggingRef.current      = true;
+    dragHasMovedRef.current    = false;
+    dragScaredFiredRef.current = false;
+    setIsDragging(true);
+    dragOffsetRef.current = {
+      x: e.clientX - posRef.current.x,
+      y: e.clientY - posRef.current.y,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    e.stopPropagation();
+  }, []);
+
+  const handleDragMove = useCallback((e) => {
+    if (!isDraggingRef.current) return;
+    // Only count as a drag once the pointer has actually moved a few pixels
+    if (!dragHasMovedRef.current) {
+      const dx0 = e.clientX - (dragOffsetRef.current.x + posRef.current.x);
+      const dy0 = e.clientY - (dragOffsetRef.current.y + posRef.current.y);
+      if (Math.abs(dx0) < 4 && Math.abs(dy0) < 4) return; // ignore micro-jitter
+      dragHasMovedRef.current = true;
+    }
+    // Fire scared once on first real movement
+    if (!dragScaredFiredRef.current) {
+      dragScaredFiredRef.current = true;
+      onBehavior('scared');
+    }
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const nx = clamp(e.clientX - dragOffsetRef.current.x, HALF, vw - HALF);
+    const ny = clamp(e.clientY - dragOffsetRef.current.y, HEADER_H + 10, vh - HALF);
+    posRef.current = { x: nx, y: ny };
+    setPos({ x: nx, y: ny });
+    // Update facing direction immediately while dragging
+    const dx = e.movementX;
+    if (Math.abs(dx) > 0.5) {
+      flipHysteresisRef.current = dx > 0 ? 20 : -20;
+      setFacingLeft(dx < 0);
+    }
+    // Track drag speed (smoothed) and accumulate spin rotation
+    const spd = Math.sqrt(e.movementX * e.movementX + e.movementY * e.movementY);
+    dragSpeedRef.current = dragSpeedRef.current * 0.65 + spd * 0.35;
+    setDragSpeed(dragSpeedRef.current);
+    if (dragSpeedRef.current > DRAG_FAST_THRESHOLD) {
+      dragRotRef.current += e.movementX * 3;
+      setDragRotation(dragRotRef.current);
+    }
+  }, [onBehavior]);
+
+  const handleDragEnd = useCallback((e) => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    setIsDragging(false);
+    // Throw velocity from last pointer movement
+    velRef.current = {
+      x: clamp(e.movementX * 0.5, -MAX_SPEED, MAX_SPEED),
+      y: clamp(e.movementY * 0.5, -MAX_SPEED, MAX_SPEED),
+    };
+    if (dragHasMovedRef.current) {
+      onBehavior('excited');
+    }
+    // Reset smoothed drag speed so scale springs back to normal
+    dragSpeedRef.current = 0;
+    setDragSpeed(0);
+  }, [onBehavior]);
+
   /* ── HUD position — measured after render, viewport-safe smart placement ── */
   const [hudPos, setHudPos] = useState(null);
   useEffect(() => {
@@ -736,9 +815,13 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       {/* Robot qui se balade */}
       <motion.div
         ref={robotRef}
-        className="pet-wanderer"
+        className={`pet-wanderer${isDragging ? ' pet-wanderer--dragging' : ''}`}
         style={{ left: `${pos.x - HALF}px`, top: `${pos.y - HALF}px` }}
-        onClick={toggleHud}
+        onClick={() => { if (!dragHasMovedRef.current) toggleHud(); }}
+        onPointerDown={handleDragStart}
+        onPointerMove={handleDragMove}
+        onPointerUp={handleDragEnd}
+        onPointerCancel={handleDragEnd}
         role="button"
         tabIndex={-1}
         aria-label="Robot de compagnie — cliquer pour interagir"
@@ -755,21 +838,38 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       >
         {(() => {
           const dir = facingLeft ? -1 : 1;
-          const stretch = Math.min(0.13, Math.max(0, (speedLevel - 0.4) * 0.1));
+          const stretch    = Math.min(0.13, Math.max(0, (speedLevel - 0.4) * 0.1));
+          const isFastDrag = isDragging && dragSpeed > DRAG_FAST_THRESHOLD;
+          const dragScale  = isFastDrag
+            ? 1 + Math.min(0.6, (dragSpeed - DRAG_FAST_THRESHOLD) * 0.035)
+            : 1;
           return (
             <div className="pet-svg-wrap">
               <motion.div
-                whileHover={{ scale: 1.1 }}
+                whileHover={isFastDrag ? {} : { scale: 1.1 }}
                 whileTap={{ scale: 0.9, scaleY: 0.82 }}
-                animate={{
-                  y: [0, -7, 0],
+                animate={isFastDrag ? {
+                  scale:  dragScale,
+                  rotate: dragRotation,
+                  scaleX: dir,
+                  scaleY: 1,
+                  y: 0,
+                } : {
+                  scale:  1,
+                  y:      [0, -7, 0],
                   rotate: [-1, 2, -1],
                   scaleX: dir * (1 + stretch),
                   scaleY: 1 - stretch * 0.5,
                 }}
-                transition={{
+                transition={isFastDrag ? {
+                  scale:  { type: 'spring', stiffness: 260, damping: 18 },
+                  rotate: { type: 'spring', stiffness: 420, damping: 8 },
+                  scaleX: { type: 'spring', stiffness: 260, damping: 18 },
+                  scaleY: { type: 'spring', stiffness: 260, damping: 18 },
+                } : {
                   y:      { duration: 3.2, repeat: Infinity, ease: 'easeInOut', repeatType: 'loop' },
                   rotate: { duration: 3.2, repeat: Infinity, ease: 'easeInOut', repeatType: 'loop' },
+                  scale:  { type: 'spring', stiffness: 260, damping: 18 },
                   scaleX: { type: 'spring', stiffness: 100, damping: 20 },
                   scaleY: { type: 'spring', stiffness: 180, damping: 16 },
                 }}

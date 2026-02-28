@@ -50,10 +50,15 @@
   width: 60px;
   height: 60px;
   z-index: calc(var(--z-lightbox) - 1);
-  cursor: pointer;
+  cursor: grab;
   pointer-events: auto;
   user-select: none;
+  touch-action: none;            /* active le drag tactile sans déclencher le scroll */
   transition: none;              /* position gérée par JS */
+}
+
+.pet-wanderer--dragging {
+  cursor: grabbing;
 }
 
 /* Flip horizontal géré en JSX (transform sur .pet-svg-wrap) */
