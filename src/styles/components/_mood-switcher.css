@@ -46,9 +46,7 @@
 
 /* ---- Panel ---- */
 .mood-panel {
-  position: absolute;
-  top: calc(100% + 12px);
-  right: 0;
+  position: fixed;
   width: 190px;
   background: rgba(8, 8, 8, 0.96);
   border: 1px solid rgba(var(--color-primary-rgb), 0.3);
@@ -57,7 +55,7 @@
     0 8px 32px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(var(--color-primary-rgb), 0.08);
   padding: 0.5rem;
-  z-index: calc(var(--z-header) + 5);
+  z-index: var(--z-lightbox);
   animation: mood-panel-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
@@ -167,6 +165,5 @@ body[data-mood="vaporwave"] {
 @media (max-width: 480px) {
   .mood-panel {
     width: 170px;
-    right: -30px;
   }
 }

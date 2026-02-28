@@ -79,9 +79,7 @@
 
 /* ---- Panel ---- */
 .mini-terminal-panel {
-  position: absolute;
-  top: calc(100% + 12px);
-  right: 0;
+  position: fixed;
   width: min(380px, 92vw);
   max-height: 420px;
   background: rgba(8, 8, 8, 0.96);
@@ -93,7 +91,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  z-index: calc(var(--z-header) + 5);
+  z-index: var(--z-lightbox);
   animation: terminal-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
@@ -229,12 +227,8 @@
 
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
-  /* Ancrage fixe centré sous le header pour éviter tout débordement de viewport */
+  /* Centrage mobile — position gérée en JS (portal), on ne garde que les dimensions */
   .mini-terminal-panel {
-    position: fixed;
-    top: calc(var(--header-height, 60px) + 8px);
-    left: 0;
-    right: 0;
     margin: 0 auto;
     width: min(420px, 94vw);
     max-height: 75vh;

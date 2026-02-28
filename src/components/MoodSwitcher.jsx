@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useMood, MOODS } from '../contexts/MoodContext.jsx';
 
 const MOOD_KEYS = Object.keys(MOODS);
@@ -8,12 +9,17 @@ const MoodSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [spinKey, setSpinKey] = useState(0);
   const panelRef = useRef(null);
+  const panelDivRef = useRef(null);
+  const [panelPos, setPanelPos] = useState(null);
 
   /* ── Fermer au clic extérieur ── */
   useEffect(() => {
     if (!isOpen) return;
     const handle = (e) => {
-      if (panelRef.current && !panelRef.current.contains(e.target)) {
+      if (
+        (panelRef.current && !panelRef.current.contains(e.target)) &&
+        !(panelDivRef.current && panelDivRef.current.contains(e.target))
+      ) {
         setIsOpen(false);
       }
     };
@@ -28,7 +34,12 @@ const MoodSwitcher = () => {
     document.addEventListener('keydown', handle);
     return () => document.removeEventListener('keydown', handle);
   }, [isOpen]);
-
+  /* —— Position du panneau (portal → coordonnées viewport) —— */
+  useEffect(() => {
+    if (!isOpen || !panelRef.current) return;
+    const rect = panelRef.current.getBoundingClientRect();
+    setPanelPos({ top: rect.bottom + 12, right: window.innerWidth - rect.right });
+  }, [isOpen]);
   /* ── Changer de mood avec animation ── */
   const handleMoodChange = useCallback((newMood) => {
     if (newMood === mood) return;
@@ -87,8 +98,17 @@ const MoodSwitcher = () => {
       </button>
 
       {/* Panneau de sélection */}
-      {isOpen && (
-        <div className="mood-panel" role="radiogroup" aria-label="Choisir une ambiance">
+      {isOpen && createPortal(
+        <div
+          ref={panelDivRef}
+          className="mood-panel"
+          role="radiogroup"
+          aria-label="Choisir une ambiance"
+          style={panelPos ? {
+            top: `${panelPos.top}px`,
+            right: `${panelPos.right}px`,
+          } : {}}
+        >
           <div className="mood-panel-title">Ambiance</div>
           {MOOD_KEYS.map((key) => {
             const m = MOODS[key];
@@ -113,7 +133,8 @@ const MoodSwitcher = () => {
               </button>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { academicProjects, personalProjects, getAllTags } from '@/data/projects.js';
 import { discoverMusicTracks } from '@/utils/discoverMusicTracks.js';
 
@@ -111,6 +112,8 @@ const MiniTerminal = () => {
   const outputRef = useRef(null);
   const inputRef = useRef(null);
   const panelRef = useRef(null);
+  const panelDivRef = useRef(null);
+  const [panelPos, setPanelPos] = useState(null);
 
   /* ── Scroll auto ── */
   useEffect(() => {
@@ -125,12 +128,25 @@ const MiniTerminal = () => {
       inputRef.current.focus();
     }
   }, [isOpen]);
-
+  /* —— Position du panneau (portal → coordonnées viewport) —— */
+  useEffect(() => {
+    if (!isOpen || !panelRef.current) return;
+    const rect = panelRef.current.getBoundingClientRect();
+    if (window.innerWidth <= 768) {
+      const hh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 60;
+      setPanelPos({ top: hh + 8, left: 0, right: 0 });
+    } else {
+      setPanelPos({ top: rect.bottom + 12, right: window.innerWidth - rect.right });
+    }
+  }, [isOpen]);
   /* ── Fermer au clic extérieur ── */
   useEffect(() => {
     if (!isOpen) return;
     const handle = (e) => {
-      if (panelRef.current && !panelRef.current.contains(e.target)) {
+      if (
+        (panelRef.current && !panelRef.current.contains(e.target)) &&
+        !(panelDivRef.current && panelDivRef.current.contains(e.target))
+      ) {
         setIsOpen(false);
         setIconState('idle');
       }
@@ -287,8 +303,19 @@ const MiniTerminal = () => {
       </button>
 
       {/* Panneau terminal */}
-      {isOpen && (
-        <div className="mini-terminal-panel" role="dialog" aria-label="Mini terminal">
+      {isOpen && createPortal(
+        <div
+          ref={panelDivRef}
+          className="mini-terminal-panel"
+          role="dialog"
+          aria-label="Mini terminal"
+          style={panelPos ? {
+            top: `${panelPos.top}px`,
+            ...(panelPos.left !== undefined
+              ? { left: `${panelPos.left}px`, right: `${panelPos.right}px` }
+              : { right: `${panelPos.right}px` }),
+          } : {}}
+        >
           <div className="mini-terminal-titlebar">
             <span className="mini-terminal-dots">
               <span className="dot dot--red" />
@@ -326,7 +353,8 @@ const MiniTerminal = () => {
               aria-label="Saisie de commande"
             />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
