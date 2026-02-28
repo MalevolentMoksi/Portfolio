@@ -1,4 +1,24 @@
+- Stats dans le terminal
 - Faire la page Projet pour la SAE3
 - Vérifier la page d'accueil niveau texte (ajouter full stack, parler de design)
 - Meilleures illustrations pour les projets
 - CV accessible
+- Implémenter des logos avec des transitions hyper fluides :
+
+1. CSS & SVG : La méthode légère
+
+C’est la plus courante pour les icônes simples (comme le passage du soleil à la lune). On utilise une seule balise <svg> contenant tous les éléments, et on anime les propriétés via CSS.
+
+    Comment ça marche : On change l'opacité, la rotation ou la position (transform) des éléments internes du SVG.
+
+    Pourquoi ça rend bien : Les transitions CSS sont accélérées par le GPU, ce qui les rend ultra-fluides.
+
+    Exemple : Pour le bouton "Soleil/Lune", les rayons du soleil s'estompent pendant que le cercle central se transforme légèrement et qu'un "masque" vient créer l'échancrure de la lune.
+
+2. Framer Motion (React) ou GSAP : Le contrôle total
+
+Si tu travailles avec un framework comme React, Framer Motion est l'outil ultime. Il permet de faire du "Layout Morphing" : tu lui donnes l'état A et l'état B, et il calcule intelligemment le chemin entre les deux.
+
+    L'astuce : Utiliser layoutId. Si tu as une icône dans deux composants différents, Framer Motion va créer une transition fluide entre les deux plutôt que de les remplacer brusquement.
+
+    GSAP : Très utilisé pour des animations plus complexes où tu veux qu'une forme se déforme physiquement pour en devenir une autre (le fameux Morphing).

@@ -1,77 +1,30 @@
 /* ============================================
-   Header Component Styles
-   ============================================
-   Compact mode : la classe .header--compact est basculée une seule fois
-   par seuil de défilement (Layout.jsx). Le navigateur gère l'animation
-   via des transitions CSS optimisées — zéro mise à jour par frame,
-   zéro boucle de rétroaction layout. */
+  Header — Split
+  ============================================
+  Header primaire (sticky) : [logo · navigation · liens sociaux]
+  Header secondaire (non sticky) : hero de page */
 
 header.header--main {
-  background: rgba(26, 26, 26, 0.62);
-  padding: var(--space-lg);
-  border-bottom: 2px solid var(--color-primary);
+  background: rgba(12, 12, 12, 0.72);
+  border-bottom: 2px solid rgba(212, 175, 55, 0.8);
   position: sticky;
   top: 0;
   z-index: var(--z-header);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "brand nav social";
   align-items: center;
-  transition: padding 0.3s ease-out;
-}
-
-header.header--main.header--compact {
-  padding: 0.75rem;
-}
-
-/* ---- Hero section ---- */
-header.header--main .header--hero {
-  overflow: hidden;
-  will-change: opacity, transform, max-height;
-  max-height: 500px;
-  opacity: 1;
-  transform: scale(1);
-  transform-origin: top center;
-  pointer-events: auto;
-  transition:
-    max-height 0.3s ease-out,
-    opacity 0.25s ease-out,
-    transform 0.25s ease-out,
-    margin-top 0.3s ease-out;
-}
-
-header.header--main.header--compact .header--hero {
-  max-height: 0;
-  opacity: 0;
-  transform: scale(0.85);
-  pointer-events: none;
-  margin-top: 0;
-}
-
-/* ---- Desktop nav margin ---- */
-header.header--main .header--nav-desktop {
-  margin: var(--space-md) 0;
-  transition: margin 0.3s ease-out;
-}
-
-header.header--main.header--compact .header--nav-desktop {
-  margin: 0;
+  column-gap: var(--space-sm);
+  padding: 0.8rem var(--space-lg);
 }
 
 /* ---- Branding ---- */
 .header--branding {
-  position: absolute;
-  left: var(--space-lg);
-  top: var(--space-lg);
+  grid-area: brand;
   display: flex;
   align-items: center;
-  transition: top 0.3s ease-out, transform 0.3s ease-out;
-}
-
-header.header--main.header--compact .header--branding {
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 .brand-logo {
@@ -121,9 +74,10 @@ header.header--main.header--compact .header--branding {
 
 /* ---- Desktop Navigation ---- */
 .header--nav-desktop {
+  grid-area: nav;
   display: none;
-  width: 100%;
-  margin: var(--space-md) 0;
+  width: auto;
+  margin: 0;
 }
 
 .header--nav-desktop ul {
@@ -176,11 +130,23 @@ header.header--main.header--compact .header--branding {
   border-color: var(--color-accent-light);
 }
 
-/* ---- Hero Section (Title & Subtitles) ---- */
-.header--hero {
+/* ---- Header secondaire (non sticky) ---- */
+.header--secondary {
+  max-width: var(--container-max-width);
+  margin: var(--space-md) auto var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(12, 12, 12, 0.72);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: var(--border-radius-md);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  position: relative;
+  z-index: var(--z-base);
+}
+
+.header--secondary .header--hero {
   text-align: center;
   width: 100%;
-  margin-top: var(--space-md);
 }
 
 .header--hero-home {
@@ -202,25 +168,19 @@ header.header--main.header--compact .header--branding {
   align-items: center;
 }
 
-.header--hero h1 {
-  margin-bottom: var(--space-sm);
+.header--secondary .header--hero h1 {
+  font-size: 1.4rem;
   margin-top: 0;
+  margin-bottom: 0.2rem;
 }
 
-.header--hero h3,
-.header--hero h4 {
-  margin-bottom: var(--space-xs);
+.header--secondary .header--hero h3,
+.header--secondary .header--hero h4 {
+  font-size: 0.85rem;
   margin-top: 0;
+  margin-bottom: 0;
   font-weight: 400;
   opacity: 0.9;
-}
-
-/* ---- Hamburger toggle compact centering ----
-   Le positionnement de base est défini dans _hamburger-menu.css ;
-   ici on ne gère que le compact-mode avec une spécificité plus haute. */
-header.header--main.header--compact .hamburger-toggle {
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 /* ---- Typing effect cursor ---- */
@@ -236,26 +196,45 @@ header.header--main.header--compact .hamburger-toggle {
   50% { opacity: 0; }
 }
 
-/* ---- Show desktop nav on larger screens ---- */
+/* ---- Actions interactives (slot droit de la barre de navigation) ---- */
+.header--actions {
+  grid-area: social;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ---- Hamburger dans le slot social (mobile) ---- */
+header.header--main .hamburger-toggle {
+  grid-area: social;
+  position: static;
+  align-self: center;
+  justify-self: end;
+}
+
+/* ---- Affichage nav desktop ---- */
 @media (min-width: 769px) {
   .header--nav-desktop {
     display: block;
   }
 }
 
-/* ---- Responsive — tablet ---- */
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+/* ---- Tablet ≤ 768px ---- */
 @media (max-width: 768px) {
+
   header.header--main {
-    padding: var(--space-md);
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "brand social";
+    padding: 0.6rem var(--space-md);
   }
 
-  header.header--main.header--compact {
-    padding: 0.75rem;
-  }
-
-  .header--branding {
-    left: var(--space-md);
-    top: var(--space-md);
+  .header--secondary {
+    margin: var(--space-sm) var(--space-md) var(--space-md);
+    padding: var(--space-sm) var(--space-md);
   }
 
   .brand-logo {
@@ -273,13 +252,13 @@ header.header--main.header--compact .hamburger-toggle {
     font-size: 0.85rem;
   }
 
-  .header--hero h1 {
+  .header--secondary .header--hero h1 {
     font-size: var(--font-size-h2);
   }
 
-  .header--hero h3,
-  .header--hero h4 {
-    font-size: 1rem;
+  .header--secondary .header--hero h3,
+  .header--secondary .header--hero h4 {
+    font-size: 0.9rem;
   }
 
   .header--hero-home {
@@ -292,19 +271,16 @@ header.header--main.header--compact .hamburger-toggle {
   }
 }
 
-/* ---- Responsive — mobile ---- */
+/* ---- Mobile ≤ 480px ---- */
 @media (max-width: 480px) {
+
   header.header--main {
-    padding: calc((var(--space-sm) + var(--space-md)) / 2) var(--space-sm);
+    padding: 0.5rem var(--space-sm);
   }
 
-  header.header--main.header--compact {
-    padding: 0.75rem var(--space-sm);
-  }
-
-  .header--branding {
-    left: var(--space-sm);
-    top: var(--space-sm);
+  .header--secondary {
+    margin: var(--space-sm);
+    padding: var(--space-sm);
   }
 
   .brand-logo {
@@ -322,14 +298,16 @@ header.header--main.header--compact .hamburger-toggle {
     display: none;
   }
 
-  .header--hero h1 {
-    font-size: 1.8rem;
-    margin-bottom: var(--space-xs);
+  .header--secondary .header--hero h1 {
+    font-size: 1.4rem;
+    margin-bottom: 0.1rem;
   }
 
-  .header--hero h3,
-  .header--hero h4 {
-    font-size: 0.9rem;
-    margin-bottom: 0;
+  .header--secondary .header--hero h3,
+  .header--secondary .header--hero h4 {
+    font-size: 0.8rem;
   }
+
+
 }
+

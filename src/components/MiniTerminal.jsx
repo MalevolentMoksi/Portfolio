@@ -1,0 +1,250 @@
+import { useState, useRef, useEffect, useCallback } from 'react';
+
+/* ── Données statiques ─────────────────────────────── */
+
+const DEV_JOKES = [
+  "Pourquoi les développeurs détestent la nature ? Parce qu'il y a trop de bugs.",
+  "Il y a 10 types de personnes : celles qui comprennent le binaire et les autres.",
+  "Un développeur ne va jamais boire un café... il va exécuter un Java.",
+  "!false — c'est drôle parce que c'est true.",
+  "Combien de programmeurs faut-il pour changer une ampoule ? Aucun, c'est un problème hardware.",
+  "['hip','hip'] — hip hip array !",
+  "Un SQL query entre dans un bar, voit deux tables et demande : « Je peux joindre ? »",
+  "Le Wi-Fi est tombé pendant 5 minutes, j'ai dû parler à ma famille. Ils ont l'air sympa.",
+  "La première règle du code : ça marche ? On ne touche plus.",
+  "Mon code fonctionne et je ne sais pas pourquoi. Mon code ne fonctionne pas et je ne sais pas pourquoi.",
+];
+
+const SKILLS = [
+  'JavaScript / React', 'HTML5 / CSS3', 'Python', 'Java',
+  'SQL / PostgreSQL', 'Git', 'Node.js', 'Linux',
+];
+
+const PROJECTS = [
+  { name: 'Application de planification de banquets', path: '/projet-MEGASAE' },
+  { name: "Implémentation d'un besoin client", path: '/projet-SAE12' },
+  { name: "Installation d'un poste pour le développement", path: '/projet-SAE3' },
+  { name: "Création d'une base de données", path: '/projet-SAE4' },
+  { name: "Création d'un site institutionnel", path: '/projet-SAE56' },
+];
+
+const HELP_TEXT = `Commandes disponibles :
+  help      — afficher cette aide
+  about     — à propos de moi
+  projects  — lister mes projets
+  skills    — compétences techniques
+  joke      — une blague de dev
+  date      — date et heure actuelles
+  clear     — effacer le terminal`;
+
+const ABOUT_TEXT = `Enzo Morello — Étudiant en BUT Informatique à l'IUT2 de Grenoble.
+Passionné par le développement web, les jeux vidéo et la création.
+Parcours Développeur d'applications.`;
+
+/* ── Composant ─────────────────────────────────────── */
+
+const MiniTerminal = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [lines, setLines] = useState([
+    { type: 'system', text: 'Bienvenue ! Tapez "help" pour la liste des commandes.' },
+  ]);
+  const [input, setInput] = useState('');
+  const [iconState, setIconState] = useState('idle'); // idle | open
+  const outputRef = useRef(null);
+  const inputRef = useRef(null);
+  const panelRef = useRef(null);
+
+  /* ── Scroll auto ── */
+  useEffect(() => {
+    if (outputRef.current) {
+      outputRef.current.scrollTop = outputRef.current.scrollHeight;
+    }
+  }, [lines]);
+
+  /* ── Focus input quand ouvert ── */
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
+  /* ── Fermer au clic extérieur ── */
+  useEffect(() => {
+    if (!isOpen) return;
+    const handle = (e) => {
+      if (panelRef.current && !panelRef.current.contains(e.target)) {
+        setIsOpen(false);
+        setIconState('idle');
+      }
+    };
+    // Délai pour ne pas attraper le clic d'ouverture
+    const id = setTimeout(() => document.addEventListener('mousedown', handle), 0);
+    return () => {
+      clearTimeout(id);
+      document.removeEventListener('mousedown', handle);
+    };
+  }, [isOpen]);
+
+  /* ── Fermer avec Escape ── */
+  useEffect(() => {
+    if (!isOpen) return;
+    const handle = (e) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        setIconState('idle');
+      }
+    };
+    document.addEventListener('keydown', handle);
+    return () => document.removeEventListener('keydown', handle);
+  }, [isOpen]);
+
+  /* ── Commandes ── */
+  const processCommand = useCallback((cmd) => {
+    const trimmed = cmd.trim().toLowerCase();
+    if (!trimmed) return;
+
+    const newLines = [{ type: 'input', text: `$ ${cmd}` }];
+
+    switch (trimmed) {
+      case 'help':
+        newLines.push({ type: 'system', text: HELP_TEXT });
+        break;
+
+      case 'about':
+        newLines.push({ type: 'system', text: ABOUT_TEXT });
+        break;
+
+      case 'projects': {
+        const list = PROJECTS.map((p, i) => `  ${i + 1}. ${p.name}`).join('\n');
+        newLines.push({ type: 'system', text: `Projets :\n${list}` });
+        break;
+      }
+
+      case 'skills': {
+        const list = SKILLS.map((s) => `  • ${s}`).join('\n');
+        newLines.push({ type: 'system', text: `Compétences :\n${list}` });
+        break;
+      }
+
+      case 'joke': {
+        const joke = DEV_JOKES[Math.floor(Math.random() * DEV_JOKES.length)];
+        newLines.push({ type: 'joke', text: joke });
+        break;
+      }
+
+      case 'date':
+        newLines.push({ type: 'system', text: new Date().toLocaleString('fr-FR') });
+        break;
+
+      case 'clear':
+        setLines([]);
+        setInput('');
+        return;
+
+      default:
+        newLines.push({
+          type: 'error',
+          text: `Commande inconnue : "${trimmed}". Tapez "help" pour voir les commandes.`,
+        });
+    }
+
+    setLines((prev) => [...prev, ...newLines]);
+    setInput('');
+  }, []);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      processCommand(input);
+    }
+  };
+
+  const toggleTerminal = () => {
+    setIsOpen((prev) => {
+      const next = !prev;
+      setIconState(next ? 'open' : 'idle');
+      return next;
+    });
+  };
+
+  return (
+    <div className="mini-terminal-wrapper" ref={panelRef}>
+      {/* Bouton icône dans la barre */}
+      <button
+        className="header-action-btn"
+        onClick={toggleTerminal}
+        aria-label="Ouvrir le mini-terminal"
+        aria-expanded={isOpen}
+        title="Terminal"
+      >
+        <svg
+          className={`terminal-icon terminal-icon--${iconState}`}
+          viewBox="0 0 24 24"
+          width="17"
+          height="17"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          {/* Chevron (>) — morphs into a blinking cursor when open */}
+          <polyline
+            className="terminal-icon__chevron"
+            points="4 17 10 11 4 5"
+          />
+          {/* Underscore (_) — slides right when open */}
+          <line
+            className="terminal-icon__cursor"
+            x1="12" y1="19" x2="20" y2="19"
+          />
+        </svg>
+      </button>
+
+      {/* Panneau terminal */}
+      {isOpen && (
+        <div className="mini-terminal-panel" role="dialog" aria-label="Mini terminal">
+          <div className="mini-terminal-titlebar">
+            <span className="mini-terminal-dots">
+              <span className="dot dot--red" />
+              <span className="dot dot--yellow" />
+              <span className="dot dot--green" />
+            </span>
+            <span className="mini-terminal-title">enzo@portfolio:~</span>
+          </div>
+
+          <div className="mini-terminal-output" ref={outputRef}>
+            {lines.map((line, i) => (
+              <div key={i} className={`mini-terminal-line mini-terminal-line--${line.type}`}>
+                {line.text.split('\n').map((segment, j) => (
+                  <span key={j}>
+                    {segment}
+                    {j < line.text.split('\n').length - 1 && <br />}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+
+          <div className="mini-terminal-input-row">
+            <span className="mini-terminal-prompt">$</span>
+            <input
+              ref={inputRef}
+              type="text"
+              className="mini-terminal-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Tapez une commande…"
+              spellCheck={false}
+              autoComplete="off"
+              aria-label="Saisie de commande"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MiniTerminal;

@@ -25,6 +25,7 @@
 @import './components/_contact-form.css';
 @import './components/_lightbox.css';
 @import './components/_three-scene.css';
+@import './components/_mini-terminal.css';
 
 /* Effects & animations */
 @import './_effects.css';

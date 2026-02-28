@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import BackToTopButton from './BackToTopButton.jsx';
 import Breadcrumbs from './Breadcrumbs.jsx';
 import Footer from './Footer.jsx';
 import HamburgerMenu from './HamburgerMenu.jsx';
+import MiniTerminal from './MiniTerminal.jsx';
 import useDocumentMeta from '../hooks/useDocumentMeta.js';
 import usePortfolioModules from '../hooks/usePortfolioModules.js';
 import { getAssetPath } from '../utils/assetPath.js';
@@ -70,7 +71,6 @@ const pageConfig = {
 const Layout = () => {
   const location = useLocation();
   const config = pageConfig[location.pathname] || pageConfig['/'];
-  const headerRef = useRef(null);
 
   useDocumentMeta(config.metaTitle, config.metaDescription);
   usePortfolioModules(trackFiles);
@@ -83,41 +83,7 @@ const Layout = () => {
     });
   }, [location.pathname]);
 
-  // Bascule compact/expanded via une classe CSS unique (pas de mise à jour par frame).
-  // Hystérésis : compact à > 80px, expand à < 30px — empêche le clignotement au seuil.
-  // La transition visuelle est entièrement gérée par le CSS (0.3s, browser-optimized).
-  useEffect(() => {
-    let ticking = false;
-    let isCompact = false;
 
-    const COMPACT_THRESHOLD = 80;
-    const EXPAND_THRESHOLD = 30;
-
-    const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const header = headerRef.current;
-        if (header) {
-          const scrollY = window.scrollY;
-          if (!isCompact && scrollY > COMPACT_THRESHOLD) {
-            header.classList.add('header--compact');
-            isCompact = true;
-          } else if (isCompact && scrollY < EXPAND_THRESHOLD) {
-            header.classList.remove('header--compact');
-            isCompact = false;
-          }
-        }
-        ticking = false;
-      });
-    };
-
-    // Vérifier la position initiale (rechargement en milieu de page)
-    handleScroll();
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <>
@@ -134,7 +100,6 @@ const Layout = () => {
       />
 
       <header
-        ref={headerRef}
         className="header--main"
       >
         {/* Branding Section */}
@@ -165,13 +130,19 @@ const Layout = () => {
         {/* Mobile Hamburger Menu */}
         <HamburgerMenu />
 
-        {/* Page Title & Subtitle - Always in DOM, hidden via CSS */}
+        {/* Actions interactives — slot droit de la barre de navigation */}
+        <div className="header--actions" aria-label="Actions interactives">
+          <MiniTerminal />
+        </div>
+      </header>
+
+      <section className="header--secondary" aria-label="En-tête secondaire de la page">
         <div className="header--hero">
           <h1 id="main-title">{config.heading}</h1>
           {config.subheading ? <h3>{config.subheading}</h3> : null}
           {config.subheadingAlt ? <h4>{config.subheadingAlt}</h4> : null}
         </div>
-      </header>
+      </section>
 
       <main id="main">
         <ReadingTimeProvider>
