@@ -360,19 +360,24 @@ class MusicPlayer {
         <button id="next-btn" aria-label="Piste suivante" class="icon-btn">
           <i class="fa-solid fa-forward-step"></i>
         </button>
-        <button id="mute-btn" aria-label="Couper le son" class="icon-btn">
-          <i class="fa-solid fa-volume-high volume-high"></i>
-          <i class="fa-solid fa-volume-low volume-low" style="display:none;"></i>
-          <i class="fa-solid fa-volume-xmark volume-muted" style="display:none;"></i>
-        </button>
+        <div class="volume-wrapper">
+          <button id="mute-btn" aria-label="Couper le son" class="icon-btn">
+            <i class="fa-solid fa-volume-high volume-high"></i>
+            <i class="fa-solid fa-volume-low volume-low" style="display:none;"></i>
+            <i class="fa-solid fa-volume-xmark volume-muted" style="display:none;"></i>
+          </button>
+          <div class="volume-popup">
+            <div class="volume-popup-track">
+              <div class="volume-popup-fill"></div>
+              <input type="range" id="volume-slider" class="volume-slider-vertical" min="0" max="100" value="70" orient="vertical" aria-label="Volume">
+            </div>
+          </div>
+        </div>
       </div>
       <div class="queue-menu" style="display: none;">
         <div class="queue-list" role="listbox" aria-label="Liste des pistes">
           <!-- Populated dynamically -->
         </div>
-      </div>
-      <div class="volume-control-container" style="display: none;">
-        <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="70" aria-label="Volume">
       </div>
       <div class="time-display"><span class="current-time">0:00</span> / <span class="duration">0:00</span></div>
       <div class="progress-container" role="progressbar" aria-label="Progression de la piste">
@@ -403,7 +408,9 @@ class MusicPlayer {
       retractBtn: container.querySelector('#player-retract-btn'),
       peekBtn,
       volumeSlider: container.querySelector('#volume-slider'),
-      volumeControlContainer: container.querySelector('.volume-control-container'),
+      volumeWrapper: container.querySelector('.volume-wrapper'),
+      volumePopup: container.querySelector('.volume-popup'),
+      volumeFill: container.querySelector('.volume-popup-fill'),
       queueMenu: container.querySelector('.queue-menu'),
       queueList: container.querySelector('.queue-list'),
       loadingIndicator: container.querySelector('.loading-indicator'),
@@ -434,12 +441,16 @@ class MusicPlayer {
     this.elements.nextBtn.addEventListener('click', () => this.nextTrack());
     this.elements.queueBtn.addEventListener('click', () => this.toggleQueue());
     this.elements.muteBtn.addEventListener('click', () => this.toggleMute());
-    this.elements.volumeSlider.addEventListener('input', (e) => this.setVolume(e.target.value / 100));
-    this.elements.muteBtn.addEventListener('mouseenter', () => {
-      this.elements.volumeControlContainer.style.display = 'block';
+    this.elements.volumeSlider.addEventListener('input', (e) => {
+      this.setVolume(e.target.value / 100);
+      this.updateVolumeFill();
     });
-    this.elements.volumeControlContainer.addEventListener('mouseleave', () => {
-      this.elements.volumeControlContainer.style.display = 'none';
+    // Show/hide vertical volume popup on wrapper hover
+    this.elements.volumeWrapper.addEventListener('mouseenter', () => {
+      this.elements.volumePopup.classList.add('open');
+    });
+    this.elements.volumeWrapper.addEventListener('mouseleave', () => {
+      this.elements.volumePopup.classList.remove('open');
     });
     this.elements.progressContainer.addEventListener('click', (e) => this.seek(e));
     
@@ -487,6 +498,13 @@ class MusicPlayer {
     if (this.elements.volumeSlider) {
       this.elements.volumeSlider.value = Math.round(this.audio.volume * 100);
     }
+    this.updateVolumeFill();
+  }
+
+  updateVolumeFill() {
+    if (!this.elements.volumeFill) return;
+    const pct = this.isMuted ? 0 : Math.round(this.audio.volume * 100);
+    this.elements.volumeFill.style.height = `${pct}%`;
   }
   
   formatTime(seconds) {
