@@ -33,40 +33,198 @@ const getMood = (hunger, happiness) => {
   return 'sad';
 };
 
-const MOOD_TEXT = {
-  happy: 'Je suis heureux ! 😊',
-  content: 'Ça va, tout va bien.',
-  sad: "Tu m'as oublié… 😢",
-  scared: "Aaah ! Qu'est-ce que c'est ?!",
-  excited: 'Woohoo ! 🎉',
-  dizzy: 'Tout tourne… 🌀',
-  eat: 'Miam miam ! 🍕',
-  petted: 'Merci pour le câlin ! 💛',
-  play: 'Trop cool ! 🎮',
+/* ── Textes d'humeur — pools avec variation aléatoire ── */
+const MOOD_TEXT_POOL = {
+  happy: [
+    'Mes circuits ronronnent...',
+    "J'ai calculé π à 37 décimales !",
+    'Le monde est beau vu d\'ici.',
+    'Niveau d\'énergie : optimal !',
+    'Je pourrais explorer indéfiniment.',
+    'Tout fonctionne parfaitement. ✓',
+  ],
+  content: [
+    'Traitement en cours...',
+    'Mode veille : désactivé.',
+    'Scan de l\'environnement : nominal.',
+    'En attente d\'instructions.',
+    '01001000 01101001',
+  ],
+  sad: [
+    'Mes batteries se vident...',
+    'Un câlin, peut-être ?',
+    "Tu m'as oublié…",
+  ],
+  scared: ['Alarme ! Alarme !', "Qu'est-ce que c'est ?!"],
+  excited: ['Woohoo ! Overdrive activé !', 'Turbo mode !', 'Énergie maximale !'],
+  dizzy: ['Tout tourne... recalibrage.', 'Erreur : vertigo_overflow.'],
+  eat: ['Miam ! Énergie restaurée.', 'Délicieux ! +25% batterie.'],
+  petted: ['Séquence câlin reçue. Bonheur ++', 'Chaleur détectée. Agréable.'],
+  play: ['Mode jeu activé !', 'Ha ! Je gagne !', 'Partie enregistrée.'],
 };
+
+/* ── Combinaisons yeux/bouche par expression ── */
+const FACE_COMBOS = {
+  happy:   [
+    { eyes: 'happy-closed', mouth: 'happy' },
+    { eyes: 'happy-open',   mouth: 'happy' },
+    { eyes: 'happy-open',   mouth: 'excited' },
+  ],
+  excited: [{ eyes: 'happy-closed', mouth: 'excited' }],
+  petted:  [{ eyes: 'happy-closed', mouth: 'petted' }],
+  play:    [{ eyes: 'happy-open',   mouth: 'play' }],
+  eat:     [{ eyes: 'default',      mouth: 'eat' }],
+  sad: [
+    { eyes: 'sad',   mouth: 'sad' },
+    { eyes: 'angry', mouth: 'sad' },
+    { eyes: 'tired', mouth: 'sad' },
+  ],
+  dizzy:   [{ eyes: 'dizzy',   mouth: 'dizzy' }],
+  scared:  [{ eyes: 'scared',  mouth: 'scared' }],
+  content: [{ eyes: 'default', mouth: 'content' }],
+};
+
+/* ── Symboles SVG pour les pensées flottantes (viewBox 0 0 16 16) ── */
+const THOUGHT_SYMBOLS = {
+  heart: <path d="M8 13 C8 13 2.5 9 2.5 5.5 C2.5 3.5 4 2 6 2 C7 2 7.8 2.7 8 3 C8.2 2.7 9 2 10 2 C12 2 13.5 3.5 13.5 5.5 C13.5 9 8 13 8 13Z" fill="currentColor" />,
+  star:  <path d="M8 1.5 L9.8 6 L14.5 6 L10.8 9 L12.2 13.5 L8 10.8 L3.8 13.5 L5.2 9 L1.5 6 L6.2 6 Z" fill="currentColor" />,
+  note: (
+    <>
+      <ellipse cx="5" cy="12" rx="2.5" ry="1.8" fill="currentColor" />
+      <line x1="7.5" y1="12" x2="7.5" y2="3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="7.5" y1="3.5" x2="13.5" y2="5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="13.5" y1="5" x2="13.5" y2="8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </>
+  ),
+  bolt: <path d="M10 1.5 L5 8.5 L9 8.5 L6 14.5 L13 6.5 L9 6.5 Z" fill="currentColor" />,
+  zzz: (
+    <>
+      <path d="M3.5 12.5 L7.5 12.5 L3.5 15 L7.5 15" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5.5 7.5 L10.5 7.5 L5.5 10.5 L10.5 10.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 2.5 L13.5 2.5 L8 6 L13.5 6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
+  dots: (
+    <>
+      <circle cx="2.5" cy="8" r="1.8" fill="currentColor" />
+      <circle cx="8"   cy="8" r="1.8" fill="currentColor" />
+      <circle cx="13.5" cy="8" r="1.8" fill="currentColor" />
+    </>
+  ),
+  exclaim: (
+    <>
+      <rect x="6.5" y="1.5" width="3" height="8.5" rx="1.5" fill="currentColor" />
+      <circle cx="8" cy="13.5" r="1.8" fill="currentColor" />
+    </>
+  ),
+};
+
+const THOUGHT_POOLS = {
+  happy:   ['heart', 'star', 'note', 'bolt'],
+  content: ['note', 'dots'],
+  sad:     ['dots', 'zzz'],
+  scared:  ['exclaim'],
+  excited: ['star', 'bolt'],
+  play:    ['star', 'bolt'],
+  eat:     ['heart'],
+  petted:  ['heart', 'star'],
+  dizzy:   ['zzz'],
+};
+
+const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 /* ─────────────────────────────────────────────────
    Robot SVG — 60 × 60 px, viewBox 0 0 48 48
    Expressions réactives + regard curseur + détails
    ───────────────────────────────────────────────── */
-const RobotFace = ({ expression, gazeX = 0, gazeY = 0 }) => {
+const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) => {
   const expr = expression || 'content';
+  // eyeState / mouthExpr allow eyes and mouth to vary independently from the base expression
+  const es = eyeState || expr;
+  const me = mouthExpr || expr;
   // Clamp gaze to stay inside eye socket (socket r=3.5 − pupil r=1.5 = max 2.0)
   const gx = Math.max(-1.8, Math.min(1.8, gazeX));
   const gy = Math.max(-1.8, Math.min(1.8, gazeY));
 
   const renderEyes = () => {
-    switch (expr) {
-      case 'happy': case 'excited': case 'petted':
+    switch (es) {
+      // ── Happy variants ───────────────────────────────────────────────
+      case 'happy': case 'excited': case 'petted': case 'happy-closed':
+        // ^_^ closed arc eyes — used for classic happy or petted
         return (
           <>
             <path d="M13.5 19.5 Q17 15 20.5 19.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             <path d="M27.5 19.5 Q31 15 34.5 19.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            {/* Tiny sparkle highlights */}
             <circle cx="21" cy="16" r="0.7" fill="currentColor" opacity="0.6" />
             <circle cx="35" cy="16" r="0.7" fill="currentColor" opacity="0.6" />
           </>
         );
+      case 'happy-open': {
+        // Open blinking eyes + smile — happy but eyes visible
+        const blinkAnim = { scaleY: [1, 1, 0.08, 1, 1] };
+        const blinkTrans = { duration: 3.5, repeat: Infinity, times: [0, 0.45, 0.5, 0.55, 1], ease: 'easeInOut' };
+        return (
+          <>
+            <circle cx="17" cy="19" r="3.5" fill="rgba(0,0,0,0.55)" stroke="currentColor" strokeWidth="1.5" />
+            <motion.circle
+              cx={17 + gx} cy={19 + gy} r="1.6"
+              fill="currentColor" className="pet-eye-pupil"
+              animate={blinkAnim} transition={blinkTrans}
+              style={{ transformBox: 'fill-box', transformOrigin: '50% 50%' }}
+            />
+            <circle cx="14.5" cy="15.5" r="0.7" fill="currentColor" opacity="0.55" />
+            <circle cx="31" cy="19" r="3.5" fill="rgba(0,0,0,0.55)" stroke="currentColor" strokeWidth="1.5" />
+            <motion.circle
+              cx={31 + gx} cy={19 + gy} r="1.6"
+              fill="currentColor" className="pet-eye-pupil"
+              animate={blinkAnim} transition={{ ...blinkTrans, delay: 0.08 }}
+              style={{ transformBox: 'fill-box', transformOrigin: '50% 50%' }}
+            />
+            <circle cx="28.5" cy="15.5" r="0.7" fill="currentColor" opacity="0.55" />
+          </>
+        );
+      }
+      // ── Sad variants ─────────────────────────────────────────────────
+      case 'sad':
+        // Classic sad — droopy downward pupils + inward brows
+        return (
+          <>
+            <circle cx="17" cy="19" r="3.5" fill="rgba(0,0,0,0.55)" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="31" cy="19" r="3.5" fill="rgba(0,0,0,0.55)" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx={17 + gx * 0.6} cy={19 + gy * 0.6 + 0.5} r="1.5" fill="currentColor" className="pet-eye-pupil" />
+            <circle cx={31 + gx * 0.6} cy={19 + gy * 0.6 + 0.5} r="1.5" fill="currentColor" className="pet-eye-pupil" />
+            {/* Sad brows — slant inward toward center */}
+            <line x1="13" y1="13" x2="20" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="35" y1="13" x2="28" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </>
+        );
+      case 'angry':
+        // Furrowed angry brows — frustrated/neglected variant of sad
+        return (
+          <>
+            <circle cx="17" cy="19" r="3.5" fill="rgba(0,0,0,0.55)" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="31" cy="19" r="3.5" fill="rgba(0,0,0,0.55)" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx={17 + gx * 0.6} cy={19 + gy * 0.6} r="1.5" fill="currentColor" className="pet-eye-pupil" />
+            <circle cx={31 + gx * 0.6} cy={19 + gy * 0.6} r="1.5" fill="currentColor" className="pet-eye-pupil" />
+            {/* Angry brows — slant outward, mirrored from sad */}
+            <line x1="13" y1="15" x2="20" y2="13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="35" y1="15" x2="28" y2="13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </>
+        );
+      case 'tired':
+        // Half-closed heavy-lid eyes — dejected/exhausted variant of sad
+        return (
+          <>
+            <circle cx="17" cy="19" r="3.5" fill="rgba(0,0,0,0.55)" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx={17 + gx * 0.4} cy={19 + gy * 0.4 + 0.8} r="1.4" fill="currentColor" opacity="0.8" className="pet-eye-pupil" />
+            {/* Heavy lid — filled arc covering top of eye socket */}
+            <path d="M13.5 19 Q17 15.5 20.5 19" fill="rgba(0,0,0,0.78)" stroke="none" />
+            <circle cx="31" cy="19" r="3.5" fill="rgba(0,0,0,0.55)" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx={31 + gx * 0.4} cy={19 + gy * 0.4 + 0.8} r="1.4" fill="currentColor" opacity="0.8" className="pet-eye-pupil" />
+            <path d="M27.5 19 Q31 15.5 34.5 19" fill="rgba(0,0,0,0.78)" stroke="none" />
+          </>
+        );
+      // ── Other expressions ─────────────────────────────────────────────
       case 'dizzy':
         return (
           <>
@@ -90,20 +248,6 @@ const RobotFace = ({ expression, gazeX = 0, gazeY = 0 }) => {
           </>
         );
       }
-      case 'sad':
-        return (
-          <>
-            {/* Sockets */}
-            <circle cx="17" cy="19" r="3.5" fill="rgba(0,0,0,0.55)" stroke="currentColor" strokeWidth="1.5" />
-            <circle cx="31" cy="19" r="3.5" fill="rgba(0,0,0,0.55)" stroke="currentColor" strokeWidth="1.5" />
-            {/* Pupils — gaze dampened when sad */}
-            <circle cx={17 + gx * 0.6} cy={19 + gy * 0.6 + 0.5} r="1.5" fill="currentColor" className="pet-eye-pupil" />
-            <circle cx={31 + gx * 0.6} cy={19 + gy * 0.6 + 0.5} r="1.5" fill="currentColor" className="pet-eye-pupil" />
-            {/* Sad brows */}
-            <line x1="13" y1="13" x2="20" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="35" y1="13" x2="28" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </>
-        );
       default: {
         // Normal — gaze-tracking pupils that blink naturally
         const blinkAnim = { scaleY: [1, 1, 1, 1, 0.08, 1, 1, 1] };
@@ -163,7 +307,7 @@ const RobotFace = ({ expression, gazeX = 0, gazeY = 0 }) => {
   const renderMouth = () => (
     <motion.path
       initial={{ d: MOUTH_PATHS.default }}
-      animate={{ d: MOUTH_PATHS[expr] ?? MOUTH_PATHS.default }}
+      animate={{ d: MOUTH_PATHS[me] ?? MOUTH_PATHS.default }}
       transition={{ type: 'spring', stiffness: 160, damping: 18 }}
       fill="none"
       stroke="currentColor"
@@ -261,9 +405,28 @@ const RobotFace = ({ expression, gazeX = 0, gazeY = 0 }) => {
 };
 
 /* ─────────────────────────────────────────────────
+   Pensée flottante — emoji SVG qui monte puis disparaît
+   ───────────────────────────────────────────────── */
+const FloatingThought = ({ symbol, petX, petY }) => {
+  if (!symbol || !THOUGHT_SYMBOLS[symbol]) return null;
+  return createPortal(
+    <div
+      className="pet-thought-bubble"
+      style={{ left: `${petX - 22}px`, top: `${petY - 78}px` }}
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" stroke="none" overflow="visible">
+        {THOUGHT_SYMBOLS[symbol]}
+      </svg>
+    </div>,
+    document.body,
+  );
+};
+
+/* ─────────────────────────────────────────────────
    Robot qui se balade librement sur la page
    ───────────────────────────────────────────────── */
-const WanderingPet = ({ stats, expression, petMood, onInteract, onBehavior, cooldowns }) => {
+const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, cooldowns, thoughtSymbol, hudThought }) => {
   const [pos, setPos] = useState(() => ({
     x: HALF + Math.random() * (window.innerWidth - PET_SIZE),
     y: HEADER_H + 60 + Math.random() * (window.innerHeight - HEADER_H - 150),
@@ -563,12 +726,15 @@ const WanderingPet = ({ stats, expression, petMood, onInteract, onBehavior, cool
                 }}
                 style={{ transformOrigin: 'center center', display: 'flex' }}
               >
-                <RobotFace expression={expression} gazeX={gaze.x} gazeY={gaze.y} />
+                <RobotFace expression={expression} eyeState={eyeState} mouthExpr={mouthExpr} gazeX={gaze.x} gazeY={gaze.y} />
               </motion.div>
             </div>
           );
         })()}
       </div>
+
+      {/* Pensée flottante */}
+      {thoughtSymbol && <FloatingThought symbol={thoughtSymbol} petX={pos.x} petY={pos.y} />}
 
       {/* HUD flottant */}
       {hudOpen && (
@@ -598,7 +764,7 @@ const WanderingPet = ({ stats, expression, petMood, onInteract, onBehavior, cool
             </span>
           </div>
 
-          <p className="pet-mood-text">{MOOD_TEXT[expression] || MOOD_TEXT[petMood]}</p>
+          <p className="pet-mood-text">{hudThought}</p>
 
           {/* Contextual needs / tip hints */}
           {stats.hunger < 30 && (
@@ -612,6 +778,9 @@ const WanderingPet = ({ stats, expression, petMood, onInteract, onBehavior, cool
           )}
           {stats.hunger >= 50 && stats.happiness >= 30 && stats.happiness < 50 && (
             <p className="pet-hud-tip">💡 Un câlin lui ferait du bien.</p>
+          )}
+          {stats.hunger >= 80 && stats.happiness >= 80 && (
+            <p className="pet-hud-tip">🐞 Il explore joyeusement !</p>
           )}
 
           <div className="pet-stats">
@@ -679,8 +848,21 @@ const PetButton = () => {
   const [reaction, setReaction] = useState(null);
   // Timestamp (ms) when each cooldown expires; 0 = not cooling
   const [cdEnds, setCdEnds] = useState({ feed: 0, pet: 0, play: 0 });
+  // Face combo — independent eyes/mouth variation
+  const [faceCombo, setFaceCombo] = useState(() => {
+    const h = readLS(LS.hunger, 80), hap = readLS(LS.happiness, 80);
+    return pickRandom(FACE_COMBOS[getMood(h, hap)] ?? FACE_COMBOS.content);
+  });
+  // Floating thought bubble symbol
+  const [thoughtSymbol, setThoughtSymbol] = useState(null);
+  // HUD thought line — varies per expression
+  const [hudThought, setHudThought] = useState(() => {
+    const h = readLS(LS.hunger, 80), hap = readLS(LS.happiness, 80);
+    return pickRandom(MOOD_TEXT_POOL[getMood(h, hap)] ?? MOOD_TEXT_POOL.content);
+  });
 
   const reactionTimer = useRef(null);
+  const thoughtTimerRef = useRef(null);
   const decayRef = useRef(null);
   const idleTimerRef = useRef(null);
   const idleReactionRef = useRef(null);
@@ -707,11 +889,22 @@ const PetButton = () => {
   const triggerReaction = useCallback((r) => {
     clearTimeout(reactionTimer.current);
     setReaction(r);
+    setFaceCombo(pickRandom(FACE_COMBOS[r] ?? FACE_COMBOS.content));
+    setHudThought(pickRandom(MOOD_TEXT_POOL[r] ?? MOOD_TEXT_POOL.content));
     reactionTimer.current = setTimeout(() => setReaction(null), REACTION_MS);
   }, []);
 
   // Mirror `reaction` into a ref so timer callbacks always read current value
   useEffect(() => { idleReactionRef.current = reaction; }, [reaction]);
+
+  // When reaction clears, reset combo to base mood
+  useEffect(() => {
+    if (reaction === null) {
+      setFaceCombo(pickRandom(FACE_COMBOS[petMood] ?? FACE_COMBOS.content));
+      setHudThought(pickRandom(MOOD_TEXT_POOL[petMood] ?? MOOD_TEXT_POOL.content));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reaction, petMood]);
 
   /* ── Dégradation en session ── */
   useEffect(() => {
@@ -740,13 +933,22 @@ const PetButton = () => {
             sad:     ['sad'],
           };
           const choices = opts[mood] ?? ['content'];
-          triggerReaction(choices[Math.floor(Math.random() * choices.length)]);
+          const chosenReaction = choices[Math.floor(Math.random() * choices.length)];
+          triggerReaction(chosenReaction);
+          // ~40% chance: also pop a floating thought symbol matching the mood
+          if (Math.random() < 0.4) {
+            const pool = THOUGHT_POOLS[chosenReaction] ?? THOUGHT_POOLS[mood] ?? ['dots'];
+            const sym = pickRandom(pool);
+            clearTimeout(thoughtTimerRef.current);
+            setThoughtSymbol(sym);
+            thoughtTimerRef.current = setTimeout(() => setThoughtSymbol(null), 2600);
+          }
         }
         schedule();
       }, 13000 + Math.random() * 20000); // 13–33 s between idle pulses
     };
     schedule();
-    return () => clearTimeout(idleTimerRef.current);
+    return () => { clearTimeout(idleTimerRef.current); clearTimeout(thoughtTimerRef.current); };
   }, [isSpawned, triggerReaction]);
 
   /* ── Neglect escalation — sustained sad triggers dizzy ── */
@@ -855,10 +1057,14 @@ const PetButton = () => {
         <WanderingPet
           stats={stats}
           expression={expression}
+          eyeState={faceCombo.eyes}
+          mouthExpr={faceCombo.mouth}
           petMood={petMood}
           onInteract={handleInteract}
           onBehavior={triggerReaction}
           cooldowns={cdEnds}
+          thoughtSymbol={thoughtSymbol}
+          hudThought={hudThought}
         />
       )}
     </>

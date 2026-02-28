@@ -436,4 +436,43 @@ body[data-mood="vaporwave"] .pet-robot {
   }
 }
 
+/* ========== Pensée flottante ========== */
+
+.pet-thought-bubble {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: rgba(8, 8, 8, 0.85);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.38);
+  border-radius: 8px;
+  color: var(--color-primary);
+  z-index: calc(var(--z-lightbox) - 1);
+  pointer-events: none;
+  animation: pet-thought-rise 2.6s ease-out forwards;
+}
+
+/* Small triangle pointer toward the robot */
+.pet-thought-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid rgba(var(--color-primary-rgb), 0.38);
+}
+
+@keyframes pet-thought-rise {
+  0%   { opacity: 0; transform: translateY(4px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  70%  { opacity: 1; transform: translateY(-16px); }
+  100% { opacity: 0; transform: translateY(-30px); }
+}
+
 
