@@ -228,12 +228,20 @@
 }
 
 /* ---- Responsive ---- */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  /* Ancrage fixe centré sous le header pour éviter tout débordement de viewport */
   .mini-terminal-panel {
-    width: 92vw;
-    right: -60px; /* centre à peu près sur mobile */
+    position: fixed;
+    top: calc(var(--header-height, 60px) + 8px);
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: min(420px, 94vw);
+    max-height: 75vh;
   }
+}
 
+@media (max-width: 480px) {
   .header-action-btn {
     width: 30px;
     height: 30px;

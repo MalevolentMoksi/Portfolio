@@ -55,3 +55,10 @@
 .particles-btn:not(:disabled):hover .particles-icon__ray {
   opacity: 1;
 }
+
+/* ---- Masquer sur mobile (les particules sont désactivées de toute façon) ---- */
+@media (max-width: 768px) {
+  .particles-btn {
+    display: none;
+  }
+}

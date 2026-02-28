@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { academicProjects, personalProjects, getAllTags } from '@/data/projects.js';
+import { discoverMusicTracks } from '@/utils/discoverMusicTracks.js';
 
 /* ── Données statiques ─────────────────────────────── */
+
+const ALL_TRACKS = discoverMusicTracks();
 
 const DEV_JOKES = [
   "Pourquoi les développeurs détestent la nature ? Parce qu'il y a trop de bugs.",
@@ -33,6 +37,7 @@ const HELP_TEXT = `Commandes disponibles :
   about     — à propos de moi
   projects  — lister mes projets
   skills    — compétences techniques
+  stats     — statistiques du portfolio et de la session
   joke      — une blague de dev
   date      — date et heure actuelles
   pet       — état du robot
@@ -41,6 +46,58 @@ const HELP_TEXT = `Commandes disponibles :
 const ABOUT_TEXT = `Enzo Morello — Étudiant en BUT Informatique à l'IUT2 de Grenoble.
 Passionné par le développement web, les jeux vidéo et la création.
 Parcours Développeur d'applications.`;
+
+/* ── Helpers ───────────────────────────────────────── */
+
+const formatElapsed = (ms) => {
+  const totalSec = Math.floor(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  if (min === 0) return `${sec}s`;
+  return `${min}m ${sec.toString().padStart(2, '0')}s`;
+};
+
+const calculateStats = () => {
+  // Portfolio
+  const totalProjects = academicProjects.length + personalProjects.length;
+  const uniqueTechs = getAllTags().length;
+
+  // Session
+  const sessionStart = parseInt(sessionStorage.getItem('session-start') || Date.now(), 10);
+  const elapsed = formatElapsed(Date.now() - sessionStart);
+  const sessionPages = JSON.parse(sessionStorage.getItem('session-pages') || '[]');
+  const pagesVisited = sessionPages.length;
+
+  // Musique
+  const trackIndex = parseInt(localStorage.getItem('music-currentTrack') || '0', 10);
+  const isPaused = localStorage.getItem('music-isPaused') === 'true';
+  const rawName = ALL_TRACKS[trackIndex] ?? `piste-${trackIndex + 1}`;
+  const trackName = rawName.replace(/\.[^.]+$/, '');
+  const musicStatus = `${trackName} (${isPaused ? '⏸' : '▶'} ${trackIndex + 1}/${ALL_TRACKS.length})`;
+
+  // Robot
+  const petStats = window.getPetStats?.();
+  let petStatus = '—';
+  if (petStats) {
+    const labels = { happy: 'Heureux 😊', content: 'Content 😐', sad: 'Triste 😢' };
+    petStatus = `${labels[petStats.mood] || petStats.mood} — bonheur: ${petStats.happiness}%`;
+  } else if (localStorage.getItem('pet-spawned') === 'false') {
+    petStatus = 'Robot rappelé';
+  }
+
+  return `Statistiques du portfolio :
+
+  Portfolio :
+    Projets        ${totalProjects} (${academicProjects.length} académiques, ${personalProjects.length} personnels)
+    Compétences    ${SKILLS.length}
+    Technologies   ${uniqueTechs} uniques
+
+  Session :
+    Pages visitées  ${pagesVisited}
+    Temps en ligne  ${elapsed}
+    Musique         ${musicStatus}
+    Robot           ${petStatus}`;
+};
 
 /* ── Composant ─────────────────────────────────────── */
 
@@ -126,6 +183,10 @@ const MiniTerminal = () => {
         newLines.push({ type: 'system', text: `Compétences :\n${list}` });
         break;
       }
+
+      case 'stats':
+        newLines.push({ type: 'system', text: calculateStats() });
+        break;
 
       case 'joke': {
         const joke = DEV_JOKES[Math.floor(Math.random() * DEV_JOKES.length)];

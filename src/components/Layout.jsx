@@ -86,6 +86,22 @@ const Layout = () => {
     });
   }, [location.pathname]);
 
+  // Initialisation du suivi de session (timestamp de début)
+  useEffect(() => {
+    if (!sessionStorage.getItem('session-start')) {
+      sessionStorage.setItem('session-start', Date.now().toString());
+    }
+  }, []);
+
+  // Suivi des pages visitées dans la session courante
+  useEffect(() => {
+    const pages = JSON.parse(sessionStorage.getItem('session-pages') || '[]');
+    if (!pages.includes(location.pathname)) {
+      pages.push(location.pathname);
+      sessionStorage.setItem('session-pages', JSON.stringify(pages));
+    }
+  }, [location.pathname]);
+
 
 
   return (
