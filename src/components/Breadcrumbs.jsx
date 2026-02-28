@@ -14,11 +14,11 @@ const Breadcrumbs = () => {
   const pathLabels = {
     'projets': 'Projets',
     'projets-personnels': 'Projets personnels',
-    'projet-MEGASAE': 'MEGASAE',
-    'projet-SAE12': 'SAE 1.2',
-    'projet-SAE3': 'SAE 3',
-    'projet-SAE4': 'SAE 4',
-    'projet-SAE56': 'SAE 5-6',
+    'projet-MEGASAE': 'Application de planification de banquets',
+    'projet-SAE12': "Implémentation d'un besoin client",
+    'projet-SAE3': "Installation d'un poste pour le développement",
+    'projet-SAE4': "Création d'une base de données",
+    'projet-SAE56': "Création d'un site institutionnel",
   };
 
   // Mapping des chemins vers leurs parents
