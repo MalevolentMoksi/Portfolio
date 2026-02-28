@@ -3,6 +3,7 @@
 - Vérifier la page d'accueil niveau texte (ajouter full stack, parler de design)
 - Meilleures illustrations pour les projets
 - CV accessible
+- Implémenter Snake quelque part
 - Implémenter des logos avec des transitions hyper fluides :
 
 1. CSS & SVG : La méthode légère

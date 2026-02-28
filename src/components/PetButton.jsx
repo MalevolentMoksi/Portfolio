@@ -695,7 +695,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         style={{ left: `${pos.x - HALF}px`, top: `${pos.y - HALF}px` }}
         onClick={toggleHud}
         role="button"
-        tabIndex={0}
+        tabIndex={-1}
         aria-label="Robot de compagnie — cliquer pour interagir"
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -867,6 +867,7 @@ const PetButton = () => {
   const idleTimerRef = useRef(null);
   const idleReactionRef = useRef(null);
   const interactionStreakRef = useRef({ count: 0, lastAt: 0 });
+  const firstSpawnRef = useRef(true);
 
   const expression = reaction || getMood(stats.hunger, stats.happiness);
   const petMood = getMood(stats.hunger, stats.happiness);
@@ -884,6 +885,26 @@ const PetButton = () => {
 
   // Migration: remove stale pet-renderer key (SVG is now the only renderer)
   useEffect(() => { localStorage.removeItem('pet-renderer'); }, []);
+
+  // Reset stats to neutral on page load (randomized ±10%)
+  useEffect(() => {
+    const randomizeNeutral = () => Math.round(50 + (Math.random() - 0.5) * 10);
+    setStats({
+      hunger: clamp(randomizeNeutral()),
+      happiness: clamp(randomizeNeutral()),
+    });
+  }, []);
+
+  // Set happy stats when pet is spawned for the first time
+  useEffect(() => {
+    if (isSpawned && firstSpawnRef.current) {
+      firstSpawnRef.current = false;
+      setStats({
+        hunger: 80,
+        happiness: 80,
+      });
+    }
+  }, [isSpawned]);
 
   /* ── Réactions temporaires ── */
   const triggerReaction = useCallback((r) => {
