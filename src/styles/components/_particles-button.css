@@ -1,0 +1,57 @@
+/* ============================================
+   Particles Button — effets visuels sur les particules
+   ============================================ */
+
+/* ---- Pulse animation quand un effet est actif ---- */
+@keyframes particles-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(var(--color-primary-rgb), 0.5);
+  }
+  50% {
+    box-shadow: 0 0 12px 4px rgba(var(--color-primary-rgb), 0.3);
+  }
+}
+
+.particles-btn--active {
+  animation: particles-pulse 0.8s ease infinite;
+  cursor: wait;
+  opacity: 0.8;
+}
+
+/* ---- Icon animations ---- */
+.particles-icon {
+  transition: transform 0.2s ease;
+}
+
+.particles-icon__star {
+  transition: opacity 0.2s ease;
+  transform-origin: 12px 12px;
+}
+
+/* Rayons : rotation continue quand actif */
+.particles-icon__ray {
+  transition: opacity 0.3s ease;
+  opacity: 0.6;
+}
+
+@keyframes particles-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.particles-icon--pulse {
+  animation: particles-spin 1s linear infinite;
+}
+
+.particles-icon--pulse .particles-icon__ray {
+  opacity: 1;
+}
+
+/* Hover effect */
+.particles-btn:not(:disabled):hover .particles-icon {
+  transform: scale(1.15) rotate(15deg);
+}
+
+.particles-btn:not(:disabled):hover .particles-icon__ray {
+  opacity: 1;
+}

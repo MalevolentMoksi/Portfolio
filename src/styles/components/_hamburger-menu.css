@@ -110,20 +110,20 @@
   color: var(--color-primary);
   text-decoration: none;
   font-weight: 500;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.2);
   transition: all var(--transition-fast);
 }
 
 .hamburger-nav ul li a:hover,
 .hamburger-nav ul li a:focus-visible {
-  background-color: rgba(212, 175, 55, 0.15);
+  background-color: rgba(var(--color-primary-rgb), 0.15);
   color: var(--color-accent-light);
   border-left: 3px solid var(--color-primary);
   padding-left: calc(var(--space-md) - 3px);
 }
 
 .hamburger-nav ul li a[aria-current="page"] {
-  background-color: rgba(212, 175, 55, 0.25);
+  background-color: rgba(var(--color-primary-rgb), 0.25);
   border-left: 3px solid var(--color-accent-light);
   padding-left: calc(var(--space-md) - 3px);
   color: var(--color-accent-light);

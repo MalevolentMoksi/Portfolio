@@ -80,8 +80,56 @@ class VisualEffects {
     });
     
     this.particlesLoaded = true;
+
+    // Appliquer le mood sauvegardé si les particules viennent de charger
+    const currentMood = document.body.getAttribute('data-mood');
+    if (currentMood && currentMood !== 'default') {
+      this.updateParticlesMood(currentMood);
+    }
+
+    // Exposer les fonctions globales pour les composants React
+    window.updateParticlesMood = (mood) => this.updateParticlesMood(mood);
   }
-  
+
+  /**
+   * Met à jour les couleurs des particules selon le mood actif
+   */
+  updateParticlesMood(mood) {
+    const MOOD_COLORS = {
+      default:   '#d4af37',
+      hacker:    '#00ff41',
+      vaporwave: '#ff71ce',
+    };
+
+    const color = MOOD_COLORS[mood] || MOOD_COLORS.default;
+
+    try {
+      const pJS = window.pJSDom?.[0]?.pJS;
+      if (!pJS) return;
+
+      // Mettre à jour la config pour les futures particules
+      pJS.particles.color.value = color;
+      pJS.particles.line_linked.color = color;
+
+      // Convertir hex en RGB
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
+      const rgb = { r, g, b };
+
+      // Mettre à jour chaque particule existante
+      pJS.particles.array.forEach((p) => {
+        p.color.value = color;
+        p.color.rgb = rgb;
+      });
+
+      // Mettre à jour la couleur de la config line_linked pour le rendu
+      pJS.particles.line_linked.color_rgb_line = rgb;
+    } catch (e) {
+      console.warn('Impossible de mettre à jour les couleurs des particules:', e);
+    }
+  }
+
   initParallax() {
     let mouseX = 0;
     let mouseY = 0;

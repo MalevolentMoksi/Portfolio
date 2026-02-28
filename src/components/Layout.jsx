@@ -5,6 +5,8 @@ import Breadcrumbs from './Breadcrumbs.jsx';
 import Footer from './Footer.jsx';
 import HamburgerMenu from './HamburgerMenu.jsx';
 import MiniTerminal from './MiniTerminal.jsx';
+import MoodSwitcher from './MoodSwitcher.jsx';
+import ParticlesButton from './ParticlesButton.jsx';
 import useDocumentMeta from '../hooks/useDocumentMeta.js';
 import usePortfolioModules from '../hooks/usePortfolioModules.js';
 import { getAssetPath } from '../utils/assetPath.js';
@@ -133,6 +135,8 @@ const Layout = () => {
         {/* Actions interactives — slot droit de la barre de navigation */}
         <div className="header--actions" aria-label="Actions interactives">
           <MiniTerminal />
+          <MoodSwitcher />
+          <ParticlesButton />
         </div>
       </header>
 

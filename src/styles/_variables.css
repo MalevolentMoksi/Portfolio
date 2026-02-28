@@ -5,7 +5,9 @@
 :root {
   /* Color Palette */
   --color-primary: #d4af37;       /* Gold - accents, borders, particles */
+  --color-primary-rgb: 212, 175, 55;  /* Triplet RGB pour rgba() dynamique */
   --color-secondary: #1a1a1a;     /* Dark gray - main backgrounds */
+  --color-secondary-rgb: 26, 26, 26;
   --color-text: #e0e0e0;          /* Light gray - body text */
   --color-bg: #000;               /* Black - page background */
   --color-accent-light: #fff8dc;  /* Cream - gradient endpoints */
@@ -81,6 +83,44 @@
  * Si un vrai mode clair est souhaité, il faudra adapter TOUTES les
  * couleurs hardcodées (rgba(26,26,26,…), etc.) en parallèle.
  */
+
+/* ============================================
+   Mood Overrides — Hacker (neon green + black)
+   ============================================ */
+body[data-mood="hacker"] {
+  --color-primary: #00ff41;
+  --color-primary-rgb: 0, 255, 65;
+  --color-secondary: #070707;
+  --color-secondary-rgb: 7, 7, 7;
+  --color-text: #00ff41;
+  --color-bg: #000000;
+  --color-accent-light: #afffaf;
+  --color-accent-pale: #39ff14;
+  --color-accent: #00ff41;
+  --primary-color: #00ff41;
+  --secondary-color: #070707;
+  --text-color: #00ff41;
+  --bg-color: #000000;
+}
+
+/* ============================================
+   Mood Overrides — Vaporwave (pink + blue)
+   ============================================ */
+body[data-mood="vaporwave"] {
+  --color-primary: #ff71ce;
+  --color-primary-rgb: 255, 113, 206;
+  --color-secondary: #1a0035;
+  --color-secondary-rgb: 26, 0, 53;
+  --color-text: #b0e0ff;
+  --color-bg: #0d001a;
+  --color-accent-light: #ffe4f6;
+  --color-accent-pale: #69b4ff;
+  --color-accent: #ff71ce;
+  --primary-color: #ff71ce;
+  --secondary-color: #1a0035;
+  --text-color: #b0e0ff;
+  --bg-color: #0d001a;
+}
 
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {

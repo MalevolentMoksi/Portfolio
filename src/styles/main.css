@@ -26,6 +26,8 @@
 @import './components/_lightbox.css';
 @import './components/_three-scene.css';
 @import './components/_mini-terminal.css';
+@import './components/_mood-switcher.css';
+@import './components/_particles-button.css';
 
 /* Effects & animations */
 @import './_effects.css';

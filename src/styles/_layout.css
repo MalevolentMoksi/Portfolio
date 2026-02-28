@@ -64,7 +64,7 @@ section:last-child {
 /* Horizontal rule */
 hr {
   border: none;
-  border-top: 1px solid rgba(212, 175, 55, 0.3);
+  border-top: 1px solid rgba(var(--color-primary-rgb), 0.3);
   margin: var(--space-xl) 0;
 }
 

@@ -6,7 +6,7 @@
 
 header.header--main {
   background: rgba(12, 12, 12, 0.72);
-  border-bottom: 2px solid rgba(212, 175, 55, 0.8);
+  border-bottom: 2px solid rgba(var(--color-primary-rgb), 0.8);
   position: sticky;
   top: 0;
   z-index: var(--z-header);
@@ -41,7 +41,7 @@ header.header--main {
 .brand-logo:hover,
 .brand-logo:focus-visible {
   color: var(--color-accent-light);
-  background: rgba(212, 175, 55, 0.1);
+  background: rgba(var(--color-primary-rgb), 0.1);
 }
 
 .logo-icon {
@@ -56,12 +56,12 @@ header.header--main {
   font-size: 1.1rem;
   border-radius: var(--border-radius-sm);
   transition: all var(--transition-fast);
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .brand-logo:hover .logo-icon,
 .brand-logo:focus-visible .logo-icon {
-  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.4);
   transform: scale(1.05);
 }
 
@@ -94,7 +94,7 @@ header.header--main {
   display: inline-block;
   padding: 0.6em 1.5em;
   border-radius: var(--border-radius-md);
-  background: rgba(212, 175, 55, 0.13);
+  background: rgba(var(--color-primary-rgb), 0.13);
   color: var(--color-primary);
   font-weight: 600;
   font-size: 1.08rem;
@@ -112,21 +112,21 @@ header.header--main {
 
 .header--nav-desktop ul li a:hover,
 .header--nav-desktop ul li a:focus-visible {
-  background: rgba(212, 175, 55, 0.45);
+  background: rgba(var(--color-primary-rgb), 0.45);
   color: var(--color-accent-light);
   border-color: var(--color-accent-light);
-  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 4px 18px rgba(var(--color-primary-rgb), 0.4);
   transform: translateY(-2px) scale(1.06);
 }
 
 .header--nav-desktop ul li a:active {
-  background: rgba(212, 175, 55, 0.6);
+  background: rgba(var(--color-primary-rgb), 0.6);
   transform: translateY(0) scale(0.98);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .header--nav-desktop ul li a[aria-current="page"] {
-  background: rgba(212, 175, 55, 0.3);
+  background: rgba(var(--color-primary-rgb), 0.3);
   border-color: var(--color-accent-light);
 }
 
@@ -136,7 +136,7 @@ header.header--main {
   margin: var(--space-md) auto var(--space-lg);
   padding: var(--space-md) var(--space-lg);
   background: rgba(12, 12, 12, 0.72);
-  border: 1px solid rgba(212, 175, 55, 0.25);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.25);
   border-radius: var(--border-radius-md);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
