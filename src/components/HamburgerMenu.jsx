@@ -1,26 +1,34 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import '@styles/components/_hamburger-menu.css';
 
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
-  // Close menu when route changes (handled by parent)
-  const handleNavClick = () => {
+  const closeMenu = () => {
     setIsOpen(false);
   };
 
-  // Close menu on Escape key
+  const toggleMenu = () => {
+    setIsOpen((prev) => !prev);
+  };
+
+  // Close menu on route change
+  useEffect(() => {
+    closeMenu();
+  }, [location.pathname]);
+
+  // Escape key and body scroll lock
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        setIsOpen(false);
+      if (e.key === 'Escape' && isOpen) {
+        closeMenu();
       }
     };
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when menu is open
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -34,29 +42,27 @@ const HamburgerMenu = () => {
 
   return (
     <>
-      {/* Hamburger Toggle Button */}
       <button
+        type="button"
         aria-label="Basculer le menu de navigation"
         aria-expanded={isOpen}
+        aria-controls="mobile-navigation"
         className={`hamburger-toggle ${isOpen ? 'active' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleMenu}
       >
-        <span></span>
-        <span></span>
-        <span></span>
+        <span className="hamburger-toggle__line"></span>
+        <span className="hamburger-toggle__line"></span>
+        <span className="hamburger-toggle__line"></span>
       </button>
 
-      {/* Overlay (closes menu when clicked) */}
-      {isOpen && (
-        <div
-          className="hamburger-overlay"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        ></div>
-      )}
+      <div
+        className={`hamburger-overlay ${isOpen ? 'open' : ''}`}
+        onClick={closeMenu}
+        aria-hidden="true"
+      ></div>
 
-      {/* Mobile Navigation Drawer */}
       <nav
+        id="mobile-navigation"
         className={`hamburger-nav ${isOpen ? 'open' : ''}`}
         aria-label="Navigation mobile"
       >
@@ -65,7 +71,7 @@ const HamburgerMenu = () => {
             <NavLink
               to="/"
               end
-              onClick={handleNavClick}
+              onClick={closeMenu}
               aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
             >
               Accueil
@@ -74,7 +80,7 @@ const HamburgerMenu = () => {
           <li>
             <NavLink
               to="/projets"
-              onClick={handleNavClick}
+              onClick={closeMenu}
               aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
             >
               Projets
@@ -83,7 +89,7 @@ const HamburgerMenu = () => {
           <li>
             <NavLink
               to="/projets-personnels"
-              onClick={handleNavClick}
+              onClick={closeMenu}
               aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
             >
               Projets personnels
