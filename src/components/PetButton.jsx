@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /* ── Configuration ── */
 const DECAY_MS = 8000;
@@ -57,7 +57,8 @@ const MOOD_TEXT_POOL = {
   ],
   scared: ['Alarme ! Alarme !', "Qu'est-ce que c'est ?!"],
   excited: ['Woohoo ! Overdrive activé !', 'Turbo mode !', 'Énergie maximale !'],
-  dizzy: ['Tout tourne... recalibrage.', 'Erreur : vertigo_overflow.'],
+  dizzy:  ['Tout tourne... recalibrage.', 'Erreur : vertigo_overflow.'],
+  woozy:  ['Téléportation... réussie... je crois.', 'Systèmes en cours de stabilisation...', 'Calibration gyroscopique requise.'],
   eat: ['Miam ! Énergie restaurée.', 'Délicieux ! +25% batterie.'],
   petted: ['Séquence câlin reçue. Bonheur ++', 'Chaleur détectée. Agréable.'],
   play: ['Mode jeu activé !', 'Ha ! Je gagne !', 'Partie enregistrée.'],
@@ -80,6 +81,7 @@ const FACE_COMBOS = {
     { eyes: 'tired', mouth: 'sad' },
   ],
   dizzy:   [{ eyes: 'dizzy',   mouth: 'dizzy' }],
+  woozy:   [{ eyes: 'woozy',  mouth: 'woozy' }],
   scared:  [{ eyes: 'scared',  mouth: 'scared' }],
   content: [{ eyes: 'default', mouth: 'content' }],
 };
@@ -129,6 +131,7 @@ const THOUGHT_POOLS = {
   eat:     ['heart'],
   petted:  ['heart', 'star'],
   dizzy:   ['zzz'],
+  woozy:   ['zzz', 'dots'],
 };
 
 const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -143,17 +146,25 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
   const es = eyeState || expr;
   const me = mouthExpr || expr;
   // Clamp gaze to stay inside eye socket (socket r=3.5 − pupil r=1.5 = max 2.0)
-  // Add jitter for natural micro-saccades + minimum offset to avoid creepy stare
-  let gx = Math.max(-1.8, Math.min(1.8, gazeX)) + (Math.sin(Date.now() * 0.003) * 0.3);
-  let gy = Math.max(-1.8, Math.min(1.8, gazeY)) + (Math.cos(Date.now() * 0.004) * 0.25);
-  // Enforce minimum offset to prevent dead-center stare
+  let gx = Math.max(-1.8, Math.min(1.8, gazeX));
+  let gy = Math.max(-1.8, Math.min(1.8, gazeY));
+  // Enforce minimum offset to prevent dead-center stare (use raw gaze direction)
   const minOffset = 0.4;
   const mag = Math.sqrt(gx * gx + gy * gy);
-  if (mag < minOffset) {
-    const angle = Math.atan2(gy, gx);
-    gx = Math.cos(angle) * minOffset;
-    gy = Math.sin(angle) * minOffset;
+  if (mag < minOffset && mag > 0.01) {
+    gx = (gx / mag) * minOffset;
+    gy = (gy / mag) * minOffset;
+  } else if (mag <= 0.01) {
+    // Near-zero gaze → nudge slightly down-right so it doesn't snap to angle 0
+    gx = minOffset * 0.7;
+    gy = minOffset * 0.7;
   }
+  // Add subtle jitter for natural micro-saccades (applied after offset so it never inverts direction)
+  gx += Math.sin(Date.now() * 0.003) * 0.18;
+  gy += Math.cos(Date.now() * 0.004) * 0.15;
+  // Final re-clamp after jitter
+  gx = Math.max(-1.8, Math.min(1.8, gx));
+  gy = Math.max(-1.8, Math.min(1.8, gy));
 
   const renderEyes = () => {
     switch (es) {
@@ -233,6 +244,18 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
             <path d="M27.5 19 Q31 15.5 34.5 19" fill="rgba(0,0,0,0.78)" stroke="none" />
           </>
         );
+      case 'woozy':
+        // X~X — crossed eyes + wavy mouth
+        return (
+          <>
+            {/* Left X eye */}
+            <line x1="14" y1="16" x2="20" y2="22" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            <line x1="20" y1="16" x2="14" y2="22" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            {/* Right X eye */}
+            <line x1="28" y1="16" x2="34" y2="22" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            <line x1="34" y1="16" x2="28" y2="22" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+          </>
+        );
       // ── Other expressions ─────────────────────────────────────────────
       case 'dizzy':
         return (
@@ -304,6 +327,7 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
     play:    'M15 26 Q24 35 33 26',
     sad:     'M17 30 Q24 25 31 30',
     dizzy:   'M16 29 Q24 24 32 29',
+    woozy:   'M16 27 C18 24 21 30 24 27 C27 24 30 30 32 27',  // ~~ wavy mouth
     scared:  'M20 27 Q24 22 28 27',  // tight upward arc — pursed gasp
     eat:     'M17 26 Q24 36 31 26',  // wide-open eating arc
     content: 'M18 28 Q24 28 30 28',
@@ -340,6 +364,7 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
     expr === 'scared' && 'pet-robot--shake',
     (expr === 'eat' || expr === 'petted' || expr === 'play') && 'pet-robot--bounce',
     (expr === 'excited' || expr === 'play') && 'pet-robot--antenna-spin',
+    expr === 'woozy' && 'pet-robot--woozy',
   ].filter(Boolean).join(' ');
 
   return (
@@ -435,7 +460,7 @@ const FloatingThought = ({ symbol, petX, petY }) => {
 /* ─────────────────────────────────────────────────
    Robot qui se balade librement sur la page
    ───────────────────────────────────────────────── */
-const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, cooldowns, thoughtSymbol, hudThought }) => {
+const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onThought, cooldowns, thoughtSymbol, hudThought }) => {
   const [pos, setPos] = useState(() => ({
     x: HALF + Math.random() * (window.innerWidth - PET_SIZE),
     y: HEADER_H + 60 + Math.random() * (window.innerHeight - HEADER_H - 150),
@@ -459,7 +484,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   const hudRef = useRef(null);
   const robotRef = useRef(null);
   // Proximity + movement behavior tracking (frame-counted cooldowns)
-  const proximityRef = useRef({ dwellFrames: 0, lastDist: Infinity, exciteCooldown: 0, scaredCooldown: 0, speedCooldown: 0 });
+  const proximityRef = useRef({ dwellFrames: 0, lastDist: Infinity, exciteCooldown: 0, scaredCooldown: 0, speedCooldown: 0, avoidDwellFrames: 0, avoidThoughtCooldown: 0 });
   // petMood in a ref so the RAF closure is never stale
   const petMoodRef = useRef(petMood);
   useEffect(() => { petMoodRef.current = petMood; }, [petMood]);
@@ -529,8 +554,19 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
           const pushback = ((120 - dist) / 120) * 0.04;
           v.x -= (dx / dist) * pushback;
           v.y -= (dy / dist) * pushback;
+          // Track dwell time near cursor while avoiding — trigger angry thought bubble
+          proximityRef.current.avoidDwellFrames++;
+          if (proximityRef.current.avoidDwellFrames >= 30 && proximityRef.current.avoidThoughtCooldown === 0) {
+            onThought('exclaim');
+            proximityRef.current.avoidDwellFrames = 0;
+            proximityRef.current.avoidThoughtCooldown = 360; // ~6s cooldown
+          }
+        } else {
+          // Reset avoid dwell when cursor is far
+          proximityRef.current.avoidDwellFrames = 0;
         }
       }
+      if (proximityRef.current.avoidThoughtCooldown > 0) proximityRef.current.avoidThoughtCooldown--;
 
       // Limiter la vitesse
       const uncappedSpeed = Math.sqrt(v.x * v.x + v.y * v.y);
@@ -698,7 +734,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   return createPortal(
     <>
       {/* Robot qui se balade */}
-      <div
+      <motion.div
         ref={robotRef}
         className="pet-wanderer"
         style={{ left: `${pos.x - HALF}px`, top: `${pos.y - HALF}px` }}
@@ -712,6 +748,10 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
             toggleHud();
           }
         }}
+        initial={{ scale: 0, opacity: 0, y: -24 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0, opacity: 0, rotate: -180, y: -20 }}
+        transition={{ type: 'spring', stiffness: 280, damping: 18 }}
       >
         {(() => {
           const dir = facingLeft ? -1 : 1;
@@ -735,12 +775,12 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
                 }}
                 style={{ transformOrigin: 'center center', display: 'flex' }}
               >
-                <RobotFace expression={expression} eyeState={eyeState} mouthExpr={mouthExpr} gazeX={gaze.x} gazeY={gaze.y} />
+                <RobotFace expression={expression} eyeState={eyeState} mouthExpr={mouthExpr} gazeX={facingLeft ? -gaze.x : gaze.x} gazeY={gaze.y} />
               </motion.div>
             </div>
           );
         })()}
-      </div>
+      </motion.div>
 
       {/* Pensée flottante */}
       {thoughtSymbol && <FloatingThought symbol={thoughtSymbol} petX={pos.x} petY={pos.y} />}
@@ -877,6 +917,8 @@ const PetButton = () => {
   const idleReactionRef = useRef(null);
   const interactionStreakRef = useRef({ count: 0, lastAt: 0 });
   const firstSpawnRef = useRef(true);
+  // Track previous isSpawned to detect false→true transitions (init to current value to avoid false trigger on mount)
+  const prevSpawnedRef = useRef(isSpawned);
 
   const expression = reaction || getMood(stats.hunger, stats.happiness);
   const petMood = getMood(stats.hunger, stats.happiness);
@@ -904,17 +946,6 @@ const PetButton = () => {
     });
   }, []);
 
-  // Set happy stats when pet is spawned for the first time
-  useEffect(() => {
-    if (isSpawned && firstSpawnRef.current) {
-      firstSpawnRef.current = false;
-      setStats({
-        hunger: 80,
-        happiness: 80,
-      });
-    }
-  }, [isSpawned]);
-
   /* ── Réactions temporaires ── */
   const triggerReaction = useCallback((r) => {
     clearTimeout(reactionTimer.current);
@@ -923,6 +954,19 @@ const PetButton = () => {
     setHudThought(pickRandom(MOOD_TEXT_POOL[r] ?? MOOD_TEXT_POOL.content));
     reactionTimer.current = setTimeout(() => setReaction(null), REACTION_MS);
   }, []);
+
+  // On every spawn: woozy landing. On first spawn only: also boost stats to happy.
+  useEffect(() => {
+    if (!prevSpawnedRef.current && isSpawned) {
+      if (firstSpawnRef.current) {
+        firstSpawnRef.current = false;
+        setStats({ hunger: 80, happiness: 80 });
+      }
+      // No cleanup return — StrictMode double-invoke would cancel the timeout before it fires
+      setTimeout(() => triggerReaction('woozy'), 450);
+    }
+    prevSpawnedRef.current = isSpawned;
+  }, [isSpawned, triggerReaction]);
 
   // Mirror `reaction` into a ref so timer callbacks always read current value
   useEffect(() => { idleReactionRef.current = reaction; }, [reaction]);
@@ -1037,6 +1081,13 @@ const PetButton = () => {
     }
   }, [cdEnds, triggerReaction]);
 
+  /* ── Thought bubble (déclenché depuis WanderingPet) ── */
+  const handleThought = useCallback((symbol) => {
+    clearTimeout(thoughtTimerRef.current);
+    setThoughtSymbol(symbol);
+    thoughtTimerRef.current = setTimeout(() => setThoughtSymbol(null), 2600);
+  }, []);
+
   /* ── Toggle spawn (recharge les stats si elles étaient basses) ── */
   const toggleSpawn = useCallback(() => {
     setIsSpawned((prev) => {
@@ -1057,6 +1108,7 @@ const PetButton = () => {
       <button
         className={`header-action-btn pet-btn${needsAttention ? ' pet-btn--attention' : ''}${!isSpawned ? ' pet-btn--off' : ''}`}
         onClick={toggleSpawn}
+        tabIndex={-1}
         aria-label={isSpawned ? 'Rappeler le robot' : 'Invoquer le robot'}
         title={isSpawned ? 'Rappeler le robot' : 'Invoquer le robot'}
       >
@@ -1083,20 +1135,24 @@ const PetButton = () => {
       </button>
 
       {/* Robot qui se balade (via portail) */}
-      {isSpawned && (
-        <WanderingPet
-          stats={stats}
-          expression={expression}
-          eyeState={faceCombo.eyes}
-          mouthExpr={faceCombo.mouth}
-          petMood={petMood}
-          onInteract={handleInteract}
-          onBehavior={triggerReaction}
-          cooldowns={cdEnds}
-          thoughtSymbol={thoughtSymbol}
-          hudThought={hudThought}
-        />
-      )}
+      <AnimatePresence>
+        {isSpawned && (
+          <WanderingPet
+            key="wandering-pet"
+            stats={stats}
+            expression={expression}
+            eyeState={faceCombo.eyes}
+            mouthExpr={faceCombo.mouth}
+            petMood={petMood}
+            onInteract={handleInteract}
+            onBehavior={triggerReaction}
+            onThought={handleThought}
+            cooldowns={cdEnds}
+            thoughtSymbol={thoughtSymbol}
+            hudThought={hudThought}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };
