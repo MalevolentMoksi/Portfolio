@@ -13,12 +13,37 @@ Modern student portfolio website (React SPA). **Feb 2026 Architecture**: Single-
 - **Routing paths**: `/`, `/projets`, `/projets-personnels`, `/projet-MEGASAE/SAE12/SAE3/SAE4/SAE56`
 - **Layout.jsx** - Shared header/footer wrapping all pages via `<Outlet />`
 
+### Components (`src/components/`)
+- **`Layout.jsx`** - Main shell: header, footer, `<Outlet />`, initializes legacy modules
+- **`Footer.jsx`** - Site footer
+- **`BackToTopButton.jsx`** - Scroll-to-top button (appears at scrollY > 300px)
+- **`Breadcrumbs.jsx`** - Auto breadcrumb trail from React Router location
+- **`HamburgerMenu.jsx`** - Mobile nav drawer
+- **`MoodSwitcher.jsx`** - Cycles site colour mood (`data-mood` on `<body>`); reads/writes `MoodContext`
+- **`ParticlesButton.jsx`** - Toggles particles.js canvas on/off
+- **`PetButton.jsx`** - Interactive robot companion: wanders the page, draggable, HUD with hunger/happiness stats, reactions, floating thought bubbles. localStorage keys: `pet-hunger`, `pet-happiness`, `pet-spawned`.
+- **`MiniTerminal.jsx`** - Decorative in-header terminal widget
+- **`ContactForm.jsx`** - Formspree-backed contact form
+- **`FilterBar.jsx`** - Tag/category filter bar for project listings
+- **`Loading.jsx`** - Full-page loading spinner
+- **`ProjectPagination.jsx`** - Pagination controls for project lists
+- **`ThreeScene.jsx`** - Three.js 3-D scene embed
+
 ### Pages Directory (`src/pages/*.jsx`)
 8 React components: `Home.jsx`, `Projets.jsx`, `ProjetsPersonnels.jsx`, `ProjetMEGASAE.jsx`, `ProjetSAE12.jsx`, `ProjetSAE3.jsx`, `ProjetSAE4.jsx`, `ProjetSAE56.jsx`
 
 ### Custom Hooks (`src/hooks/`)
 - **`useDocumentMeta(title, description)`** - Updates `<title>` and `<meta description>` per page (SEO)
 - **`usePortfolioModules(trackFiles)`** - Lazy-initializes legacy JS modules (music-player, effects, ui-enhancements, lightbox) on route change
+- **`useReadingTimeEstimate()`** - Estimates reading time for the current page content
+
+### Contexts (`src/contexts/`)
+- **`MoodContext.jsx`** - Provides `{ mood, setMood }` globally; `MoodSwitcher` writes, components can read
+- **`ReadingTimeContext.jsx`** - Provides estimated reading time to page components via `ReadingTimeProvider` (wraps `<Outlet />` in Layout)
+
+### Utils (`src/utils/`)
+- **`assetPath.js`** - `getAssetPath(path)` helper — prepends correct base URL for asset references
+- **`discoverMusicTracks.js`** - `discoverMusicTracks()` — returns the list of `.m4a` filenames from `public/assets/music/` at build time; used in `Layout.jsx` instead of a hardcoded array
 
 ### Legacy JavaScript Modules (`src/scripts/`)
 These coexist with React, initialized via `usePortfolioModules` hook in `Layout.jsx`:
@@ -30,13 +55,14 @@ These coexist with React, initialized via `usePortfolioModules` hook in `Layout.
 ### CSS Modules (`src/styles/`)
 - **`main.css`** - Central import that bundles all via `@import`
 - **Core**: `_variables.css` (CSS custom properties), `_base.css`, `_layout.css`, `_typography.css`, `_effects.css`
-- **Components** (6 files): `_header.css`, `_footer.css`, `_buttons.css`, `_music-player.css`, `_projects.css`, `_personal-projects.css`
+- **Components** (18 files): `_header.css`, `_footer.css`, `_buttons.css`, `_music-player.css`, `_projects.css`, `_personal-projects.css`, `_breadcrumbs.css`, `_contact-form.css`, `_filter-bar.css`, `_hamburger-menu.css`, `_lightbox.css`, `_loading.css`, `_mini-terminal.css`, `_mood-switcher.css`, `_particles-button.css`, `_pet-button.css`, `_project-pagination.css`, `_three-scene.css`
 - **Dark theme**: Gold accent (#d4af37), CSS variables centralized
 
 ### Assets (`public/assets/`)
 - Images: `public/assets/images/` + `drawings/` subfolder
-- Music: `public/assets/music/` (deepstone.m4a, browser.m4a, wildriver.m4a)
+- Music: `public/assets/music/` (auto-discovered by `discoverMusicTracks()`)
 - Videos: `public/assets/videos/`
+- Pet sprites: `public/assets/pet/`
 
 ## Key Implementation Patterns
 
@@ -60,11 +86,35 @@ export default Home = () => {
 ### Legacy Module Initialization (React Integration)
 ```jsx
 // Layout.jsx initializes legacy JS modules once on mount:
-const [trackFiles] = useState(['deepstone.m4a', 'browser.m4a', 'wildriver.m4a']);
+// trackFiles are auto-discovered at build time via discoverMusicTracks()
+const trackFiles = discoverMusicTracks();
 usePortfolioModules(trackFiles);
 // This creates singleton instances (musicPlayerInstance, visualEffectsInstance)
 // Modules reinitialize on route change (useEffect in usePortfolioModules)
 ```
+
+### Header Action Buttons (right slot in `<header>`)
+Four interactive widgets live in `.header--actions` inside `Layout.jsx`:
+1. **`MoodSwitcher`** — cycles `data-mood` attribute on `<body>` between `default`, `hacker`, `vaporwave`; CSS variables in `_variables.css` respond to each mood
+2. **`ParticlesButton`** — toggles the particles.js canvas (`#particles-js`)
+3. **`PetButton`** — spawns/recalls the wandering robot; see Pet section below
+4. **`MiniTerminal`** — decorative terminal panel
+
+### Pet Robot (`PetButton.jsx`)
+- **Wandering**: RAF loop, organic steering, cursor magnet/repulsion based on mood
+- **Dragging**: pointer-capture drag; `scared` reaction on first real move (>4 px), `excited` on release; scale grows + spin accumulates when dragged aggressively (`DRAG_FAST_THRESHOLD = 8 px/frame`)
+- **Stats**: `hunger` + `happiness` (0-100), reset to ~50% (±5%) synchronously at construction; decay every 8 s while spawned
+- **localStorage keys**: `pet-hunger`, `pet-happiness`, `pet-spawned`
+- **Reactions**: temporary expressions (`scared`, `excited`, `woozy`, `dizzy`, `eat`, `petted`, `play`); woozy fires on every spawn
+- **HUD**: click pet (without dragging) → dialog with mood badge, stat bars, Feed/Câliner/Jouer buttons with cooldown countdown
+- **Thought bubbles**: SVG symbols (`heart`, `star`, `note`, `bolt`, `zzz`, `dots`, `exclaim`) float above the robot
+- **Face**: `RobotFace` SVG with per-expression eyes + Framer Motion morphing mouth paths (`MOUTH_PATHS`); pupils follow cursor
+- **Global API**: `window.petReact(reaction)` and `window.getPetStats()` available in console
+
+### Mood System
+- `MoodContext` provides `{ mood, setMood }` app-wide
+- `MoodSwitcher` cycles through moods and writes `data-mood` to `document.body`
+- CSS in `_variables.css` (and component files) uses `body[data-mood="hacker"]` / `body[data-mood="vaporwave"]` selectors to retheme accent colors
 
 ### Music Player Persistence
 - **Class**: `MusicPlayer` - constructor accepts track array
@@ -101,8 +151,8 @@ usePortfolioModules(trackFiles);
 
 ### Adding a Music Track
 1. Place `.m4a` file in `public/assets/music/filename.m4a`
-2. Update `Layout.jsx`: modify `trackFiles` array passed to `usePortfolioModules()`
-3. Player auto-reads ID3 tags for metadata
+2. `discoverMusicTracks()` picks it up automatically — no code change needed
+3. Player auto-reads ID3 tags for metadata (artist, title, artwork)
 
 ### Modifying Styles
 - **Global theme**: Edit `src/styles/_variables.css` (CSS custom properties)
@@ -147,8 +197,13 @@ usePortfolioModules(trackFiles);
 | [vite.config.js](vite.config.js) | Vite 5 build config, path aliases (`@`, `@styles`, etc.), React plugin |
 | [src/App.jsx](src/App.jsx) | React Router orchestrator - defines all 8 routes |
 | [src/components/Layout.jsx](src/components/Layout.jsx) | Shared header/footer, initializes legacy modules, wraps pages via `<Outlet />` |
+| [src/components/PetButton.jsx](src/components/PetButton.jsx) | Interactive robot pet — wandering, dragging, stats, reactions, HUD |
+| [src/components/MoodSwitcher.jsx](src/components/MoodSwitcher.jsx) | Cycles site mood; writes `data-mood` on `<body>` |
+| [src/contexts/MoodContext.jsx](src/contexts/MoodContext.jsx) | Global mood state provider |
+| [src/contexts/ReadingTimeContext.jsx](src/contexts/ReadingTimeContext.jsx) | Reading time provider (wraps `<Outlet />` in Layout) |
+| [src/utils/discoverMusicTracks.js](src/utils/discoverMusicTracks.js) | Auto-discovers `.m4a` files — no hardcoded track list needed |
 | [src/hooks/useDocumentMeta.js](src/hooks/useDocumentMeta.js) | Hook for per-page SEO (title, description) |
 | [src/hooks/usePortfolioModules.js](src/hooks/usePortfolioModules.js) | Hook for lazy-loading legacy JS modules (music, effects, UI) |
-| [src/styles/_variables.css](src/styles/_variables.css) | CSS custom properties (colors, spacing, theme) |
+| [src/styles/_variables.css](src/styles/_variables.css) | CSS custom properties (colors, spacing, theme, mood overrides) |
 | [src/styles/main.css](src/styles/main.css) | Central CSS import aggregator |
-| [package.json](package.json) | React 18, React Router 6, Vite 5 dependencies
+| [package.json](package.json) | React 18, React Router 6, Vite 5, Framer Motion dependencies |

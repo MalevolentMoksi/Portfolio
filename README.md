@@ -13,8 +13,8 @@ Portfolio professionnel moderne présentant mes projets académiques et personne
 
 ```bash
 # Cloner le dépôt (si applicable)
-git clone https://github.com/MalevolentMoksi/P2.01-Portfolio.git
-cd P2.01-Portfolio
+git clone https://github.com/MalevolentMoksi/Portfolio.git
+cd Portfolio
 
 # Installer les dépendances
 npm install
@@ -82,7 +82,18 @@ P2.01-Portfolio/
 │   ├── components/                 # Composants React réutilisables
 │   │   ├── Layout.jsx             # Layout principal (header/footer + Outlet)
 │   │   ├── Footer.jsx             # Composant footer
-│   │   └── BackToTopButton.jsx    # Bouton retour en haut
+│   │   ├── BackToTopButton.jsx    # Bouton retour en haut
+│   │   ├── Breadcrumbs.jsx        # Fil d'Ariane automatique
+│   │   ├── HamburgerMenu.jsx      # Navigation mobile (drawer)
+│   │   ├── MoodSwitcher.jsx       # Bouton cycler les thèmes (default/hacker/vaporwave)
+│   │   ├── ParticlesButton.jsx    # Toggle du canvas particles.js
+│   │   ├── PetButton.jsx          # Robot de compagnie interactif (vagabond + HUD)
+│   │   ├── MiniTerminal.jsx       # Terminal décoratif dans l'en-tête
+│   │   ├── ContactForm.jsx        # Formulaire de contact (Formspree)
+│   │   ├── FilterBar.jsx          # Barre de filtres pour les projets
+│   │   ├── Loading.jsx            # Spinner plein écran
+│   │   ├── ProjectPagination.jsx  # Pagination des listes de projets
+│   │   └── ThreeScene.jsx         # Scène 3D Three.js
 │   │
 │   ├── pages/                      # Composants pages (routes)
 │   │   ├── Home.jsx               # Page d'accueil
@@ -96,7 +107,16 @@ P2.01-Portfolio/
 │   │
 │   ├── hooks/                      # Hooks React personnalisés
 │   │   ├── useDocumentMeta.js     # Hook pour title/meta description (SEO)
-│   │   └── usePortfolioModules.js # Hook d'initialisation des modules legacy
+│   │   ├── usePortfolioModules.js # Hook d'initialisation des modules legacy
+│   │   └── useReadingTimeEstimate.js # Estimation du temps de lecture
+│   │
+│   ├── contexts/                   # Contextes React globaux
+│   │   ├── MoodContext.jsx        # État global du mood (default/hacker/vaporwave)
+│   │   └── ReadingTimeContext.jsx # Contexte temps de lecture (wrapper dans Layout)
+│   │
+│   ├── utils/                      # Utilitaires
+│   │   ├── assetPath.js           # getAssetPath() — préfixe base URL pour les assets
+│   │   └── discoverMusicTracks.js # Auto-découverte des .m4a dans public/assets/music/
 │   │
 │   ├── scripts/                    # Modules JavaScript legacy (vanilla JS)
 │   │   ├── main.js                # Orchestrateur des modules
@@ -118,7 +138,19 @@ P2.01-Portfolio/
 │           ├── _buttons.css
 │           ├── _music-player.css
 │           ├── _projects.css
-│           └── _personal-projects.css
+│           ├── _personal-projects.css
+│           ├── _breadcrumbs.css
+│           ├── _contact-form.css
+│           ├── _filter-bar.css
+│           ├── _hamburger-menu.css
+│           ├── _lightbox.css
+│           ├── _loading.css
+│           ├── _mini-terminal.css
+│           ├── _mood-switcher.css
+│           ├── _particles-button.css
+│           ├── _pet-button.css
+│           ├── _project-pagination.css
+│           └── _three-scene.css
 │
 ├── public/                         # Assets statiques (copiés tel quel dans dist/)
 │   └── assets/
@@ -152,6 +184,22 @@ P2.01-Portfolio/
 - **Typing animation** : `#main-title` avec 50ms par caractère
 - **Email glitch** : Effet rotation 400ms sur `.local-part`
 - **Lightbox** : Zoom galerie sur images `.zoomable`
+
+### Fonctionnalités interactives de l'en-tête
+Quatre widgets dans le slot droit de la navigation (`header--actions`) :
+
+- **MoodSwitcher** : Cycle entre 3 thèmes visuels (`default` → `hacker` → `vaporwave`) en écrivant `data-mood` sur `<body>`. Les variables CSS dans `_variables.css` répondent à chaque mood.
+- **ParticlesButton** : Active/désactive le canvas particles.js sans rechargement de page.
+- **PetButton** : Robot de compagnie interactif.
+  - **Vagabondage** : boucle RAF avec direction organique, attraction/répulsion cursor selon l'humeur
+  - **Drag** : pointer-capture natif (souris + tactile) ; réaction `scared` au premier vrai mouvement, `excited` au relâcher ; grossit + tourne quand déplacé rapidement (seuil 8 px/frame)
+  - **Stats** : `hunger` + `happiness` (0-100) réinitialisées à ~50% à chaque chargement de page ; dégradation automatique toutes les 8 s
+  - **HUD** : clic sur le robot → dialogue avec badge humeur, barres de stats, boutons Nourrir/Câliner/Jouer (cooldowns)
+  - **Pensées flottantes** : bulles SVG (`heart`, `star`, `note`, `bolt`…) qui remontent au-dessus du robot
+  - **Expressions** : yeux + bouche morphent via Framer Motion (`RobotFace`), pupils suivent le curseur
+  - **API console** : `window.petReact('excited')`, `window.getPetStats()`
+  - **localStorage** : `pet-hunger`, `pet-happiness`, `pet-spawned`
+- **MiniTerminal** : Panel terminal décoratif dans la barre de navigation.
 
 ### SEO & Performance
 - **Meta tags dynamiques** : Title et description par page via `useDocumentMeta()`
@@ -296,19 +344,8 @@ import ProjetNEW from '@/pages/ProjetNEW.jsx';
 public/assets/music/nouvelle-track.m4a
 ```
 
-#### 2. Mettre à jour Layout.jsx
-```jsx
-// src/components/Layout.jsx
-const trackFiles = [
-  'deepstone.m4a',
-  'browser.m4a',
-  'wildriver.m4a',
-  'nouvelle-track.m4a'  // ← Ajouter ici
-];
-usePortfolioModules(trackFiles);
-```
-
-Le lecteur lira automatiquement les métadonnées ID3 (artiste, titre, pochette).
+#### 2. C'est tout
+`discoverMusicTracks()` dans `src/utils/discoverMusicTracks.js` auto-découvre les fichiers `.m4a` au build — aucune modification de code requise. Le lecteur lira automatiquement les métadonnées ID3 (artiste, titre, pochette).
 
 ### Modifier les styles
 
