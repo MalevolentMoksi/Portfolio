@@ -322,12 +322,12 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
   // interpolates point-to-point instead of jumping from SVG origin on remount.
   // scared/eat are path-approximated (upward arc = gasp, wide arc = chew).
   const MOUTH_PATHS = {
-    happy:   'M16 27 Q24 33 32 27',
-    petted:  'M16 27 Q24 33 32 27',
-    excited: 'M15 26 Q24 35 33 26',
-    play:    'M15 26 Q24 35 33 26',
-    sad:     'M17 30 Q24 25 31 30',
-    dizzy:   'M16 29 Q24 24 32 29',
+    happy:   'M20 27 Q24 31 28 27',   // narrow :> smile
+    petted:  'M20 27 Q24 31 28 27',
+    excited: 'M19 26 Q24 32 29 26',   // slightly wider for excitement
+    play:    'M19 26 Q24 32 29 26',
+    sad:     'M20 30 Q24 26 28 30',   // narrow :< frown
+    dizzy:   'M19 29 Q24 25 29 29',   // shallow frown
     woozy:   'M16 27 C18 24 21 30 24 27 C27 24 30 30 32 27',  // ~~ wavy mouth
     scared:  'M20 27 Q24 22 28 27',  // tight upward arc — pursed gasp
     eat:     'M17 26 Q24 36 31 26',  // wide-open eating arc
@@ -990,24 +990,23 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
    ───────────────────────────────────────────────── */
 const PetButton = () => {
   const [isSpawned, setIsSpawned] = useState(() => localStorage.getItem(LS.spawned) === 'true');
-  const [stats, setStats] = useState(() => ({
-    hunger: readLS(LS.hunger, 80),
-    happiness: readLS(LS.happiness, 80),
-  }));
+  const [stats, setStats] = useState(() => {
+    // Réinitialise à ~50% à chaque chargement de page (synchrone, évite le délai d'un useEffect)
+    const neutral = () => Math.round(50 + (Math.random() - 0.5) * 10);
+    return { hunger: clamp(neutral()), happiness: clamp(neutral()) };
+  });
   const [reaction, setReaction] = useState(null);
   // Timestamp (ms) when each cooldown expires; 0 = not cooling
   const [cdEnds, setCdEnds] = useState({ feed: 0, pet: 0, play: 0 });
   // Face combo — independent eyes/mouth variation
   const [faceCombo, setFaceCombo] = useState(() => {
-    const h = readLS(LS.hunger, 80), hap = readLS(LS.happiness, 80);
-    return pickRandom(FACE_COMBOS[getMood(h, hap)] ?? FACE_COMBOS.content);
+    return pickRandom(FACE_COMBOS[getMood(50, 50)] ?? FACE_COMBOS.content);
   });
   // Floating thought bubble symbol
   const [thoughtSymbol, setThoughtSymbol] = useState(null);
   // HUD thought line — varies per expression
   const [hudThought, setHudThought] = useState(() => {
-    const h = readLS(LS.hunger, 80), hap = readLS(LS.happiness, 80);
-    return pickRandom(MOOD_TEXT_POOL[getMood(h, hap)] ?? MOOD_TEXT_POOL.content);
+    return pickRandom(MOOD_TEXT_POOL[getMood(50, 50)] ?? MOOD_TEXT_POOL.content);
   });
 
   const reactionTimer = useRef(null);
@@ -1037,15 +1036,6 @@ const PetButton = () => {
   // Migration: remove stale pet-renderer key (SVG is now the only renderer)
   useEffect(() => { localStorage.removeItem('pet-renderer'); }, []);
 
-  // Reset stats to neutral on page load (randomized ±10%)
-  useEffect(() => {
-    const randomizeNeutral = () => Math.round(50 + (Math.random() - 0.5) * 10);
-    setStats({
-      hunger: clamp(randomizeNeutral()),
-      happiness: clamp(randomizeNeutral()),
-    });
-  }, []);
-
   /* ── Réactions temporaires ── */
   const triggerReaction = useCallback((r) => {
     clearTimeout(reactionTimer.current);
@@ -1063,7 +1053,7 @@ const PetButton = () => {
         setStats({ hunger: 80, happiness: 80 });
       }
       // No cleanup return — StrictMode double-invoke would cancel the timeout before it fires
-      setTimeout(() => triggerReaction('woozy'), 450);
+      setTimeout(() => triggerReaction('woozy'), 0);
     }
     prevSpawnedRef.current = isSpawned;
   }, [isSpawned, triggerReaction]);
