@@ -143,8 +143,17 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
   const es = eyeState || expr;
   const me = mouthExpr || expr;
   // Clamp gaze to stay inside eye socket (socket r=3.5 − pupil r=1.5 = max 2.0)
-  const gx = Math.max(-1.8, Math.min(1.8, gazeX));
-  const gy = Math.max(-1.8, Math.min(1.8, gazeY));
+  // Add jitter for natural micro-saccades + minimum offset to avoid creepy stare
+  let gx = Math.max(-1.8, Math.min(1.8, gazeX)) + (Math.sin(Date.now() * 0.003) * 0.3);
+  let gy = Math.max(-1.8, Math.min(1.8, gazeY)) + (Math.cos(Date.now() * 0.004) * 0.25);
+  // Enforce minimum offset to prevent dead-center stare
+  const minOffset = 0.4;
+  const mag = Math.sqrt(gx * gx + gy * gy);
+  if (mag < minOffset) {
+    const angle = Math.atan2(gy, gx);
+    gx = Math.cos(angle) * minOffset;
+    gy = Math.sin(angle) * minOffset;
+  }
 
   const renderEyes = () => {
     switch (es) {
