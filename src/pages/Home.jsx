@@ -12,10 +12,9 @@ const Home = () => {
           <article className="presentation-block" id="about" aria-labelledby="about-title">
             <h3 id="about-title">À propos de moi</h3>
             <p>
-              Étudiant en 2ème année de BUT Informatique à l'IUT2 de Grenoble spécialisé dans
-              le développement d'applications. Passionné par l'alliance entre la logique
-              technique et l'ergonomie visuelle, j'espère pouvoir mettre ma curiosité et ma
-              méthode au service de projets innovants.
+              Étudiant en 2ème année de <strong>BUT Informatique</strong> à l'IUT2 de Grenoble, spécialisé <strong>Développement d'Applications</strong>. Passionné par l'alliance entre logique technique
+              et ergonomie visuelle, j'éspère pouvoir mettre ma curiosité et ma méthode au service
+              de projets innovants.
             </p>
           </article>
 
@@ -23,9 +22,10 @@ const Home = () => {
             <h3 id="skills-title">Compétences</h3>
             <ul>
               <li>Réaliser, Concevoir, Optimiser et Administrer en :</li>
-              <li>Java, JavaScript, Python, SQL</li>
-              <li>HTML/CSS, JavaFX</li>
-              <li>Git, Maven, Linux</li>
+              <li>Java, Python, C, C++</li>
+              <li>HTML/CSS, JavaScript, PHP</li>
+              <li>Git, Linux, JavaFX</li>
+              <li>React, Vite, Bash,  SQL (PostgreSQL, SQLite...)</li>
             </ul>
           </article>
 
@@ -41,7 +41,7 @@ const Home = () => {
           </article>
 
           <article className="presentation-block" id="hobbies" aria-labelledby="hobbies-title">
-            <h3 id="hobbies-title">Centres d'intérêt</h3>
+            <h3 id="hobbies-title">Mes centres d'intérêt</h3>
             <ul>
               <li>Art traditionnel et digital</li>
               <li>Jeux-Vidéo</li>
