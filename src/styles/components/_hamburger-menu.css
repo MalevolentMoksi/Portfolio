@@ -137,10 +137,15 @@
   border-color: var(--color-accent-light);
 }
 
-.hamburger-nav ul li a[aria-current="page"] {
-  background-color: rgba(var(--color-primary-rgb), 0.3);
-  border-color: var(--color-accent-light);
-  color: var(--color-accent-light);
+.hamburger-nav ul li a[aria-current="page"],
+.hamburger-nav ul li a.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-secondary);
+  font-weight: 700;
+  pointer-events: none;
+  padding-left: calc(var(--space-md) + 6px);
+  border-left: 4px solid var(--color-accent-light);
 }
 
 @media (max-width: 768px) {

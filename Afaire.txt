@@ -2,3 +2,4 @@
 - Meilleures illustrations pour les projets
 - CV accessible
 - Implémenter Snake quelque part
+- Ajouter des fonctions d'accessibilités
