@@ -249,50 +249,58 @@
 /* Progress bar */
 .progress-container {
   width: 100%;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 3px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+  border-radius: 4px;
   overflow: visible;
   cursor: pointer;
   position: relative;
-  transition: height var(--transition-base);
+  transition: height var(--transition-base), background var(--transition-base);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .progress {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary) 85%, rgba(var(--color-primary-rgb), 0.6) 100%);
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary) 85%, rgba(var(--color-primary-rgb), 0.8) 100%);
   width: 0%;
   transition: width 0.1s linear;
   border-radius: 3px;
-  box-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.5);
+  box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.6), inset -1px 0 2px rgba(255, 255, 255, 0.2);
   position: relative;
 }
 
 .progress::after {
   content: '';
   position: absolute;
-  right: -5px;
+  right: -6px;
   top: 50%;
   transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   background: var(--color-primary);
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.6);
-  opacity: 0;
-  transition: opacity var(--transition-base);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.7);
+  opacity: 0.5;
+  transition: opacity var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .progress-container:hover {
-  height: 6px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(var(--color-primary-rgb), 0.4);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 8px rgba(var(--color-primary-rgb), 0.25);
 }
 
 .progress-container:hover .progress {
-  box-shadow: 0 0 12px rgba(var(--color-primary-rgb), 0.8);
+  box-shadow: 0 0 16px rgba(var(--color-primary-rgb), 0.9), inset -1px 0 2px rgba(255, 255, 255, 0.3);
 }
 
 .progress-container:hover .progress::after {
   opacity: 1;
+  transform: translateY(-50%) scale(1.15);
+  box-shadow: 0 0 14px rgba(var(--color-primary-rgb), 0.95);
 }
 
 /* Loading indicator */
