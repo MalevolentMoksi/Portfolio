@@ -287,24 +287,11 @@ body[data-mood='vaporwave'] .pet-robot {
     0 8px 32px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(var(--color-primary-rgb), 0.08);
   z-index: calc(var(--z-lightbox) + 1);
-  animation: pet-hud-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   pointer-events: auto;
 }
 
-@keyframes pet-hud-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Header du HUD */
 .pet-hud-header {
   display: flex;
   align-items: center;
@@ -315,25 +302,31 @@ body[data-mood='vaporwave'] .pet-robot {
 }
 
 .pet-hud-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.5);
   user-select: none;
   letter-spacing: 0.04em;
 }
 
+.pet-hud-title-icon {
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
 .pet-hud-close {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border: none;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.45);
   cursor: pointer;
-  font-size: 0.9rem;
-  line-height: 1;
   padding: 0;
   transition:
     background 0.15s,
@@ -343,6 +336,13 @@ body[data-mood='vaporwave'] .pet-robot {
 .pet-hud-close:hover {
   background: rgba(255, 255, 255, 0.15);
   color: rgba(255, 255, 255, 0.8);
+}
+
+/* Hint icons in needs/tip lines */
+.pet-hud-hint-icon {
+  vertical-align: -1px;
+  margin-right: 3px;
+  flex-shrink: 0;
 }
 
 /* ---- Texte d'humeur ---- */
@@ -474,7 +474,8 @@ body[data-mood='vaporwave'] .pet-robot {
 
 .pet-action-btn {
   flex: 1;
-  padding: 0.35rem 0.2rem;
+  min-width: 0;
+  padding: 0.38rem 0.2rem;
   border: 1px solid rgba(var(--color-primary-rgb), 0.2);
   border-radius: 7px;
   background: rgba(var(--color-primary-rgb), 0.06);
@@ -499,18 +500,58 @@ body[data-mood='vaporwave'] .pet-robot {
   transform: scale(0.96);
 }
 
-.pet-action-btn:disabled {
-  opacity: 0.4;
+.pet-action-btn--cooling {
+  opacity: 0.55;
   cursor: wait;
 }
 
-/* Countdown badge inside disabled action buttons */
-.pet-cd-badge {
-  display: inline-block;
-  margin-left: 0.25em;
-  font-size: 0.58rem;
-  opacity: 0.75;
+/* Inner flex for icon/ring + label */
+.pet-action-btn-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.pet-action-label {
+  font-size: 0.62rem;
+  opacity: 0.85;
+}
+
+/* Cooldown ring */
+.pet-cd-ring {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+.pet-cd-ring-track {
+  fill: none;
+  stroke: rgba(var(--color-primary-rgb), 0.15);
+  stroke-width: 2;
+}
+
+.pet-cd-ring-fill {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: stroke-dashoffset 0.1s linear;
+}
+
+.pet-cd-ring-text {
+  position: absolute;
+  font-size: 0.42rem;
   font-variant-numeric: tabular-nums;
+  color: rgba(var(--color-primary-rgb), 0.8);
+  line-height: 1;
+  pointer-events: none;
 }
 
 /* ---- Responsive ---- */
@@ -526,26 +567,36 @@ body[data-mood='vaporwave'] .pet-robot {
   }
 }
 
-/* ========== Pensée flottante ========== */
+/* ========== Pensées flottantes ========== */
 
-.pet-thought-bubble {
+/* Base commune à toutes les bulles */
+.pet-thought {
   position: fixed;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  background: rgba(8, 8, 8, 0.85);
-  border: 1px solid rgba(var(--color-primary-rgb), 0.38);
-  border-radius: 8px;
-  color: var(--color-primary);
   z-index: calc(var(--z-lightbox) - 1);
   pointer-events: none;
-  animation: pet-thought-rise 2.6s ease-out forwards;
+  animation-duration: var(--tb-dur, 3.5s);
+  animation-fill-mode: forwards;
+  animation-timing-function: ease-out;
+  animation-delay: var(--tb-delay, 0ms);
+  opacity: 0;
 }
 
-/* Small triangle pointer toward the robot */
-.pet-thought-bubble::after {
+/* ── Symbol bubble (icône SVG, fond pill arrondi) ── */
+.pet-thought--symbol {
+  --tb-dur: 3.5s;
+  width: 32px;
+  height: 32px;
+  background: rgba(8, 8, 8, 0.88);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+  border-radius: 8px;
+  color: var(--color-primary);
+  animation-name: pet-thought-rise;
+}
+
+.pet-thought--symbol::after {
   content: '';
   position: absolute;
   bottom: -5px;
@@ -553,28 +604,73 @@ body[data-mood='vaporwave'] .pet-robot {
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 5px solid rgba(var(--color-primary-rgb), 0.38);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid rgba(var(--color-primary-rgb), 0.4);
 }
 
+/* ── Text bubble (speech pill) ── */
+.pet-thought--text {
+  --tb-dur: 2.0s;
+  padding: 3px 8px;
+  background: rgba(8, 8, 8, 0.9);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.36);
+  border-radius: 12px;
+  color: rgba(var(--color-primary-rgb), 0.9);
+  font-size: 0.62rem;
+  font-family: inherit;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  animation-name: pet-thought-rise;
+}
+
+.pet-thought--text::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid rgba(var(--color-primary-rgb), 0.36);
+}
+
+/* ── Reaction bubble (icon + label) ── */
+.pet-thought--reaction {
+  --tb-dur: 2.5s;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(8, 8, 8, 0.9);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.38);
+  border-radius: 10px;
+  color: var(--color-primary);
+  animation-name: pet-thought-pop-rise;
+}
+
+.pet-thought-label {
+  font-size: 0.6rem;
+  font-family: inherit;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+/* ── Keyframes ── */
 @keyframes pet-thought-rise {
-  0% {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  15% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  70% {
-    opacity: 1;
-    transform: translateY(-16px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
+  0%   { opacity: 0; transform: translateY(6px) scale(0.8); }
+  12%  { opacity: 1; transform: translateY(0) scale(1.05); }
+  20%  { transform: translateY(0) scale(1); }
+  68%  { opacity: 1; transform: translateY(-18px); }
+  100% { opacity: 0; transform: translateY(-32px); }
+}
+
+@keyframes pet-thought-pop-rise {
+  0%   { opacity: 0; transform: translateY(4px) scale(0.7); }
+  10%  { opacity: 1; transform: translateY(0) scale(1.1); }
+  18%  { transform: translateY(0) scale(1); }
+  65%  { opacity: 1; transform: translateY(-14px); }
+  100% { opacity: 0; transform: translateY(-26px); }
 }
 
 /* ========== Blush — rougeur joues ========== */

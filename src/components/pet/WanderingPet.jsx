@@ -4,7 +4,7 @@
    ══════════════════════════════════════════════ */
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   PET_SIZE, HALF, HEADER_H,
   BASE_SPEED, MAX_SPEED, MAGNET_RADIUS, MAGNET_SPEED,
@@ -12,9 +12,9 @@ import {
   SCROLL_DIZZY_WINDOW, clamp,
 } from './petConstants.js';
 import RobotFace from './RobotFace.jsx';
-import FloatingThought from './FloatingThought.jsx';
+import ThoughtBubbleQueue from './ThoughtBubbleQueue.jsx';
 
-const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onThought, onHoverPet, cooldowns, thoughtSymbol, hudThought, sizeScale, speedMult, isSleeping, moodSpinActive }) => {
+const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onThought, onHoverPet, cooldowns, thoughtQueue, hudThought, sizeScale, speedMult, isSleeping, moodSpinActive }) => {
   const [pos, setPos] = useState(() => ({
     x: HALF + Math.random() * (window.innerWidth - PET_SIZE),
     y: HEADER_H + 60 + Math.random() * (window.innerHeight - HEADER_H - 150),
@@ -678,9 +678,9 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       onHoverPet(); // +5 happiness
       hoverCooldownRef.current = 360; // ~6s cooldown in frames
       // Cascade heart bubbles
-      onThought('heart');
-      const t1 = setTimeout(() => onThought('heart'), 500);
-      const t2 = setTimeout(() => onThought('heart'), 1000);
+      onThought({ type: 'symbol', content: 'heart' });
+      const t1 = setTimeout(() => onThought({ type: 'symbol', content: 'heart' }), 500);
+      const t2 = setTimeout(() => onThought({ type: 'symbol', content: 'heart' }), 1000);
       hoverTimerRef.current = { t1, t2 }; // store for cleanup
     }, 1500);
   }, [onBehavior, onThought, onHoverPet]);
@@ -825,12 +825,13 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         })()}
       </motion.div>
 
-      {/* Pensée flottante */}
-      {thoughtSymbol && <FloatingThought symbol={thoughtSymbol} petX={pos.x} petY={pos.y} />}
+      {/* Pensees flottantes */}
+      <ThoughtBubbleQueue queue={thoughtQueue} petX={pos.x} petY={pos.y} />
 
       {/* HUD flottant */}
-      {hudOpen && (
-        <div
+      <AnimatePresence>
+        {hudOpen && (
+          <motion.div
           ref={hudRef}
           className="pet-hud"
           style={
@@ -843,58 +844,126 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
           aria-label="Robot de compagnie"
           tabIndex={-1}
           onKeyDown={handleHudKeyDown}
+          initial={{ opacity: 0, y: -6, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -4, scale: 0.96 }}
+          transition={{ type: 'spring', stiffness: 340, damping: 24 }}
         >
           <div className="pet-hud-header">
-            <span className="pet-hud-title">🤖 Mon Robot</span>
-            <button className="pet-hud-close" onClick={() => setHudOpen(false)} aria-label="Fermer">×</button>
+            <span className="pet-hud-title">
+              {/* SVG robot icon */}
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="pet-hud-title-icon">
+                <line x1="12" y1="6" x2="12" y2="3" />
+                <circle cx="12" cy="2" r="1.5" fill="currentColor" stroke="none" />
+                <rect x="5" y="6" width="14" height="11" rx="3" />
+                <circle cx="9.5" cy="11" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="14.5" cy="11" r="1.5" fill="currentColor" stroke="none" />
+                <path d="M9 15 Q12 17 15 15" />
+                <rect x="8" y="17" width="8" height="4" rx="1.5" />
+              </svg>
+              Mon Robot
+            </span>
+            <button className="pet-hud-close" onClick={() => setHudOpen(false)} aria-label="Fermer">
+              <svg viewBox="0 0 16 16" width="10" height="10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                <line x1="3" y1="3" x2="13" y2="13" />
+                <line x1="13" y1="3" x2="3" y2="13" />
+              </svg>
+            </button>
           </div>
 
           {/* Mood badge */}
           <div className="pet-hud-status">
             <span className={`pet-hud-mood-badge pet-hud-mood-badge--${petMood}`}>
-              {petMood === 'happy' ? '😊 Heureux' : petMood === 'content' ? '😐 Stable' : '😢 Triste'}
+              <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+                {petMood === 'happy' && (<><circle cx="8" cy="8" r="6.5" /><path d="M5.5 9.5 Q8 12 10.5 9.5" /><circle cx="5.8" cy="7" r="0.8" fill="currentColor" stroke="none" /><circle cx="10.2" cy="7" r="0.8" fill="currentColor" stroke="none" /></>)}
+                {petMood === 'content' && (<><circle cx="8" cy="8" r="6.5" /><line x1="5.5" y1="10" x2="10.5" y2="10" /><circle cx="5.8" cy="7" r="0.8" fill="currentColor" stroke="none" /><circle cx="10.2" cy="7" r="0.8" fill="currentColor" stroke="none" /></>)}
+                {petMood === 'sad' && (<><circle cx="8" cy="8" r="6.5" /><path d="M5.5 11 Q8 8.5 10.5 11" /><line x1="5" y1="5.5" x2="6.5" y2="6.5" /><line x1="11" y1="5.5" x2="9.5" y2="6.5" /></>)}
+              </svg>
+              {petMood === 'happy' ? 'Heureux' : petMood === 'content' ? 'Stable' : 'Triste'}
             </span>
           </div>
 
           <p className="pet-mood-text">{hudThought}</p>
 
-          {/* Contextual needs / tip hints */}
+          {/* Contextual needs / tip hints — SVG icons replace emoji */}
           {stats.hunger < 30 && (
-            <p className="pet-hud-needs">⚠️ Il a très faim !</p>
+            <p className="pet-hud-needs">
+              <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true" className="pet-hud-hint-icon">
+                <path d="M8 1 L14.5 13 L1.5 13 Z" /><line x1="8" y1="5" x2="8" y2="9" /><circle cx="8" cy="11.5" r="0.8" fill="currentColor" stroke="none" />
+              </svg>
+              Il a très faim !
+            </p>
           )}
           {stats.hunger >= 30 && stats.happiness < 30 && (
-            <p className="pet-hud-needs">⚠️ Il se sent seul !</p>
+            <p className="pet-hud-needs">
+              <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true" className="pet-hud-hint-icon">
+                <path d="M8 1 L14.5 13 L1.5 13 Z" /><line x1="8" y1="5" x2="8" y2="9" /><circle cx="8" cy="11.5" r="0.8" fill="currentColor" stroke="none" />
+              </svg>
+              Il se sent seul !
+            </p>
           )}
           {stats.hunger >= 30 && stats.hunger < 50 && stats.happiness >= 30 && (
-            <p className="pet-hud-tip">💡 Il commence à avoir faim.</p>
+            <p className="pet-hud-tip">
+              <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true" className="pet-hud-hint-icon">
+                <circle cx="8" cy="6" r="4.5" /><line x1="8" y1="10.5" x2="8" y2="14" />
+              </svg>
+              Il commence à avoir faim.
+            </p>
           )}
           {stats.hunger >= 50 && stats.happiness >= 30 && stats.happiness < 50 && (
-            <p className="pet-hud-tip">💡 Un câlin lui ferait du bien.</p>
+            <p className="pet-hud-tip">
+              <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true" className="pet-hud-hint-icon">
+                <circle cx="8" cy="6" r="4.5" /><line x1="8" y1="10.5" x2="8" y2="14" />
+              </svg>
+              Un câlin lui ferait du bien.
+            </p>
           )}
           {stats.hunger >= 80 && stats.happiness >= 80 && stats.hunger < 85 && (
-            <p className="pet-hud-tip">🐞 Il explore joyeusement !</p>
+            <p className="pet-hud-tip">
+              <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true" className="pet-hud-hint-icon">
+                <circle cx="8" cy="6" r="4.5" /><line x1="8" y1="10.5" x2="8" y2="14" />
+              </svg>
+              Il explore joyeusement !
+            </p>
           )}
           {stats.hunger >= 85 && stats.happiness >= 85 && (
-            <p className="pet-hud-tip pet-hud-tip--thriving">🌟 En pleine forme ! — déclin ralenti</p>
+            <p className="pet-hud-tip pet-hud-tip--thriving">
+              <svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor" stroke="none" aria-hidden="true" className="pet-hud-hint-icon">
+                <path d="M8 1.5 L9.6 6 L14.5 6 L10.5 9 L12 13.5 L8 11 L4 13.5 L5.5 9 L1.5 6 L6.4 6 Z" />
+              </svg>
+              En pleine forme ! — déclin ralenti
+            </p>
           )}
 
           <div className="pet-stats">
             <div className="pet-stat">
-              <span className="pet-stat-icon" aria-label="Faim">🍔</span>
+              {/* Fork+knife SVG for hunger */}
+              <svg className="pet-stat-icon" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-label="Faim">
+                <line x1="5" y1="2" x2="5" y2="6" />
+                <path d="M3 2 L3 5 Q3 7 5 7 Q7 7 7 5 L7 2" />
+                <line x1="5" y1="7" x2="5" y2="14" />
+                <line x1="11" y1="2" x2="11" y2="14" />
+                <path d="M9 2 Q11 3 11 6" />
+              </svg>
               <div className="pet-stat-track">
-                <div
+                <motion.div
                   className={`pet-stat-fill${stats.hunger < 30 ? ' pet-stat-fill--critical' : ''}`}
-                  style={{ width: `${stats.hunger}%` }}
+                  animate={{ width: `${stats.hunger}%` }}
+                  transition={{ type: 'spring', stiffness: 80, damping: 18 }}
                 />
               </div>
               <span className="pet-stat-value">{stats.hunger}%</span>
             </div>
             <div className="pet-stat">
-              <span className="pet-stat-icon" aria-label="Bonheur">⭐</span>
+              {/* Star SVG for happiness */}
+              <svg className="pet-stat-icon" viewBox="0 0 16 16" width="13" height="13" fill="currentColor" stroke="none" aria-label="Bonheur">
+                <path d="M8 2 L9.5 6.2 L14 6.2 L10.5 8.8 L11.8 13 L8 10.5 L4.2 13 L5.5 8.8 L2 6.2 L6.5 6.2 Z" />
+              </svg>
               <div className="pet-stat-track">
-                <div
+                <motion.div
                   className={`pet-stat-fill${stats.happiness < 30 ? ' pet-stat-fill--critical' : ''}`}
-                  style={{ width: `${stats.happiness}%` }}
+                  animate={{ width: `${stats.happiness}%` }}
+                  transition={{ type: 'spring', stiffness: 80, damping: 18 }}
                 />
               </div>
               <span className="pet-stat-value">{stats.happiness}%</span>
@@ -903,29 +972,79 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
 
           <div className="pet-actions">
             {[
-              { key: 'feed', label: '🍕 Nourrir', title: 'Nourrir' },
-              { key: 'pet',  label: '🫳 Câliner', title: 'Câliner' },
-              { key: 'play', label: '🎮 Jouer',   title: 'Jouer'   },
-            ].map(({ key, label, title }) => {
+              {
+                key: 'feed', label: 'Nourrir', title: 'Nourrir',
+                icon: (
+                  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+                    <line x1="5" y1="2" x2="5" y2="6" />
+                    <path d="M3 2 L3 5 Q3 7 5 7 Q7 7 7 5 L7 2" />
+                    <line x1="5" y1="7" x2="5" y2="14" />
+                    <line x1="11" y1="2" x2="11" y2="14" />
+                    <path d="M9 2 Q11 3 11 6" />
+                  </svg>
+                ),
+              },
+              {
+                key: 'pet', label: 'Câliner', title: 'Câliner',
+                icon: (
+                  <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" stroke="none" aria-hidden="true">
+                    <path d="M3 7.5 Q3 5 5.5 4 Q7 3.5 8 5 Q9 3.5 10.5 4 Q13 5 13 7.5 Q13 11 8 13.5 Q3 11 3 7.5Z" opacity="0.9" />
+                  </svg>
+                ),
+              },
+              {
+                key: 'play', label: 'Jouer', title: 'Jouer',
+                icon: (
+                  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="1.5" y="5" width="13" height="9" rx="2.5" />
+                    <circle cx="5.5" cy="9.5" r="1.3" fill="currentColor" stroke="none" />
+                    <circle cx="10.5" cy="9.5" r="1.3" fill="currentColor" stroke="none" />
+                    <path d="M6 2.5 L8 1 L10 2.5" />
+                  </svg>
+                ),
+              },
+            ].map(({ key, label, title, icon }) => {
+              const cdFull    = key === 'play' ? 3000 : 2000;
               const remaining = Math.max(0, cooldowns[key] - Date.now());
               const cooling   = remaining > 0;
+              const progress  = cooling ? remaining / cdFull : 0;
+              const r         = 7;
+              const circ      = 2 * Math.PI * r;
               return (
                 <button
                   key={key}
-                  className="pet-action-btn"
+                  className={`pet-action-btn${cooling ? ' pet-action-btn--cooling' : ''}`}
                   onClick={() => onInteract(key)}
                   disabled={cooling}
                   aria-disabled={cooling}
                   title={title}
                 >
-                  {label}
-                  {cooling && <span className="pet-cd-badge">{(remaining / 1000).toFixed(1)}s</span>}
+                  <span className="pet-action-btn-inner">
+                    {cooling ? (
+                      <span className="pet-cd-ring" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 18 18">
+                          <circle cx="9" cy="9" r={r} className="pet-cd-ring-track" />
+                          <circle
+                            cx="9" cy="9" r={r}
+                            className="pet-cd-ring-fill"
+                            style={{
+                              strokeDasharray: circ,
+                              strokeDashoffset: circ * (1 - progress),
+                            }}
+                          />
+                        </svg>
+                        <span className="pet-cd-ring-text">{(remaining / 1000).toFixed(1)}s</span>
+                      </span>
+                    ) : icon}
+                    <span className="pet-action-label">{label}</span>
+                  </span>
                 </button>
               );
             })}
           </div>
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
     </>,
     document.body,
   );

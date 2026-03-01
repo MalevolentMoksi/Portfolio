@@ -28,22 +28,28 @@ This directory contains the modularized pet robot companion component, split fro
 - Blush effect (pink cheeks when happy/petted/playing)
 - Seamless morphing between expressions
 
-#### `FloatingThought.jsx` (~25 lines)
-**Props**: `symbol` (SVG key), `petX`, `petY`  
-**Renders**: Portal-based floating thought bubble that fades out over 2.6s above the pet.
+#### `ThoughtBubbleQueue.jsx` (~150 lines)
+**Exports**: Default component `ThoughtBubbleQueue`, named export `normalizeThought`  
+**Props**: `queue` (array of thoughts), `petX`, `petY`  
+**Renders**: Portal-based queue of up to 3 concurrent thought bubbles above the pet, each with:
+- **3 types**: `symbol` (3.5s SVG icon), `text` (2.0s pill), `reaction` (2.5s action feedback with SVG icons)
+- **Staggered pos**: Concurrent bubbles offset horizontally/vertically for visual clarity
+- **Animations**: Entry pop + rise + fade using CSS keyframes (`pet-thought-rise`, `pet-thought-pop-rise`)
+- **SVG icons**: Reaction symbols (feed, petted, play, excited) rendered inline instead of emoji
+- **Backward compat**: `normalizeThought()` accepts string (`'heart'`) or object (`{type, content, duration}`) for flexible API
 
-#### `WanderingPet.jsx` (~500 lines)
+#### `WanderingPet.jsx` (~550 lines)
 **Props**: (from PetButton via AnimatePresence)
 - `stats` { hunger, happiness }, `expression`, `eyeState`, `mouthExpr`, `petMood`
-- `onInteract(action)`, `onBehavior(reaction)`, `onThought(symbol)`, `onHoverPet()`
-- `cooldowns`, `thoughtSymbol`, `hudThought`, `sizeScale`, `speedMult`, `isSleeping`, `moodSpinActive`
+- `onInteract(action)`, `onBehavior(reaction)`, `onThought(thoughtObj)`, `onHoverPet()`
+- `cooldowns`, `thoughtQueue` (array), `hudThought`, `sizeScale`, `speedMult`, `isSleeping`, `moodSpinActive`
 
 **Core features**:
 - **Physics RAF loop** (~60fps): Organic wander, wall bounce with restitution, cursor magnet/repulsion (mood-aware)
 - **Drag & throw**: Pointer capture drag, fast-drag rotation scale, throw momentum with THROW_SPEED_CAP bypass
 - **Scroll detection**: Back-and-forth scroll triggers dizzy, idle scroll → rest/sit behavior (2.5–10s timer)
 - **Behaviors**: Dwell excitement, sudden approach scare, high-speed bursts, proximity avoidance when sad
-- **HUD dialog**: Floating stats (hunger/happiness bars), action buttons (Feed/Câliner/Jouer), contextual tips
+- **HUD dialog** (Framer Motion): Floating stats with animated bars, action buttons (Feed/Câliner/Jouer) with SVG icons, contextual tips with SVG hint icons, cooldown ring (SVG circle with stroke-dasharray animation)
 - **Hover-to-pet**: Sustained pointer hover (1.5s) triggers petted reaction + cascading hearts
 - **Facing & gaze**: Hysteresis-smoothed direction flip, iris pupils follow cursor
 
@@ -57,7 +63,8 @@ This directory contains the modularized pet robot companion component, split fro
 - `stats` { hunger, happiness } — resets ~50% on each page load (synchronous)
 - `reaction` — temporary expression (2s timeout via `REACTION_MS`)
 - `faceCombo` — `{ eyes, mouth }` from `FACE_COMBOS`
-- `thoughtSymbol`, `hudThought` — current floating thought and HUD text
+- `thoughtQueue` (array) — queue of up to 3 concurrent floating thoughts; `thoughtQueueRef`, `thoughtTimersRef` for lifecycle + `_thoughtIdCounter` for unique IDs
+- `hudThought` — current HUD text feedback
 - `isSleeping`, `moodSpinActive` — state flags
 - `cdEnds` — cooldown timestamps for feed/pet/play actions
 
@@ -71,10 +78,13 @@ This directory contains the modularized pet robot companion component, split fro
 7. **Mood flourish**: Site mood change → excited + spin animation (0.9s)
 8. **Global API**: `window.petReact(reaction)`, `window.getPetStats()`
 9. **Interaction combo**: 3 actions within 7s → bonus happiness + excited
+10. **Neglect escalation** (fixed): Tracks `sadSinceRef` timestamp + setInterval (not stat-dependent) — if sad >28s, triggers dizzy
+11. **Sleep expression sync** (fixed): `isSleeping` flag drives expression formula; dedicated sync useEffect ensures face is correct
+12. **Combo streak** (fixed): Reduced reaction flicker by shortening combo window (now `REACTION_MS - 100 = 1900ms`)
 
 **Callbacks**:
 - `handleInteract(action)` — feed/pet/play with stat changes, reactions, cooldown
-- `handleThought(symbol)` — set and auto-clear floating thought (2.6s)
+- `handleThought(input)` — normalizes input (string or object), queues thought (max 3), auto-removes after duration
 - `handleHoverPet()` — +5 happiness on sustained hover
 - `toggleSpawn()` — toggle visibility, recharge low stats (<10)
 
@@ -83,9 +93,10 @@ This directory contains the modularized pet robot companion component, split fro
 ```
 PetButton (orchestrator, state holder)
   │
-  ├─ useState: stats, reaction, faceCombo, thoughtSymbol, hudThought, isSleeping, moodSpinActive
+  ├─ useState: stats, reaction, faceCombo, thoughtQueue, hudThought, isSleeping, moodSpinActive
+  ├─ useRef: thoughtQueueRef, thoughtTimersRef, _thoughtIdCounter, sadSinceRef, isSleepingRef
   │
-  ├─ useEffect × 9: persistence, spawn, decay, idle, neglect, sleep, mood flourish, API, cleanup
+  ├─ useEffect × 10: persistence, spawn, decay, idle, neglect (ref-based), sleep, mood flourish, API, thought cleanup, face sync
   │
   └─ AnimatePresence
        └─ WanderingPet (if isSpawned)
@@ -97,8 +108,8 @@ PetButton (orchestrator, state holder)
             │
             └─ Portals (at document.body):
                  ├─ motion.div wanderer (with RobotFace child)
-                 ├─ FloatingThought (symbol + fade)
-                 └─ HUD dialog (stats, actions, layout-safe positioning)
+                 ├─ ThoughtBubbleQueue (queue of symbols/text/reactions with SVG icons, staggered, auto-remove)
+                 └─ HUD dialog (Framer Motion AnimatePresence, SVG icons, animated bars, SVG cooldown ring)
 ```
 
 ## Key Patterns
@@ -160,9 +171,15 @@ PetButton (orchestrator, state holder)
 - **Throw not working**: Verify `throwActiveRef` is set true on drag end; check velocity clamping isn't killing throw earlier than expected
 
 ## CSS
-- All pet styling is in `src/styles/components/_pet-button.css` (~555 lines)
-- Classes: `.pet-wanderer`, `.pet-wanderer--dragging`, `.pet-wanderer--resting`, `.pet-wanderer--sleeping`, `.pet-wanderer--mood-spin`
-- HUD: `.pet-hud`, `.pet-hud-header`, `.pet-stats`, `.pet-actions`, etc.
+- All pet styling is in `src/styles/components/_pet-button.css` (~740 lines)
+- **Wanderer states**: `.pet-wanderer`, `.pet-wanderer--dragging`, `.pet-wanderer--resting`, `.pet-wanderer--sleeping`, `.pet-wanderer--mood-spin`
+- **Thought bubbles**: `.pet-thought` (base) + `.pet-thought--symbol` / `.pet-thought--text` / `.pet-thought--reaction` (variants)
+  - Animations: `pet-thought-rise` (scale pop + float + fade), `pet-thought-pop-rise` (more pronounced pop for reactions)
+  - CSS custom property: `--tb-dur` (duration), `--tb-delay` (stagger delay per bubble)
+- **HUD**: `.pet-hud`, `.pet-hud-header` (flex with SVG icons), `.pet-stats`, `.pet-actions`
+  - **Cooldown ring**: `.pet-cd-ring`, `.pet-cd-ring-track`, `.pet-cd-ring-fill` (SVG circle with stroke-dasharray, `r=7`), `.pet-cd-ring-text`
+  - **Action buttons**: `.pet-action-btn`, `.pet-action-btn-inner` (flex column for SVG + label), `.pet-action-label`
+  - **Stat bars**: Now animated via Framer Motion (not CSS width), `.pet-stat-fill`
 
 ## Global API (Console)
 ```javascript

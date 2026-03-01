@@ -10,6 +10,7 @@ import {
 } from './petConstants.js';
 import { MOOD_TEXT_POOL, FACE_COMBOS, THOUGHT_POOLS } from './petData.jsx';
 import WanderingPet from './WanderingPet.jsx';
+import { normalizeThought } from './ThoughtBubbleQueue.jsx';
 
 const PetButton = () => {
   const { mood } = useMood();
@@ -26,8 +27,10 @@ const PetButton = () => {
   const [faceCombo, setFaceCombo] = useState(() => {
     return pickRandom(FACE_COMBOS[getMood(50, 50)] ?? FACE_COMBOS.content);
   });
-  // Floating thought bubble symbol
-  const [thoughtSymbol, setThoughtSymbol] = useState(null);
+  // Floating thought bubble queue — each entry: { id, type, content, label?, duration }
+  const [thoughtQueue, setThoughtQueue] = useState([]);
+  const thoughtQueueRef = useRef([]);
+  const thoughtTimersRef = useRef({});
   // HUD thought line — varies per expression
   const [hudThought, setHudThought] = useState(() => {
     return pickRandom(MOOD_TEXT_POOL[getMood(50, 50)] ?? MOOD_TEXT_POOL.content);
@@ -38,7 +41,7 @@ const PetButton = () => {
   const [moodSpinActive, setMoodSpinActive] = useState(false);
 
   const reactionTimer = useRef(null);
-  const thoughtTimerRef = useRef(null);
+  let _thoughtIdCounter = useRef(0);
   const decayRef = useRef(null);
   const idleTimerRef = useRef(null);
   const idleReactionRef = useRef(null);
@@ -165,9 +168,7 @@ const PetButton = () => {
           if (Math.random() < 0.4) {
             const pool = THOUGHT_POOLS[chosenReaction] ?? THOUGHT_POOLS[mood] ?? ['dots'];
             const sym = pickRandom(pool);
-            clearTimeout(thoughtTimerRef.current);
-            setThoughtSymbol(sym);
-            thoughtTimerRef.current = setTimeout(() => setThoughtSymbol(null), 2600);
+            handleThought({ type: 'symbol', content: sym });
           }
         }
         schedule();
@@ -285,11 +286,28 @@ const PetButton = () => {
     }
   }, [cdEnds, triggerReaction]);
 
-  /* ── Thought bubble (déclenché depuis WanderingPet) ── */
-  const handleThought = useCallback((symbol) => {
-    clearTimeout(thoughtTimerRef.current);
-    setThoughtSymbol(symbol);
-    thoughtTimerRef.current = setTimeout(() => setThoughtSymbol(null), 2600);
+  /* ── Thought bubble queue (déclenché depuis WanderingPet ou PetButton) ── */
+  const handleThought = useCallback((input) => {
+    const thought = normalizeThought(input);
+    const id = ++_thoughtIdCounter.current;
+    const entry = { ...thought, id };
+
+    // Enforce max 3 concurrent bubbles: drop oldest if full
+    const next = [...thoughtQueueRef.current, entry].slice(-3);
+    thoughtQueueRef.current = next;
+    setThoughtQueue([...next]);
+
+    // Auto-remove after duration
+    thoughtTimersRef.current[id] = setTimeout(() => {
+      thoughtQueueRef.current = thoughtQueueRef.current.filter(t => t.id !== id);
+      setThoughtQueue([...thoughtQueueRef.current]);
+      delete thoughtTimersRef.current[id];
+    }, thought.duration);
+  }, []);
+
+  // Cleanup all thought timers on unmount
+  useEffect(() => {
+    return () => Object.values(thoughtTimersRef.current).forEach(clearTimeout);
   }, []);
 
   /* ── Hover-pet stat bump (+5 happiness) ── */
@@ -359,7 +377,7 @@ const PetButton = () => {
             onThought={handleThought}
             onHoverPet={handleHoverPet}
             cooldowns={cdEnds}
-            thoughtSymbol={thoughtSymbol}
+            thoughtQueue={thoughtQueue}
             hudThought={hudThought}
             sizeScale={sizeScale}
             speedMult={speedMult}
