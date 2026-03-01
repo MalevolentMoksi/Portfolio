@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useMood } from '../contexts/MoodContext.jsx';
 
 /* ── Configuration ── */
 const DECAY_MS = 8000;
@@ -14,6 +15,11 @@ const MAX_SPEED = 1.2;        // px/frame max en balade
 const MAGNET_RADIUS = 200;    // rayon d'attraction au curseur
 const MAGNET_SPEED = 2.5;     // px/frame max sous attraction
 const DRAG_FAST_THRESHOLD = 8; // vitesse (px/frame) à partir de laquelle scale + spin s'activent
+const BOUNCE_RESTITUTION = 0.65; // coefficient de rebond sur les murs
+const THROW_SPEED_CAP = 18;      // vitesse max de lancer (px/frame)
+const SLEEP_IDLE_MS = 60_000;    // 1 minute sans activité → sommeil
+const SCROLL_DIZZY_WINDOW = 1500; // fenêtre de détection scroll rapide (ms)
+const REST_SCROLL_IDLE = 2500;   // 2.5s sans scroll → tenter repos
 
 const LS = {
   hunger: 'pet-hunger',
@@ -63,6 +69,7 @@ const MOOD_TEXT_POOL = {
   eat: ['Miam ! Énergie restaurée.', 'Délicieux ! +25% batterie.'],
   petted: ['Séquence câlin reçue. Bonheur ++', 'Chaleur détectée. Agréable.'],
   play: ['Mode jeu activé !', 'Ha ! Je gagne !', 'Partie enregistrée.'],
+  sleep: ['Zzz...', 'Mode veille activé...', 'Analyse des rêves en cours...', 'Traitement des souvenirs de la journée...'],
 };
 
 /* ── Combinaisons yeux/bouche par expression ── */
@@ -85,6 +92,7 @@ const FACE_COMBOS = {
   woozy:   [{ eyes: 'woozy',  mouth: 'woozy' }],
   scared:  [{ eyes: 'scared',  mouth: 'scared' }],
   content: [{ eyes: 'default', mouth: 'content' }],
+  sleep:   [{ eyes: 'tired',   mouth: 'content' }],
 };
 
 /* ── Symboles SVG pour les pensées flottantes (viewBox 0 0 16 16) ── */
@@ -133,6 +141,7 @@ const THOUGHT_POOLS = {
   petted:  ['heart', 'star'],
   dizzy:   ['zzz'],
   woozy:   ['zzz', 'dots'],
+  sleep:   ['zzz'],
 };
 
 const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -331,6 +340,7 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
     woozy:   'M16 27 C18 24 21 30 24 27 C27 24 30 30 32 27',  // ~~ wavy mouth
     scared:  'M20 27 Q24 22 28 27',  // tight upward arc — pursed gasp
     eat:     'M17 26 Q24 36 31 26',  // wide-open eating arc
+    sleep:   'M18 28 Q24 28 30 28',  // flat neutral line while sleeping
     content: 'M18 28 Q24 28 30 28',
     default: 'M18 28 Q24 28 30 28',
   };
@@ -351,13 +361,23 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
   );
 
   const renderBlush = () => {
-    if (expr !== 'petted') return null;
-    return (
-      <>
-        <circle cx="11" cy="23" r="3" fill="currentColor" opacity="0.18" />
-        <circle cx="37" cy="23" r="3" fill="currentColor" opacity="0.18" />
-      </>
-    );
+    if (expr === 'petted') {
+      return (
+        <>
+          <circle className="pet-blush" cx="11" cy="23" r="5" fill="currentColor" opacity="0.38" />
+          <circle className="pet-blush" cx="37" cy="23" r="5" fill="currentColor" opacity="0.38" />
+        </>
+      );
+    }
+    if (expr === 'happy') {
+      return (
+        <>
+          <circle className="pet-blush" cx="11" cy="23" r="4" fill="currentColor" opacity="0.15" />
+          <circle className="pet-blush" cx="37" cy="23" r="4" fill="currentColor" opacity="0.15" />
+        </>
+      );
+    }
+    return null;
   };
 
   const animClass = [
@@ -366,6 +386,7 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
     (expr === 'eat' || expr === 'petted' || expr === 'play') && 'pet-robot--bounce',
     (expr === 'excited' || expr === 'play') && 'pet-robot--antenna-spin',
     expr === 'woozy' && 'pet-robot--woozy',
+    expr === 'sleep' && 'pet-robot--sleep',
   ].filter(Boolean).join(' ');
 
   return (
@@ -461,7 +482,7 @@ const FloatingThought = ({ symbol, petX, petY }) => {
 /* ─────────────────────────────────────────────────
    Robot qui se balade librement sur la page
    ───────────────────────────────────────────────── */
-const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onThought, cooldowns, thoughtSymbol, hudThought }) => {
+const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onThought, onHoverPet, cooldowns, thoughtSymbol, hudThought, sizeScale, speedMult, isSleeping, moodSpinActive }) => {
   const [pos, setPos] = useState(() => ({
     x: HALF + Math.random() * (window.innerWidth - PET_SIZE),
     y: HEADER_H + 60 + Math.random() * (window.innerHeight - HEADER_H - 150),
@@ -470,6 +491,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   const [hudOpen, setHudOpen] = useState(false);
   const [gaze, setGaze] = useState({ x: 0, y: 0 });
   const [speedLevel, setSpeedLevel] = useState(0);
+  const [isResting, setIsResting] = useState(false);
 
   const posRef = useRef(pos);
   const velRef = useRef({ x: (Math.random() - 0.5) * BASE_SPEED * 2, y: (Math.random() - 0.5) * BASE_SPEED * 2 });
@@ -485,10 +507,16 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   const hudRef = useRef(null);
   const robotRef = useRef(null);
   // Proximity + movement behavior tracking (frame-counted cooldowns)
-  const proximityRef = useRef({ dwellFrames: 0, lastDist: Infinity, exciteCooldown: 0, scaredCooldown: 0, speedCooldown: 0, avoidDwellFrames: 0, avoidThoughtCooldown: 0 });
+  const proximityRef = useRef({ dwellFrames: 0, lastDist: Infinity, exciteCooldown: 0, scaredCooldown: 0, speedCooldown: 0, avoidDwellFrames: 0, avoidThoughtCooldown: 0, bounceCooldown: 0 });
   // petMood in a ref so the RAF closure is never stale
   const petMoodRef = useRef(petMood);
   useEffect(() => { petMoodRef.current = petMood; }, [petMood]);
+  // Speed multiplier ref for RAF closure
+  const speedMultRef = useRef(speedMult);
+  useEffect(() => { speedMultRef.current = speedMult; }, [speedMult]);
+  // Sleeping ref for RAF closure
+  const isSleepingRef = useRef(isSleeping);
+  useEffect(() => { isSleepingRef.current = isSleeping; }, [isSleeping]);
   // Hysteresis: +1/frame moving right, -1/frame moving left. Flip commits after ±15 frames (~0.5 s).
   const flipHysteresisRef = useRef(0);
   // Drag
@@ -501,6 +529,21 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   const [isDragging,    setIsDragging]    = useState(false);
   const [dragSpeed,     setDragSpeed]     = useState(0);
   const [dragRotation,  setDragRotation]  = useState(0);
+  // Scroll dizzy detection
+  const scrollHistoryRef = useRef([]);
+  const scrollDizzyCooldownRef = useRef(0);
+  const lastScrollYRef = useRef(window.scrollY);
+  // Rest/sit detection
+  const restTargetRef = useRef(null);
+  const scrollIdleTimerRef = useRef(null);
+  const hasRestThoughtRef = useRef(false);
+  const restTimeoutRef = useRef(null);
+  const isRestingRef = useRef(false);
+  // Hover-to-pet
+  const hoverTimerRef = useRef(null);
+  const hoverCooldownRef = useRef(0);
+  // Throw momentum — skip wander speed cap while decaying
+  const throwActiveRef = useRef(false);
 
   /* ── Suivi du curseur ── */
   useEffect(() => {
@@ -512,6 +555,88 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
+  /* ── Scroll dizzy — détection de scroll rapide back-and-forth ── */
+  useEffect(() => {
+    const onScroll = () => {
+      const now = Date.now();
+      const sy = window.scrollY;
+      const delta = sy - lastScrollYRef.current;
+      lastScrollYRef.current = sy;
+      if (Math.abs(delta) < 5) return; // ignore micro-scrolls
+      scrollHistoryRef.current.push({ delta, time: now });
+      // Trim to window
+      scrollHistoryRef.current = scrollHistoryRef.current.filter(e => now - e.time < SCROLL_DIZZY_WINDOW);
+      // Count sign reversals
+      const hist = scrollHistoryRef.current;
+      if (hist.length >= 3 && scrollDizzyCooldownRef.current === 0) {
+        let reversals = 0;
+        for (let i = 1; i < hist.length; i++) {
+          if ((hist[i].delta > 0) !== (hist[i - 1].delta > 0)) reversals++;
+        }
+        if (reversals >= 3) {
+          onBehavior('dizzy');
+          onThought('zzz');
+          scrollDizzyCooldownRef.current = Date.now() + 8000;
+          scrollHistoryRef.current = [];
+        }
+      }
+      // Reset cooldown after timeout
+      if (scrollDizzyCooldownRef.current > 0 && now > scrollDizzyCooldownRef.current) {
+        scrollDizzyCooldownRef.current = 0;
+      }
+
+      // Cancel resting on scroll
+      if (isRestingRef.current) {
+        isRestingRef.current = false;
+        setIsResting(false);
+        restTargetRef.current = null;
+        hasRestThoughtRef.current = false;
+        clearTimeout(restTimeoutRef.current);
+      }
+
+      // Schedule rest attempt after scroll idle
+      clearTimeout(scrollIdleTimerRef.current);
+      const restDelay = 2500 + Math.random() * 7500; // 2.5 – 10 s
+      scrollIdleTimerRef.current = setTimeout(() => {
+        if (isDraggingRef.current || isSleepingRef.current) return;
+        // Find a visible resting target (main or footer)
+        const vh = window.innerHeight;
+        const mainEl = document.querySelector('main');
+        const footerEl = document.querySelector('footer');
+        let target = null;
+        for (const el of [footerEl, mainEl]) {
+          if (!el) continue;
+          const rect = el.getBoundingClientRect();
+          // Element's top edge must be within visible viewport
+          if (rect.top > 60 && rect.top < vh - 80) {
+            const rx = HALF + Math.random() * Math.max(0, Math.min(rect.width, window.innerWidth) - PET_SIZE);
+            // Sit ON the element's top edge: pet bottom aligns with rect.top
+            target = { x: rect.left + rx, y: rect.top - HALF + 6 };
+            break;
+          }
+        }
+        if (target) {
+          restTargetRef.current = target;
+          hasRestThoughtRef.current = false;
+          isRestingRef.current = true;
+          setIsResting(true);
+          // Auto cancel rest after 10s
+          restTimeoutRef.current = setTimeout(() => {
+            isRestingRef.current = false;
+            setIsResting(false);
+            restTargetRef.current = null;
+          }, 10000);
+        }
+      }, restDelay);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      clearTimeout(scrollIdleTimerRef.current);
+      clearTimeout(restTimeoutRef.current);
+    };
+  }, [onBehavior, onThought]);
+
   /* ── Boucle d'animation RAF ── */
   useEffect(() => {
     const tick = () => {
@@ -522,6 +647,63 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       frameRef.current++;
+      const sm = speedMultRef.current;
+      const sleeping = isSleepingRef.current;
+
+      // ── Rest/sit steering — override normal wander when resting ──
+      if (isRestingRef.current && restTargetRef.current) {
+        const rt = restTargetRef.current;
+        const rdx = rt.x - p.x;
+        const rdy = rt.y - p.y;
+        const rdist = Math.sqrt(rdx * rdx + rdy * rdy);
+        if (rdist > 12) {
+          // Steer strongly toward rest target
+          v.x += (rdx / rdist) * 0.18;
+          v.y += (rdy / rdist) * 0.18;
+          v.x *= 0.92;
+          v.y *= 0.92;
+        } else {
+          // Arrived — stop and emit zzz thought once
+          v.x *= 0.8;
+          v.y *= 0.8;
+          if (!hasRestThoughtRef.current) {
+            hasRestThoughtRef.current = true;
+            onThought('zzz');
+          }
+        }
+        // Update position with wall clamp
+        p.x = clamp(p.x + v.x, HALF, vw - HALF);
+        p.y = clamp(p.y + v.y, HEADER_H + 10, vh - HALF);
+        if (frameRef.current % 2 === 0) {
+          setPos({ x: p.x, y: p.y });
+          setSpeedLevel(Math.sqrt(v.x * v.x + v.y * v.y));
+        }
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      // ── Sleeping: near-zero drift, no cursor interaction ──
+      if (sleeping) {
+        v.x *= 0.96;
+        v.y *= 0.96;
+        if (frameRef.current % 50 === 0) {
+          const dv = desiredVRef.current;
+          dv.x = (Math.random() - 0.5) * 0.1;
+          dv.y = (Math.random() - 0.5) * 0.1;
+        }
+        v.x += (desiredVRef.current.x - v.x) * 0.01;
+        v.y += (desiredVRef.current.y - v.y) * 0.01;
+        // Emit zzz thought every ~300 frames (~5s)
+        if (frameRef.current % 300 === 0) onThought('zzz');
+        p.x = clamp(p.x + v.x, HALF, vw - HALF);
+        p.y = clamp(p.y + v.y, HEADER_H + 10, vh - HALF);
+        if (frameRef.current % 2 === 0) {
+          setPos({ x: p.x, y: p.y });
+          setSpeedLevel(Math.sqrt(v.x * v.x + v.y * v.y));
+        }
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
 
       // Organic wander: gently perturb desired direction every 50 frames
       if (frameRef.current % 50 === 0) {
@@ -529,8 +711,8 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         dv.x += (Math.random() - 0.5) * 1.4;
         dv.y += (Math.random() - 0.5) * 1.4;
         const dm = Math.sqrt(dv.x * dv.x + dv.y * dv.y) || 1;
-        dv.x = (dv.x / dm) * BASE_SPEED;
-        dv.y = (dv.y / dm) * BASE_SPEED;
+        dv.x = (dv.x / dm) * BASE_SPEED * sm;
+        dv.y = (dv.y / dm) * BASE_SPEED * sm;
       }
       // Smooth steering toward desired velocity
       const dv = desiredVRef.current;
@@ -540,12 +722,48 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       v.x *= 0.984;
       v.y *= 0.984;
 
-      // Smooth edge repulsion (force increases near edge)
+      // ── Wall bounce with momentum ──
+      const effectiveMaxSpeed = MAX_SPEED * sm;
+      const nextX = p.x + v.x;
+      const nextY = p.y + v.y;
+      let bounced = false;
+      if (nextX < HALF) {
+        v.x = Math.abs(v.x) * BOUNCE_RESTITUTION;
+        p.x = HALF;
+        bounced = true;
+      } else if (nextX > vw - HALF) {
+        v.x = -Math.abs(v.x) * BOUNCE_RESTITUTION;
+        p.x = vw - HALF;
+        bounced = true;
+      }
+      if (nextY < HEADER_H + 10) {
+        v.y = Math.abs(v.y) * BOUNCE_RESTITUTION;
+        p.y = HEADER_H + 10;
+        bounced = true;
+      } else if (nextY > vh - HALF) {
+        v.y = -Math.abs(v.y) * BOUNCE_RESTITUTION;
+        p.y = vh - HALF;
+        bounced = true;
+      }
+      // Bounce dizzy — if fast enough and cooldown expired
+      const prox = proximityRef.current;
+      if (bounced) {
+        const bspd = Math.sqrt(v.x * v.x + v.y * v.y);
+        if (bspd > 1.8 && prox.bounceCooldown === 0) {
+          onBehavior('dizzy');
+          prox.bounceCooldown = 120;
+        }
+      }
+      if (prox.bounceCooldown > 0) prox.bounceCooldown--;
+
+      // Smooth edge repulsion (softer push when not bouncing hard)
       const margin = 40;
-      if (p.x < margin + HALF)      v.x += 0.18 * Math.pow(1 - Math.max(0, (p.x - HALF) / margin), 1.5);
-      if (p.x > vw - margin - HALF) v.x -= 0.18 * Math.pow(1 - Math.max(0, (vw - HALF - p.x) / margin), 1.5);
-      if (p.y < HEADER_H + 20)      v.y += 0.28;
-      if (p.y > vh - margin - HALF)  v.y -= 0.18 * Math.pow(1 - Math.max(0, (vh - HALF - p.y) / margin), 1.5);
+      if (!bounced) {
+        if (p.x < margin + HALF)      v.x += 0.18 * Math.pow(1 - Math.max(0, (p.x - HALF) / margin), 1.5);
+        if (p.x > vw - margin - HALF) v.x -= 0.18 * Math.pow(1 - Math.max(0, (vw - HALF - p.x) / margin), 1.5);
+        if (p.y < HEADER_H + 20)      v.y += 0.28;
+        if (p.y > vh - margin - HALF)  v.y -= 0.18 * Math.pow(1 - Math.max(0, (vh - HALF - p.y) / margin), 1.5);
+      }
 
       // Cursor interaction — mood-dependent
       const dx = cursorRef.current.x - p.x;
@@ -579,17 +797,27 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       }
       if (proximityRef.current.avoidThoughtCooldown > 0) proximityRef.current.avoidThoughtCooldown--;
 
-      // Limiter la vitesse
+      // Limiter la vitesse — skip wander cap during throw momentum
       const uncappedSpeed = Math.sqrt(v.x * v.x + v.y * v.y);
-      if (uncappedSpeed > speedCap) {
+      if (throwActiveRef.current) {
+        // Only apply hard cap (THROW_SPEED_CAP) during throw; let friction decay naturally
+        if (uncappedSpeed > THROW_SPEED_CAP) {
+          v.x = (v.x / uncappedSpeed) * THROW_SPEED_CAP;
+          v.y = (v.y / uncappedSpeed) * THROW_SPEED_CAP;
+        }
+        // Clear throw state once momentum has decayed to normal wander speed
+        if (uncappedSpeed < speedCap) throwActiveRef.current = false;
+      } else if (uncappedSpeed > speedCap) {
         v.x = (v.x / uncappedSpeed) * speedCap;
         v.y = (v.y / uncappedSpeed) * speedCap;
       }
       const spd = Math.sqrt(v.x * v.x + v.y * v.y);
 
-      // Mettre à jour la position
-      p.x = clamp(p.x + v.x, HALF, vw - HALF);
-      p.y = clamp(p.y + v.y, HEADER_H + 10, vh - HALF);
+      // Mettre à jour la position (with bounce already handled above, just apply velocity)
+      if (!bounced) {
+        p.x = clamp(p.x + v.x, HALF, vw - HALF);
+        p.y = clamp(p.y + v.y, HEADER_H + 10, vh - HALF);
+      }
 
       // All state updates batched every 2 frames (~30fps render)
       if (frameRef.current % 2 === 0) {
@@ -618,7 +846,6 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         }
 
         // ── Proximity & movement behaviors ──────────────────────────────
-        const prox = proximityRef.current;
         if (prox.exciteCooldown > 0) prox.exciteCooldown--;
         if (prox.scaredCooldown > 0) prox.scaredCooldown--;
         if (prox.speedCooldown  > 0) prox.speedCooldown--;
@@ -646,11 +873,14 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         prox.lastDist = dist;
 
         // Sustained high speed → energy burst — only when not sad
-        if (!isSad && spd > MAX_SPEED * 0.82 && prox.speedCooldown === 0 && prox.exciteCooldown === 0) {
+        if (!isSad && spd > effectiveMaxSpeed * 0.82 && prox.speedCooldown === 0 && prox.exciteCooldown === 0) {
           onBehavior('excited');
           prox.speedCooldown = 240;
           prox.exciteCooldown = 240;
         }
+
+        // Hover-to-pet cooldown decrement
+        if (hoverCooldownRef.current > 0) hoverCooldownRef.current--;
       }
 
       rafRef.current = requestAnimationFrame(tick);
@@ -740,13 +970,21 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
     if (!isDraggingRef.current) return;
     isDraggingRef.current = false;
     setIsDragging(false);
-    // Throw velocity from last pointer movement
+    // Throw velocity from last pointer movement — use THROW_SPEED_CAP for bouncing
     velRef.current = {
-      x: clamp(e.movementX * 0.5, -MAX_SPEED, MAX_SPEED),
-      y: clamp(e.movementY * 0.5, -MAX_SPEED, MAX_SPEED),
+      x: clamp(e.movementX * 1.2, -THROW_SPEED_CAP, THROW_SPEED_CAP),
+      y: clamp(e.movementY * 1.2, -THROW_SPEED_CAP, THROW_SPEED_CAP),
     };
     if (dragHasMovedRef.current) {
+      throwActiveRef.current = true;
       onBehavior('excited');
+    }
+    // Cancel resting on drag
+    if (isRestingRef.current) {
+      isRestingRef.current = false;
+      setIsResting(false);
+      restTargetRef.current = null;
+      clearTimeout(restTimeoutRef.current);
     }
     // Reset smoothed drag speed so scale springs back to normal
     dragSpeedRef.current = 0;
@@ -810,18 +1048,57 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
     }
   }, [])
 
+  /* ── Hover-to-pet — sustained hover triggers petted reaction ── */
+  const handlePetHoverEnter = useCallback(() => {
+    if (isDraggingRef.current || isSleepingRef.current || hoverCooldownRef.current > 0) return;
+    hoverTimerRef.current = setTimeout(() => {
+      if (isDraggingRef.current) return;
+      onBehavior('petted');
+      onHoverPet(); // +5 happiness
+      hoverCooldownRef.current = 360; // ~6s cooldown in frames
+      // Cascade heart bubbles
+      onThought('heart');
+      const t1 = setTimeout(() => onThought('heart'), 500);
+      const t2 = setTimeout(() => onThought('heart'), 1000);
+      hoverTimerRef.current = { t1, t2 }; // store for cleanup
+    }, 1500);
+  }, [onBehavior, onThought, onHoverPet]);
+
+  const handlePetHoverLeave = useCallback(() => {
+    if (hoverTimerRef.current) {
+      if (typeof hoverTimerRef.current === 'number') {
+        clearTimeout(hoverTimerRef.current);
+      } else {
+        clearTimeout(hoverTimerRef.current.t1);
+        clearTimeout(hoverTimerRef.current.t2);
+      }
+      hoverTimerRef.current = null;
+    }
+  }, []);
+
+  // Build wanderer class list
+  const wandererClass = [
+    'pet-wanderer',
+    isDragging && 'pet-wanderer--dragging',
+    isResting && 'pet-wanderer--resting',
+    isSleeping && 'pet-wanderer--sleeping',
+    moodSpinActive && 'pet-wanderer--mood-spin',
+  ].filter(Boolean).join(' ');
+
   return createPortal(
     <>
       {/* Robot qui se balade */}
       <motion.div
         ref={robotRef}
-        className={`pet-wanderer${isDragging ? ' pet-wanderer--dragging' : ''}`}
+        className={wandererClass}
         style={{ left: `${pos.x - HALF}px`, top: `${pos.y - HALF}px` }}
         onClick={() => { if (!dragHasMovedRef.current) toggleHud(); }}
         onPointerDown={handleDragStart}
         onPointerMove={handleDragMove}
         onPointerUp={handleDragEnd}
         onPointerCancel={handleDragEnd}
+        onPointerEnter={handlePetHoverEnter}
+        onPointerLeave={handlePetHoverLeave}
         role="button"
         tabIndex={-1}
         aria-label="Robot de compagnie — cliquer pour interagir"
@@ -832,7 +1109,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
           }
         }}
         initial={{ scale: 0, opacity: 0, y: -24 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
+        animate={{ scale: sizeScale, opacity: 1, y: 0 }}
         exit={{ scale: 0, opacity: 0, rotate: -180, y: -20 }}
         transition={{ type: 'spring', stiffness: 280, damping: 18 }}
       >
@@ -928,8 +1205,11 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
           {stats.hunger >= 50 && stats.happiness >= 30 && stats.happiness < 50 && (
             <p className="pet-hud-tip">💡 Un câlin lui ferait du bien.</p>
           )}
-          {stats.hunger >= 80 && stats.happiness >= 80 && (
+          {stats.hunger >= 80 && stats.happiness >= 80 && stats.hunger < 85 && (
             <p className="pet-hud-tip">🐞 Il explore joyeusement !</p>
+          )}
+          {stats.hunger >= 85 && stats.happiness >= 85 && (
+            <p className="pet-hud-tip pet-hud-tip--thriving">🌟 En pleine forme ! — déclin ralenti</p>
           )}
 
           <div className="pet-stats">
@@ -989,6 +1269,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
    Composant principal (bouton header + logique)
    ───────────────────────────────────────────────── */
 const PetButton = () => {
+  const { mood } = useMood();
   const [isSpawned, setIsSpawned] = useState(() => localStorage.getItem(LS.spawned) === 'true');
   const [stats, setStats] = useState(() => {
     // Réinitialise à ~50% à chaque chargement de page (synchrone, évite le délai d'un useEffect)
@@ -1008,6 +1289,10 @@ const PetButton = () => {
   const [hudThought, setHudThought] = useState(() => {
     return pickRandom(MOOD_TEXT_POOL[getMood(50, 50)] ?? MOOD_TEXT_POOL.content);
   });
+  // Sleep after long idle
+  const [isSleeping, setIsSleeping] = useState(false);
+  // Mood switch flourish
+  const [moodSpinActive, setMoodSpinActive] = useState(false);
 
   const reactionTimer = useRef(null);
   const thoughtTimerRef = useRef(null);
@@ -1018,10 +1303,20 @@ const PetButton = () => {
   const firstSpawnRef = useRef(true);
   // Track previous isSpawned to detect false→true transitions (init to current value to avoid false trigger on mount)
   const prevSpawnedRef = useRef(isSpawned);
+  // Sleep/idle tracking
+  const lastActivityRef = useRef(Date.now());
+  const sleepCheckRef = useRef(null);
+  // Mood switch tracking
+  const prevMoodRef = useRef(mood);
 
   const expression = reaction || getMood(stats.hunger, stats.happiness);
   const petMood = getMood(stats.hunger, stats.happiness);
   const needsAttention = petMood === 'sad' && isSpawned;
+
+  // ── Vitality-derived size and speed ──
+  const vitality = clamp((stats.hunger + stats.happiness) / 200, 0, 1);
+  const sizeScale = 0.85 + vitality * 0.25;   // range 0.85–1.10
+  const speedMult = 0.6 + vitality * 0.8;     // range 0.6–1.40
 
   /* ── Persistance ── */
   useEffect(() => {
@@ -1070,14 +1365,18 @@ const PetButton = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reaction, petMood]);
 
-  /* ── Dégradation en session ── */
+  /* ── Dégradation en session (ralentie si thriving) ── */
   useEffect(() => {
     if (!isSpawned) return;
     decayRef.current = setInterval(() => {
-      setStats((s) => ({
-        hunger: clamp(s.hunger - 2),
-        happiness: clamp(s.happiness - 1),
-      }));
+      setStats((s) => {
+        const thriving = s.hunger > 85 && s.happiness > 85;
+        const m = thriving ? 0.2 : 1.0;
+        return {
+          hunger: clamp(s.hunger - 2 * m),
+          happiness: clamp(s.happiness - 1 * m),
+        };
+      });
     }, DECAY_MS);
     return () => clearInterval(decayRef.current);
   }, [isSpawned]);
@@ -1122,6 +1421,45 @@ const PetButton = () => {
     const id = setTimeout(() => triggerReaction('dizzy'), 28000);
     return () => clearTimeout(id);
   }, [isSpawned, stats.hunger, stats.happiness, triggerReaction]);
+
+  /* ── Sommeil après inactivité ── */
+  useEffect(() => {
+    if (!isSpawned) return;
+    lastActivityRef.current = Date.now();
+    const onActivity = () => {
+      lastActivityRef.current = Date.now();
+      if (isSleeping) {
+        setIsSleeping(false);
+        triggerReaction('woozy');
+      }
+    };
+    window.addEventListener('mousemove', onActivity);
+    window.addEventListener('keydown', onActivity);
+    window.addEventListener('pointerdown', onActivity);
+    sleepCheckRef.current = setInterval(() => {
+      if (!isSleeping && Date.now() - lastActivityRef.current > SLEEP_IDLE_MS) {
+        setIsSleeping(true);
+        triggerReaction('sleep');
+      }
+    }, 15000);
+    return () => {
+      window.removeEventListener('mousemove', onActivity);
+      window.removeEventListener('keydown', onActivity);
+      window.removeEventListener('pointerdown', onActivity);
+      clearInterval(sleepCheckRef.current);
+    };
+  }, [isSpawned, isSleeping, triggerReaction]);
+
+  /* ── Flourish quand le mood du site change ── */
+  useEffect(() => {
+    if (prevMoodRef.current !== null && prevMoodRef.current !== mood && isSpawned) {
+      triggerReaction('excited');
+      setMoodSpinActive(true);
+      const id = setTimeout(() => setMoodSpinActive(false), 900);
+      return () => clearTimeout(id);
+    }
+    prevMoodRef.current = mood;
+  }, [mood, isSpawned, triggerReaction]);
 
   /* ── API globale ── */
   useEffect(() => {
@@ -1176,6 +1514,11 @@ const PetButton = () => {
     clearTimeout(thoughtTimerRef.current);
     setThoughtSymbol(symbol);
     thoughtTimerRef.current = setTimeout(() => setThoughtSymbol(null), 2600);
+  }, []);
+
+  /* ── Hover-pet stat bump (+5 happiness) ── */
+  const handleHoverPet = useCallback(() => {
+    setStats((s) => ({ ...s, happiness: clamp(s.happiness + 5) }));
   }, []);
 
   /* ── Toggle spawn (recharge les stats si elles étaient basses) ── */
@@ -1237,9 +1580,14 @@ const PetButton = () => {
             onInteract={handleInteract}
             onBehavior={triggerReaction}
             onThought={handleThought}
+            onHoverPet={handleHoverPet}
             cooldowns={cdEnds}
             thoughtSymbol={thoughtSymbol}
             hudThought={hudThought}
+            sizeScale={sizeScale}
+            speedMult={speedMult}
+            isSleeping={isSleeping}
+            moodSpinActive={moodSpinActive}
           />
         )}
       </AnimatePresence>

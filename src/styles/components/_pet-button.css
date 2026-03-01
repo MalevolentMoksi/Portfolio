@@ -485,4 +485,62 @@ body[data-mood="vaporwave"] .pet-robot {
   100% { opacity: 0; transform: translateY(-30px); }
 }
 
+/* ========== Blush — rougeur joues ========== */
 
+.pet-blush {
+  filter: drop-shadow(0 0 3px rgba(255, 120, 120, 0.35));
+  transition: opacity 0.4s ease;
+}
+
+/* ========== Sleep — sommeil après inactivité ========== */
+
+@keyframes pet-sleep-sway {
+  0%, 100% { transform: rotate(-2deg) translateY(0); }
+  50%      { transform: rotate(2deg) translateY(2px); }
+}
+
+.pet-robot--sleep {
+  animation: pet-sleep-sway 3s ease-in-out infinite;
+}
+
+.pet-wanderer--sleeping {
+  opacity: 0.65;
+  transition: opacity 0.6s ease;
+}
+
+/* ========== Mood-switch flourish — spin ========== */
+
+@keyframes pet-mood-spin {
+  0%   { transform: rotate(0deg) scale(1); }
+  40%  { transform: rotate(200deg) scale(1.12); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.pet-robot--mood-spin {
+  animation: pet-mood-spin 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pet-wanderer--mood-spin {
+  filter: drop-shadow(0 0 8px rgba(var(--color-primary-rgb), 0.5));
+  transition: filter 0.3s ease;
+}
+
+/* ========== Resting — repos sur scroll idle ========== */
+
+@keyframes pet-rest-settle {
+  0%   { transform: scaleY(1) scaleX(1); }
+  60%  { transform: scaleY(0.88) scaleX(1.06); }
+  100% { transform: scaleY(0.90) scaleX(1.05); }
+}
+
+.pet-wanderer--resting .pet-svg-wrap {
+  animation: pet-rest-settle 0.5s ease-out forwards;
+}
+
+/* ========== Thriving tip — état épanoui ========== */
+
+.pet-hud-tip--thriving {
+  color: #d4af37;
+  background: rgba(212, 175, 55, 0.08);
+  border-color: rgba(212, 175, 55, 0.25);
+}
