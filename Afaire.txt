@@ -5,3 +5,4 @@
 - Spinning Spirals for Woozy
 - + d'Arrière plans
 - Crédits
+- When the tab regains focus, or the mouse re-enters the tab after a while, the pet bot will act dizzy as if it just spawned
