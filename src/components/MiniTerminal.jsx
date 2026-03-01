@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { academicProjects, personalProjects, getAllTags } from '@/data/projects.js';
 import { discoverMusicTracks } from '@/utils/discoverMusicTracks.js';
+import SnakeGame from './SnakeGame.jsx';
 
 /* ── Données statiques ─────────────────────────────── */
 
@@ -42,6 +43,7 @@ const HELP_TEXT = `Commandes disponibles :
   joke      — une blague de dev
   date      — date et heure actuelles
   pet       — état du robot
+  snake     — lancer le jeu Snake 🐍
   clear     — effacer le terminal`;
 
 const ABOUT_TEXT = `Enzo Morello / Étudiant en BUT Informatique à l'IUT2 de Grenoble.
@@ -104,6 +106,7 @@ const calculateStats = () => {
 
 const MiniTerminal = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [snakeMode, setSnakeMode] = useState(false);
   const [lines, setLines] = useState([
     { type: 'system', text: 'Bienvenue ! Tapez "help" pour la liste des commandes.' },
   ]);
@@ -237,6 +240,11 @@ const MiniTerminal = () => {
         break;
       }
 
+      case 'snake':
+        setSnakeMode(true);
+        setInput('');
+        return;
+
       case 'clear':
         setLines([]);
         setInput('');
@@ -263,9 +271,16 @@ const MiniTerminal = () => {
     setIsOpen((prev) => {
       const next = !prev;
       setIconState(next ? 'open' : 'idle');
+      if (!next) setSnakeMode(false); // fermer le snake si on ferme le terminal
       return next;
     });
   };
+
+  const closeSnake = useCallback(() => {
+    setSnakeMode(false);
+    // Donner le focus à l'input terminal après fermeture du jeu
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }, []);
 
   return (
     <div className="mini-terminal-wrapper" ref={panelRef}>
@@ -306,7 +321,7 @@ const MiniTerminal = () => {
       {isOpen && createPortal(
         <div
           ref={panelDivRef}
-          className="mini-terminal-panel"
+          className={`mini-terminal-panel${snakeMode ? ' mini-terminal-panel--snake' : ''}`}
           role="dialog"
           aria-label="Mini terminal"
           style={panelPos ? {
@@ -325,34 +340,40 @@ const MiniTerminal = () => {
             <span className="mini-terminal-title">enzo@portfolio:~</span>
           </div>
 
-          <div className="mini-terminal-output" ref={outputRef}>
-            {lines.map((line, i) => (
-              <div key={i} className={`mini-terminal-line mini-terminal-line--${line.type}`}>
-                {line.text.split('\n').map((segment, j) => (
-                  <span key={j}>
-                    {segment}
-                    {j < line.text.split('\n').length - 1 && <br />}
-                  </span>
+          {snakeMode ? (
+            <SnakeGame onClose={closeSnake} />
+          ) : (
+            <>
+              <div className="mini-terminal-output" ref={outputRef}>
+                {lines.map((line, i) => (
+                  <div key={i} className={`mini-terminal-line mini-terminal-line--${line.type}`}>
+                    {line.text.split('\n').map((segment, j) => (
+                      <span key={j}>
+                        {segment}
+                        {j < line.text.split('\n').length - 1 && <br />}
+                      </span>
+                    ))}
+                  </div>
                 ))}
               </div>
-            ))}
-          </div>
 
-          <div className="mini-terminal-input-row">
-            <span className="mini-terminal-prompt">$</span>
-            <input
-              ref={inputRef}
-              type="text"
-              className="mini-terminal-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Tapez une commande…"
-              spellCheck={false}
-              autoComplete="off"
-              aria-label="Saisie de commande"
-            />
-          </div>
+              <div className="mini-terminal-input-row">
+                <span className="mini-terminal-prompt">$</span>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  className="mini-terminal-input"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Tapez une commande…"
+                  spellCheck={false}
+                  autoComplete="off"
+                  aria-label="Saisie de commande"
+                />
+              </div>
+            </>
+          )}
         </div>,
         document.body
       )}

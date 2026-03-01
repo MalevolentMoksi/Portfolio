@@ -26,6 +26,7 @@
 @import './components/_lightbox.css';
 @import './components/_three-scene.css';
 @import './components/_mini-terminal.css';
+@import './components/_snake-game.css';
 @import './components/_mood-switcher.css';
 @import './components/_particles-button.css';
 @import './components/_pet-button.css';
