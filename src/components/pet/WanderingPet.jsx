@@ -80,6 +80,8 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   const throwActiveRef = useRef(false);
   // External gravity effect — pulls pet downward when active
   const gravityActiveRef = useRef(false);
+  // External attract effect — pulls pet toward a target point when active
+  const attractTargetRef = useRef(null);
 
   /* ── Suivi du curseur ── */
   useEffect(() => {
@@ -195,6 +197,60 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       const sm = speedMultRef.current;
       const sleeping = isSleepingRef.current;
 
+      // ── Attract steering — highest priority override ──
+      // Direct seek: SET velocity toward target each frame (no accumulation).
+      // This guarantees the pet always moves toward the attraction point.
+      if (attractTargetRef.current) {
+        const at = attractTargetRef.current;
+        const adx = at.x - p.x;
+        const ady = at.y - p.y;
+        const adist = Math.sqrt(adx * adx + ady * ady);
+
+        if (adist > 3) {
+          // Speed ramps with distance: fast when far, slows near target
+          const speed = Math.min(5.0, 1.2 + adist * 0.008);
+          // Overwrite velocity — no residual wander momentum
+          v.x = (adx / adist) * speed;
+          v.y = (ady / adist) * speed;
+        } else {
+          // Close enough — brake
+          v.x *= 0.7;
+          v.y *= 0.7;
+        }
+
+        p.x = clamp(p.x + v.x, HALF, vw - HALF);
+        p.y = clamp(p.y + v.y, HEADER_H + 10, vh - HALF);
+
+        if (frameRef.current % 2 === 0) {
+          setPos({ x: p.x, y: p.y });
+          setSpeedLevel(Math.sqrt(v.x * v.x + v.y * v.y));
+
+          if (v.x > 0.08)       flipHysteresisRef.current = Math.min(flipHysteresisRef.current + 1,  20);
+          else if (v.x < -0.08) flipHysteresisRef.current = Math.max(flipHysteresisRef.current - 1, -20);
+          if (flipHysteresisRef.current >=  15) setFacingLeft(false);
+          if (flipHysteresisRef.current <= -15) setFacingLeft(true);
+
+          const gdx = cursorRef.current.x - p.x;
+          const gdy = cursorRef.current.y - p.y;
+          const gdist = Math.sqrt(gdx * gdx + gdy * gdy) || 1;
+          const gazeStrength = Math.min(1, gdist / 260);
+          const MAX_GAZE = 1.8;
+          if (!hasMouseMovedRef.current) {
+            setGaze({ x: 0, y: 0 });
+          } else {
+            setGaze({
+              x: (gdx / gdist) * gazeStrength * MAX_GAZE,
+              y: (gdy / gdist) * gazeStrength * MAX_GAZE,
+            });
+          }
+
+          if (hoverCooldownRef.current > 0) hoverCooldownRef.current--;
+        }
+
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
       // ── Rest/sit steering — override normal wander when resting ──
       if (isRestingRef.current && restTargetRef.current) {
         const rt = restTargetRef.current;
@@ -228,7 +284,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       }
 
       // ── Sleeping: near-zero drift, no cursor interaction ──
-      if (sleeping) {
+      if (sleeping && !attractTargetRef.current) {
         v.x *= 0.96;
         v.y *= 0.96;
         if (frameRef.current % 50 === 0) {
@@ -266,6 +322,8 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       // Natural friction
       v.x *= 0.984;
       v.y *= 0.984;
+
+      let speedCap = MAX_SPEED;
 
       // ── Gravity effect: pull pet downward when active ──
       if (gravityActiveRef.current) {
@@ -319,9 +377,9 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       const dx = cursorRef.current.x - p.x;
       const dy = cursorRef.current.y - p.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      let speedCap = MAX_SPEED;
+      const isAttracting = Boolean(attractTargetRef.current);
 
-      if (dist > 5) {
+      if (!isAttracting && dist > 5) {
         if (petMoodRef.current !== 'sad' && dist < MAGNET_RADIUS) {
           // Happy/content: gently attracted to cursor
           const strength = ((MAGNET_RADIUS - dist) / MAGNET_RADIUS) * 0.06;
@@ -345,7 +403,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
           proximityRef.current.avoidDwellFrames = 0;
         }
       }
-      if (proximityRef.current.avoidThoughtCooldown > 0) proximityRef.current.avoidThoughtCooldown--;
+      if (!isAttracting && proximityRef.current.avoidThoughtCooldown > 0) proximityRef.current.avoidThoughtCooldown--;
 
       // Limiter la vitesse — skip wander cap during throw momentum
       const uncappedSpeed = Math.sqrt(v.x * v.x + v.y * v.y);
@@ -403,7 +461,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         const isSad = petMoodRef.current === 'sad';
 
         // Dwell excitement — only when happy/content
-        if (!isSad && dist < 130 && dist > 8) {
+        if (!isAttracting && !isSad && dist < 130 && dist > 8) {
           prox.dwellFrames++;
           if (prox.dwellFrames >= 90 && prox.exciteCooldown === 0) {
             onBehavior('excited');
@@ -415,7 +473,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         }
 
         // Sudden close approach → scared (mood-independent — surprise is universal)
-        if (prox.lastDist - dist > 80 && dist < 160 && prox.scaredCooldown === 0) {
+        if (!isAttracting && prox.lastDist - dist > 80 && dist < 160 && prox.scaredCooldown === 0) {
           onBehavior('scared');
           prox.scaredCooldown = 180;
           prox.dwellFrames = 0;
@@ -423,7 +481,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         prox.lastDist = dist;
 
         // Sustained high speed → energy burst — only when not sad
-        if (!isSad && spd > effectiveMaxSpeed * 0.82 && prox.speedCooldown === 0 && prox.exciteCooldown === 0) {
+        if (!isAttracting && !isSad && spd > effectiveMaxSpeed * 0.82 && prox.speedCooldown === 0 && prox.exciteCooldown === 0) {
           onBehavior('excited');
           prox.speedCooldown = 240;
           prox.exciteCooldown = 240;
@@ -653,6 +711,34 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       clearTimeout(gravityTimer);
       gravityActiveRef.current = false;
       delete window.petGravity;
+    };
+  }, []);
+
+  /* ── API globale attraction ── */
+  useEffect(() => {
+    let attractTimer = null;
+    window.petAttract = (x, y, duration) => {
+      clearTimeout(attractTimer);
+      if (isRestingRef.current) {
+        isRestingRef.current = false;
+        setIsResting(false);
+        restTargetRef.current = null;
+        hasRestThoughtRef.current = false;
+        clearTimeout(restTimeoutRef.current);
+      }
+      attractTargetRef.current = { x, y };
+      // Reset velocity so the pet immediately heads toward the target
+      velRef.current.x = 0;
+      velRef.current.y = 0;
+      window.petReact?.('excited');
+      attractTimer = setTimeout(() => {
+        attractTargetRef.current = null;
+      }, duration);
+    };
+    return () => {
+      clearTimeout(attractTimer);
+      attractTargetRef.current = null;
+      delete window.petAttract;
     };
   }, []);
 

@@ -42,6 +42,10 @@ const PetButton = () => {
   const decayRef = useRef(null);
   const idleTimerRef = useRef(null);
   const idleReactionRef = useRef(null);
+  // Ref mirrors for stale-closure-safe reads inside timer callbacks
+  const isSleepingRef = useRef(false);
+  // Tracks timestamp when pet first became sad (for neglect escalation)
+  const sadSinceRef = useRef(null);
   const interactionStreakRef = useRef({ count: 0, lastAt: 0 });
   const firstSpawnRef = useRef(true);
   // Track previous isSpawned to detect false→true transitions (init to current value to avoid false trigger on mount)
@@ -52,8 +56,9 @@ const PetButton = () => {
   // Mood switch tracking
   const prevMoodRef = useRef(mood);
 
-  const expression = reaction || getMood(stats.hunger, stats.happiness);
   const petMood = getMood(stats.hunger, stats.happiness);
+  // Sleep takes priority over base mood but yields to temporary reactions
+  const expression = reaction || (isSleeping ? 'sleep' : petMood);
   const needsAttention = petMood === 'sad' && isSpawned;
 
   // ── Vitality-derived size and speed ──
@@ -96,8 +101,20 @@ const PetButton = () => {
     prevSpawnedRef.current = isSpawned;
   }, [isSpawned, triggerReaction]);
 
-  // Mirror `reaction` into a ref so timer callbacks always read current value
+  // Mirror `reaction` and `isSleeping` into refs so timer callbacks always read current values
   useEffect(() => { idleReactionRef.current = reaction; }, [reaction]);
+  useEffect(() => { isSleepingRef.current = isSleeping; }, [isSleeping]);
+
+  // Sync faceCombo/hudThought when sleep state changes (no triggerReaction for sleep
+  // since we need a persistent expression, not a 2 s auto-clear)
+  useEffect(() => {
+    if (isSleeping) {
+      setFaceCombo(pickRandom(FACE_COMBOS.sleep ?? FACE_COMBOS.content));
+      setHudThought(pickRandom(MOOD_TEXT_POOL.sleep ?? MOOD_TEXT_POOL.content));
+    }
+  // When waking up, triggerReaction('woozy') is called which resets the combo
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSleeping]);
 
   // When reaction clears, reset combo to base mood
   useEffect(() => {
@@ -131,7 +148,8 @@ const PetButton = () => {
     if (!isSpawned) return;
     const schedule = () => {
       idleTimerRef.current = setTimeout(() => {
-        if (idleReactionRef.current === null) {
+        // Guard: skip if a reaction is already playing or the pet is asleep
+      if (idleReactionRef.current === null && !isSleepingRef.current) {
           const h   = readLS(LS.hunger, 80);
           const hap = readLS(LS.happiness, 80);
           const mood = getMood(h, hap);
@@ -160,12 +178,23 @@ const PetButton = () => {
   }, [isSpawned, triggerReaction]);
 
   /* ── Neglect escalation — sustained sad triggers dizzy ── */
+  // Uses petMood (not raw stats) so the interval isn't reset on every decay tick.
+  // sadSinceRef records when sad began; crossing the 28 s mark fires dizzy once.
   useEffect(() => {
-    if (!isSpawned) return;
-    if (getMood(stats.hunger, stats.happiness) !== 'sad') return;
-    const id = setTimeout(() => triggerReaction('dizzy'), 28000);
-    return () => clearTimeout(id);
-  }, [isSpawned, stats.hunger, stats.happiness, triggerReaction]);
+    if (!isSpawned || petMood !== 'sad') {
+      sadSinceRef.current = null;
+      return;
+    }
+    // Preserve timestamp if we were already tracking
+    if (sadSinceRef.current === null) sadSinceRef.current = Date.now();
+    const id = setInterval(() => {
+      if (sadSinceRef.current !== null && Date.now() - sadSinceRef.current >= 28000) {
+        sadSinceRef.current = null;
+        triggerReaction('dizzy');
+      }
+    }, 5000);
+    return () => clearInterval(id);
+  }, [isSpawned, petMood, triggerReaction]);
 
   /* ── Sommeil après inactivité ── */
   useEffect(() => {
@@ -183,8 +212,9 @@ const PetButton = () => {
     window.addEventListener('pointerdown', onActivity);
     sleepCheckRef.current = setInterval(() => {
       if (!isSleeping && Date.now() - lastActivityRef.current > SLEEP_IDLE_MS) {
+        // Set sleep flag only — expression derived from isSleeping, not a timed reaction,
+        // so the sleep face persists for the full duration without a 2 s auto-clear.
         setIsSleeping(true);
-        triggerReaction('sleep');
       }
     }, 15000);
     return () => {
@@ -250,7 +280,8 @@ const PetButton = () => {
     if (streak.count >= 3) {
       streak.count = 0;
       setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness + 8)) }));
-      setTimeout(() => triggerReaction('excited'), REACTION_MS + 50);
+      // Fire before the current reaction clears to avoid a 50 ms base-mood flicker
+      setTimeout(() => triggerReaction('excited'), REACTION_MS - 100);
     }
   }, [cdEnds, triggerReaction]);
 

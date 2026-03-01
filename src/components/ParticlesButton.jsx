@@ -15,6 +15,13 @@ const getPJS = () => {
   } catch { return null; }
 };
 
+const triggerPetAttract = (x, y, duration) => {
+  const fire = () => window.petAttract?.(x, y, duration);
+  fire();
+  requestAnimationFrame(fire);
+  setTimeout(fire, 50);
+};
+
 /**
  * Vitesse de base réelle d'une particule : les particules.js initialisent
  * chaque composante à (random - 0.5) * speed / 3, donc la magnitude RMS
@@ -118,13 +125,14 @@ const effects = {
    * Attraction : les particules convergent vers un point aléatoire de l'écran.
    */
   attract() {
+    const cx = Math.random() * window.innerWidth;
+    const cy = Math.random() * window.innerHeight;
+    triggerPetAttract(cx, cy, 3000);
+
     const pJS = getPJS();
     if (!pJS) return;
 
-    const cx = Math.random() * window.innerWidth;
-    const cy = Math.random() * window.innerHeight;
     let active = true;
-    window.petReact?.('excited');
 
     const pull = () => {
       if (!active) return;
@@ -160,6 +168,8 @@ const effects = {
    * les anciennes pour éviter la disparité.
    */
   storm() {
+    window.petReact?.('dizzy');
+
     const pJS = getPJS();
     if (!pJS) return;
 
@@ -174,8 +184,6 @@ const effects = {
         pos_y: Math.random() * window.innerHeight,
       });
     }
-
-    window.petReact?.('dizzy');
 
     // Uniformiser TOUTES les particules (nouvelles incluses) à stormSpeed
     // en préservant leur direction individuelle
@@ -209,11 +217,12 @@ const effects = {
    * Utilise pJS.canvas.h pour une détection de sol fiable.
    */
   gravity() {
+    window.petReact?.('dizzy');
+    window.petGravity?.(3000);
+
     const pJS = getPJS();
     if (!pJS) return;
     let active = true;
-    window.petReact?.('dizzy');
-    window.petGravity?.(3000);
 
     const fall = () => {
       if (!active) return;

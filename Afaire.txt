@@ -1,5 +1,3 @@
-- Vérifier la page d'accueil niveau texte (ajouter full stack, parler de design)
 - Meilleures illustrations pour les projets
 - CV accessible
-- Implémenter Snake quelque part
 - Ajouter des fonctions d'accessibilités
