@@ -78,6 +78,8 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   const hoverCooldownRef = useRef(0);
   // Throw momentum — skip wander speed cap while decaying
   const throwActiveRef = useRef(false);
+  // External gravity effect — pulls pet downward when active
+  const gravityActiveRef = useRef(false);
 
   /* ── Suivi du curseur ── */
   useEffect(() => {
@@ -265,6 +267,11 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       v.x *= 0.984;
       v.y *= 0.984;
 
+      // ── Gravity effect: pull pet downward when active ──
+      if (gravityActiveRef.current) {
+        v.y += 0.18;
+      }
+
       // ── Wall bounce with momentum ──
       const effectiveMaxSpeed = MAX_SPEED * sm;
       const nextX = p.x + v.x;
@@ -305,7 +312,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         if (p.x < margin + HALF)      v.x += 0.18 * Math.pow(1 - Math.max(0, (p.x - HALF) / margin), 1.5);
         if (p.x > vw - margin - HALF) v.x -= 0.18 * Math.pow(1 - Math.max(0, (vw - HALF - p.x) / margin), 1.5);
         if (p.y < HEADER_H + 20)      v.y += 0.28;
-        if (p.y > vh - margin - HALF)  v.y -= 0.18 * Math.pow(1 - Math.max(0, (vh - HALF - p.y) / margin), 1.5);
+        if (!gravityActiveRef.current && p.y > vh - margin - HALF)  v.y -= 0.18 * Math.pow(1 - Math.max(0, (vh - HALF - p.y) / margin), 1.5);
       }
 
       // Cursor interaction — mood-dependent
@@ -630,6 +637,23 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       }
       hoverTimerRef.current = null;
     }
+  }, []);
+
+  /* ── API globale gravité ── */
+  useEffect(() => {
+    let gravityTimer = null;
+    window.petGravity = (duration) => {
+      clearTimeout(gravityTimer);
+      gravityActiveRef.current = true;
+      gravityTimer = setTimeout(() => {
+        gravityActiveRef.current = false;
+      }, duration);
+    };
+    return () => {
+      clearTimeout(gravityTimer);
+      gravityActiveRef.current = false;
+      delete window.petGravity;
+    };
   }, []);
 
   // Build wanderer class list

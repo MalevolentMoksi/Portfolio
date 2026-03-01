@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 /* ── Configuration des effets ─────────────────────── */
 const EFFECTS = [
@@ -213,6 +213,7 @@ const effects = {
     if (!pJS) return;
     let active = true;
     window.petReact?.('dizzy');
+    window.petGravity?.(3000);
 
     const fall = () => {
       if (!active) return;
@@ -245,7 +246,10 @@ const effects = {
 const ParticlesButton = () => {
   const [effectIndex, setEffectIndex] = useState(0);
   const [isActive, setIsActive] = useState(false);
+  const [activeEffectKey, setActiveEffectKey] = useState(null);
+  const [progress, setProgress] = useState(100);
   const cooldownRef = useRef(false);
+  const progressIntervalRef = useRef(null);
 
   const triggerEffect = useCallback(() => {
     if (cooldownRef.current) return;
@@ -254,31 +258,88 @@ const ParticlesButton = () => {
     effects[effect.key]();
 
     setIsActive(true);
+    setActiveEffectKey(effect.key);
+    setProgress(100);
     cooldownRef.current = true;
 
     // Cooldown : empêcher le spam (durée définie dans l'objet EFFECTS)
     const duration = effect.duration;
-    setTimeout(() => {
-      setIsActive(false);
-      cooldownRef.current = false;
-      // Passer à l'effet suivant
-      setEffectIndex((i) => (i + 1) % EFFECTS.length);
-    }, duration);
+
+    // Start progress countdown
+    const startTime = Date.now();
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+
+    progressIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, duration - elapsed);
+      const progressPercent = (remaining / duration) * 100;
+      setProgress(progressPercent);
+
+      if (progressPercent <= 0) {
+        clearInterval(progressIntervalRef.current);
+        setIsActive(false);
+        setActiveEffectKey(null);
+        cooldownRef.current = false;
+        // Passer à l'effet suivant
+        setEffectIndex((i) => (i + 1) % EFFECTS.length);
+      }
+    }, 50);
   }, [effectIndex]);
 
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, []);
+
   const currentEffect = EFFECTS[effectIndex];
-  const nextEffect = EFFECTS[(effectIndex + 1) % EFFECTS.length];
+  const progressRingRadius = 18;
+  const progressRingCircumference = 2 * Math.PI * progressRingRadius;
+  const progressOffset = progressRingCircumference * (1 - progress / 100);
+
+  // Determine progress class for color transition
+  let progressClass = '';
+  if (progress > 75) progressClass = 'progress-75';
+  else if (progress > 50) progressClass = 'progress-50';
+  else if (progress > 25) progressClass = 'progress-25';
 
   return (
     <button
       className={`header-action-btn particles-btn ${isActive ? 'particles-btn--active' : ''}`}
       onClick={triggerEffect}
       aria-label={`Effet particules : ${currentEffect.label}`}
-      title={`${currentEffect.icon} ${currentEffect.label}${isActive ? ' (en cours…)' : ''}`}
+      title={`${currentEffect.icon} ${currentEffect.label}${isActive ? ` (${Math.ceil(progress)}%)` : ''}`}
       disabled={isActive}
     >
+      {/* Cooldown Progress Ring */}
+      {isActive && (
+        <svg
+          className="particles-progress-ring"
+          viewBox="0 0 40 40"
+          width="40"
+          height="40"
+        >
+          <circle
+            className={`particles-progress-ring__circle ${progressClass}`}
+            cx="20"
+            cy="20"
+            r={progressRingRadius}
+            fill="none"
+            strokeWidth="2"
+            strokeDasharray={progressRingCircumference}
+            strokeDashoffset={progressOffset}
+          />
+        </svg>
+      )}
+
+      {/* Effect Icon with Animation */}
       <svg
-        className={`particles-icon ${isActive ? 'particles-icon--pulse' : ''}`}
+        className={`particles-icon ${activeEffectKey ? `particles-icon--${activeEffectKey}` : ''}`}
         viewBox="0 0 24 24"
         width="17"
         height="17"
