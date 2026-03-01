@@ -163,9 +163,18 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         }
       }, restDelay);
     };
+    // Vider l'historique quand l'onglet perd/reprend le focus — évite les faux positifs
+    // sur les événements scroll que le navigateur émet lors du retour au premier plan.
+    const onVisibility = () => {
+      scrollHistoryRef.current = [];
+      lastScrollYRef.current = window.scrollY;
+    };
+
     window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('visibilitychange', onVisibility);
       clearTimeout(scrollIdleTimerRef.current);
       clearTimeout(restTimeoutRef.current);
     };

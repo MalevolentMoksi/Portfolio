@@ -14,18 +14,21 @@ class UIEnhancements {
     this.initBackToTop();
     this.initVideoHover();
     this.initFooterClock();
-    this.initViewTransitions();
   }
   
   initTypingEffect() {
     const element = document.getElementById('main-title');
     if (!element) return;
     
-    const fullText = element.dataset.originalText || element.textContent;
+    // Toujours lire le texte courant défini par React; ne pas réutiliser
+    // dataset.originalText qui peut contenir le texte d'une page précédente.
+    const currentText = element.textContent.trim();
+    const fullText = currentText || element.dataset.originalText || '';
     element.dataset.originalText = fullText;
     if (element.dataset.typedText === fullText && element.dataset.typed === 'true') {
       return;
     }
+    element.dataset.typed = 'false';
     element.dataset.typedText = fullText;
     element.textContent = '';
     element.classList.add('typing');
@@ -167,39 +170,7 @@ class UIEnhancements {
     setInterval(updateClock, 1000);
   }
   
-  initViewTransitions() {
-    // Native View Transition API for Chrome/Edge
-    if (!document.startViewTransition) return;
-    if (document.documentElement.dataset.spaMode === 'true') return;
-    if (document.documentElement.dataset.viewTransitionInit === 'true') return;
-    document.documentElement.dataset.viewTransitionInit = 'true';
-    
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('a');
-      if (!link) return;
-      
-      const url = new URL(link.href, location);
-      
-      // Only handle same-origin, not anchors, not new tabs
-      if (
-        url.origin !== location.origin ||
-        link.target === '_blank' ||
-        link.href.includes('#') ||
-        e.ctrlKey ||
-        e.metaKey ||
-        e.shiftKey ||
-        e.altKey
-      ) {
-        return;
-      }
-      
-      e.preventDefault();
-      
-      document.startViewTransition(() => {
-        window.location = link.href;
-      });
-    });
-  }
+
 }
 
 export default UIEnhancements;
