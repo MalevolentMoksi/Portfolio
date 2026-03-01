@@ -73,6 +73,9 @@
   --secondary-color: var(--color-secondary);
   --text-color: var(--color-text);
   --bg-color: var(--color-bg);
+
+  /* Technology icon tint — recolours SVG icons to match the active mood */
+  --tech-icon-filter: invert(79%) sepia(39%) saturate(1450%) hue-rotate(358deg) brightness(89%) contrast(89%);
 }
 
 /*
@@ -90,6 +93,7 @@
 body[data-mood="hacker"] {
   --color-primary: #00ff41;
   --color-primary-rgb: 0, 255, 65;
+  --tech-icon-filter: invert(56%) sepia(98%) saturate(427%) hue-rotate(99deg) brightness(121%) contrast(100%);
   --color-secondary: #070707;
   --color-secondary-rgb: 7, 7, 7;
   --color-text: #00ff41;
@@ -109,6 +113,7 @@ body[data-mood="hacker"] {
 body[data-mood="vaporwave"] {
   --color-primary: #ff71ce;
   --color-primary-rgb: 255, 113, 206;
+  --tech-icon-filter: invert(77%) sepia(33%) saturate(786%) hue-rotate(283deg) brightness(105%) contrast(98%);
   --color-secondary: #1a0035;
   --color-secondary-rgb: 26, 0, 53;
   --color-text: #b0e0ff;

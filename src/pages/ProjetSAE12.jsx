@@ -20,6 +20,8 @@ const ProjetSAE12 = () => {
           </p>
         </section>
 
+        <hr />
+
         <section id="skills">
           <h2>Compétences</h2>
           <ul>
@@ -30,6 +32,8 @@ const ProjetSAE12 = () => {
             <li>Comparaison expérimentale de méthodes d'IA</li>
           </ul>
         </section>
+
+        <hr />
 
         <section id="techniques">
           <h2>Compétences Techniques & Savoir-Faire</h2>
@@ -42,6 +46,8 @@ const ProjetSAE12 = () => {
           </ul>
         </section>
 
+        <hr />
+
         <section id="objectives">
           <h2>Objectifs</h2>
           <ul>
@@ -52,6 +58,8 @@ const ProjetSAE12 = () => {
             <li>Comparer avec la méthode des K plus proches voisins</li>
           </ul>
         </section>
+
+        <hr />
 
         <section id="group-work">
           <h2>Travail en groupe</h2>
@@ -65,6 +73,8 @@ const ProjetSAE12 = () => {
             (discutablement la plus difficile) et a pu me l'expliquer après.
           </p>
         </section>
+
+        <hr />
 
         <section id="individual-work">
           <h2>Travail individuel</h2>

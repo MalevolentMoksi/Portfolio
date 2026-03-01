@@ -6,11 +6,12 @@ import { Link } from 'react-router-dom';
  */
 
 const projects = [
-  { path: '/projet-SAE12', title: 'SAE 1.2 - Implémentation besoin client' },
-  { path: '/projet-SAE3', title: 'SAE 3 - Installation poste développement' },
-  { path: '/projet-SAE4', title: 'SAE 4 - Création base de données' },
-  { path: '/projet-SAE56', title: 'SAE 5-6 - Site web institutionnel' },
+  { path: '/projet-SAE3.01', title: 'SAE 3.01 - Application Web pour les aidants' },
   { path: '/projet-MEGASAE', title: 'MEGASAE - Application de banquets' },
+  { path: '/projet-SAE56', title: 'SAE 5-6 - Site web institutionnel' },
+  { path: '/projet-SAE3', title: 'SAE 3 - Installation poste développement' },
+  { path: '/projet-SAE12', title: 'SAE 1.2 - Implémentation besoin client' },
+  { path: '/projet-SAE4', title: 'SAE 4 - Création base de données' },
 ];
 
 const ProjectPagination = ({ currentPath }) => {

@@ -69,6 +69,13 @@ const pageConfig = {
     metaTitle: 'Projet - Création site web institutionnel',
     metaDescription: "Portfolio d'Enzo Morello - Projet SAE56",
   },
+  '/projet-SAE3.01': {
+    heading: "Aidémé – Application Web de coordination pour les aidants",
+    subheading: 'Une plateforme collaborative pour gérer le suivi des personnes dépendantes',
+    backgroundSrc: getAssetPath('assets/images/pyramids2.png'),
+    metaTitle: 'Aidémé – Application Web pour les aidants',
+    metaDescription: "Portfolio d'Enzo Morello - Projet SAE 3.01 : application full-stack React + PHP",
+  },
 };
 
 const Layout = () => {

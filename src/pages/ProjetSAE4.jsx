@@ -42,6 +42,8 @@ const ProjetSAE4 = () => {
           </p>
         </section>
 
+        <hr />
+
         <section id="skills">
           <h2>Compétences mobilisées</h2>
           <ul>
@@ -50,6 +52,8 @@ const ProjetSAE4 = () => {
             <li>Concevoir une base de données relationnelle à partir d'un cahier des charges</li>
           </ul>
         </section>
+
+        <hr />
 
         <section id="objectives">
           <h2>Objectifs pédagogiques</h2>
@@ -60,6 +64,8 @@ const ProjetSAE4 = () => {
             <li>Apprendre à faire évoluer un schéma existant sans casser les données.</li>
           </ul>
         </section>
+
+        <hr />
 
         <section id="techniques">
           <h2>Compétences techniques & savoir-faire</h2>
@@ -73,6 +79,8 @@ const ProjetSAE4 = () => {
           </ul>
         </section>
 
+        <hr />
+
         <section id="group-work">
           <h2>Organisation en binôme</h2>
           <p>
@@ -80,6 +88,8 @@ const ProjetSAE4 = () => {
             moi sur le SLR, les requêtes métier et le bilan. Revues de code hebdomadaires sur GitLab.
           </p>
         </section>
+
+        <hr />
 
         <section id="individual-work">
           <h2>Contributions personnelles</h2>

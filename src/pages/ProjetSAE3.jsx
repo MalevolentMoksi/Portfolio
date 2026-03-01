@@ -23,6 +23,8 @@ const ProjetSAE3 = () => {
           </p>
         </section>
 
+        <hr />
+
         <section id="skills">
           <h2>Compétences</h2>
           <ul>
@@ -65,6 +67,8 @@ const ProjetSAE3 = () => {
           </ul>
         </section>
 
+        <hr />
+
         <section id="techniques">
           <h2>Compétences Techniques & Savoir-Faire</h2>
           <ul>
@@ -85,6 +89,8 @@ const ProjetSAE3 = () => {
           </ul>
         </section>
 
+        <hr />
+
         <section id="objectives">
           <h2>Objectifs</h2>
           <ul>
@@ -93,6 +99,8 @@ const ProjetSAE3 = () => {
             <li>Rédiger un guide synthétique expliquant chaque commande et choix technique</li>
           </ul>
         </section>
+
+        <hr />
 
         <section id="group-work">
           <h2>Collaboration</h2>
@@ -103,6 +111,8 @@ const ProjetSAE3 = () => {
             aidé à clarifier l'ordre des étapes.
           </p>
         </section>
+
+        <hr />
 
         <section id="individual-work">
           <h2>Travail personnel</h2>

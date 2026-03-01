@@ -5,6 +5,24 @@
 
 export const academicProjects = [
   {
+    id: 'sae301',
+    path: '/projet-SAE3.01',
+    type: 'Projet SAE',
+    title: '"Aidémé" – Application Web pour les aidants',
+    category: 'SAE 3.01',
+    description: 'Conception et développement d\'une application Web full-stack (React 19 + PHP 8 + SQLite) permettant aux aidants de coordonner le suivi de personnes dépendantes : contacts, agenda, galerie photo, fichiers et notifications.',
+    teamSize: 'En équipe (Team 08 – IUT2 Info UGA)',
+    image: '/assets/images/AidemePresentation.png',
+    tags: ['React', 'PHP', 'SQLite', 'Vite', 'API REST', 'Git'],
+    technologies: [
+      { name: 'React', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/react.svg' },
+      { name: 'Vite', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/vite.svg' },
+      { name: 'PHP', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/php.svg' },
+      { name: 'SQLite', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/sqlite.svg' },
+      { name: 'GitLab', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg' },
+    ],
+  },
+  {
     id: 'megasae',
     path: '/projet-MEGASAE',
     type: 'Projet',
@@ -12,7 +30,7 @@ export const academicProjects = [
     category: 'Projet cardinal',
     description: 'Développement à partir de zéro d\'une application qui pourrait planifier des événements dans des salles pour un utilisateur.',
     teamSize: 'En hexanome (6 personnes)',
-    image: '/assets/images/banquets-MEGASAE.webp',
+    image: '/assets/images/banquets-MEGASAE.jpg',
     tags: ['Java', 'JavaFX', 'Maven', 'SQL', 'Git'],
     technologies: [
       { name: 'Java', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/openjdk.svg' },

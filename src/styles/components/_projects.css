@@ -50,7 +50,7 @@
   height: 30px;
   aspect-ratio: 1/1;
   object-fit: contain;
-  filter: invert(79%) sepia(39%) saturate(1450%) hue-rotate(358deg) brightness(89%) contrast(89%);
+  filter: var(--tech-icon-filter);
   opacity: 0.85;
   transition: 
     transform var(--transition-base),
