@@ -73,7 +73,7 @@
   background: rgba(var(--color-primary-rgb), 0.1);
 }
 
-.filter-tag input[type="checkbox"] {
+.filter-tag input[type='checkbox'] {
   width: 18px;
   height: 18px;
   cursor: pointer;
@@ -87,7 +87,7 @@
   transition: color var(--transition-duration) var(--transition-easing);
 }
 
-.filter-tag input[type="checkbox"]:checked + .tag-label {
+.filter-tag input[type='checkbox']:checked + .tag-label {
   color: var(--color-accent);
   font-weight: 600;
 }
@@ -170,7 +170,7 @@
     padding: calc(var(--space-xs) / 1.5) var(--space-xs);
   }
 
-  .filter-tag input[type="checkbox"] {
+  .filter-tag input[type='checkbox'] {
     width: 16px;
     height: 16px;
   }

@@ -9,25 +9,25 @@ class VisualEffects {
     this.particlesLoaded = false;
     this.init();
   }
-  
+
   init() {
     this.initParticles();
     if (this.background) {
       this.initParallax();
     }
   }
-  
+
   initParticles() {
     // Check if particles.js is loaded
     if (typeof particlesJS === 'undefined') {
       console.warn('particles.js not loaded');
       return;
     }
-    
+
     // Réduit le nombre de particules sur mobile pour les performances
     const isMobile = window.innerWidth <= 768;
     const particleCount = isMobile ? 40 : 80;
-    
+
     particlesJS('particles-js', {
       particles: {
         number: {
@@ -78,7 +78,7 @@ class VisualEffects {
       },
       retina_detect: true,
     });
-    
+
     this.particlesLoaded = true;
 
     // Appliquer le mood sauvegardé si les particules viennent de charger
@@ -96,8 +96,8 @@ class VisualEffects {
    */
   updateParticlesMood(mood) {
     const MOOD_COLORS = {
-      default:   '#d4af37',
-      hacker:    '#00ff41',
+      default: '#d4af37',
+      hacker: '#00ff41',
       vaporwave: '#ff71ce',
     };
 
@@ -135,10 +135,10 @@ class VisualEffects {
     let mouseY = 0;
     let posX = 0;
     let posY = 0;
-    
+
     const friction = 1 / 12; // Easing factor
     const depth = 0.06; // Movement intensity
-    
+
     // Track mouse position
     const handleMouseMove = (e) => {
       const x = e.clientX - window.innerWidth / 2;
@@ -146,7 +146,7 @@ class VisualEffects {
       mouseX = x * depth;
       mouseY = y * depth;
     };
-    
+
     // Throttle mousemove for performance
     let ticking = false;
     window.addEventListener('mousemove', (e) => {
@@ -158,7 +158,7 @@ class VisualEffects {
         ticking = true;
       }
     });
-    
+
     // Smooth animation loop
     const updateParallax = () => {
       posX += (mouseX - posX) * friction;
@@ -167,7 +167,7 @@ class VisualEffects {
       this.background.style.filter = 'blur(4px)';
       requestAnimationFrame(updateParallax);
     };
-    
+
     updateParallax();
   }
 }

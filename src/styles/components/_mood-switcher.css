@@ -12,28 +12,42 @@
 }
 
 .mood-orb {
-  transition: fill 0.5s ease, stroke 0.5s ease;
+  transition:
+    fill 0.5s ease,
+    stroke 0.5s ease;
 }
 
 .mood-dot {
-  transition: opacity 0.4s ease, fill 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    fill 0.4s ease;
 }
 
 /* Spin animation on mood change — smooth ease-out, no overshoot */
 @keyframes mood-spin {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes mood-pulse {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.18); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .mood-icon--spin {
   animation:
-    mood-spin  0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    mood-spin 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     mood-pulse 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   transform-origin: center;
 }
@@ -41,7 +55,9 @@
 /* Retirer la classe après la fin de l'animation pour éviter tout snap */
 .mood-icon--spin .mood-orb,
 .mood-icon--spin .mood-dot {
-  transition: fill 0.4s ease, opacity 0.3s ease;
+  transition:
+    fill 0.4s ease,
+    opacity 0.3s ease;
 }
 
 /* ---- Panel ---- */
@@ -62,8 +78,14 @@
 }
 
 @keyframes mood-panel-in {
-  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .mood-panel-title {
@@ -141,7 +163,7 @@
 
 /* ---- Mood-specific body overlays ---- */
 /* Hacker: subtle scan-line overlay */
-body[data-mood="hacker"]::after {
+body[data-mood='hacker']::after {
   content: '';
   position: fixed;
   inset: 0;
@@ -157,7 +179,7 @@ body[data-mood="hacker"]::after {
 }
 
 /* Vaporwave: gradient background replaces solid black */
-body[data-mood="vaporwave"] {
+body[data-mood='vaporwave'] {
   background: linear-gradient(135deg, #0d001a 0%, #0a1040 50%, #1a0035 100%) !important;
 }
 

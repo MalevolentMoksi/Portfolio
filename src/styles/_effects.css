@@ -18,7 +18,7 @@
 
 /* Global image hover effects */
 img {
-  transition: 
+  transition:
     transform var(--transition-base),
     box-shadow var(--transition-base);
 }
@@ -46,7 +46,8 @@ img:hover {
 }
 
 @keyframes glitch-text {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -72,7 +73,8 @@ img:hover {
 
 /* Pulse animation for highlighted elements */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(var(--color-primary-rgb), 0.7);
   }
   50% {
@@ -120,14 +122,13 @@ img:hover {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
+
   #cursor-trail,
   .local-part {
     animation: none;
   }
-  
+
   img:hover {
     transform: none;
   }
-
 }

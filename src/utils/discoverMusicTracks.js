@@ -5,10 +5,10 @@
 
 export function discoverMusicTracks() {
   // Use Vite's import.meta.glob to discover all music files at build time
-  const musicFiles = import.meta.glob(
-    '../../public/assets/music/*.{m4a,mp3}',
-    { query: '?url', import: 'default' }
-  );
+  const musicFiles = import.meta.glob('../../public/assets/music/*.{m4a,mp3}', {
+    query: '?url',
+    import: 'default',
+  });
 
   // Extract filenames from the glob paths
   const trackNames = Object.keys(musicFiles)

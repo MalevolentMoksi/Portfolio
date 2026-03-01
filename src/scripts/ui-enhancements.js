@@ -7,7 +7,7 @@ class UIEnhancements {
   constructor() {
     this.init();
   }
-  
+
   init() {
     this.initTypingEffect();
     this.initEmailGlitch();
@@ -15,11 +15,11 @@ class UIEnhancements {
     this.initVideoHover();
     this.initFooterClock();
   }
-  
+
   initTypingEffect() {
     const element = document.getElementById('main-title');
     if (!element) return;
-    
+
     // Toujours lire le texte courant défini par React; ne pas réutiliser
     // dataset.originalText qui peut contenir le texte d'une page précédente.
     const currentText = element.textContent.trim();
@@ -32,7 +32,7 @@ class UIEnhancements {
     element.dataset.typedText = fullText;
     element.textContent = '';
     element.classList.add('typing');
-    
+
     let i = 0;
     const typeLetter = () => {
       if (i <= fullText.length) {
@@ -44,34 +44,35 @@ class UIEnhancements {
         element.dataset.typed = 'true';
       }
     };
-    
+
     typeLetter();
   }
-  
+
   initEmailGlitch() {
     const target = document.querySelector('.local-part');
     if (!target || target.dataset.glitchInit === 'true') return;
     target.dataset.glitchInit = 'true';
-    
+
     const GLITCH_LENGTH = 10;
     const GLITCH_CHARS = '█▓▒░';
     const INTERVAL = 400;
-    
+
     const randomString = (n) =>
-      Array.from({ length: n }, () =>
-        GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
+      Array.from(
+        { length: n },
+        () => GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
       ).join('');
-    
+
     setInterval(() => {
       target.textContent = randomString(GLITCH_LENGTH);
     }, INTERVAL);
   }
-  
+
   initBackToTop() {
     const button = document.getElementById('back-to-top');
     if (!button || button.dataset.backToTopInit === 'true') return;
     button.dataset.backToTopInit = 'true';
-    
+
     // Show/hide based on scroll position
     const toggleVisibility = () => {
       if (window.scrollY > 300) {
@@ -80,7 +81,7 @@ class UIEnhancements {
         button.classList.remove('show');
       }
     };
-    
+
     // Throttled scroll listener
     let ticking = false;
     window.addEventListener('scroll', () => {
@@ -92,45 +93,45 @@ class UIEnhancements {
         ticking = true;
       }
     });
-    
+
     // Scroll to top (using CSS scroll-behavior: smooth for global smoothing)
     button.addEventListener('click', () => {
       window.scrollTo(0, 0);
     });
-    
+
     // Initial check
     toggleVisibility();
   }
-  
+
   initVideoHover() {
     const hoverVideos = document.querySelectorAll('.hover-play');
-    
+
     hoverVideos.forEach((video) => {
       if (video.dataset.hoverInit === 'true') return;
       video.dataset.hoverInit = 'true';
       const progressBar = video.closest('.video-item')?.querySelector('.progress');
       if (!progressBar) return;
-      
+
       video.addEventListener('mouseenter', () => {
         video.play().catch(() => {
           // Playback failed
         });
       });
-      
+
       video.addEventListener('mouseleave', () => {
         video.pause();
       });
-      
+
       video.addEventListener('timeupdate', () => {
         if (!video.duration) return;
         const percentage = (video.currentTime / video.duration) * 100;
         progressBar.style.width = `${percentage}%`;
       });
-      
+
       video.addEventListener('loadedmetadata', () => {
         progressBar.style.width = '0%';
       });
-      
+
       // Reset progress on loop
       video.addEventListener('timeupdate', () => {
         if (video.currentTime >= video.duration - 0.05) {
@@ -138,7 +139,7 @@ class UIEnhancements {
         }
       });
     });
-    
+
     // Touch device fallback: tap to play
     if ('ontouchstart' in window) {
       hoverVideos.forEach((video) => {
@@ -152,12 +153,12 @@ class UIEnhancements {
       });
     }
   }
-  
+
   initFooterClock() {
     const clockElement = document.getElementById('footer-clock');
     if (!clockElement || clockElement.dataset.clockInit === 'true') return;
     clockElement.dataset.clockInit = 'true';
-    
+
     const updateClock = () => {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, '0');
@@ -165,12 +166,10 @@ class UIEnhancements {
       const seconds = String(now.getSeconds()).padStart(2, '0');
       clockElement.textContent = `${hours}:${minutes}:${seconds}`;
     };
-    
+
     updateClock();
     setInterval(updateClock, 1000);
   }
-  
-
 }
 
 export default UIEnhancements;

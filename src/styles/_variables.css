@@ -4,22 +4,22 @@
 
 :root {
   /* Color Palette */
-  --color-primary: #d4af37;       /* Gold - accents, borders, particles */
-  --color-primary-rgb: 212, 175, 55;  /* Triplet RGB pour rgba() dynamique */
-  --color-secondary: #1a1a1a;     /* Dark gray - main backgrounds */
+  --color-primary: #d4af37; /* Gold - accents, borders, particles */
+  --color-primary-rgb: 212, 175, 55; /* Triplet RGB pour rgba() dynamique */
+  --color-secondary: #1a1a1a; /* Dark gray - main backgrounds */
   --color-secondary-rgb: 26, 26, 26;
-  --color-text: #e0e0e0;          /* Light gray - body text */
-  --color-bg: #000;               /* Black - page background */
-  --color-accent-light: #fff8dc;  /* Cream - gradient endpoints */
-  --color-accent-pale: #ffe17e;   /* Pale gold - gradient starts */
-  
+  --color-text: #e0e0e0; /* Light gray - body text */
+  --color-bg: #000; /* Black - page background */
+  --color-accent-light: #fff8dc; /* Cream - gradient endpoints */
+  --color-accent-pale: #ffe17e; /* Pale gold - gradient starts */
+
   /* Spacing Scale */
   --space-xs: 0.5rem;
   --space-sm: 1rem;
   --space-md: 1.5rem;
   --space-lg: 2rem;
   --space-xl: 3rem;
-  
+
   /* Typography */
   --font-family-base: 'Roboto', sans-serif;
   --font-size-base: 1rem;
@@ -27,22 +27,22 @@
   --font-size-h2: 2rem;
   --font-size-h3: 1.5rem;
   --line-height-base: 1.6;
-  
+
   /* Layout */
   --container-max-width: 800px;
   --border-radius-sm: 6px;
   --border-radius-md: 8px;
-  
+
   /* Animations */
   --transition-fast: 0.15s ease;
   --transition-base: 0.3s ease;
   --transition-slow: 0.5s ease;
-  
+
   /* Effects */
-  --parallax-friction: 0.083;     /* 1/12 */
+  --parallax-friction: 0.083; /* 1/12 */
   --parallax-depth: 0.06;
   --animation-typing-speed: 50ms;
-  
+
   /* Z-Index Scale */
   --z-background: -1;
   --z-base: 1;
@@ -50,7 +50,7 @@
   --z-music-player: 100;
   --z-lightbox: 1000;
   --z-cursor-trail: 9999;
-  
+
   /* Responsive Breakpoints */
   --breakpoint-mobile: 320px;
   --breakpoint-tablet: 768px;
@@ -75,7 +75,8 @@
   --bg-color: var(--color-bg);
 
   /* Technology icon tint — recolours SVG icons to match the active mood */
-  --tech-icon-filter: invert(79%) sepia(39%) saturate(1450%) hue-rotate(358deg) brightness(89%) contrast(89%);
+  --tech-icon-filter: invert(79%) sepia(39%) saturate(1450%) hue-rotate(358deg) brightness(89%)
+    contrast(89%);
 }
 
 /*
@@ -90,10 +91,11 @@
 /* ============================================
    Mood Overrides — Hacker (neon green + black)
    ============================================ */
-body[data-mood="hacker"] {
+body[data-mood='hacker'] {
   --color-primary: #00ff41;
   --color-primary-rgb: 0, 255, 65;
-  --tech-icon-filter: invert(56%) sepia(98%) saturate(427%) hue-rotate(99deg) brightness(121%) contrast(100%);
+  --tech-icon-filter: invert(56%) sepia(98%) saturate(427%) hue-rotate(99deg) brightness(121%)
+    contrast(100%);
   --color-secondary: #070707;
   --color-secondary-rgb: 7, 7, 7;
   --color-text: #00ff41;
@@ -110,10 +112,11 @@ body[data-mood="hacker"] {
 /* ============================================
    Mood Overrides — Vaporwave (pink + blue)
    ============================================ */
-body[data-mood="vaporwave"] {
+body[data-mood='vaporwave'] {
   --color-primary: #ff71ce;
   --color-primary-rgb: 255, 113, 206;
-  --tech-icon-filter: invert(77%) sepia(33%) saturate(786%) hue-rotate(283deg) brightness(105%) contrast(98%);
+  --tech-icon-filter: invert(77%) sepia(33%) saturate(786%) hue-rotate(283deg) brightness(105%)
+    contrast(98%);
   --color-secondary: #1a0035;
   --color-secondary-rgb: 26, 0, 53;
   --color-text: #b0e0ff;
@@ -134,7 +137,7 @@ body[data-mood="vaporwave"] {
     --transition-base: 0s;
     --transition-slow: 0s;
   }
-  
+
   *,
   *::before,
   *::after {

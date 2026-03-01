@@ -137,7 +137,7 @@
   border-color: var(--color-accent-light);
 }
 
-.hamburger-nav ul li a[aria-current="page"],
+.hamburger-nav ul li a[aria-current='page'],
 .hamburger-nav ul li a.active {
   background-color: var(--color-primary);
   border-color: var(--color-primary);

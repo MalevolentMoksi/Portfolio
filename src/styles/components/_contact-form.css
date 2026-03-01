@@ -68,14 +68,14 @@
   cursor: not-allowed;
 }
 
-.contact-form input[aria-invalid="true"],
-.contact-form textarea[aria-invalid="true"] {
+.contact-form input[aria-invalid='true'],
+.contact-form textarea[aria-invalid='true'] {
   border-color: #ff6b6b;
   background: rgba(255, 107, 107, 0.05);
 }
 
-.contact-form input[aria-invalid="true"]:focus,
-.contact-form textarea[aria-invalid="true"]:focus {
+.contact-form input[aria-invalid='true']:focus,
+.contact-form textarea[aria-invalid='true']:focus {
   box-shadow: 0 0 12px rgba(255, 107, 107, 0.2);
 }
 
@@ -98,7 +98,11 @@
 }
 
 .submit-btn {
-  background: linear-gradient(135deg, var(--color-primary) 0%, rgba(var(--color-primary-rgb), 0.8) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    rgba(var(--color-primary-rgb), 0.8) 100%
+  );
   border: none;
   border-radius: 6px;
   color: #1a1a1a;

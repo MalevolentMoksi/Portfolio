@@ -8,8 +8,13 @@
 }
 
 @keyframes pet-bob {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-2px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
 .pet-icon--bob {
@@ -34,8 +39,15 @@
 }
 
 @keyframes pet-attention-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.6; transform: scale(0.8); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
 }
 
 /* Bouton quand robot est despawn */
@@ -53,8 +65,8 @@
   cursor: grab;
   pointer-events: auto;
   user-select: none;
-  touch-action: none;            /* active le drag tactile sans déclencher le scroll */
-  transition: none;              /* position gérée par JS */
+  touch-action: none; /* active le drag tactile sans déclencher le scroll */
+  transition: none; /* position gérée par JS */
 }
 
 .pet-wanderer--dragging {
@@ -81,34 +93,31 @@
   --pet-color: var(--color-primary);
   --pet-bg: #080808;
   color: var(--pet-color);
-  filter:
-    drop-shadow(0 0 1px rgba(var(--color-primary-rgb), 0.28))
+  filter: drop-shadow(0 0 1px rgba(var(--color-primary-rgb), 0.28))
     drop-shadow(0 0 3px rgba(var(--color-primary-rgb), 0.12));
 }
 
 /* ---- Glow breathe keyframes ---- */
 @keyframes pet-glow-breathe {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 1px rgba(var(--color-primary-rgb), 0.2))
+  0%,
+  100% {
+    filter: drop-shadow(0 0 1px rgba(var(--color-primary-rgb), 0.2))
       drop-shadow(0 0 3px rgba(var(--color-primary-rgb), 0.08));
   }
   50% {
-    filter:
-      drop-shadow(0 0 2px rgba(var(--color-primary-rgb), 0.35))
+    filter: drop-shadow(0 0 2px rgba(var(--color-primary-rgb), 0.35))
       drop-shadow(0 0 5px rgba(var(--color-primary-rgb), 0.14));
   }
 }
 
 @keyframes pet-glow-breathe-hover {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 2px rgba(var(--color-primary-rgb), 0.3))
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px rgba(var(--color-primary-rgb), 0.3))
       drop-shadow(0 0 5px rgba(var(--color-primary-rgb), 0.14));
   }
   50% {
-    filter:
-      drop-shadow(0 0 3px rgba(var(--color-primary-rgb), 0.4))
+    filter: drop-shadow(0 0 3px rgba(var(--color-primary-rgb), 0.4))
       drop-shadow(0 0 7px rgba(var(--color-primary-rgb), 0.18));
   }
 }
@@ -124,8 +133,13 @@
 }
 
 @keyframes pet-led-blink {
-  0%, 100% { opacity: 0.5; }
-  50%       { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* ---- Forehead loader bar ---- */
@@ -136,10 +150,22 @@
 }
 
 @keyframes pet-loader-slide {
-  0%   { transform: scaleX(0.25); opacity: 0.7; }
-  40%  { transform: scaleX(0.9);  opacity: 1; }
-  70%  { transform: scaleX(0.55); opacity: 0.85; }
-  100% { transform: scaleX(0.25); opacity: 0.7; }
+  0% {
+    transform: scaleX(0.25);
+    opacity: 0.7;
+  }
+  40% {
+    transform: scaleX(0.9);
+    opacity: 1;
+  }
+  70% {
+    transform: scaleX(0.55);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scaleX(0.25);
+    opacity: 0.7;
+  }
 }
 
 /* ---- Micro-circuit corner dots ---- */
@@ -148,8 +174,13 @@
 }
 
 @keyframes pet-circuit-pulse {
-  0%, 100% { opacity: 0.22; }
-  50%       { opacity: 0.45; }
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.45;
+  }
 }
 
 /* ---- Eye pupil inner glow ---- */
@@ -157,33 +188,57 @@
   filter: drop-shadow(0 0 1.5px currentColor);
 }
 
-body[data-mood="hacker"] .pet-robot {
+body[data-mood='hacker'] .pet-robot {
   --pet-color: #00ff41;
 }
 
-body[data-mood="vaporwave"] .pet-robot {
+body[data-mood='vaporwave'] .pet-robot {
   --pet-color: #ff71ce;
 }
 
 /* ---- Animations du robot ---- */
 @keyframes pet-shake {
-  0%, 100% { transform: translateX(0); }
-  20%      { transform: translateX(-3px); }
-  40%      { transform: translateX(3px); }
-  60%      { transform: translateX(-2px); }
-  80%      { transform: translateX(2px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-3px);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
 }
 
 @keyframes pet-bounce {
-  0%, 100% { transform: translateY(0); }
-  30%      { transform: translateY(-6px); }
-  50%      { transform: translateY(0); }
-  70%      { transform: translateY(-3px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  70% {
+    transform: translateY(-3px);
+  }
 }
 
 @keyframes pet-antenna-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .pet-robot--shake {
@@ -199,10 +254,18 @@ body[data-mood="vaporwave"] .pet-robot {
 }
 
 @keyframes pet-woozy {
-  0%   { transform: rotate(-5deg) translateX(-1px); }
-  30%  { transform: rotate(5deg)  translateX(2px); }
-  60%  { transform: rotate(-3deg) translateX(-1px); }
-  100% { transform: rotate(-5deg) translateX(-1px); }
+  0% {
+    transform: rotate(-5deg) translateX(-1px);
+  }
+  30% {
+    transform: rotate(5deg) translateX(2px);
+  }
+  60% {
+    transform: rotate(-3deg) translateX(-1px);
+  }
+  100% {
+    transform: rotate(-5deg) translateX(-1px);
+  }
 }
 
 .pet-robot--antenna-spin .pet-antenna-tip {
@@ -231,8 +294,14 @@ body[data-mood="vaporwave"] .pet-robot {
 }
 
 @keyframes pet-hud-in {
-  from { opacity: 0; transform: translateY(6px) scale(0.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Header du HUD */
@@ -266,7 +335,9 @@ body[data-mood="vaporwave"] .pet-robot {
   font-size: 0.9rem;
   line-height: 1;
   padding: 0;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .pet-hud-close:hover {
@@ -305,9 +376,18 @@ body[data-mood="vaporwave"] .pet-robot {
   user-select: none;
 }
 
-.pet-hud-mood-badge--happy   { color: #7be47b; background: rgba(123, 228, 123, 0.1); }
-.pet-hud-mood-badge--content { color: rgba(var(--color-primary-rgb), 1); background: rgba(var(--color-primary-rgb), 0.08); }
-.pet-hud-mood-badge--sad     { color: #f08080; background: rgba(240, 128, 128, 0.1); }
+.pet-hud-mood-badge--happy {
+  color: #7be47b;
+  background: rgba(123, 228, 123, 0.1);
+}
+.pet-hud-mood-badge--content {
+  color: rgba(var(--color-primary-rgb), 1);
+  background: rgba(var(--color-primary-rgb), 0.08);
+}
+.pet-hud-mood-badge--sad {
+  color: #f08080;
+  background: rgba(240, 128, 128, 0.1);
+}
 
 /* ---- Needs / tip hints ---- */
 .pet-hud-needs,
@@ -479,10 +559,22 @@ body[data-mood="vaporwave"] .pet-robot {
 }
 
 @keyframes pet-thought-rise {
-  0%   { opacity: 0; transform: translateY(4px); }
-  15%  { opacity: 1; transform: translateY(0); }
-  70%  { opacity: 1; transform: translateY(-16px); }
-  100% { opacity: 0; transform: translateY(-30px); }
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-16px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
 }
 
 /* ========== Blush — rougeur joues ========== */
@@ -495,8 +587,13 @@ body[data-mood="vaporwave"] .pet-robot {
 /* ========== Sleep — sommeil après inactivité ========== */
 
 @keyframes pet-sleep-sway {
-  0%, 100% { transform: rotate(-2deg) translateY(0); }
-  50%      { transform: rotate(2deg) translateY(2px); }
+  0%,
+  100% {
+    transform: rotate(-2deg) translateY(0);
+  }
+  50% {
+    transform: rotate(2deg) translateY(2px);
+  }
 }
 
 .pet-robot--sleep {
@@ -511,9 +608,15 @@ body[data-mood="vaporwave"] .pet-robot {
 /* ========== Mood-switch flourish — spin ========== */
 
 @keyframes pet-mood-spin {
-  0%   { transform: rotate(0deg) scale(1); }
-  40%  { transform: rotate(200deg) scale(1.12); }
-  100% { transform: rotate(360deg) scale(1); }
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  40% {
+    transform: rotate(200deg) scale(1.12);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
 }
 
 .pet-robot--mood-spin {
@@ -528,9 +631,15 @@ body[data-mood="vaporwave"] .pet-robot {
 /* ========== Resting — repos sur scroll idle ========== */
 
 @keyframes pet-rest-settle {
-  0%   { transform: scaleY(1) scaleX(1); }
-  60%  { transform: scaleY(0.88) scaleX(1.06); }
-  100% { transform: scaleY(0.90) scaleX(1.05); }
+  0% {
+    transform: scaleY(1) scaleX(1);
+  }
+  60% {
+    transform: scaleY(0.88) scaleX(1.06);
+  }
+  100% {
+    transform: scaleY(0.9) scaleX(1.05);
+  }
 }
 
 .pet-wanderer--resting .pet-svg-wrap {

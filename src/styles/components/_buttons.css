@@ -60,7 +60,8 @@
 
 /* Back to top button */
 @keyframes float-bob {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -69,20 +70,22 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 
+  0%,
+  100% {
+    box-shadow:
       0 4px 12px rgba(0, 0, 0, 0.3),
       0 0 0 0 rgba(212, 175, 55, 0.4);
   }
   50% {
-    box-shadow: 
+    box-shadow:
       0 4px 12px rgba(0, 0, 0, 0.3),
       0 0 0 6px rgba(212, 175, 55, 0.2);
   }
 }
 
 @keyframes arrow-bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -107,7 +110,7 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: 
+  transition:
     opacity var(--transition-base),
     transform var(--transition-base),
     box-shadow 0.3s ease,
@@ -118,7 +121,7 @@
 #back-to-top.show {
   display: flex;
   opacity: 1;
-  animation: 
+  animation:
     float-bob 6s ease-in-out infinite,
     pulse-glow 4s ease-in-out infinite;
 }
@@ -127,7 +130,7 @@
 #back-to-top:focus-visible {
   opacity: 1;
   transform: translateY(-6px) scale(1.1);
-  box-shadow: 
+  box-shadow:
     0 6px 20px rgba(0, 0, 0, 0.4),
     0 0 12px rgba(212, 175, 55, 0.6);
   background: var(--color-primary);
@@ -150,7 +153,7 @@
     width: 100%;
     text-align: center;
   }
-  
+
   #back-to-top {
     bottom: 20px;
     right: 20px;

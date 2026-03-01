@@ -10,17 +10,17 @@ export const COOLDOWNS = { feed: 2000, pet: 2000, play: 3000 };
 /* ── Dimensions & physique ── */
 export const PET_SIZE = 60;
 export const HALF = PET_SIZE / 2;
-export const HEADER_H = 75;              // zone interdite en haut
-export const BASE_SPEED = 0.6;           // px/frame en balade
-export const MAX_SPEED = 1.2;            // px/frame max en balade
-export const MAGNET_RADIUS = 200;        // rayon d'attraction au curseur
-export const MAGNET_SPEED = 2.5;         // px/frame max sous attraction
-export const DRAG_FAST_THRESHOLD = 8;    // vitesse (px/frame) à partir de laquelle scale + spin s'activent
-export const BOUNCE_RESTITUTION = 0.65;  // coefficient de rebond sur les murs
-export const THROW_SPEED_CAP = 18;       // vitesse max de lancer (px/frame)
-export const SLEEP_IDLE_MS = 60_000;     // 1 minute sans activité → sommeil
+export const HEADER_H = 75; // zone interdite en haut
+export const BASE_SPEED = 0.6; // px/frame en balade
+export const MAX_SPEED = 1.2; // px/frame max en balade
+export const MAGNET_RADIUS = 200; // rayon d'attraction au curseur
+export const MAGNET_SPEED = 2.5; // px/frame max sous attraction
+export const DRAG_FAST_THRESHOLD = 8; // vitesse (px/frame) à partir de laquelle scale + spin s'activent
+export const BOUNCE_RESTITUTION = 0.65; // coefficient de rebond sur les murs
+export const THROW_SPEED_CAP = 18; // vitesse max de lancer (px/frame)
+export const SLEEP_IDLE_MS = 60_000; // 1 minute sans activité → sommeil
 export const SCROLL_DIZZY_WINDOW = 1500; // fenêtre de détection scroll rapide (ms)
-export const REST_SCROLL_IDLE = 2500;    // 2.5s sans scroll → tenter repos
+export const REST_SCROLL_IDLE = 2500; // 2.5s sans scroll → tenter repos
 
 /* ── Clés localStorage ── */
 export const LS = {

@@ -74,11 +74,11 @@ hr {
     margin: var(--space-sm) auto;
     padding: var(--space-md);
   }
-  
+
   section {
     margin-bottom: var(--space-lg);
   }
-  
+
   hr {
     margin: var(--space-lg) 0;
   }

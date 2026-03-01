@@ -75,11 +75,11 @@
     margin-bottom: var(--space-md);
     justify-content: flex-start;
   }
-  
+
   .breadcrumbs ol {
     gap: calc(var(--space-xs) / 2);
   }
-  
+
   .breadcrumb-separator {
     font-size: 1rem;
   }

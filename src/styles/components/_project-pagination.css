@@ -109,21 +109,21 @@
     flex-direction: column;
     gap: var(--space-sm);
   }
-  
+
   .project-pagination-link {
     min-height: 70px;
   }
-  
+
   .project-pagination-link.back-to-list {
     order: -1;
     min-width: auto;
     min-height: 50px;
   }
-  
+
   .pagination-title {
     font-size: 0.9rem;
   }
-  
+
   .pagination-label {
     font-size: 0.75rem;
   }
