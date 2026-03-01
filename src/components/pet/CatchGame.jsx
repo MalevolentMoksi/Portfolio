@@ -6,12 +6,13 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   CATCH_BALL_SIZE, CATCH_BALL_SPEED, CATCH_BALL_GRAVITY,
-  CATCH_BOT_RADIUS, HEADER_H, BOUNCE_RESTITUTION,
+  CATCH_BOT_RADIUS, BOUNCE_RESTITUTION,
 } from './petConstants.js';
 
 const BALL_R        = CATCH_BALL_SIZE / 2;
 const PLAYER_CATCH  = 70;
 const BOT_CATCH     = CATCH_BOT_RADIUS;
+const BALL_TOP_MIN  = BALL_R;
 const VEL_HIST_MAX  = 6;
 const AIM_STEPS     = 32;
 const AIM_DT        = 2.5;
@@ -103,7 +104,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
       sx += svx * AIM_DT; sy += svy * AIM_DT;
       if (sx < BALL_R)          { sx = BALL_R;          svx =  Math.abs(svx) * BOUNCE_RESTITUTION; }
       else if (sx > vw - BALL_R){ sx = vw - BALL_R;     svx = -Math.abs(svx) * BOUNCE_RESTITUTION; }
-      if (sy < HEADER_H + BALL_R)     { sy = HEADER_H + BALL_R; svy =  Math.abs(svy) * BOUNCE_RESTITUTION; }
+      if (sy < BALL_TOP_MIN)          { sy = BALL_TOP_MIN;      svy =  Math.abs(svy) * BOUNCE_RESTITUTION; }
       else if (sy > vh - BALL_R - 4)  { sy = vh - BALL_R - 4;   svy = -Math.abs(svy) * BOUNCE_RESTITUTION; }
       d += ` L${sx.toFixed(1)},${sy.toFixed(1)}`;
     }
@@ -187,7 +188,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
       // Wall bounces
       if (bp.x < BALL_R)               { bp.x = BALL_R;            bv.x =  Math.abs(bv.x) * BOUNCE_RESTITUTION; }
       else if (bp.x > vw - BALL_R)     { bp.x = vw - BALL_R;      bv.x = -Math.abs(bv.x) * BOUNCE_RESTITUTION; }
-      if (bp.y < HEADER_H + BALL_R)    { bp.y = HEADER_H + BALL_R; bv.y =  Math.abs(bv.y) * BOUNCE_RESTITUTION; }
+      if (bp.y < BALL_TOP_MIN)         { bp.y = BALL_TOP_MIN;      bv.y =  Math.abs(bv.y) * BOUNCE_RESTITUTION; }
       else if (bp.y > vh - BALL_R - 4) { bp.y = vh - BALL_R - 4;  bv.y = -Math.abs(bv.y) * BOUNCE_RESTITUTION; }
 
       // Bot catch

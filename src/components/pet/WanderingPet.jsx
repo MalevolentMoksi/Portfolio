@@ -6,7 +6,7 @@ import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import {
-  PET_SIZE, HALF, HEADER_H,
+  PET_SIZE, HALF,
   BASE_SPEED, MAX_SPEED, MAGNET_RADIUS, MAGNET_SPEED,
   DRAG_FAST_THRESHOLD, BOUNCE_RESTITUTION, THROW_SPEED_CAP,
   SCROLL_DIZZY_WINDOW, clamp,
@@ -20,9 +20,10 @@ import { FOOD_ICONS } from './petData.jsx';
 // forwardRef permet à AnimatePresence (PetButton) de transmettre sa ref sans warning React.
 // Le portal rend dans document.body donc la ref n'est pas attachée à un DOM node visible.
 const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onThought, onHoverPet, cooldowns, thoughtQueue, hudThought, sizeScale, speedMult, isSleeping, moodSpinActive, petName, onRename, feedIconIndex, achievements, onUnlock, isCatching, onGameEnd }, _ref) {
+  const PET_TOP_MIN = HALF;
   const [pos, setPos] = useState(() => ({
     x: HALF + Math.random() * (window.innerWidth - PET_SIZE),
-    y: HEADER_H + 60 + Math.random() * (window.innerHeight - HEADER_H - 150),
+    y: PET_TOP_MIN + 60 + Math.random() * (window.innerHeight - PET_TOP_MIN - 150),
   }));
   const [facingLeft, setFacingLeft] = useState(false);
   const [hudOpen, setHudOpen] = useState(false);
@@ -103,6 +104,39 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   const gravityActiveRef = useRef(false);
   // External attract effect — pulls pet toward a target point when active
   const attractTargetRef = useRef(null);
+  // Dynamic header bounds (viewport coords) for soft avoidance steering
+  const headerBottomRef = useRef(0);
+
+  /* ── Header bounds tracking (for soft avoidance, not collision) ── */
+  useEffect(() => {
+    let ro = null;
+    const updateHeaderBounds = () => {
+      const header = document.querySelector('header');
+      if (!header) {
+        headerBottomRef.current = 0;
+        return;
+      }
+      const rect = header.getBoundingClientRect();
+      // Bottom edge of the visible header area in viewport coordinates.
+      headerBottomRef.current = Math.max(0, Math.min(window.innerHeight, rect.bottom));
+    };
+
+    updateHeaderBounds();
+    window.addEventListener('resize', updateHeaderBounds);
+    window.addEventListener('scroll', updateHeaderBounds, { passive: true });
+
+    const header = document.querySelector('header');
+    if (header && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(updateHeaderBounds);
+      ro.observe(header);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateHeaderBounds);
+      window.removeEventListener('scroll', updateHeaderBounds);
+      ro?.disconnect();
+    };
+  }, []);
 
   /* ── Suivi du curseur ── */
   useEffect(() => {
@@ -240,7 +274,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         }
 
         p.x = clamp(p.x + v.x, HALF, vw - HALF);
-        p.y = clamp(p.y + v.y, HEADER_H + 10, vh - HALF);
+        p.y = clamp(p.y + v.y, PET_TOP_MIN, vh - HALF);
 
         if (frameRef.current % 2 === 0) {
           setPos({ x: p.x, y: p.y });
@@ -296,7 +330,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         }
         // Update position with wall clamp
         p.x = clamp(p.x + v.x, HALF, vw - HALF);
-        p.y = clamp(p.y + v.y, HEADER_H + 10, vh - HALF);
+        p.y = clamp(p.y + v.y, PET_TOP_MIN, vh - HALF);
         if (frameRef.current % 2 === 0) {
           setPos({ x: p.x, y: p.y });
           setSpeedLevel(Math.sqrt(v.x * v.x + v.y * v.y));
@@ -319,7 +353,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         // Emit zzz thought every ~300 frames (~5s)
         if (frameRef.current % 300 === 0) onThought('zzz');
         p.x = clamp(p.x + v.x, HALF, vw - HALF);
-        p.y = clamp(p.y + v.y, HEADER_H + 10, vh - HALF);
+        p.y = clamp(p.y + v.y, PET_TOP_MIN, vh - HALF);
         if (frameRef.current % 2 === 0) {
           setPos({ x: p.x, y: p.y });
           setSpeedLevel(Math.sqrt(v.x * v.x + v.y * v.y));
@@ -366,9 +400,9 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         p.x = vw - HALF;
         bounced = true;
       }
-      if (nextY < HEADER_H + 10) {
+      if (nextY < PET_TOP_MIN) {
         v.y = Math.abs(v.y) * BOUNCE_RESTITUTION;
-        p.y = HEADER_H + 10;
+        p.y = PET_TOP_MIN;
         bounced = true;
       } else if (nextY > vh - HALF) {
         v.y = -Math.abs(v.y) * BOUNCE_RESTITUTION;
@@ -392,7 +426,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
       if (!bounced) {
         if (p.x < margin + HALF)      v.x += 0.18 * Math.pow(1 - Math.max(0, (p.x - HALF) / margin), 1.5);
         if (p.x > vw - margin - HALF) v.x -= 0.18 * Math.pow(1 - Math.max(0, (vw - HALF - p.x) / margin), 1.5);
-        if (p.y < HEADER_H + 20)      v.y += 0.28;
+        if (p.y < PET_TOP_MIN + 10)   v.y += 0.28;
         if (!gravityActiveRef.current && p.y > vh - margin - HALF)  v.y -= 0.18 * Math.pow(1 - Math.max(0, (vh - HALF - p.y) / margin), 1.5);
       }
 
@@ -401,6 +435,21 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
       const dy = cursorRef.current.y - p.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       const isAttracting = Boolean(attractTargetRef.current);
+
+      // Soft header avoidance: steer down when the bot enters a band near the header.
+      // This is intentionally not a hard barrier, so drag/throw momentum can still cross.
+      if (!isAttracting) {
+        const headerBottom = headerBottomRef.current;
+        if (headerBottom > 0) {
+          const avoidBand = 42;
+          const petTop = p.y - HALF;
+          const overlap = headerBottom + avoidBand - petTop;
+          if (overlap > 0) {
+            const steerDown = Math.min(0.52, 0.07 + overlap * 0.012);
+            v.y += steerDown;
+          }
+        }
+      }
 
       if (!isAttracting && dist > 5) {
         if (petMoodRef.current !== 'sad' && dist < MAGNET_RADIUS) {
@@ -447,7 +496,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
       // Mettre à jour la position (with bounce already handled above, just apply velocity)
       if (!bounced) {
         p.x = clamp(p.x + v.x, HALF, vw - HALF);
-        p.y = clamp(p.y + v.y, HEADER_H + 10, vh - HALF);
+        p.y = clamp(p.y + v.y, PET_TOP_MIN, vh - HALF);
       }
 
       // All state updates batched every 2 frames (~30fps render)
@@ -578,7 +627,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const nx = clamp(e.clientX - dragOffsetRef.current.x, HALF, vw - HALF);
-    const ny = clamp(e.clientY - dragOffsetRef.current.y, HEADER_H + 10, vh - HALF);
+    const ny = clamp(e.clientY - dragOffsetRef.current.y, PET_TOP_MIN, vh - HALF);
     posRef.current = { x: nx, y: ny };
     setPos({ x: nx, y: ny });
     // Update facing direction immediately while dragging
@@ -651,11 +700,11 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
       // Toujours au-dessus du bot (pousse vers le haut quand le contenu grandit)
       let top  = p.y - HALF - height - GAP;
       // Repli en dessous si pas assez de place au-dessus
-      if (top < HEADER_H + PAD) top = p.y + HALF + GAP;
+      if (top < PAD) top = p.y + HALF + GAP;
       // Centré horizontalement, clamp dans le viewport
       let left = p.x - width / 2;
       left = Math.max(PAD, Math.min(vw - width - PAD, left));
-      top  = Math.max(HEADER_H + PAD, Math.min(vh - height - PAD, top));
+      top  = Math.max(PAD, Math.min(vh - height - PAD, top));
       setHudPos({ left, top });
     };
     // Premier calcul après 2 frames (le HUD doit être peint avant qu'on le mesure)
