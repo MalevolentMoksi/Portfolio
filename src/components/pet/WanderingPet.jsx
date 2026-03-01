@@ -58,6 +58,8 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   const dragScaredFiredRef = useRef(false);
   const dragSpeedRef       = useRef(0);
   const dragRotRef         = useRef(0);
+  // Smoothed velocity vector tracked during drag — used for throw on release
+  const dragVelRef         = useRef({ x: 0, y: 0 });
   const [isDragging,    setIsDragging]    = useState(false);
   const [dragSpeed,     setDragSpeed]     = useState(0);
   const [dragRotation,  setDragRotation]  = useState(0);
@@ -488,7 +490,11 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       flipHysteresisRef.current = dx > 0 ? 20 : -20;
       setFacingLeft(dx < 0);
     }
-    // Track drag speed (smoothed) and accumulate spin rotation
+    // Track smoothed velocity vector (for throw) and speed magnitude (for spin)
+    dragVelRef.current = {
+      x: dragVelRef.current.x * 0.6 + e.movementX * 0.4,
+      y: dragVelRef.current.y * 0.6 + e.movementY * 0.4,
+    };
     const spd = Math.sqrt(e.movementX * e.movementX + e.movementY * e.movementY);
     dragSpeedRef.current = dragSpeedRef.current * 0.65 + spd * 0.35;
     setDragSpeed(dragSpeedRef.current);
@@ -498,19 +504,28 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
     }
   }, [onBehavior]);
 
-  const handleDragEnd = useCallback((e) => {
+  const handleDragEnd = useCallback(() => {
     if (!isDraggingRef.current) return;
     isDraggingRef.current = false;
     setIsDragging(false);
-    // Throw velocity from last pointer movement — use THROW_SPEED_CAP for bouncing
-    velRef.current = {
-      x: clamp(e.movementX * 1.2, -THROW_SPEED_CAP, THROW_SPEED_CAP),
-      y: clamp(e.movementY * 1.2, -THROW_SPEED_CAP, THROW_SPEED_CAP),
-    };
-    if (dragHasMovedRef.current) {
+    // Throw: use smoothed velocity tracked during drag (e.movementX on pointerup is ~0)
+    const tv = dragVelRef.current;
+    const throwSpeed = Math.sqrt(tv.x * tv.x + tv.y * tv.y);
+    if (dragHasMovedRef.current && throwSpeed > 1.5) {
+      // Scale up and cap
+      const scale = Math.min(THROW_SPEED_CAP / Math.max(throwSpeed, 1), 2.5);
+      velRef.current = {
+        x: clamp(tv.x * scale, -THROW_SPEED_CAP, THROW_SPEED_CAP),
+        y: clamp(tv.y * scale, -THROW_SPEED_CAP, THROW_SPEED_CAP),
+      };
       throwActiveRef.current = true;
       onBehavior('excited');
+    } else {
+      // Gentle placement — just kill velocity
+      velRef.current = { x: 0, y: 0 };
     }
+    // Reset smoothed drag vel for next drag
+    dragVelRef.current = { x: 0, y: 0 };
     // Cancel resting on drag
     if (isRestingRef.current) {
       isRestingRef.current = false;
