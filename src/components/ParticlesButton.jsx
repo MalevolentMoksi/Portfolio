@@ -85,6 +85,10 @@ const effects = {
 
     const W = window.innerWidth;
     const H = window.innerHeight;
+    // pJS.canvas.pxratio = devicePixelRatio sur écran retina, 1 sinon.
+    // Les positions internes des particules (pt.x/pt.y) sont en pixels physiques,
+    // donc toutes les coordonnées CSS doivent être multipliées par pxratio.
+    const pxr = pJS.canvas.pxratio ?? 1;
     // Zones en haut à gauche et en haut à droite — hors zone du contenu central
     const zoneW = W * 0.25;
     const zoneH = H * 0.35;
@@ -93,21 +97,22 @@ const effects = {
     // 15 particules dans le coin haut-gauche
     for (let i = 0; i < 15; i++) {
       pJS.fn.modes.pushParticles(1, {
-        pos_x: Math.random() * zoneW,
-        pos_y: headerH + Math.random() * (zoneH - headerH),
+        pos_x: Math.random() * zoneW * pxr,
+        pos_y: (headerH + Math.random() * (zoneH - headerH)) * pxr,
       });
     }
     // 15 particules dans le coin haut-droit
     for (let i = 0; i < 15; i++) {
       pJS.fn.modes.pushParticles(1, {
-        pos_x: W - Math.random() * zoneW,
-        pos_y: headerH + Math.random() * (zoneH - headerH),
+        pos_x: (W - Math.random() * zoneW) * pxr,
+        pos_y: (headerH + Math.random() * (zoneH - headerH)) * pxr,
       });
     }
 
-    // Projeter toutes les particules vers l'extérieur depuis le centre
-    const cx = W / 2;
-    const cy = H / 4; // depuis le quart supérieur pour accompagner le spawn
+    // Projeter toutes les particules vers l'extérieur depuis le centre.
+    // cx/cy convertis en pixels physiques pour correspondre à l'espace de pt.x/pt.y.
+    const cx = (W / 2) * pxr;
+    const cy = (H / 4) * pxr; // depuis le quart supérieur pour accompagner le spawn
     pJS.particles.array.forEach((pt) => {
       const dx = pt.x - cx;
       const dy = pt.y - cy;
@@ -125,12 +130,21 @@ const effects = {
    * Attraction : les particules convergent vers un point aléatoire de l'écran.
    */
   attract() {
+    // cx/cy en pixels CSS — espace du robot (position: fixed, coordonnées viewport).
     const cx = Math.random() * window.innerWidth;
     const cy = Math.random() * window.innerHeight;
     triggerPetAttract(cx, cy, 3000);
 
     const pJS = getPJS();
     if (!pJS) return;
+
+    // Convertir en pixels physiques pour l'espace interne de particles.js.
+    // Sur écran retina pxratio = devicePixelRatio (ex. 2), pt.x/pt.y vont
+    // jusqu'à canvas.w = innerWidth * pxratio, donc la cible doit être mise
+    // à l'échelle pour que particules et robot convergent au même point visuel.
+    const pxr = pJS.canvas.pxratio ?? 1;
+    const pcx = cx * pxr;
+    const pcy = cy * pxr;
 
     let active = true;
 
@@ -139,8 +153,8 @@ const effects = {
       const p = getPJS();
       if (!p) return;
       p.particles.array.forEach((pt) => {
-        const dx = cx - pt.x;
-        const dy = cy - pt.y;
+        const dx = pcx - pt.x;
+        const dy = pcy - pt.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         pt.vx += (dx / dist) * 0.5;
         pt.vy += (dy / dist) * 0.5;
@@ -176,12 +190,13 @@ const effects = {
     const originalCount = pJS.particles.array.length;
     const bonus = Math.min(originalCount, 80); // max 80 extra
     const stormSpeed = 5;
+    const pxr = pJS.canvas.pxratio ?? 1;
 
-    // Spawn en positions aléatoires
+    // Spawn en positions aléatoires — coordonnées en pixels physiques
     for (let i = 0; i < bonus; i++) {
       pJS.fn.modes.pushParticles(1, {
-        pos_x: Math.random() * window.innerWidth,
-        pos_y: Math.random() * window.innerHeight,
+        pos_x: Math.random() * window.innerWidth * pxr,
+        pos_y: Math.random() * window.innerHeight * pxr,
       });
     }
 
