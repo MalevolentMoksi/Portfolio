@@ -23,10 +23,10 @@ export const SCROLL_DIZZY_WINDOW = 1500; // fenêtre de détection scroll rapide
 export const REST_SCROLL_IDLE = 2500; // 2.5s sans scroll → tenter repos
 
 /* ── Catch game ── */
-export const CATCH_BALL_SIZE  = 22;   // diamètre balle
-export const CATCH_BALL_SPEED = 12;   // lancer initial (px/frame)
+export const CATCH_BALL_SIZE = 22; // diamètre balle
+export const CATCH_BALL_SPEED = 12; // lancer initial (px/frame)
 export const CATCH_BALL_GRAVITY = 0.15;
-export const CATCH_BOT_RADIUS  = 55;  // distance de détection du bot
+export const CATCH_BOT_RADIUS = 55; // distance de détection du bot
 
 /* ── Clés localStorage ── */
 export const LS = {
@@ -40,17 +40,17 @@ export const LS = {
 
 /* ── Achievements (id, label, description) ── */
 export const ACHIEVEMENTS = [
-  { id: 'wall-bounce',  label: 'Premier rebond',  desc: 'Le robot a rebondi contre un mur' },
-  { id: 'pet-action',   label: 'Câlin reçu',      desc: 'Câliné pour la première fois' },
-  { id: 'footer-sit',   label: 'Repos sur footer', desc: 'Le robot s\'est posé sur le pied de page' },
-  { id: 'thrive',       label: 'Florissant',       desc: 'Atteint l\'état heureux' },
-  { id: 'particles',    label: 'Sensoriel',        desc: 'Le robot a repéré les particules' },
-  { id: 'throw',        label: 'Lancé !',          desc: 'Lancé le robot avec élan' },
-  { id: 'catch-game',   label: 'Baseball',         desc: 'Joué au jeu d\'attrape' },
-  { id: 'sleep',        label: 'Bonne nuit',       desc: 'Le robot s\'est endormi' },
-  { id: 'combo',        label: 'Combo ×3',         desc: 'Enchaîné 3 interactions en 7 s' },
-  { id: 'rename',       label: 'Rebaptisé',        desc: 'Donné un nouveau nom au robot' },
-  { id: 'neglect',      label: 'Têtu',             desc: 'Resté triste trop longtemps' },
+  { id: 'wall-bounce', label: 'Premier rebond', desc: 'Le robot a rebondi contre un mur' },
+  { id: 'pet-action', label: 'Câlin reçu', desc: 'Câliné pour la première fois' },
+  { id: 'footer-sit', label: 'Repos sur footer', desc: "Le robot s'est posé sur le pied de page" },
+  { id: 'thrive', label: 'Florissant', desc: "Atteint l'état heureux" },
+  { id: 'particles', label: 'Sensoriel', desc: 'Le robot a repéré les particules' },
+  { id: 'throw', label: 'Lancé !', desc: 'Lancé le robot avec élan' },
+  { id: 'catch-game', label: 'Baseball', desc: "Joué au jeu d'attrape" },
+  { id: 'sleep', label: 'Bonne nuit', desc: "Le robot s'est endormi" },
+  { id: 'combo', label: 'Combo ×3', desc: 'Enchaîné 3 interactions en 7 s' },
+  { id: 'rename', label: 'Rebaptisé', desc: 'Donné un nouveau nom au robot' },
+  { id: 'neglect', label: 'Têtu', desc: 'Resté triste trop longtemps' },
 ];
 
 /* ── Utilitaires ── */

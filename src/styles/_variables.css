@@ -6,11 +6,11 @@
   /* Color Palette */
   --color-primary: #d4af37; /* Gold - accents, borders, particles */
   --color-primary-rgb: 212, 175, 55; /* Triplet RGB pour rgba() dynamique */
-  --color-secondary: #1a1a1a; /* Dark gray - main backgrounds */
-  --color-secondary-rgb: 26, 26, 26;
-  --color-text: #e0e0e0; /* Light gray - body text */
-  --color-bg: #000; /* Black - page background */
-  --color-accent-light: #fff8dc; /* Cream - gradient endpoints */
+  --color-secondary: #1a1600; /* Warm amber-dark - main backgrounds */
+  --color-secondary-rgb: 26, 22, 0;
+  --color-text: #ddd4a8; /* Warm cream - body text (softer than cold gray) */
+  --color-bg: #050400; /* Near-black with warm amber undertone */
+  --color-accent-light: #fffbee; /* Warm cream - gradient endpoints */
   --color-accent-pale: #ffe17e; /* Pale gold - gradient starts */
 
   /* Spacing Scale */
@@ -96,17 +96,17 @@ body[data-mood='hacker'] {
   --color-primary-rgb: 0, 255, 65;
   --tech-icon-filter: invert(56%) sepia(98%) saturate(427%) hue-rotate(99deg) brightness(121%)
     contrast(100%);
-  --color-secondary: #070707;
-  --color-secondary-rgb: 7, 7, 7;
-  --color-text: #00ff41;
-  --color-bg: #000000;
-  --color-accent-light: #afffaf;
+  --color-secondary: #061006; /* Green-tinted dark panels (not flat black) */
+  --color-secondary-rgb: 6, 16, 6;
+  --color-text: #7dff8c; /* Muted green - readable body text, softer than #00ff41 */
+  --color-bg: #010801; /* Near-black with subtle green CRT tint */
+  --color-accent-light: #b3ffbe; /* Soft mint - gradient endpoints */
   --color-accent-pale: #39ff14;
   --color-accent: #00ff41;
   --primary-color: #00ff41;
-  --secondary-color: #070707;
-  --text-color: #00ff41;
-  --bg-color: #000000;
+  --secondary-color: #061006;
+  --text-color: #7dff8c;
+  --bg-color: #010801;
 }
 
 /* ============================================
