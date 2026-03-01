@@ -38,13 +38,13 @@ const HELP_TEXT = `Commandes disponibles :
   about     — à propos de moi
   projects  — lister mes projets
   skills    — compétences techniques
-  stats     — statistiques du portfolio et de la session
+  stats     — statistiques portfolio & session
   joke      — une blague de dev
   date      — date et heure actuelles
   pet       — état du robot
   clear     — effacer le terminal`;
 
-const ABOUT_TEXT = `Enzo Morello — Étudiant en BUT Informatique à l'IUT2 de Grenoble.
+const ABOUT_TEXT = `Enzo Morello / Étudiant en BUT Informatique à l'IUT2 de Grenoble.
 Passionné par le développement web, les jeux vidéo et la création.
 Parcours Développeur d'applications.`;
 
