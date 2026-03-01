@@ -2,9 +2,9 @@
    Robot qui se balade librement sur la page
    Physique RAF, drag, HUD, scroll, repos, hover
    ══════════════════════════════════════════════ */
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   PET_SIZE, HALF, HEADER_H,
   BASE_SPEED, MAX_SPEED, MAGNET_RADIUS, MAGNET_SPEED,
@@ -13,8 +13,13 @@ import {
 } from './petConstants.js';
 import RobotFace from './RobotFace.jsx';
 import ThoughtBubbleQueue from './ThoughtBubbleQueue.jsx';
+import CatchGame from './CatchGame.jsx';
+import AchievementsPanel from './AchievementsPanel.jsx';
+import { FOOD_ICONS } from './petData.jsx';
 
-const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onThought, onHoverPet, cooldowns, thoughtQueue, hudThought, sizeScale, speedMult, isSleeping, moodSpinActive }) => {
+// forwardRef permet à AnimatePresence (PetButton) de transmettre sa ref sans warning React.
+// Le portal rend dans document.body donc la ref n'est pas attachée à un DOM node visible.
+const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onThought, onHoverPet, cooldowns, thoughtQueue, hudThought, sizeScale, speedMult, isSleeping, moodSpinActive, petName, onRename, feedIconIndex, achievements, onUnlock, isCatching, onGameEnd }, _ref) {
   const [pos, setPos] = useState(() => ({
     x: HALF + Math.random() * (window.innerWidth - PET_SIZE),
     y: HEADER_H + 60 + Math.random() * (window.innerHeight - HEADER_H - 150),
@@ -24,6 +29,21 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   const [gaze, setGaze] = useState({ x: 0, y: 0 });
   const [speedLevel, setSpeedLevel] = useState(0);
   const [isResting, setIsResting] = useState(false);
+  // HUD inline rename editing
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  // Achievements sub-panel
+  const [achOpen, setAchOpen] = useState(false);
+  // Spring animation when bot catches ball
+  const [catchSpring, setCatchSpring] = useState(false);
+  // Ticker pour mettre à jour les compte-à-rebours des cooldowns
+  const [, setCdTick] = useState(0);
+  useEffect(() => {
+    const anyCooling = Object.values(cooldowns).some((t) => t > Date.now());
+    if (!anyCooling) return;
+    const id = setInterval(() => setCdTick((n) => n + 1), 100);
+    return () => clearInterval(id);
+  }, [cooldowns]);
 
   const posRef = useRef(pos);
   const velRef = useRef({ x: (Math.random() - 0.5) * BASE_SPEED * 2, y: (Math.random() - 0.5) * BASE_SPEED * 2 });
@@ -38,6 +58,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   const rafRef = useRef(null);
   const hudRef = useRef(null);
   const robotRef = useRef(null);
+  const prevHudOpenRef = useRef(false);
   // Proximity + movement behavior tracking (frame-counted cooldowns)
   const proximityRef = useRef({ dwellFrames: 0, lastDist: Infinity, exciteCooldown: 0, scaredCooldown: 0, speedCooldown: 0, avoidDwellFrames: 0, avoidThoughtCooldown: 0, bounceCooldown: 0 });
   // petMood in a ref so the RAF closure is never stale
@@ -270,6 +291,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
           if (!hasRestThoughtRef.current) {
             hasRestThoughtRef.current = true;
             onThought('zzz');
+            onUnlock('footer-sit');
           }
         }
         // Update position with wall clamp
@@ -360,6 +382,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         if (bspd > 1.8 && prox.bounceCooldown === 0) {
           onBehavior('dizzy');
           prox.bounceCooldown = 120;
+          onUnlock('wall-bounce');
         }
       }
       if (prox.bounceCooldown > 0) prox.bounceCooldown--;
@@ -594,6 +617,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       };
       throwActiveRef.current = true;
       onBehavior('excited');
+      onUnlock('throw');
     } else {
       // Gentle placement — just kill velocity
       velRef.current = { x: 0, y: 0 };
@@ -624,19 +648,24 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       const p   = posRef.current;
       const GAP = 14;
       const PAD = 8;
-      // Prefer above pet; fall back below if not enough room
+      // Toujours au-dessus du bot (pousse vers le haut quand le contenu grandit)
       let top  = p.y - HALF - height - GAP;
+      // Repli en dessous si pas assez de place au-dessus
       if (top < HEADER_H + PAD) top = p.y + HALF + GAP;
-      // Center on pet horizontally, clamp to viewport
+      // Centré horizontalement, clamp dans le viewport
       let left = p.x - width / 2;
       left = Math.max(PAD, Math.min(vw - width - PAD, left));
       top  = Math.max(HEADER_H + PAD, Math.min(vh - height - PAD, top));
       setHudPos({ left, top });
     };
-    // Double rAF: HUD must paint before we can measure its bounds
+    // Premier calcul après 2 frames (le HUD doit être peint avant qu'on le mesure)
     const id = requestAnimationFrame(() => requestAnimationFrame(recompute));
     window.addEventListener('resize', recompute);
-    return () => { cancelAnimationFrame(id); window.removeEventListener('resize', recompute); };
+    // ResizeObserver : reposisionne automatiquement quand le HUD change de taille
+    // (panneau succès ouvert/fermé, stats mises à jour, etc.)
+    const ro = new ResizeObserver(recompute);
+    if (hudRef.current) ro.observe(hudRef.current);
+    return () => { cancelAnimationFrame(id); window.removeEventListener('resize', recompute); ro.disconnect(); };
   }, [hudOpen, pos]);
 
   /* ── Focus management — modal-like ── */
@@ -646,10 +675,14 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
         const first = hudRef.current?.querySelector('button:not(:disabled)');
         first?.focus();
       }, 80);
+      prevHudOpenRef.current = true;
       return () => clearTimeout(id);
     }
-    // Restore focus to pet trigger on close
-    robotRef.current?.focus();
+    // Restore focus only after an actual open -> close transition
+    if (prevHudOpenRef.current) {
+      robotRef.current?.focus();
+      prevHudOpenRef.current = false;
+    }
   }, [hudOpen]);
 
   /* ── Focus trap + keyboard handler for HUD dialog ── */
@@ -698,6 +731,18 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
   }, []);
 
   /* ── API globale gravité ── */
+  // Particles detection — unlock achievement when particles canvas is active
+  useEffect(() => {
+    const check = setInterval(() => {
+      const el = document.getElementById('particles-js');
+      if (el && el.childElementCount > 0) {
+        onUnlock('particles');
+        clearInterval(check);
+      }
+    }, 5000);
+    return () => clearInterval(check);
+  }, [onUnlock]);
+
   useEffect(() => {
     let gravityTimer = null;
     window.petGravity = (duration) => {
@@ -749,6 +794,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
     isResting && 'pet-wanderer--resting',
     isSleeping && 'pet-wanderer--sleeping',
     moodSpinActive && 'pet-wanderer--mood-spin',
+    isCatching && 'pet-wanderer--catching',
   ].filter(Boolean).join(' ');
 
   return createPortal(
@@ -787,7 +833,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
             ? 1 + Math.min(0.6, (dragSpeed - DRAG_FAST_THRESHOLD) * 0.035)
             : 1;
           return (
-            <div className="pet-svg-wrap">
+            <div className={`pet-svg-wrap${catchSpring ? ' pet-svg-wrap--catch-spring' : ''}`}>
               <motion.div
                 whileHover={isFastDrag ? {} : { scale: 1.1 }}
                 whileTap={{ scale: 0.9, scaleY: 0.82 }}
@@ -818,7 +864,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
                 }}
                 style={{ transformOrigin: 'center center', display: 'flex' }}
               >
-                <RobotFace expression={expression} eyeState={eyeState} mouthExpr={mouthExpr} gazeX={facingLeft ? -gaze.x : gaze.x} gazeY={gaze.y} />
+                <RobotFace expression={expression} eyeState={isResting ? 'cozy' : eyeState} mouthExpr={isResting ? 'cozy' : mouthExpr} gazeX={facingLeft ? -gaze.x : gaze.x} gazeY={gaze.y} />
               </motion.div>
             </div>
           );
@@ -829,9 +875,8 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
       <ThoughtBubbleQueue queue={thoughtQueue} petX={pos.x} petY={pos.y} />
 
       {/* HUD flottant */}
-      <AnimatePresence>
-        {hudOpen && (
-          <motion.div
+      {hudOpen && (
+        <motion.div
           ref={hudRef}
           className="pet-hud"
           style={
@@ -861,14 +906,57 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
                 <path d="M9 15 Q12 17 15 15" />
                 <rect x="8" y="17" width="8" height="4" rx="1.5" />
               </svg>
-              Mon Robot
+              {isEditingName ? (
+                <input
+                  className="pet-hud-name-edit"
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value.slice(0, 18))}
+                  onBlur={() => { onRename(nameDraft); setIsEditingName(false); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') { onRename(nameDraft); setIsEditingName(false); }
+                    if (e.key === 'Escape') setIsEditingName(false);
+                  }}
+                  autoFocus
+                  maxLength={18}
+                  aria-label="Renommer le robot"
+                />
+              ) : (
+                <>
+                  <span className="pet-hud-name">{petName}</span>
+                  <button
+                    className="pet-hud-name-pencil"
+                    onClick={(e) => { e.stopPropagation(); setNameDraft(petName); setIsEditingName(true); }}
+                    aria-label="Renommer"
+                    title="Renommer"
+                  >
+                    <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M11.5 2.5 L13.5 4.5 L5 13 L2 14 L3 11 Z" />
+                      <line x1="10" y1="4" x2="12" y2="6" />
+                    </svg>
+                  </button>
+                </>
+              )}
             </span>
-            <button className="pet-hud-close" onClick={() => setHudOpen(false)} aria-label="Fermer">
-              <svg viewBox="0 0 16 16" width="10" height="10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-                <line x1="3" y1="3" x2="13" y2="13" />
-                <line x1="13" y1="3" x2="3" y2="13" />
-              </svg>
-            </button>
+            <div className="pet-hud-header-actions">
+              {/* Trophy / achievements toggle */}
+              <button
+                className={`pet-hud-trophy-btn${achOpen ? ' pet-hud-trophy-btn--active' : ''}`}
+                onClick={(e) => { e.stopPropagation(); setAchOpen((a) => !a); }}
+                aria-label="Succès"
+                title="Succès"
+              >
+                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" stroke="none" aria-hidden="true">
+                  <path d="M3 2 L3 6 Q3 10 8 12 Q13 10 13 6 L13 2 Z" opacity="0.8" />
+                  <path d="M6.5 7 L7.5 8.5 L10 5.5" fill="none" stroke="var(--pet-bg, #080808)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <button className="pet-hud-close" onClick={() => setHudOpen(false)} aria-label="Fermer">
+                <svg viewBox="0 0 16 16" width="13" height="13" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                  <line x1="3" y1="3" x2="13" y2="13" />
+                  <line x1="13" y1="3" x2="3" y2="13" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Mood badge */}
@@ -882,6 +970,9 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
               {petMood === 'happy' ? 'Heureux' : petMood === 'content' ? 'Stable' : 'Triste'}
             </span>
           </div>
+
+          {/* Achievements panel — toggleable */}
+          {achOpen && <AchievementsPanel unlocked={achievements} />}
 
           <p className="pet-mood-text">{hudThought}</p>
 
@@ -974,20 +1065,12 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
             {[
               {
                 key: 'feed', label: 'Nourrir', title: 'Nourrir',
-                icon: (
-                  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
-                    <line x1="5" y1="2" x2="5" y2="6" />
-                    <path d="M3 2 L3 5 Q3 7 5 7 Q7 7 7 5 L7 2" />
-                    <line x1="5" y1="7" x2="5" y2="14" />
-                    <line x1="11" y1="2" x2="11" y2="14" />
-                    <path d="M9 2 Q11 3 11 6" />
-                  </svg>
-                ),
+                icon: FOOD_ICONS[feedIconIndex] || FOOD_ICONS[0],
               },
               {
                 key: 'pet', label: 'Câliner', title: 'Câliner',
                 icon: (
-                  <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" stroke="none" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" stroke="none" aria-hidden="true">
                     <path d="M3 7.5 Q3 5 5.5 4 Q7 3.5 8 5 Q9 3.5 10.5 4 Q13 5 13 7.5 Q13 11 8 13.5 Q3 11 3 7.5Z" opacity="0.9" />
                   </svg>
                 ),
@@ -995,7 +1078,7 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
               {
                 key: 'play', label: 'Jouer', title: 'Jouer',
                 icon: (
-                  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <rect x="1.5" y="5" width="13" height="9" rx="2.5" />
                     <circle cx="5.5" cy="9.5" r="1.3" fill="currentColor" stroke="none" />
                     <circle cx="10.5" cy="9.5" r="1.3" fill="currentColor" stroke="none" />
@@ -1003,12 +1086,23 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
                   </svg>
                 ),
               },
-            ].map(({ key, label, title, icon }) => {
+              {
+                key: 'catch', label: 'Attrape', title: 'Attrape !',
+                noCooldown: true,
+                icon: (
+                  <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+                    <circle cx="8" cy="8" r="5" />
+                    <path d="M5 8 Q8 4 11 8" />
+                    <path d="M5 8 Q8 12 11 8" />
+                  </svg>
+                ),
+              },
+            ].map(({ key, label, title, icon, noCooldown }) => {
               const cdFull    = key === 'play' ? 3000 : 2000;
-              const remaining = Math.max(0, cooldowns[key] - Date.now());
+              const remaining = noCooldown ? 0 : Math.max(0, (cooldowns[key] || 0) - Date.now());
               const cooling   = remaining > 0;
               const progress  = cooling ? remaining / cdFull : 0;
-              const r         = 7;
+              const r         = 9;
               const circ      = 2 * Math.PI * r;
               return (
                 <button
@@ -1022,10 +1116,10 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
                   <span className="pet-action-btn-inner">
                     {cooling ? (
                       <span className="pet-cd-ring" aria-hidden="true">
-                        <svg width="18" height="18" viewBox="0 0 18 18">
-                          <circle cx="9" cy="9" r={r} className="pet-cd-ring-track" />
+                        <svg width="22" height="22" viewBox="0 0 22 22">
+                          <circle cx="11" cy="11" r={r} className="pet-cd-ring-track" />
                           <circle
-                            cx="9" cy="9" r={r}
+                            cx="11" cy="11" r={r}
                             className="pet-cd-ring-fill"
                             style={{
                               strokeDasharray: circ,
@@ -1043,11 +1137,22 @@ const WanderingPet = ({ stats, expression, eyeState, mouthExpr, petMood, onInter
             })}
           </div>
         </motion.div>
-        )}
-      </AnimatePresence>
+      )}
+      {/* Jeu d'attrape */}
+      {isCatching && (
+        <CatchGame
+          botPosRef={posRef}
+          onBotCatch={() => {
+            onBehavior('excited');
+            setCatchSpring(true);
+            setTimeout(() => setCatchSpring(false), 450);
+          }}
+          onGameEnd={onGameEnd}
+        />
+      )}
     </>,
     document.body,
   );
-};
+});
 
 export default WanderingPet;

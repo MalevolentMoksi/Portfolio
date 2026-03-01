@@ -1,3 +1,7 @@
 - Meilleures illustrations pour les projets
 - CV accessible
 - Ajouter des fonctions d'accessibilités
+- Toast notifications
+- Spinning Spirals for Woozy
+- + d'Arrière plans
+- Crédits

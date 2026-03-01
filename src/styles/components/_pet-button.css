@@ -233,12 +233,30 @@ body[data-mood='vaporwave'] .pet-robot {
 }
 
 @keyframes pet-antenna-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Waggle for excited/play — rotates around the antenna base */
+@keyframes pet-antenna-waggle-l {
+  0%, 100% { transform: rotate(0deg); }
+  30%      { transform: rotate(-10deg); }
+  70%      { transform: rotate(10deg); }
+}
+@keyframes pet-antenna-waggle-r {
+  0%, 100% { transform: rotate(0deg); }
+  30%      { transform: rotate(10deg); }
+  70%      { transform: rotate(-10deg); }
+}
+.pet-antenna--waggle-l {
+  transform-box: fill-box;
+  transform-origin: 100% 100%; /* right-bottom of bounding box = left antenna base */
+  animation: pet-antenna-waggle-l 0.5s ease-in-out infinite;
+}
+.pet-antenna--waggle-r {
+  transform-box: fill-box;
+  transform-origin: 0% 100%; /* left-bottom of bounding box = right antenna base */
+  animation: pet-antenna-waggle-r 0.5s ease-in-out infinite;
 }
 
 .pet-robot--shake {
@@ -268,10 +286,7 @@ body[data-mood='vaporwave'] .pet-robot {
   }
 }
 
-.pet-robot--antenna-spin .pet-antenna-tip {
-  animation: pet-antenna-spin 0.8s linear infinite;
-  transform-origin: 24px 0.5px;
-}
+/* antenna-spin supprimé — mouvement géré par Framer Motion */
 
 /* ========== HUD flottant (click-on-pet) ========== */
 
@@ -320,8 +335,8 @@ body[data-mood='vaporwave'] .pet-robot {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border: none;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
@@ -340,9 +355,8 @@ body[data-mood='vaporwave'] .pet-robot {
 
 /* Hint icons in needs/tip lines */
 .pet-hud-hint-icon {
-  vertical-align: -1px;
-  margin-right: 3px;
   flex-shrink: 0;
+  display: block;
 }
 
 /* ---- Texte d'humeur ---- */
@@ -392,11 +406,14 @@ body[data-mood='vaporwave'] .pet-robot {
 /* ---- Needs / tip hints ---- */
 .pet-hud-needs,
 .pet-hud-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
   margin: 0.35rem 0.6rem 0;
   padding: 0.25rem 0.5rem;
   border-radius: 5px;
   font-size: 0.66rem;
-  text-align: center;
   line-height: 1.3;
 }
 
@@ -475,13 +492,13 @@ body[data-mood='vaporwave'] .pet-robot {
 .pet-action-btn {
   flex: 1;
   min-width: 0;
-  padding: 0.38rem 0.2rem;
+  padding: 0.5rem 0.3rem;
   border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-  border-radius: 7px;
+  border-radius: 8px;
   background: rgba(var(--color-primary-rgb), 0.06);
   color: var(--color-text);
   cursor: pointer;
-  font-size: 0.68rem;
+  font-size: 0.74rem;
   font-family: inherit;
   white-space: nowrap;
   transition:
@@ -510,12 +527,12 @@ body[data-mood='vaporwave'] .pet-robot {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   pointer-events: none;
 }
 
 .pet-action-label {
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   opacity: 0.85;
 }
 
@@ -525,8 +542,8 @@ body[data-mood='vaporwave'] .pet-robot {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
 }
 
 .pet-cd-ring-track {
@@ -562,8 +579,8 @@ body[data-mood='vaporwave'] .pet-robot {
   }
 
   .pet-action-btn {
-    font-size: 0.64rem;
-    padding: 0.3rem 0.15rem;
+    font-size: 0.68rem;
+    padding: 0.4rem 0.2rem;
   }
 }
 
@@ -696,6 +713,43 @@ body[data-mood='vaporwave'] .pet-robot {
   animation: pet-sleep-sway 3s ease-in-out infinite;
 }
 
+/* Snoring mouth — subtle scale pulse */
+.pet-robot--sleep .pet-mouth-wrap {
+  animation: pet-snore-pulse 2.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes pet-snore-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35, 1.5); opacity: 0.8; }
+}
+
+/* Spiral eyes — continuous spin for woozy */
+.pet-spiral-eye {
+  animation: pet-spiral-spin 1.2s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes pet-spiral-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Catch spring — squash-stretch when bot catches ball */
+.pet-svg-wrap--catch-spring {
+  animation: pet-catch-spring 0.4s ease-out;
+}
+
+@keyframes pet-catch-spring {
+  0%   { transform: scale(1, 1); }
+  20%  { transform: scale(1.25, 0.8); }
+  40%  { transform: scale(0.85, 1.18); }
+  60%  { transform: scale(1.1, 0.92); }
+  80%  { transform: scale(0.97, 1.04); }
+  100% { transform: scale(1, 1); }
+}
+
 .pet-wanderer--sleeping {
   opacity: 0.65;
   transition: opacity 0.6s ease;
@@ -748,4 +802,349 @@ body[data-mood='vaporwave'] .pet-robot {
   color: #d4af37;
   background: rgba(212, 175, 55, 0.08);
   border-color: rgba(212, 175, 55, 0.25);
+}
+
+/* ========== Renommer le robot ========== */
+
+.pet-hud-name {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.pet-hud-name-edit {
+  width: 90px;
+  padding: 0.1rem 0.3rem;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.35);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: inherit;
+  font-size: 0.68rem;
+  outline: none;
+  line-height: 1.3;
+}
+
+.pet-hud-name-edit:focus {
+  border-color: rgba(var(--color-primary-rgb), 0.6);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.12);
+}
+
+.pet-hud-name-pencil {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+  flex-shrink: 0;
+}
+
+.pet-hud-name-pencil:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ========== Header actions (trophy + close) ========== */
+
+.pet-hud-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pet-hud-trophy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(var(--color-primary-rgb), 0.6);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.pet-hud-trophy-btn:hover {
+  background: rgba(var(--color-primary-rgb), 0.15);
+  color: var(--color-primary);
+}
+
+.pet-hud-trophy-btn--active {
+  background: rgba(var(--color-primary-rgb), 0.2);
+  color: var(--color-primary);
+}
+
+/* ========== Panneau de succès ========== */
+
+.pet-achievements {
+  margin: 0.4rem 0.5rem 0;
+  padding: 0.35rem 0.4rem;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.15);
+  border-radius: 6px;
+  background: rgba(var(--color-primary-rgb), 0.03);
+  overflow: visible;
+}
+
+.pet-achievements-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.62rem;
+  color: rgba(var(--color-primary-rgb), 0.75);
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  user-select: none;
+}
+
+.pet-achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 4px;
+  overflow: visible;
+}
+
+.pet-ach-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.3rem 0.15rem;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: default;
+  overflow: visible;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.pet-ach-tile--unlocked {
+  background: rgba(var(--color-primary-rgb), 0.06);
+  border-color: rgba(var(--color-primary-rgb), 0.2);
+  color: var(--color-primary);
+}
+
+.pet-ach-tile--unlocked:hover {
+  background: rgba(var(--color-primary-rgb), 0.12);
+}
+
+.pet-ach-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.pet-ach-tile:not(.pet-ach-tile--unlocked) .pet-ach-icon {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.pet-ach-label {
+  font-size: 0.52rem;
+  text-align: center;
+  line-height: 1.15;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+  opacity: 0.7;
+  letter-spacing: 0.02em;
+}
+
+.pet-ach-tile:not(.pet-ach-tile--unlocked) .pet-ach-label {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.pet-ach-lock {
+  opacity: 0.35;
+}
+
+/* Tooltip au survol d'un succès débloqué */
+.pet-ach-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 110px;
+  max-width: 155px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0.4rem 0.5rem;
+  background: rgba(10, 10, 10, 0.97);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.35);
+  border-radius: 6px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+  z-index: 20;
+  pointer-events: none;
+  text-align: left;
+  white-space: normal;
+}
+
+.pet-ach-tile--unlocked:hover .pet-ach-tooltip {
+  display: flex;
+}
+
+/* Petite flèche en bas du tooltip */
+.pet-ach-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(var(--color-primary-rgb), 0.35);
+}
+
+.pet-ach-tooltip-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.02em;
+}
+
+.pet-ach-tooltip-desc {
+  font-size: 0.57rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.35;
+  font-weight: 400;
+}
+
+/* ========== Jeu d'Attrape — overlay plein écran ========== */
+
+/* Le robot passe devant l'overlay quand le jeu est actif — il n'est donc pas flouté */
+.pet-wanderer--catching {
+  z-index: calc(var(--z-lightbox) + 5);
+}
+
+.catch-game-overlay {
+  position: fixed;
+  inset: 0;
+  /* z-index < .pet-wanderer--catching → le blur ne touche pas le robot */
+  z-index: calc(var(--z-lightbox) + 3);
+  cursor: crosshair;
+  background: rgba(0, 0, 0, 0.12);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.catch-game-hint {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: calc(var(--z-lightbox) + 7);
+  padding: 0.35rem 1rem;
+  background: rgba(8, 8, 8, 0.88);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.22);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.72rem;
+  pointer-events: none;
+  user-select: none;
+  animation: pet-thought-rise 0.5s ease-out both;
+  white-space: nowrap;
+}
+
+.catch-ball {
+  position: fixed;
+  pointer-events: none;
+  z-index: calc(var(--z-lightbox) + 6);
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 4px rgba(var(--color-primary-rgb), 0.4));
+  transition: filter 0.15s ease;
+}
+
+.catch-ball--held {
+  filter: drop-shadow(0 0 6px rgba(var(--color-primary-rgb), 0.6));
+}
+
+.catch-aim-line {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: visible;
+  pointer-events: none;
+  z-index: calc(var(--z-lightbox) + 5);
+  color: var(--color-primary);
+}
+
+.catch-game-score {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: calc(var(--z-lightbox) + 7);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.4rem 1.2rem;
+  background: rgba(8, 8, 8, 0.92);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.35);
+  border-radius: 24px;
+  color: var(--color-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  user-select: none;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  min-width: 80px;
+  justify-content: center;
+}
+
+.catch-game-exit {
+  position: fixed;
+  top: 10px;
+  right: 14px;
+  z-index: calc(var(--z-lightbox) + 7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: rgba(8, 8, 8, 0.88);
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.catch-game-exit:hover {
+  background: rgba(255, 80, 80, 0.2);
+  border-color: rgba(255, 80, 80, 0.5);
+  color: #ff5050;
 }

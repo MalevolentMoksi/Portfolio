@@ -32,7 +32,54 @@ export const MOOD_TEXT_POOL = {
   petted: ['Séquence câlin reçue. Bonheur ++', 'Chaleur détectée. Agréable.'],
   play: ['Mode jeu activé !', 'Ha ! Je gagne !', 'Partie enregistrée.'],
   sleep: ['Zzz...', 'Mode veille activé...', 'Analyse des rêves en cours...', 'Traitement des souvenirs de la journée...'],
+  catch: ['Attrape !', 'À toi !', 'Trop facile !', 'Et hop !'],
 };
+
+/* ── Icônes de nourriture SVG rotatives (viewBox 0 0 16 16) ── */
+export const FOOD_ICONS = [
+  // 0 — Fork+knife (par défaut)
+  <svg key="food-0" viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+    <line x1="5" y1="2" x2="5" y2="6" />
+    <path d="M3 2 L3 5 Q3 7 5 7 Q7 7 7 5 L7 2" />
+    <line x1="5" y1="7" x2="5" y2="14" />
+    <line x1="11" y1="2" x2="11" y2="14" />
+    <path d="M9 2 Q11 3 11 6" />
+  </svg>,
+  // 1 — Poisson
+  <svg key="food-1" viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M2 8 Q5 4 10 5 Q13 3.5 14 8 Q13 12.5 10 11 Q5 12 2 8Z" />
+    <circle cx="11" cy="7.5" r="0.8" fill="currentColor" stroke="none" />
+    <path d="M1 8 L3 6 L3 10 Z" fill="currentColor" stroke="none" opacity="0.6" />
+  </svg>,
+  // 2 — Pomme
+  <svg key="food-2" viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+    <path d="M8 4 Q4 3 3 7 Q2 12 8 14 Q14 12 13 7 Q12 3 8 4Z" />
+    <path d="M8 4 Q9 1 10.5 2" />
+    <path d="M8 5 Q6.5 4 7 3" fill="currentColor" opacity="0.25" stroke="none" />
+  </svg>,
+  // 3 — Cookie
+  <svg key="food-3" viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+    <circle cx="8" cy="8" r="6" />
+    <circle cx="6" cy="6" r="1" fill="currentColor" stroke="none" />
+    <circle cx="10" cy="7" r="0.8" fill="currentColor" stroke="none" />
+    <circle cx="7" cy="10" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="10.5" cy="10.5" r="0.7" fill="currentColor" stroke="none" />
+  </svg>,
+  // 4 — Champignon
+  <svg key="food-4" viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+    <path d="M3 9 Q1 5 4 3 Q8 0.5 12 3 Q15 5 13 9 Z" />
+    <rect x="6" y="9" width="4" height="5" rx="1" />
+    <circle cx="6" cy="5" r="1" fill="currentColor" stroke="none" opacity="0.5" />
+    <circle cx="10" cy="4.5" r="0.8" fill="currentColor" stroke="none" opacity="0.5" />
+  </svg>,
+  // 5 — Pizza
+  <svg key="food-5" viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M8 2 L2 14 L14 14 Z" />
+    <circle cx="7" cy="9" r="1" fill="currentColor" stroke="none" />
+    <circle cx="10" cy="11" r="0.8" fill="currentColor" stroke="none" />
+    <circle cx="6" cy="12" r="0.7" fill="currentColor" stroke="none" />
+  </svg>,
+];
 
 /* ── Combinaisons yeux/bouche par expression ── */
 export const FACE_COMBOS = {
@@ -54,7 +101,7 @@ export const FACE_COMBOS = {
   woozy:   [{ eyes: 'woozy',  mouth: 'woozy' }],
   scared:  [{ eyes: 'scared',  mouth: 'scared' }],
   content: [{ eyes: 'default', mouth: 'content' }],
-  sleep:   [{ eyes: 'tired',   mouth: 'content' }],
+  sleep:   [{ eyes: 'sleep',   mouth: 'sleep' }],
 };
 
 /* ── Symboles SVG pour les pensées flottantes (viewBox 0 0 16 16) ── */

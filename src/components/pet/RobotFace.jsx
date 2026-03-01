@@ -110,15 +110,46 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
           </>
         );
       case 'woozy':
-        // X~X — crossed eyes + wavy mouth
+        // Œil tourbillon — point central + arc 315° ouvert à l'extrémité (style manga "étourdi")
+        // Le point central + l'arc avec une "queue" ouverte donne une spirale clairement lisible
         return (
           <>
-            {/* Left X eye */}
-            <line x1="14" y1="16" x2="20" y2="22" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-            <line x1="20" y1="16" x2="14" y2="22" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-            {/* Right X eye */}
-            <line x1="28" y1="16" x2="34" y2="22" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-            <line x1="34" y1="16" x2="28" y2="22" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            {/* Left swirl eye */}
+            <g className="pet-spiral-eye">
+              <circle cx="17" cy="19" r="1" fill="currentColor" />
+              <path
+                d="M17,16.2 Q20.2,16.2 20.2,19 Q20.2,21.8 17,21.8 Q13.8,21.8 13.8,19 Q13.8,17.2 15.8,17"
+                fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+              />
+            </g>
+            {/* Right swirl eye */}
+            <g className="pet-spiral-eye">
+              <circle cx="31" cy="19" r="1" fill="currentColor" />
+              <path
+                d="M31,16.2 Q34.2,16.2 34.2,19 Q34.2,21.8 31,21.8 Q27.8,21.8 27.8,19 Q27.8,17.2 29.8,17"
+                fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+              />
+            </g>
+          </>
+        );
+      case 'sleep':
+        // U_U — yeux fermés en arcs inversés (dodo mignon)
+        return (
+          <>
+            {/* Left U eye */}
+            <path d="M14 17 Q14 22 17 22 Q20 22 20 17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            {/* Right U eye */}
+            <path d="M28 17 Q28 22 31 22 Q34 22 34 17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </>
+        );
+      case 'cozy':
+        // ^v^ — petits arcs v (convexe vers le bas) pour l'expression «posé sur le sol»
+        return (
+          <>
+            <path d="M13.5 18 Q17 22.5 20.5 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path d="M27.5 18 Q31 22.5 34.5 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="15" cy="21" r="0.6" fill="currentColor" opacity="0.55" />
+            <circle cx="29" cy="21" r="0.6" fill="currentColor" opacity="0.55" />
           </>
         );
       // ── Other expressions ─────────────────────────────────────────────
@@ -188,14 +219,15 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
   const MOUTH_PATHS = {
     happy:   'M20 27 Q24 31 28 27',   // narrow :> smile
     petted:  'M20 27 Q24 31 28 27',
-    excited: 'M19 26 Q24 32 29 26',   // slightly wider for excitement
-    play:    'M19 26 Q24 32 29 26',
-    sad:     'M20 30 Q24 26 28 30',   // narrow :< frown
-    dizzy:   'M19 29 Q24 25 29 29',   // shallow frown
+    excited: 'M19 26 Q24 30 29 26',   // slightly wider for excitement
+    play:    'M19 26 Q24 30 29 26',
+    cozy:    'M20 27.5 Q24 29.5 28 27.5', // subtle resting smile
+    sad:     'M20 27 Q24 23 28 27',   // narrow :< frown
+    dizzy:   'M19 27 Q24 23 29 27',   // shallow frown
     woozy:   'M16 27 C18 24 21 30 24 27 C27 24 30 30 32 27',  // ~~ wavy mouth
     scared:  'M20 27 Q24 22 28 27',  // tight upward arc — pursed gasp
-    eat:     'M17 26 Q24 36 31 26',  // wide-open eating arc
-    sleep:   'M18 28 Q24 28 30 28',  // flat neutral line while sleeping
+    eat:     'M17 26 Q24 29.5 31 26',  // wide-open eating arc
+    sleep:   'M22 27 Q24 30 26 27',  // petite bouche "o" de ronflement
     content: 'M18 28 Q24 28 30 28',
     default: 'M18 28 Q24 28 30 28',
   };
@@ -204,15 +236,17 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
   // interpolates from whatever shape is currently drawn, eliminating the
   // top-left origin jump that happens when element types (circle/rect) swap.
   const renderMouth = () => (
-    <motion.path
-      initial={{ d: MOUTH_PATHS.default }}
-      animate={{ d: MOUTH_PATHS[me] ?? MOUTH_PATHS.default }}
-      transition={{ type: 'spring', stiffness: 160, damping: 18 }}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <g className={expr === 'sleep' ? 'pet-mouth-wrap' : undefined}>
+      <motion.path
+        initial={{ d: MOUTH_PATHS.default }}
+        animate={{ d: MOUTH_PATHS[me] ?? MOUTH_PATHS.default }}
+        transition={{ type: 'spring', stiffness: 160, damping: 18 }}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </g>
   );
 
   const renderBlush = () => {
@@ -235,11 +269,32 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
     return null;
   };
 
+  // ── Antenna paths by expression — quadratic bezier M start Q control end ──
+  // Bases at (18,6) left / (30,6) right (top of body, y=6).
+  // All paths share the same M Q structure so Framer Motion can interpolate d.
+  // Drooping: control point well above base, end point falls back down → bent wilted shape.
+  const ANTENNA_PATHS = {
+    happy:   { left: 'M18,6 Q17,1 15,0',    right: 'M30,6 Q31,1 33,0'   },
+    content: { left: 'M18,6 Q17,1 15,0',    right: 'M30,6 Q31,1 33,0'   },
+    excited: { left: 'M18,6 Q15,0 14,-1',   right: 'M30,6 Q33,0 34,-1'  },
+    play:    { left: 'M18,6 Q15,0 14,-1',   right: 'M30,6 Q33,0 34,-1'  },
+    petted:  { left: 'M18,6 Q17,0 15,-1',   right: 'M30,6 Q31,0 33,-1'  },
+    eat:     { left: 'M18,6 Q17,1 15,0',    right: 'M30,6 Q31,1 33,0'   },
+    scared:  { left: 'M18,6 Q16,-2 15,-3',  right: 'M30,6 Q32,-2 33,-3' },
+    // Droop: bases slightly inward, tip ends outside body x-bounds (x<10 left, x>38 right)
+    // so the curve arcs outward and never overlaps the head. y stays above y=6 (body top).
+    sad:     { left: 'M20,6 Q10,2 6,4',     right: 'M28,6 Q38,2 42,4'  },
+    dizzy:   { left: 'M20,6 Q10,2 6,4',     right: 'M28,6 Q38,2 42,4'  },
+    woozy:   { left: 'M20,6 Q10,2 6,4',     right: 'M30,6 Q32,0 34,-1'  }, // asymmetric
+    sleep:   { left: 'M20,6 Q9,3 5,5',      right: 'M28,6 Q39,3 43,5'  }, // most wilted
+  };
+  const antPath = ANTENNA_PATHS[expr] || ANTENNA_PATHS.content;
+  const isWaggle = expr === 'excited' || expr === 'play';
+
   const animClass = [
     'pet-robot',
     expr === 'scared' && 'pet-robot--shake',
     (expr === 'eat' || expr === 'petted' || expr === 'play') && 'pet-robot--bounce',
-    (expr === 'excited' || expr === 'play') && 'pet-robot--antenna-spin',
     expr === 'woozy' && 'pet-robot--woozy',
     expr === 'sleep' && 'pet-robot--sleep',
   ].filter(Boolean).join(' ');
@@ -270,9 +325,23 @@ const RobotFace = ({ expression, eyeState, mouthExpr, gazeX = 0, gazeY = 0 }) =>
         </filter>
       </defs>
 
-      {/* Antenna */}
-      <line className="pet-antenna" x1="24" y1="6" x2="24" y2="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <circle className="pet-antenna-tip" cx="24" cy="0.5" r="2.5" fill="currentColor" />
+      {/* Dual antennas — bezier paths, expression-reactive */}
+      <motion.path
+        className={`pet-antenna pet-antenna--left${isWaggle ? ' pet-antenna--waggle-l' : ''}`}
+        d={antPath.left}
+        initial={{ d: antPath.left }}
+        animate={{ d: antPath.left }}
+        transition={{ type: 'spring', stiffness: 180, damping: 14 }}
+        stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"
+      />
+      <motion.path
+        className={`pet-antenna pet-antenna--right${isWaggle ? ' pet-antenna--waggle-r' : ''}`}
+        d={antPath.right}
+        initial={{ d: antPath.right }}
+        animate={{ d: antPath.right }}
+        transition={{ type: 'spring', stiffness: 180, damping: 14 }}
+        stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"
+      />
 
       {/* Arms — filled + stroke */}
       <rect x="2" y="14" width="5" height="8" rx="2" fill="url(#petBodyGrad)" stroke="currentColor" strokeWidth="2" />

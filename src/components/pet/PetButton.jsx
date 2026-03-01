@@ -2,13 +2,12 @@
    Composant principal — bouton header + logique d'état
    ───────────────────────────────────────────────── */
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import { useMood } from '../../contexts/MoodContext.jsx';
 import {
-  LS, DECAY_MS, REACTION_MS, COOLDOWNS, SLEEP_IDLE_MS,
+  LS, DECAY_MS, REACTION_MS, COOLDOWNS, SLEEP_IDLE_MS, ACHIEVEMENTS,
   clamp, readLS, getMood, pickRandom,
 } from './petConstants.js';
-import { MOOD_TEXT_POOL, FACE_COMBOS, THOUGHT_POOLS } from './petData.jsx';
+import { MOOD_TEXT_POOL, FACE_COMBOS, THOUGHT_POOLS, FOOD_ICONS } from './petData.jsx';
 import WanderingPet from './WanderingPet.jsx';
 import { normalizeThought } from './ThoughtBubbleQueue.jsx';
 
@@ -23,6 +22,21 @@ const PetButton = () => {
   const [reaction, setReaction] = useState(null);
   // Timestamp (ms) when each cooldown expires; 0 = not cooling
   const [cdEnds, setCdEnds] = useState({ feed: 0, pet: 0, play: 0 });
+  // Pet name — persisted
+  const [petName, setPetName] = useState(() => localStorage.getItem(LS.name) || 'Mon Robot');
+  // Cycling food icon index — persisted
+  const [feedIconIndex, setFeedIconIndex] = useState(() => {
+    const v = parseInt(localStorage.getItem(LS.feedIndex), 10);
+    return Number.isFinite(v) ? v % FOOD_ICONS.length : 0;
+  });
+  // Achievements — persisted set of unlocked IDs
+  const [achievements, setAchievements] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(LS.achievements)) || []; }
+    catch { return []; }
+  });
+  // Catch game active flag
+  const [isCatching, setIsCatching] = useState(false);
+  const isCatchingRef = useRef(false);
   // Face combo — independent eyes/mouth variation
   const [faceCombo, setFaceCombo] = useState(() => {
     return pickRandom(FACE_COMBOS[getMood(50, 50)] ?? FACE_COMBOS.content);
@@ -79,6 +93,11 @@ const PetButton = () => {
     localStorage.setItem(LS.spawned, String(isSpawned));
   }, [isSpawned]);
 
+  useEffect(() => { localStorage.setItem(LS.name, petName); }, [petName]);
+  useEffect(() => { localStorage.setItem(LS.feedIndex, String(feedIconIndex)); }, [feedIconIndex]);
+  useEffect(() => { localStorage.setItem(LS.achievements, JSON.stringify(achievements)); }, [achievements]);
+  useEffect(() => { isCatchingRef.current = isCatching; }, [isCatching]);
+
   // Migration: remove stale pet-renderer key (SVG is now the only renderer)
   useEffect(() => { localStorage.removeItem('pet-renderer'); }, []);
 
@@ -128,12 +147,17 @@ const PetButton = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reaction, petMood]);
 
-  /* ── Dégradation en session (ralentie si thriving) ── */
+  /* ── Dégradation en session (ralentie si thriving) + freeze pendant catch ── */
   // Approche probabiliste : évite les décimales (pas de multiplicateur flottant)
-  // Thriving (>85/85) : déclin avec 20% de probabilité par tick → ~5× plus lent
+  // Thriving (>85/85) : déclin avec 20% de probabilité par tick → ≈5× plus lent
   useEffect(() => {
     if (!isSpawned) return;
     decayRef.current = setInterval(() => {
+      if (isCatchingRef.current) {
+        // Catch game: freeze hunger, gain happiness slowly
+        setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness + 0.5)) }));
+        return;
+      }
       setStats((s) => {
         const thriving = s.hunger > 85 && s.happiness > 85;
         if (thriving && Math.random() > 0.2) return s; // skip ce tick
@@ -175,7 +199,7 @@ const PetButton = () => {
       }, 13000 + Math.random() * 20000); // 13–33 s between idle pulses
     };
     schedule();
-    return () => { clearTimeout(idleTimerRef.current); clearTimeout(thoughtTimerRef.current); };
+    return () => { clearTimeout(idleTimerRef.current); };
   }, [isSpawned, triggerReaction]);
 
   /* ── Neglect escalation — sustained sad triggers dizzy ── */
@@ -192,6 +216,7 @@ const PetButton = () => {
       if (sadSinceRef.current !== null && Date.now() - sadSinceRef.current >= 28000) {
         sadSinceRef.current = null;
         triggerReaction('dizzy');
+        unlockAchievement('neglect');
       }
     }, 5000);
     return () => clearInterval(id);
@@ -254,17 +279,33 @@ const PetButton = () => {
     return () => { delete window.petReact; delete window.getPetStats; };
   }, [triggerReaction]);
 
+  /* ── Unlock achievement helper ── */
+  const unlockAchievement = useCallback((id) => {
+    setAchievements((prev) => {
+      if (prev.includes(id)) return prev;
+      return [...prev, id];
+    });
+  }, []);
+
   /* ── Interactions (depuis le HUD) ── */
   const handleInteract = useCallback((action) => {
+    if (action === 'catch') {
+      setIsCatching(true);
+      triggerReaction('play');
+      unlockAchievement('catch-game');
+      return;
+    }
     if (Date.now() < cdEnds[action]) return;
     switch (action) {
       case 'feed':
         setStats((s) => ({ ...s, hunger: clamp(Math.round(s.hunger + 25)) }));
+        setFeedIconIndex((i) => (i + 1) % FOOD_ICONS.length);
         triggerReaction('eat');
         break;
       case 'pet':
         setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness + 20)) }));
         triggerReaction('petted');
+        unlockAchievement('pet-action');
         break;
       case 'play':
         setStats((s) => ({ hunger: clamp(Math.round(s.hunger + 10)), happiness: clamp(Math.round(s.happiness + 10)) }));
@@ -281,10 +322,11 @@ const PetButton = () => {
     if (streak.count >= 3) {
       streak.count = 0;
       setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness + 8)) }));
+      unlockAchievement('combo');
       // Fire before the current reaction clears to avoid a 50 ms base-mood flicker
       setTimeout(() => triggerReaction('excited'), REACTION_MS - 100);
     }
-  }, [cdEnds, triggerReaction]);
+  }, [cdEnds, triggerReaction, unlockAchievement]);
 
   /* ── Thought bubble queue (déclenché depuis WanderingPet ou PetButton) ── */
   const handleThought = useCallback((input) => {
@@ -315,6 +357,18 @@ const PetButton = () => {
     setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness + 5)) }));
   }, []);
 
+  /* ── Catch game end ── */
+  const handleGameEnd = useCallback(() => {
+    setIsCatching(false);
+  }, []);
+
+  /* ── Rename callback ── */
+  const handleRename = useCallback((newName) => {
+    const trimmed = newName.trim().slice(0, 18) || 'Mon Robot';
+    setPetName(trimmed);
+    if (trimmed !== 'Mon Robot') unlockAchievement('rename');
+  }, [unlockAchievement]);
+
   /* ── Toggle spawn (recharge les stats si elles étaient basses) ── */
   const toggleSpawn = useCallback(() => {
     setIsSpawned((prev) => {
@@ -329,6 +383,18 @@ const PetButton = () => {
     });
   }, []);
 
+
+  // Achievement unlocks driven by state changes in PetButton
+  useEffect(() => {
+    if (petMood === 'happy') unlockAchievement('thrive');
+  }, [petMood, unlockAchievement]);
+
+  useEffect(() => {
+    if (isSleeping) unlockAchievement('sleep');
+  }, [isSleeping, unlockAchievement]);
+
+  // Neglect escalation already triggers dizzy — also unlock achievement
+  // (handled inline in the neglect effect below after triggerReaction('dizzy'))
 
   return (
     <>
@@ -363,29 +429,37 @@ const PetButton = () => {
       </button>
 
       {/* Robot qui se balade (via portail) */}
-      <AnimatePresence>
-        {isSpawned && (
-          <WanderingPet
-            key="wandering-pet"
-            stats={stats}
-            expression={expression}
-            eyeState={faceCombo.eyes}
-            mouthExpr={faceCombo.mouth}
-            petMood={petMood}
-            onInteract={handleInteract}
-            onBehavior={triggerReaction}
-            onThought={handleThought}
-            onHoverPet={handleHoverPet}
-            cooldowns={cdEnds}
-            thoughtQueue={thoughtQueue}
-            hudThought={hudThought}
-            sizeScale={sizeScale}
-            speedMult={speedMult}
-            isSleeping={isSleeping}
-            moodSpinActive={moodSpinActive}
-          />
-        )}
-      </AnimatePresence>
+      {/* Pas d'AnimatePresence ici — WanderingPet rend via portal sur document.body,
+          AnimatePresence ne peut pas mesurer/animer son DOM et injecte un ref
+          à travers le portal ce qui génère un warning React. */}
+      {isSpawned && (
+        <WanderingPet
+          key="wandering-pet"
+          stats={stats}
+          expression={expression}
+          eyeState={faceCombo.eyes}
+          mouthExpr={faceCombo.mouth}
+          petMood={petMood}
+          onInteract={handleInteract}
+          onBehavior={triggerReaction}
+          onThought={handleThought}
+          onHoverPet={handleHoverPet}
+          cooldowns={cdEnds}
+          thoughtQueue={thoughtQueue}
+          hudThought={hudThought}
+          sizeScale={sizeScale}
+          speedMult={speedMult}
+          isSleeping={isSleeping}
+          moodSpinActive={moodSpinActive}
+          petName={petName}
+          onRename={handleRename}
+          feedIconIndex={feedIconIndex}
+          achievements={achievements}
+          onUnlock={unlockAchievement}
+          isCatching={isCatching}
+          onGameEnd={handleGameEnd}
+        />
+      )}
     </>
   );
 };
