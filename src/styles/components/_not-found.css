@@ -1,0 +1,183 @@
+/* ============================================
+   404 — Page introuvable
+   Standalone page hors Layout, reprend l'esthétique du site
+   ============================================ */
+
+/* ---- Conteneur pleine page ---- */
+.not-found {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--space-lg) var(--space-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family-base);
+  overflow: hidden;
+}
+
+/* ---- Étoiles décoratives (pseudo-éléments) ---- */
+.not-found__stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.not-found__stars::before,
+.not-found__stars::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: var(--color-primary);
+  opacity: 0.08;
+  filter: blur(90px);
+  animation: notfound-drift 16s ease-in-out infinite alternate;
+}
+
+.not-found__stars::before {
+  width: 500px;
+  height: 500px;
+  top: -15%;
+  left: -10%;
+}
+
+.not-found__stars::after {
+  width: 400px;
+  height: 400px;
+  bottom: -10%;
+  right: -8%;
+  animation-delay: -8s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes notfound-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, 30px) scale(1.12); }
+}
+
+/* ---- Contenu central ---- */
+.not-found__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 540px;
+  gap: 0;
+}
+
+/* ---- Grand code 404 ---- */
+.not-found__code {
+  font-size: clamp(6rem, 18vw, 11rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+  text-shadow:
+    0 0 40px rgba(var(--color-primary-rgb), 0.45),
+    0 0 80px rgba(var(--color-primary-rgb), 0.2),
+    0 4px 30px rgba(0, 0, 0, 0.5);
+  margin-bottom: var(--space-xs);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  user-select: none;
+  animation: notfound-glow 4s ease-in-out infinite alternate;
+}
+
+@keyframes notfound-glow {
+  0%   { text-shadow: 0 0 40px rgba(var(--color-primary-rgb), 0.45), 0 0 80px rgba(var(--color-primary-rgb), 0.2), 0 4px 30px rgba(0, 0, 0, 0.5); }
+  100% { text-shadow: 0 0 60px rgba(var(--color-primary-rgb), 0.65), 0 0 120px rgba(var(--color-primary-rgb), 0.35), 0 4px 30px rgba(0, 0, 0, 0.5); }
+}
+
+/* ---- Sous-titre ---- */
+.not-found__title {
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+}
+
+.not-found__description {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.6;
+  max-width: 420px;
+  margin-bottom: var(--space-lg);
+}
+
+/* ---- Boutons d'action ---- */
+.not-found__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin-bottom: var(--space-lg);
+}
+
+
+/* ---- Snake game container ---- */
+.not-found__snake-container {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-sm);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.15);
+  border-radius: var(--border-radius-md);
+  background: rgba(var(--color-secondary-rgb), 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  animation: notfound-snake-in 0.35s ease both;
+}
+
+@keyframes notfound-snake-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ---- Footer discret ---- */
+.not-found__footer {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding-top: var(--space-xl);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.04em;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 480px) {
+  .not-found {
+    padding: var(--space-md) var(--space-sm);
+  }
+
+  .not-found__code {
+    font-size: clamp(4.5rem, 22vw, 7rem);
+  }
+
+  .not-found__title {
+    font-size: 1.5rem;
+  }
+
+  .not-found__description {
+    font-size: 0.95rem;
+  }
+
+  .not-found__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .not-found__actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
