@@ -681,9 +681,7 @@ class MusicPlayer {
   }
 
   getAccentRgb() {
-    const rgb = getComputedStyle(document.documentElement)
-      .getPropertyValue('--color-primary-rgb')
-      .trim();
+    const rgb = getComputedStyle(document.body).getPropertyValue('--color-primary-rgb').trim();
     return rgb || '212, 175, 55';
   }
 

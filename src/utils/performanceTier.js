@@ -29,7 +29,7 @@
  *                 (les CPU mobiles avec 8 cœurs restent limités thermiquement)
  */
 
-const SS_KEY     = 'perf-tier-v2'; // v2 : supprime deviceMemory, invalide l'ancien cache
+const SS_KEY = 'perf-tier-v2'; // v2 : supprime deviceMemory, invalide l'ancien cache
 const SS_FPS_KEY = 'perf-fps-v2';
 
 /* ────────────────────────────────────────────
@@ -112,11 +112,7 @@ export const getPerformanceTier = () => {
  * @param {number}  [opts.fpsThreshold=35] — seuil en dessous duquel on abaisse
  * @param {number}  [opts.delayMs=2000]    — délai avant de commencer la mesure
  */
-export const startFpsMonitor = ({
-  sampleFrames = 90,
-  fpsThreshold = 35,
-  delayMs = 2000,
-} = {}) => {
+export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs = 2000 } = {}) => {
   // Ne mesurer qu'une fois par session
   if (sessionStorage.getItem(SS_FPS_KEY)) return;
 
@@ -125,7 +121,9 @@ export const startFpsMonitor = ({
     let start = 0;
 
     const tick = (now) => {
-      if (count === 0) { start = now; }
+      if (count === 0) {
+        start = now;
+      }
       count++;
       if (count >= sampleFrames) {
         const elapsed = now - start;

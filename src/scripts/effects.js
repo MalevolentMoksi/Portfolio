@@ -41,8 +41,8 @@ class VisualEffects {
     // Adapter le nombre de particules au tier de performance
     const particleCount = byTier({
       high: isMobile ? 40 : 80,
-      mid:  isMobile ? 30 : 60,
-      low:  isMobile ? 20 : 35,
+      mid: isMobile ? 30 : 60,
+      low: isMobile ? 20 : 35,
     });
 
     // retina_detect ON uniquement sur tier 'high' — quadruple la surface canvas sinon

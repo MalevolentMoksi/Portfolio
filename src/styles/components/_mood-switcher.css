@@ -25,12 +25,24 @@
 
 /* Theatrical spin on mood change — burst → overshoot → snap back */
 @keyframes mood-theatrical-spin {
-  0%   { transform: rotate(0deg)   scale(1);    }
-  18%  { transform: rotate(210deg) scale(1.28); } /* burst accélération */
-  52%  { transform: rotate(430deg) scale(0.88); } /* dépassement + compression */
-  72%  { transform: rotate(344deg) scale(1.1);  } /* rebond arrière */
-  86%  { transform: rotate(366deg) scale(0.96); } /* micro-rebond */
-  100% { transform: rotate(360deg) scale(1);    } /* stabilisation */
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  18% {
+    transform: rotate(210deg) scale(1.28);
+  } /* burst accélération */
+  52% {
+    transform: rotate(430deg) scale(0.88);
+  } /* dépassement + compression */
+  72% {
+    transform: rotate(344deg) scale(1.1);
+  } /* rebond arrière */
+  86% {
+    transform: rotate(366deg) scale(0.96);
+  } /* micro-rebond */
+  100% {
+    transform: rotate(360deg) scale(1);
+  } /* stabilisation */
 }
 
 .mood-icon--spin {
