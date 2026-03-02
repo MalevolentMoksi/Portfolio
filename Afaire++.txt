@@ -1,8 +1,6 @@
 Tâches manuelles :
 
 - Meilleures idées pour illustration (base de données)
-- Change l'ordre Robot / Particules
-- Mot CM2 + mis en avant
 - Changer la section Moksi's Bazaar pour faire + pro
 - Remplacer dessins par dessins + pro
 - SQLite vs PostgreSQL a corrigé selon la SAE
@@ -24,5 +22,3 @@ Tâches moyennes (besoin expertise IA) :
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
 
 - Attrape : Laisser les stats visible, ou implémenter une manière alternative de montrer les statsen mode Attrape pour montrer , faire en sorte que le robot cherche la balle après lancer et ameliorer les physiques de la balle si possible
-- Comment le site en général pourrait-il être optimisé en termes de performances?
-- Comment le jeu Attrape pourrait-il être optimisé en termes de performances?

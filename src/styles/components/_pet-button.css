@@ -1250,7 +1250,7 @@ body[data-mood='vaporwave'] .pet-robot {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: calc(var(--z-lightbox) + 8);
+  z-index: calc(var(--z-lightbox) + 20);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1268,7 +1268,7 @@ body[data-mood='vaporwave'] .pet-robot {
 }
 
 .catch-game-intro-title {
-  font-size: 1.5rem;
+  font-size: 1.9rem;
   font-weight: 800;
   color: var(--color-primary);
   letter-spacing: 0.04em;
@@ -1277,26 +1277,26 @@ body[data-mood='vaporwave'] .pet-robot {
 .catch-game-intro-steps {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.9rem;
 }
 
 .catch-game-intro-step {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  font-size: 0.85rem;
+  gap: 0.9rem;
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.75);
 }
 
 .catch-game-intro-icon {
-  font-size: 1.3rem;
-  width: 2rem;
+  font-size: 1.6rem;
+  width: 2.4rem;
   text-align: center;
   flex-shrink: 0;
 }
 
 .catch-game-intro-start {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.4);
   margin-top: 0.5rem;
   animation: catch-intro-blink 2s ease-in-out infinite;
@@ -1329,12 +1329,12 @@ body[data-mood='vaporwave'] .pet-robot {
   left: 50%;
   transform: translateX(-50%);
   z-index: calc(var(--z-lightbox) + 7);
-  padding: 0.35rem 1rem;
+  padding: 0.5rem 1.4rem;
   background: rgba(8, 8, 8, 0.88);
   border: 1px solid rgba(var(--color-primary-rgb), 0.22);
   border-radius: 20px;
   color: rgba(255, 255, 255, 0.55);
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   pointer-events: none;
   user-select: none;
   animation: pet-thought-rise 0.5s ease-out both;
@@ -1367,18 +1367,18 @@ body[data-mood='vaporwave'] .pet-robot {
 
 .catch-game-score {
   position: fixed;
-  top: 12px;
+  top: 16px;
   left: 50%;
   transform: translateX(-50%);
   z-index: calc(var(--z-lightbox) + 7);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 0.6rem 1.8rem;
+  gap: 3px;
+  padding: 0.85rem 2.4rem;
   background: rgba(8, 8, 8, 0.92);
   border: 1px solid rgba(var(--color-primary-rgb), 0.35);
-  border-radius: 16px;
+  border-radius: 18px;
   color: var(--color-primary);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.08em;
@@ -1386,19 +1386,19 @@ body[data-mood='vaporwave'] .pet-robot {
   user-select: none;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  min-width: 120px;
+  min-width: 160px;
 }
 
 .catch-game-score-label {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: rgba(255, 255, 255, 0.45);
 }
 
 .catch-game-score-value {
-  font-size: 2.2rem;
+  font-size: 3.2rem;
   font-weight: 800;
   line-height: 1;
   transition: transform 0.15s ease;
@@ -1410,26 +1410,78 @@ body[data-mood='vaporwave'] .pet-robot {
 }
 
 .catch-game-score-best {
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.35);
-  margin-top: 2px;
+  margin-top: 3px;
+}
+
+/* ── Mini stat bars in catch game HUD ── */
+.catch-game-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+}
+
+.catch-game-stat {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.catch-game-stat-icon {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  opacity: 0.7;
+}
+
+.catch-game-stat-track {
+  flex: 1;
+  height: 6px;
+  min-width: 65px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.catch-game-stat-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.catch-game-stat-fill--critical {
+  background: #e74c3c;
+}
+
+.catch-game-stat-value {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  min-width: 28px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .catch-game-exit {
   position: fixed;
-  top: 10px;
-  right: 14px;
+  top: 14px;
+  right: 18px;
   z-index: calc(var(--z-lightbox) + 7);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   width: auto;
-  height: 44px;
-  padding: 0 14px;
+  height: 52px;
+  padding: 0 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 22px;
+  border-radius: 26px;
   background: rgba(8, 8, 8, 0.88);
   color: rgba(255, 255, 255, 0.65);
   cursor: pointer;
@@ -1442,9 +1494,9 @@ body[data-mood='vaporwave'] .pet-robot {
 }
 
 .catch-game-exit-label {
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   opacity: 0.6;
 }
 

@@ -27,6 +27,10 @@ export const CATCH_BALL_SIZE = 22; // diamètre balle
 export const CATCH_BALL_SPEED = 12; // lancer initial (px/frame)
 export const CATCH_BALL_GRAVITY = 0.15;
 export const CATCH_BOT_RADIUS = 55; // distance de détection du bot
+export const CATCH_SEEK_SPEED = 3.5; // vitesse du bot en mode interception (px/frame)
+export const CATCH_BOT_HOLD_MIN = 24; // frames min de tenue de balle (~0.4s)
+export const CATCH_BOT_HOLD_RANGE = 36; // plage aléatoire ajoutée au min (~0→0.6s)
+export const CATCH_BOT_THROW_SPREAD = 0.14; // dispersion angulaire du lancer bot (±~8°)
 
 /* ── Clés localStorage ── */
 export const LS = {

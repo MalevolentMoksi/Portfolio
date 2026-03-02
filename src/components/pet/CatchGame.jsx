@@ -1,23 +1,27 @@
 /* ══════════════════════════════════════════════
    Jeu d'Attrape — lance une balle, le bot la renvoie
    Trajectoire prévisualisée + lancer directionnel
+   Bot-held phase : le robot attrape, tient, puis relance
    ══════════════════════════════════════════════ */
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   CATCH_BALL_SIZE, CATCH_BALL_SPEED, CATCH_BALL_GRAVITY,
   CATCH_BOT_RADIUS, BOUNCE_RESTITUTION,
+  CATCH_BOT_HOLD_MIN, CATCH_BOT_HOLD_RANGE, CATCH_BOT_THROW_SPREAD,
 } from './petConstants.js';
 
 const BALL_R        = CATCH_BALL_SIZE / 2;
-const PLAYER_CATCH  = 70;
+const PLAYER_CATCH  = 85;           // zone de recatch joueur — plus généreuse
 const BOT_CATCH     = CATCH_BOT_RADIUS;
 const BALL_TOP_MIN  = BALL_R;
 const VEL_HIST_MAX  = 6;
-const AIM_STEPS     = 20;
+const AIM_STEPS     = 22;           // prévisualisation plus longue
 const AIM_DT        = 2.5;
 const HINT_DELAY_MS = 3000;
-const VEL_SMOOTH    = 0.35;   // EMA blending factor — lower = smoother / slower
+const VEL_SMOOTH    = 0.55;         // EMA plus réactif (vs 0.35 avant)
+const AIR_FRICTION  = 0.997;        // friction air plus forte (vs 0.999) — réduit les rebonds interminables
+const STOP_THRESH   = 0.5;          // seuil d'arrêt de balle (vs 0.25)
 
 const closestPointOnSegment = (ax, ay, bx, by, px, py) => {
   const abx = bx - ax;
@@ -30,7 +34,7 @@ const closestPointOnSegment = (ax, ay, bx, by, px, py) => {
   return { x: ax + abx * t, y: ay + aby * t, t };
 };
 
-const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
+const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => {
   const startX = window.innerWidth / 2;
   const startY = window.innerHeight - 120;
 
@@ -43,6 +47,9 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
   const velHistRef       = useRef([]);
   const smoothVelRef     = useRef({ x: 0, y: 0 });
   const rafRef           = useRef(null);
+
+  /* ── Bot-held phase ── */
+  const botHoldCounterRef = useRef(0);
 
   /* ── DOM refs — direct manipulation, no React state churn ── */
   const ballElRef  = useRef(null);
@@ -125,7 +132,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
     let d = `M${sx.toFixed(1)},${sy.toFixed(1)}`;
     for (let i = 0; i < AIM_STEPS; i++) {
       svy += CATCH_BALL_GRAVITY * AIM_DT;
-      svx *= 0.999; svy *= 0.999;
+      svx *= AIR_FRICTION; svy *= AIR_FRICTION;
       sx += svx * AIM_DT; sy += svy * AIM_DT;
       if (sx < BALL_R)          { sx = BALL_R;          svx =  Math.abs(svx) * BOUNCE_RESTITUTION; }
       else if (sx > vw - BALL_R){ sx = vw - BALL_R;     svx = -Math.abs(svx) * BOUNCE_RESTITUTION; }
@@ -180,22 +187,101 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
     const tick = () => {
       const vw = window.innerWidth, vh = window.innerHeight;
       const bp = ballPosRef.current, bv = ballVelRef.current;
+      const holder = holderRef.current;
       if (catchCooldownRef.current > 0) catchCooldownRef.current--;
 
+      // ── Expose ball state to WanderingPet for seek steering ──
+      if (ballInfoRef) {
+        ballInfoRef.current = { x: bp.x, y: bp.y, vx: bv.x, vy: bv.y, holder };
+      }
+
       /* ── Player holds ball ── */
-      if (holderRef.current === 'player') {
+      if (holder === 'player') {
         bp.x = cursorRef.current.x;
         bp.y = cursorRef.current.y;
 
-        // Smooth aim velocity (exponential moving average)
         const t = targetVel();
         const sv = smoothVelRef.current;
         sv.x += (t.vx - sv.x) * VEL_SMOOTH;
         sv.y += (t.vy - sv.y) * VEL_SMOOTH;
-
-        // Aim line à 60fps — AIM_STEPS réduit (20 vs 32 initial) pour compenser
         if (aimSvgRef.current) aimSvgRef.current.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
         if (aimPathRef.current) aimPathRef.current.setAttribute('d', buildAim(bp.x, bp.y, sv.x, sv.y));
+        if (ballElRef.current) {
+          ballElRef.current.style.left = `${bp.x - BALL_R}px`;
+          ballElRef.current.style.top  = `${bp.y - BALL_R}px`;
+        }
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      /* ── Bot is holding the ball — follow bot position, countdown to throw ── */
+      if (holder === 'bot-held') {
+        const bot = botPosRef.current;
+        bp.x = bot.x;
+        bp.y = bot.y;
+        botHoldCounterRef.current--;
+
+        if (botHoldCounterRef.current <= 0) {
+          // ── Weighted random throw style ──────────────────────────────
+          //   50% direct  — straight line, fixed speed
+          //   30% arc     — medium ballistic parabola
+          //   15% lob     — tall slow arc
+          //    5% fastball — fast and nearly flat
+          // All styles use the same ballistic formula:
+          //   vx = dx / T
+          //   vy = dy / T  −  0.5 · g · T
+          // T controls arc height and speed: short T = fast/flat, long T = slow/high.
+          // Direct is the exception: aims at fixed speed, ignoring g compensation.
+          const cx = cursorRef.current.x, cy = cursorRef.current.y;
+          const dx = cx - bot.x;
+          const dist = Math.sqrt(dx * dx + (cy - bot.y) * (cy - bot.y)) || 1;
+
+          // Upward bias — lift the aim target so every throw arcs up before landing.
+          // Scales with distance (subtle when close, pronounced when far), capped at 90px.
+          const upBias = Math.min(90, dist * 0.18);
+          const cy_target = cy - upBias;
+          const dy = cy_target - bot.y;
+
+          const roll = Math.random();
+          let tvx, tvy;
+
+          if (roll < 0.50) {
+            // ── Direct — straight shot at fixed speed toward biased target ──
+            const dxB = cx - bot.x, dyB = cy_target - bot.y;
+            const distB = Math.sqrt(dxB * dxB + dyB * dyB) || 1;
+            const spd = CATCH_BALL_SPEED * 0.85;
+            tvx = (dxB / distB) * spd;
+            tvy = (dyB / distB) * spd;
+          } else if (roll < 0.80) {
+            // ── Arc — medium parabola, lands at biased target ──
+            const T = Math.max(30, Math.min(65, dist / 8));
+            tvx = dx / T;
+            tvy = dy / T - 0.5 * CATCH_BALL_GRAVITY * T;
+          } else if (roll < 0.95) {
+            // ── Lob — high slow arc ──
+            const T = Math.max(55, Math.min(95, dist / 5));
+            tvx = dx / T;
+            tvy = dy / T - 0.5 * CATCH_BALL_GRAVITY * T;
+          } else {
+            // ── Fastball — fast, nearly flat ──
+            const T = Math.max(16, Math.min(28, dist / 16));
+            tvx = dx / T;
+            tvy = dy / T - 0.5 * CATCH_BALL_GRAVITY * T;
+          }
+
+          // Small angular spread for natural imprecision
+          const arcSpd = Math.sqrt(tvx * tvx + tvy * tvy);
+          const baseAngle = Math.atan2(tvy, tvx);
+          const spread = (Math.random() - 0.5) * 2 * CATCH_BOT_THROW_SPREAD;
+          const throwAngle = baseAngle + spread;
+          bv.x = Math.cos(throwAngle) * arcSpd;
+          bv.y = Math.sin(throwAngle) * arcSpd;
+          bp.x = bot.x + Math.cos(throwAngle) * (BOT_CATCH + 6);
+          bp.y = bot.y + Math.sin(throwAngle) * (BOT_CATCH + 6);
+          catchCooldownRef.current = 18;
+          holderRef.current = 'returning';
+        }
+
         if (ballElRef.current) {
           ballElRef.current.style.left = `${bp.x - BALL_R}px`;
           ballElRef.current.style.top  = `${bp.y - BALL_R}px`;
@@ -208,7 +294,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
       const prevX = bp.x;
       const prevY = bp.y;
       bv.y += CATCH_BALL_GRAVITY;
-      bv.x *= 0.999; bv.y *= 0.999;
+      bv.x *= AIR_FRICTION; bv.y *= AIR_FRICTION;
       bp.x += bv.x;  bp.y += bv.y;
 
       // Wall bounces
@@ -217,7 +303,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
       if (bp.y < BALL_TOP_MIN)         { bp.y = BALL_TOP_MIN;      bv.y =  Math.abs(bv.y) * BOUNCE_RESTITUTION; }
       else if (bp.y > vh - BALL_R - 4) { bp.y = vh - BALL_R - 4;  bv.y = -Math.abs(bv.y) * BOUNCE_RESTITUTION; }
 
-      // Bot catch
+      // Bot catch — CCD proximity detection → bot-held phase
       if (holderRef.current === 'flying') {
         const bot = botPosRef.current;
         const hit = closestPointOnSegment(prevX, prevY, bp.x, bp.y, bot.x, bot.y);
@@ -226,20 +312,12 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
         const hitDist = Math.sqrt(hx * hx + hy * hy);
         if (hitDist < BOT_CATCH) {
           onBotCatch();
-          const cx = cursorRef.current.x, cy = cursorRef.current.y - 40;
-          const tdx = cx - bot.x, tdy = cy - bot.y;
-          const td = Math.sqrt(tdx * tdx + tdy * tdy) || 1;
-          const spd = CATCH_BALL_SPEED * 0.9;
-          // Reposition from impact direction (continuous collision), fallback to current vector.
-          const dx = hitDist > 1e-6 ? hx : (bp.x - bot.x);
-          const dy = hitDist > 1e-6 ? hy : (bp.y - bot.y);
-          const pd = Math.sqrt(dx * dx + dy * dy) || 1;
-          bp.x = bot.x + (dx / pd) * (BOT_CATCH + 6);
-          bp.y = bot.y + (dy / pd) * (BOT_CATCH + 6);
-          bv.x = (tdx / td) * spd;
-          bv.y = (tdy / td) * spd;
-          catchCooldownRef.current = 18;
-          holderRef.current = 'returning';
+          // Snap ball to bot and enter bot-held phase
+          bp.x = bot.x;
+          bp.y = bot.y;
+          bv.x = 0; bv.y = 0;
+          holderRef.current = 'bot-held';
+          botHoldCounterRef.current = CATCH_BOT_HOLD_MIN + Math.floor(Math.random() * CATCH_BOT_HOLD_RANGE);
           setRallies(r => r + 1);
           setCatchFlash(true);
           setTimeout(() => setCatchFlash(false), 200);
@@ -247,7 +325,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
       }
 
       // Player catch
-      if (holderRef.current !== 'player' && catchCooldownRef.current <= 0) {
+      if (holderRef.current !== 'player' && holderRef.current !== 'bot-held' && catchCooldownRef.current <= 0) {
         const cx = cursorRef.current.x, cy = cursorRef.current.y;
         const dx = bp.x - cx, dy = bp.y - cy;
         if (Math.sqrt(dx * dx + dy * dy) < PLAYER_CATCH) {
@@ -256,7 +334,9 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
       }
 
       // Ball nearly stopped → snap to player
-      if (Math.sqrt(bv.x * bv.x + bv.y * bv.y) < 0.25 && holderRef.current !== 'player') {
+      // Only in 'returning' state — never in 'flying', which would cause the
+      // ball to teleport back at its apex (near-zero vel when thrown straight up).
+      if (holderRef.current === 'returning' && Math.sqrt(bv.x * bv.x + bv.y * bv.y) < STOP_THRESH) {
         snapToPlayer(bv);
       }
 
@@ -270,7 +350,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
 
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [botPosRef, onBotCatch, startHoldTimer]);
+  }, [botPosRef, onBotCatch, startHoldTimer, ballInfoRef]);
 
   return createPortal(
     <div className={`catch-game-overlay${catchFlash ? ' catch-game-overlay--flash' : ''}`} onClick={handleClick}>
@@ -297,14 +377,43 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
         </div>
       )}
 
-      {/* HUD Score — agrandi et clair */}
-      <div className="catch-game-score">
+      {/* HUD Score + Mini Stats — masqué pendant l'intro */}
+      {!showIntro && <div className="catch-game-score">
         <div className="catch-game-score-label">Rallies</div>
         <div className="catch-game-score-value">{rallies}</div>
         {bestScore > 0 && (
           <div className="catch-game-score-best">Record : {bestScore}</div>
         )}
-      </div>
+        {/* Mini stat bars */}
+        {stats && (
+          <div className="catch-game-stats">
+            <div className="catch-game-stat">
+              <svg className="catch-game-stat-icon" viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-label="Faim">
+                <line x1="5" y1="2" x2="5" y2="6" />
+                <path d="M3 2 L3 5 Q3 7 5 7 Q7 7 7 5 L7 2" />
+                <line x1="5" y1="7" x2="5" y2="14" />
+                <line x1="11" y1="2" x2="11" y2="14" />
+                <path d="M9 2 Q11 3 11 6" />
+              </svg>
+              <div className="catch-game-stat-track">
+                <div className={`catch-game-stat-fill${stats.hunger < 30 ? ' catch-game-stat-fill--critical' : ''}`}
+                  style={{ width: `${stats.hunger}%` }} />
+              </div>
+              <span className="catch-game-stat-value">{stats.hunger}%</span>
+            </div>
+            <div className="catch-game-stat">
+              <svg className="catch-game-stat-icon" viewBox="0 0 16 16" width="11" height="11" fill="currentColor" stroke="none" aria-label="Bonheur">
+                <path d="M8 2 L9.5 6.2 L14 6.2 L10.5 8.8 L11.8 13 L8 10.5 L4.2 13 L5.5 8.8 L2 6.2 L6.5 6.2 Z" />
+              </svg>
+              <div className="catch-game-stat-track">
+                <div className={`catch-game-stat-fill${stats.happiness < 30 ? ' catch-game-stat-fill--critical' : ''}`}
+                  style={{ width: `${stats.happiness}%` }} />
+              </div>
+              <span className="catch-game-stat-value">{stats.happiness}%</span>
+            </div>
+          </div>
+        )}
+      </div>}
 
       {/* Aim line — always mounted, path written via ref; viewBox synced to viewport */}
       <svg

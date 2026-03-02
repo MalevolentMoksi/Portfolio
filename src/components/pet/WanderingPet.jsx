@@ -10,6 +10,7 @@ import {
   BASE_SPEED, MAX_SPEED, MAGNET_RADIUS, MAGNET_SPEED,
   DRAG_FAST_THRESHOLD, BOUNCE_RESTITUTION, THROW_SPEED_CAP,
   SCROLL_DIZZY_WINDOW, clamp,
+  CATCH_SEEK_SPEED, CATCH_BALL_GRAVITY, CATCH_BOT_RADIUS,
 } from './petConstants.js';
 import RobotFace from './RobotFace.jsx';
 import ThoughtBubbleQueue from './ThoughtBubbleQueue.jsx';
@@ -115,6 +116,11 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   const attractTargetRef = useRef(null);
   // Dynamic header bounds (viewport coords) for soft avoidance steering
   const headerBottomRef = useRef(0);
+  // Ball info bridge — CatchGame writes ball state, RAF reads for seek steering
+  const ballInfoRef = useRef(null);
+  // Catching ref for RAF closure
+  const isCatchingRef = useRef(false);
+  useEffect(() => { isCatchingRef.current = isCatching; }, [isCatching]);
 
   /* ── Header bounds tracking (for soft avoidance, not collision) ── */
   useEffect(() => {
@@ -307,6 +313,92 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
               y: (gdy / gdist) * gazeStrength * MAX_GAZE,
             });
           }
+
+          if (hoverCooldownRef.current > 0) hoverCooldownRef.current--;
+        }
+
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      // ── Catch-game seek steering — intercept the ball intelligently ──
+      if (isCatchingRef.current && ballInfoRef.current) {
+        const bi = ballInfoRef.current;
+        // Only seek when ball is flying (thrown by player)
+        if (bi.holder === 'flying') {
+          // Simulate ball trajectory to find best interception point
+          let sx = bi.x, sy = bi.y, svx = bi.vx, svy = bi.vy;
+          const seekSpd = CATCH_SEEK_SPEED;
+          const bw = window.innerWidth, bh = window.innerHeight;
+          const ballR = 11; // CATCH_BALL_SIZE / 2
+          let bestPt = { x: sx, y: sy };
+          for (let i = 1; i <= 60; i++) {
+            svy += CATCH_BALL_GRAVITY;
+            svx *= 0.997; svy *= 0.997;
+            sx += svx; sy += svy;
+            // Wall bounces (same logic as CatchGame)
+            if (sx < ballR)          { sx = ballR;          svx =  Math.abs(svx) * BOUNCE_RESTITUTION; }
+            else if (sx > bw - ballR){ sx = bw - ballR;     svx = -Math.abs(svx) * BOUNCE_RESTITUTION; }
+            if (sy < ballR)                { sy = ballR;            svy =  Math.abs(svy) * BOUNCE_RESTITUTION; }
+            else if (sy > bh - ballR - 4) { sy = bh - ballR - 4;  svy = -Math.abs(svy) * BOUNCE_RESTITUTION; }
+            // Can the bot reach this point in i frames?
+            const dx = sx - p.x, dy = sy - p.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist <= seekSpd * i + CATCH_BOT_RADIUS * 0.7) {
+              bestPt = { x: sx, y: sy };
+              break;
+            }
+            bestPt = { x: sx, y: sy };
+          }
+
+          // Steer toward interception point
+          const tdx = bestPt.x - p.x;
+          const tdy = bestPt.y - p.y;
+          const tdist = Math.sqrt(tdx * tdx + tdy * tdy);
+          if (tdist > 4) {
+            const speed = Math.min(seekSpd, 1.2 + tdist * 0.01);
+            v.x = (tdx / tdist) * speed;
+            v.y = (tdy / tdist) * speed;
+          } else {
+            v.x *= 0.7;
+            v.y *= 0.7;
+          }
+        } else if (bi.holder === 'bot-held') {
+          // Bot is holding — gentle brake, face toward cursor
+          v.x *= 0.85;
+          v.y *= 0.85;
+        } else {
+          // Ball held by player or returning — gentle wander with reduced speed
+          v.x *= 0.92;
+          v.y *= 0.92;
+          const dv = desiredVRef.current;
+          v.x += (dv.x * 0.3 - v.x) * 0.02;
+          v.y += (dv.y * 0.3 - v.y) * 0.02;
+        }
+
+        p.x = clamp(p.x + v.x, HALF, vw - HALF);
+        p.y = clamp(p.y + v.y, PET_TOP_MIN, vh - HALF);
+
+        if (frameRef.current % 2 === 0) {
+          setPos({ x: p.x, y: p.y });
+          setSpeedLevel(Math.sqrt(v.x * v.x + v.y * v.y));
+
+          if (v.x > 0.08)       flipHysteresisRef.current = Math.min(flipHysteresisRef.current + 1,  20);
+          else if (v.x < -0.08) flipHysteresisRef.current = Math.max(flipHysteresisRef.current - 1, -20);
+          if (flipHysteresisRef.current >=  15) setFacingLeft(false);
+          if (flipHysteresisRef.current <= -15) setFacingLeft(true);
+
+          // Gaze toward ball when flying, toward cursor otherwise
+          const gazeTarget = bi.holder === 'flying' ? { x: bi.x, y: bi.y } : cursorRef.current;
+          const gdx = gazeTarget.x - p.x;
+          const gdy = gazeTarget.y - p.y;
+          const gdist = Math.sqrt(gdx * gdx + gdy * gdy) || 1;
+          const gazeStrength = Math.min(1, gdist / 260);
+          const MAX_GAZE = 1.8;
+          setGaze({
+            x: (gdx / gdist) * gazeStrength * MAX_GAZE,
+            y: (gdy / gdist) * gazeStrength * MAX_GAZE,
+          });
 
           if (hoverCooldownRef.current > 0) hoverCooldownRef.current--;
         }
@@ -1213,6 +1305,8 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
           botPosRef={posRef}
           onBotCatch={handleBotCatch}
           onGameEnd={onGameEnd}
+          ballInfoRef={ballInfoRef}
+          stats={stats}
         />
       )}
     </>,
