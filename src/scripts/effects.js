@@ -3,10 +3,16 @@
  * Handles particles, parallax background, and cursor effects
  */
 
+import { getPerformanceTier, byTier } from '../utils/performanceTier.js';
+
 class VisualEffects {
   constructor() {
     this.background = document.getElementById('background');
     this.particlesLoaded = false;
+    this._parallaxRafId = null;
+    this._mouseMoveHandler = null;
+    this._visibilityHandler = null;
+    this._parallaxRunning = false;
     this.init();
   }
 
@@ -18,15 +24,32 @@ class VisualEffects {
   }
 
   initParticles() {
+    // Respecter prefers-reduced-motion : pas de particules
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
+      return;
+    }
+
     // Check if particles.js is loaded
     if (typeof particlesJS === 'undefined') {
       console.warn('particles.js not loaded');
       return;
     }
 
-    // Réduit le nombre de particules sur mobile pour les performances
+    const tier = getPerformanceTier();
     const isMobile = window.innerWidth <= 768;
-    const particleCount = isMobile ? 40 : 80;
+
+    // Adapter le nombre de particules au tier de performance
+    const particleCount = byTier({
+      high: isMobile ? 40 : 80,
+      mid:  isMobile ? 30 : 60,
+      low:  isMobile ? 20 : 35,
+    });
+
+    // retina_detect ON uniquement sur tier 'high' — quadruple la surface canvas sinon
+    const retinaDetect = tier === 'high';
+
+    // Réduire la distance de liaison sur low tier (moins de calculs de proximité)
+    const linkDistance = byTier({ high: 150, mid: 150, low: 120 });
 
     particlesJS('particles-js', {
       particles: {
@@ -51,7 +74,7 @@ class VisualEffects {
         },
         line_linked: {
           enable: true,
-          distance: 150,
+          distance: linkDistance,
           color: '#d4af37',
           opacity: 0.55,
           width: 1,
@@ -73,10 +96,10 @@ class VisualEffects {
           resize: true,
         },
         modes: {
-          push: { particles_nb: 4 },
+          push: { particles_nb: byTier({ high: 4, mid: 3, low: 2 }) },
         },
       },
-      retina_detect: true,
+      retina_detect: retinaDetect,
     });
 
     this.particlesLoaded = true;
@@ -149,7 +172,7 @@ class VisualEffects {
 
     // Throttle mousemove for performance
     let ticking = false;
-    window.addEventListener('mousemove', (e) => {
+    this._mouseMoveHandler = (e) => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           handleMouseMove(e);
@@ -157,18 +180,52 @@ class VisualEffects {
         });
         ticking = true;
       }
-    });
+    };
+    window.addEventListener('mousemove', this._mouseMoveHandler);
 
-    // Smooth animation loop
+    // Smooth animation loop — with visibility-aware pause
     const updateParallax = () => {
       posX += (mouseX - posX) * friction;
       posY += (mouseY - posY) * friction;
       this.background.style.transform = `scale(1.15) translate(${posX}px, ${posY}px)`;
-      this.background.style.filter = 'blur(4px)';
-      requestAnimationFrame(updateParallax);
+      this._parallaxRafId = requestAnimationFrame(updateParallax);
     };
 
-    updateParallax();
+    this._parallaxRunning = true;
+    this._parallaxRafId = requestAnimationFrame(updateParallax);
+
+    // Pause la boucle RAF quand l'onglet est masqué (économie CPU)
+    this._visibilityHandler = () => {
+      if (document.hidden) {
+        if (this._parallaxRafId) {
+          cancelAnimationFrame(this._parallaxRafId);
+          this._parallaxRafId = null;
+        }
+        this._parallaxRunning = false;
+      } else if (!this._parallaxRunning && this.background) {
+        this._parallaxRunning = true;
+        this._parallaxRafId = requestAnimationFrame(updateParallax);
+      }
+    };
+    document.addEventListener('visibilitychange', this._visibilityHandler);
+  }
+
+  /**
+   * Nettoie toutes les ressources (RAF, listeners).
+   * Appelé lors du démontage du hook usePortfolioModules.
+   */
+  destroy() {
+    if (this._parallaxRafId) {
+      cancelAnimationFrame(this._parallaxRafId);
+      this._parallaxRafId = null;
+    }
+    if (this._mouseMoveHandler) {
+      window.removeEventListener('mousemove', this._mouseMoveHandler);
+    }
+    if (this._visibilityHandler) {
+      document.removeEventListener('visibilitychange', this._visibilityHandler);
+    }
+    this._parallaxRunning = false;
   }
 }
 

@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Tooltip from './Tooltip.jsx';
+import { getPerformanceTier } from '../utils/performanceTier.js';
 
 /* ── Configuration des effets ─────────────────────── */
 const EFFECTS = [
@@ -76,18 +77,18 @@ const getBaseSpeed = () => (getPJS()?.particles.move.speed ?? 2) * 0.22;
 /**
  * Décélération exponentielle smooth : ramène toutes les particules vers
  * baseSpeed sur `duration` ms sans snap brutal.
- * Décroissance par frame : k = 0.05^(1/N) où N ≈ frames dans duration.
+ * Retourne un handle { cancel() } pour annuler la boucle depuis l'extérieur.
  */
 const smoothRestore = (duration = 1500) => {
   const baseSpeed = getBaseSpeed();
-  // k tel que après duration ms (≈ duration*0.06 frames à 60fps) la vitesse
-  // excédentaire soit réduite à 5 % : k = 0.05^(1/(duration*0.06))
   const frames = duration * 0.06;
-  const k = Math.pow(0.05, 1 / frames); // ≈ 0.967 pour duration=1500
-
+  const k = Math.pow(0.05, 1 / frames);
   const start = performance.now();
+  let cancelled = false;
+  let rafId = null;
 
   const frame = () => {
+    if (cancelled) return;
     const elapsed = performance.now() - start;
     const done = elapsed >= duration;
     const p = getPJS();
@@ -101,7 +102,6 @@ const smoothRestore = (duration = 1500) => {
       if (done) {
         targetMag = baseSpeed;
       } else {
-        // Converge exponentiellement : excès réduit de (1-k) par frame
         targetMag = baseSpeed + (mag - baseSpeed) * k;
       }
       const ratio = targetMag / mag;
@@ -109,54 +109,64 @@ const smoothRestore = (duration = 1500) => {
       pt.vy *= ratio;
     });
 
-    if (!done) requestAnimationFrame(frame);
+    if (!done) rafId = requestAnimationFrame(frame);
   };
 
-  requestAnimationFrame(frame);
+  rafId = requestAnimationFrame(frame);
+
+  return {
+    cancel() {
+      cancelled = true;
+      if (rafId) cancelAnimationFrame(rafId);
+    },
+  };
 };
 
-/* ── Implémentation des effets ── */
+/* ── Implémentation des effets ──
+ *
+ * Chaque effet accepte un objet `signal` : { cancelled: boolean }
+ * Le composant peut marquer signal.cancelled = true pour stopper
+ * les boucles RAF en cas de démontage ou de nouvel effet.
+ *
+ * Chaque effet retourne un objet { restoreHandle } pour permettre
+ * au composant d'annuler le smoothRestore si besoin.
+ */
 const effects = {
 
   /**
-   * Explosion : spawn dans les coins supérieurs (zone visible sans contenu)
-   * et projection radiale de toutes les particules depuis ces coins.
+   * Explosion : spawn dans les coins supérieurs
+   * et projection radiale de toutes les particules.
    */
-  explode() {
+  explode(signal) {
     setParticlesForeground(true);
     const pJS = getPJS();
-    if (!pJS) return;
+    if (!pJS) return { restoreHandle: null };
 
     const W = window.innerWidth;
     const H = window.innerHeight;
-    // pJS.canvas.pxratio = devicePixelRatio sur écran retina, 1 sinon.
-    // Les positions internes des particules (pt.x/pt.y) sont en pixels physiques,
-    // donc toutes les coordonnées CSS doivent être multipliées par pxratio.
     const pxr = pJS.canvas.pxratio ?? 1;
-    // Zones en haut à gauche et en haut à droite — hors zone du contenu central
     const zoneW = W * 0.25;
     const zoneH = H * 0.35;
-    const headerH = 70; // hauteur approximative du header sticky
+    const headerH = 70;
 
-    // 15 particules dans le coin haut-gauche
-    for (let i = 0; i < 15; i++) {
+    // Adapter le nombre de particules spawnées au tier
+    const spawnCount = getPerformanceTier() === 'low' ? 8 : 15;
+
+    for (let i = 0; i < spawnCount; i++) {
       pJS.fn.modes.pushParticles(1, {
         pos_x: Math.random() * zoneW * pxr,
         pos_y: (headerH + Math.random() * (zoneH - headerH)) * pxr,
       });
     }
-    // 15 particules dans le coin haut-droit
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < spawnCount; i++) {
       pJS.fn.modes.pushParticles(1, {
         pos_x: (W - Math.random() * zoneW) * pxr,
         pos_y: (headerH + Math.random() * (zoneH - headerH)) * pxr,
       });
     }
 
-    // Projeter toutes les particules vers l'extérieur depuis le centre.
-    // cx/cy convertis en pixels physiques pour correspondre à l'espace de pt.x/pt.y.
     const cx = (W / 2) * pxr;
-    const cy = (H / 4) * pxr; // depuis le quart supérieur pour accompagner le spawn
+    const cy = (H / 4) * pxr;
     pJS.particles.array.forEach((pt) => {
       const dx = pt.x - cx;
       const dy = pt.y - cy;
@@ -166,35 +176,34 @@ const effects = {
       pt.vy = (dy / dist) * burst;
     });
 
-    setTimeout(() => { smoothRestore(1200); setParticlesForeground(false); }, 600);
+    let restoreHandle = null;
+    setTimeout(() => {
+      if (!signal.cancelled) {
+        restoreHandle = smoothRestore(1200);
+        setParticlesForeground(false);
+      }
+    }, 600);
     window.petReact?.('scared');
+    return { get restoreHandle() { return restoreHandle; } };
   },
 
   /**
-   * Attraction : les particules convergent vers un point en bordure de l'écran.
-   * Le centre du viewport est évité pour ne pas cacher le contenu.
+   * Attraction : les particules convergent vers un point en bordure.
    */
-  attract() {
+  attract(signal) {
     setParticlesForeground(true);
-    // Point aléatoire hors zone centrale
     const { x: cx, y: cy } = randomEdgePoint();
     triggerPetAttract(cx, cy, 3000);
 
     const pJS = getPJS();
-    if (!pJS) return;
+    if (!pJS) return { restoreHandle: null };
 
-    // Convertir en pixels physiques pour l'espace interne de particles.js.
-    // Sur écran retina pxratio = devicePixelRatio (ex. 2), pt.x/pt.y vont
-    // jusqu'à canvas.w = innerWidth * pxratio, donc la cible doit être mise
-    // à l'échelle pour que particules et robot convergent au même point visuel.
     const pxr = pJS.canvas.pxratio ?? 1;
     const pcx = cx * pxr;
     const pcy = cy * pxr;
 
-    let active = true;
-
     const pull = () => {
-      if (!active) return;
+      if (signal.cancelled) return;
       const p = getPJS();
       if (!p) return;
       p.particles.array.forEach((pt) => {
@@ -203,7 +212,6 @@ const effects = {
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         pt.vx += (dx / dist) * 0.5;
         pt.vy += (dy / dist) * 0.5;
-        // Limiter la vitesse d'attraction
         const spd = Math.sqrt(pt.vx * pt.vx + pt.vy * pt.vy);
         if (spd > 8) {
           pt.vx = (pt.vx / spd) * 8;
@@ -215,31 +223,34 @@ const effects = {
 
     requestAnimationFrame(pull);
 
+    let restoreHandle = null;
     setTimeout(() => {
-      active = false;
-      smoothRestore(1500);
-      setParticlesForeground(false);
+      signal.cancelled = true; // Arrêter la boucle pull
+      if (!signal._unmounted) {
+        restoreHandle = smoothRestore(1500);
+        setParticlesForeground(false);
+      }
     }, 3000);
+    return { get restoreHandle() { return restoreHandle; } };
   },
 
   /**
-   * Tempête : double le nombre de particules et uniformise leur vitesse.
-   * Les nouvelles particules reçoivent exactement la même vitesse que
-   * les anciennes pour éviter la disparité.
+   * Tempête : ajoute des particules bonus et uniformise leur vitesse.
    */
-  storm() {
+  storm(signal) {
     setParticlesForeground(true);
     window.petReact?.('dizzy');
 
     const pJS = getPJS();
-    if (!pJS) return;
+    if (!pJS) return { restoreHandle: null };
 
     const originalCount = pJS.particles.array.length;
-    const bonus = Math.min(originalCount, 80); // max 80 extra
+    // Adapter le nombre de particules bonus au tier
+    const maxBonus = getPerformanceTier() === 'low' ? 30 : (getPerformanceTier() === 'mid' ? 50 : 80);
+    const bonus = Math.min(originalCount, maxBonus);
     const stormSpeed = 5;
     const pxr = pJS.canvas.pxratio ?? 1;
 
-    // Spawn en positions aléatoires — coordonnées en pixels physiques
     for (let i = 0; i < bonus; i++) {
       pJS.fn.modes.pushParticles(1, {
         pos_x: Math.random() * window.innerWidth * pxr,
@@ -247,8 +258,6 @@ const effects = {
       });
     }
 
-    // Uniformiser TOUTES les particules (nouvelles incluses) à stormSpeed
-    // en préservant leur direction individuelle
     pJS.particles.array.forEach((pt) => {
       const mag = Math.sqrt(pt.vx * pt.vx + pt.vy * pt.vy);
       if (mag < 0.001) {
@@ -262,43 +271,42 @@ const effects = {
       }
     });
 
+    let restoreHandle = null;
     setTimeout(() => {
+      if (signal.cancelled) return;
       const p2 = getPJS();
       if (!p2) return;
-      // Supprimer les particules bonus (ajoutées à la fin du tableau)
       const excess = p2.particles.array.length - originalCount;
       if (excess > 0) {
         p2.particles.array.splice(p2.particles.array.length - excess, excess);
       }
-      smoothRestore(1800);
+      restoreHandle = smoothRestore(1800);
       setParticlesForeground(false);
     }, 3000);
+    return { get restoreHandle() { return restoreHandle; } };
   },
 
   /**
-   * Gravité : les particules tombent vers le bas du viewport et rebondissent.
-   * Utilise pJS.canvas.h pour une détection de sol fiable.
+   * Gravité : les particules tombent et rebondissent.
    */
-  gravity() {
+  gravity(signal) {
     setParticlesForeground(true);
     window.petReact?.('dizzy');
     window.petGravity?.(3000);
 
     const pJS = getPJS();
-    if (!pJS) return;
-    let active = true;
+    if (!pJS) return { restoreHandle: null };
 
     const fall = () => {
-      if (!active) return;
+      if (signal.cancelled) return;
       const p = getPJS();
       if (!p) return;
-      // pJS.canvas.h = hauteur CSS du canvas = window.innerHeight (container 100vh fixe)
       const floor = p.canvas.h - 4;
 
       p.particles.array.forEach((pt) => {
-        pt.vy += 0.18; // gravité douce
+        pt.vy += 0.18;
         if (pt.y >= floor) {
-          pt.vy *= -0.55; // rebond partiel
+          pt.vy *= -0.55;
           pt.y = floor;
         }
       });
@@ -307,11 +315,15 @@ const effects = {
 
     requestAnimationFrame(fall);
 
+    let restoreHandle = null;
     setTimeout(() => {
-      active = false;
-      smoothRestore(2000);
-      setParticlesForeground(false);
+      signal.cancelled = true; // Arrêter la boucle fall
+      if (!signal._unmounted) {
+        restoreHandle = smoothRestore(2000);
+        setParticlesForeground(false);
+      }
     }, 3000);
+    return { get restoreHandle() { return restoreHandle; } };
   },
 };
 
@@ -324,27 +336,53 @@ const ParticlesButton = () => {
   const [progress, setProgress] = useState(100);
   const cooldownRef = useRef(false);
   const progressIntervalRef = useRef(null);
+  // Refs pour annuler les effets en cours lors du démontage
+  const isMountedRef = useRef(true);
+  const effectSignalRef = useRef(null);
+  const smoothRestoreHandleRef = useRef(null);
 
   const triggerEffect = useCallback(() => {
     if (cooldownRef.current) return;
 
+    // Annuler tout smoothRestore précédent encore en cours
+    smoothRestoreHandleRef.current?.cancel();
+    smoothRestoreHandleRef.current = null;
+
     const effect = EFFECTS[effectIndex];
-    effects[effect.key]();
+
+    // Créer un signal pour cet effet — permet de l'annuler depuis cleanup
+    const signal = { cancelled: false, _unmounted: false };
+    effectSignalRef.current = signal;
+
+    const result = effects[effect.key](signal);
+
+    // Intercepter le smoothRestore retourné par l'effet (via getter lazy)
+    // pour pouvoir l'annuler au démontage
+    if (result) {
+      const checkRestore = setInterval(() => {
+        const h = result.restoreHandle;
+        if (h) {
+          smoothRestoreHandleRef.current = h;
+          clearInterval(checkRestore);
+        }
+      }, 200);
+      // Safety : ne pas fuiter l'interval
+      setTimeout(() => clearInterval(checkRestore), 5000);
+    }
 
     setIsActive(true);
     setActiveEffectKey(effect.key);
     setProgress(100);
     cooldownRef.current = true;
 
-    // Cooldown : empêcher le spam (durée définie dans l'objet EFFECTS)
     const duration = effect.duration;
-
-    // Start progress countdown
     const startTime = Date.now();
+
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
     }
 
+    // 100ms au lieu de 50ms — 10 updates/sec suffisent pour un compteur %
     progressIntervalRef.current = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, duration - elapsed);
@@ -356,18 +394,29 @@ const ParticlesButton = () => {
         setIsActive(false);
         setActiveEffectKey(null);
         cooldownRef.current = false;
-        // Passer à l'effet suivant
         setEffectIndex((i) => (i + 1) % EFFECTS.length);
       }
-    }, 50);
+    }, 100);
   }, [effectIndex]);
 
-  // Cleanup interval on unmount
+  // Cleanup complet au démontage : annuler RAF leaks + intervals
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
+      // Signaler à l'effet en cours de s'arrêter
+      if (effectSignalRef.current) {
+        effectSignalRef.current.cancelled = true;
+        effectSignalRef.current._unmounted = true;
+      }
+      // Annuler le smoothRestore en cours
+      smoothRestoreHandleRef.current?.cancel();
+      // Annuler l'interval de progress
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
+      // Remettre le foreground à l'état normal
+      setParticlesForeground(false);
     };
   }, []);
 

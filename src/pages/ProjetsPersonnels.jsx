@@ -266,7 +266,7 @@ const ProjetsPersonnels = () => {
         </div>
 
         <p>
-          En CM2, j'ai été introduit au logiciel en ligne Scratch par mon professeur. Cela a
+          En <strong>CM2</strong>, j'ai été introduit au logiciel en ligne Scratch par mon professeur. Cela a
           consommé une bonne partie de mon temps personnel que j'ai passé à faire des jeux jusqu'en
           2020. <br />
           Le programme permet de programmer de manière ludique, avec des blocs de code visuels. J'ai

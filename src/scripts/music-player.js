@@ -4,6 +4,7 @@
  */
 
 import { getAssetPath } from '../utils/assetPath.js';
+import { isLowTier } from '../utils/performanceTier.js';
 
 class MusicPlayer {
   constructor(trackFiles) {
@@ -194,7 +195,7 @@ class MusicPlayer {
         .play()
         .then(() => {
           setTimeout(() => {
-            this.audio.muted = false;
+            if (!this.isMuted) this.audio.muted = false;
           }, 150);
         })
         .catch(() => {
@@ -232,7 +233,7 @@ class MusicPlayer {
       this.audio
         .play()
         .then(() => {
-          this.audio.muted = false;
+          if (!this.isMuted) this.audio.muted = false;
         })
         .catch(() => {
           // Still blocked
@@ -247,8 +248,9 @@ class MusicPlayer {
       return;
     }
 
-    // Fetch all tracks in parallel immediately
-    const metadataPromises = this.trackFiles.map((filename, idx) => {
+    // Charger la piste courante immédiatement, stagger les autres
+    // pour ne pas saturer le réseau et le thread principal au démarrage
+    const loadTrack = (filename, idx) => {
       const url = getAssetPath(`assets/music/${filename}`);
 
       return fetch(url)
@@ -318,6 +320,19 @@ class MusicPlayer {
             this.populateQueueMenu();
           }
         });
+    };
+
+    // Piste courante chargée immédiatement, les autres décalées de 400ms chacune
+    // pour ne pas concurrencer le rendu React et le chargement des assets visuels
+    const metadataPromises = this.trackFiles.map((filename, idx) => {
+      if (idx === this.currentTrackIndex) {
+        return loadTrack(filename, idx);
+      }
+      // Stagger : la 1ère piste non-courante attend 400ms, la 2ème 800ms, etc.
+      const delay = (idx < this.currentTrackIndex ? idx : idx - 1) * 400 + 400;
+      return new Promise((resolve) => {
+        setTimeout(() => loadTrack(filename, idx).then(resolve, resolve), delay);
+      });
     });
 
     // Once all metadata completes, refresh queue to show all loaded data
@@ -396,6 +411,11 @@ class MusicPlayer {
       </div>
     `;
 
+    // Apply retracted state BEFORE inserting into DOM so the CSS transition doesn't fire
+    if (this.isRetracted) {
+      container.classList.add('retracted');
+    }
+
     document.body.appendChild(container);
 
     // Peek tab — separate fixed element shown when player is retracted
@@ -438,9 +458,8 @@ class MusicPlayer {
     this.updateVolumeButton();
     this.populateQueueMenu();
 
-    // Restore retracted state without re-saving to localStorage
+    // Sync peek-btn and retract-btn visuals with initial retracted state
     if (this.isRetracted) {
-      this.elements.container.classList.add('retracted');
       this.elements.peekBtn.classList.add('visible');
       this.elements.retractBtn.setAttribute('aria-label', 'Afficher le lecteur');
       this.elements.retractBtn.querySelector('i').className = 'fa-solid fa-chevron-right';
@@ -530,7 +549,7 @@ class MusicPlayer {
       this.audio
         .play()
         .then(() => {
-          this.audio.muted = false;
+          if (!this.isMuted) this.audio.muted = false;
         })
         .catch(() => {
           // Playback failed
@@ -661,12 +680,20 @@ class MusicPlayer {
     this.renderIdleWave();
   }
 
+  getAccentRgb() {
+    const rgb = getComputedStyle(document.documentElement)
+      .getPropertyValue('--color-primary-rgb')
+      .trim();
+    return rgb || '212, 175, 55';
+  }
+
   renderIdleWave() {
     if (!this.visualizer.ctx) return;
 
     const { ctx, width, height } = this.visualizer;
+    const rgb = this.getAccentRgb();
     ctx.clearRect(0, 0, width, height);
-    ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
+    ctx.strokeStyle = `rgba(${rgb}, 0.45)`;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, height / 2);
@@ -687,12 +714,22 @@ class MusicPlayer {
 
     if (this.visualizer.rafId) return;
 
+    // Propriétés constantes du contexte canvas — définies une seule fois,
+    // pas à chaque frame (évite des appels inutiles au GPU)
+    const { ctx } = this.visualizer;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    // Sur machines faibles, désactiver le shadow canvas (force software rendering)
+    const useShadow = !isLowTier();
+
     const draw = () => {
       this.visualizer.rafId = window.requestAnimationFrame(draw);
       this.visualizer.analyser.getByteTimeDomainData(this.visualizer.dataArray);
       this.visualizer.analyser.getByteFrequencyData(this.visualizer.freqData);
 
       const { ctx, width, height, bufferLength, dataArray, freqData } = this.visualizer;
+      // Read accent color each frame so mood changes apply live
+      const rgb = this.getAccentRgb();
       let sum = 0;
 
       for (let i = 0; i < bufferLength; i++) {
@@ -705,11 +742,11 @@ class MusicPlayer {
       ctx.clearRect(0, 0, width, height);
 
       ctx.lineWidth = 2.2 + energy * 2.2;
-      ctx.strokeStyle = `rgba(212, 175, 55, ${0.6 + energy * 0.4})`;
-      ctx.shadowBlur = 10 + energy * 18;
-      ctx.shadowColor = 'rgba(212, 175, 55, 0.85)';
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+      ctx.strokeStyle = `rgba(${rgb}, ${0.6 + energy * 0.4})`;
+      if (useShadow) {
+        ctx.shadowBlur = 10 + energy * 18;
+        ctx.shadowColor = `rgba(${rgb}, 0.85)`;
+      }
 
       ctx.beginPath();
       const sliceWidth = width / bufferLength;
@@ -729,7 +766,8 @@ class MusicPlayer {
       }
 
       ctx.stroke();
-      ctx.shadowBlur = 0;
+      // Réinitialiser le shadow pour ne pas affecter d'autres dessins canvas
+      if (useShadow) ctx.shadowBlur = 0;
     };
 
     this.visualizer.rafId = window.requestAnimationFrame(draw);
@@ -764,7 +802,7 @@ class MusicPlayer {
         .play()
         .then(() => {
           setTimeout(() => {
-            this.audio.muted = false;
+            if (!this.isMuted) this.audio.muted = false;
           }, 150);
         })
         .catch(() => {

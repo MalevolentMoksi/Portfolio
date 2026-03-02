@@ -14,8 +14,8 @@
   opacity: 0.3;
   transform: scale(1.15);
   pointer-events: none;
-  filter: blur(2px);
-  -webkit-filter: blur(2px);
+  filter: blur(4px);
+  -webkit-filter: blur(4px);
 }
 
 /* Particles.js container */

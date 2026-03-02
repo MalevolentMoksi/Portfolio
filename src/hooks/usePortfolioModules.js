@@ -4,6 +4,7 @@ import MusicPlayer from '../scripts/music-player.js';
 import VisualEffects from '../scripts/effects.js';
 import UIEnhancements from '../scripts/ui-enhancements.js';
 import Lightbox from '../scripts/lightbox.js';
+import { startFpsMonitor } from '../utils/performanceTier.js';
 
 let musicPlayerInstance = null;
 let visualEffectsInstance = null;
@@ -18,6 +19,10 @@ const usePortfolioModules = (trackFiles) => {
     if (!visualEffectsInstance) {
       visualEffectsInstance = new VisualEffects();
     }
+
+    // Lancer le monitoring FPS passif (une seule fois par session)
+    // Différé de 2s pour ne pas rivaliser avec l'hydratation React
+    startFpsMonitor();
   }, [trackFiles]);
 
   useEffect(() => {

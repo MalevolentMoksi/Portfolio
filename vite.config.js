@@ -15,6 +15,12 @@ export default defineConfig({
     target: ['es2020', 'chrome90', 'firefox88', 'safari14', 'edge90'],
     rollupOptions: {
       input: resolve(__dirname, 'src/index.html'),
+      output: {
+        // Séparer Framer Motion en chunk dédié — chargé à la demande
+        manualChunks: {
+          'framer': ['framer-motion'],
+        },
+      },
     },
     // Optimize assets
     assetsInlineLimit: 4096, // Inline small assets as base64

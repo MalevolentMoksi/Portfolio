@@ -38,6 +38,14 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   const [achOpen, setAchOpen] = useState(false);
   // Spring animation when bot catches ball
   const [catchSpring, setCatchSpring] = useState(false);
+
+  // Callback stable pour CatchGame — évite de re-créer la RAF loop à chaque render
+  const handleBotCatch = useCallback(() => {
+    onBehavior('excited');
+    setCatchSpring(true);
+    setTimeout(() => setCatchSpring(false), 450);
+  }, [onBehavior]);
+
   // Ticker pour mettre à jour les compte-à-rebours des cooldowns
   const [, setCdTick] = useState(0);
   useEffect(() => {
@@ -1203,11 +1211,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
       {isCatching && (
         <CatchGame
           botPosRef={posRef}
-          onBotCatch={() => {
-            onBehavior('excited');
-            setCatchSpring(true);
-            setTimeout(() => setCatchSpring(false), 450);
-          }}
+          onBotCatch={handleBotCatch}
           onGameEnd={onGameEnd}
         />
       )}

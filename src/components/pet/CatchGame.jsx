@@ -14,7 +14,7 @@ const PLAYER_CATCH  = 70;
 const BOT_CATCH     = CATCH_BOT_RADIUS;
 const BALL_TOP_MIN  = BALL_R;
 const VEL_HIST_MAX  = 6;
-const AIM_STEPS     = 32;
+const AIM_STEPS     = 20;
 const AIM_DT        = 2.5;
 const HINT_DELAY_MS = 3000;
 const VEL_SMOOTH    = 0.35;   // EMA blending factor — lower = smoother / slower
@@ -193,7 +193,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
         sv.x += (t.vx - sv.x) * VEL_SMOOTH;
         sv.y += (t.vy - sv.y) * VEL_SMOOTH;
 
-        // Update aim SVG via DOM (viewBox kept in sync with viewport)
+        // Aim line à 60fps — AIM_STEPS réduit (20 vs 32 initial) pour compenser
         if (aimSvgRef.current) aimSvgRef.current.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
         if (aimPathRef.current) aimPathRef.current.setAttribute('d', buildAim(bp.x, bp.y, sv.x, sv.y));
         if (ballElRef.current) {
