@@ -322,9 +322,8 @@ const ParticlesButton = () => {
   }, []);
 
   const currentEffect = EFFECTS[effectIndex];
-  const progressRingRadius = 18;
-  const progressRingCircumference = 2 * Math.PI * progressRingRadius;
-  const progressOffset = progressRingCircumference * (1 - progress / 100);
+  const progressRingPerimeter = 4 * (39 - 2 * 10.5) + 2 * Math.PI * 10.5; // périmètre rect 39×39 rx=10.5
+  const progressOffset = progressRingPerimeter * (1 - progress / 100);
 
   // Determine progress class for color transition
   let progressClass = '';
@@ -348,14 +347,15 @@ const ParticlesButton = () => {
           width="40"
           height="40"
         >
-          <circle
+          <rect
             className={`particles-progress-ring__circle ${progressClass}`}
-            cx="20"
-            cy="20"
-            r={progressRingRadius}
-            fill="none"
+            x="0.5"
+            y="0.5"
+            width="39"
+            height="39"
+            rx="10.5"
             strokeWidth="2"
-            strokeDasharray={progressRingCircumference}
+            strokeDasharray={progressRingPerimeter}
             strokeDashoffset={progressOffset}
           />
         </svg>

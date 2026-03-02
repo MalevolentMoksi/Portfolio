@@ -98,11 +98,8 @@ const AchievementsPanel = ({ unlocked = [] }) => {
   return (
     <div className="pet-achievements">
       <div className="pet-achievements-header">
-        <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" stroke="none" aria-hidden="true">
-          <path d="M3 2 L3 6 Q3 10 8 12 Q13 10 13 6 L13 2 Z" opacity="0.8" />
-          <path d="M6.5 7 L7.5 8.5 L10 5.5" fill="none" stroke="var(--pet-bg, #080808)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span>{count}/{total}</span>
+        <span aria-hidden="true">🏆</span>
+        <span>Succès — {count}/{total}</span>
       </div>
       <div className="pet-achievements-grid">
         {ACHIEVEMENTS.map((ach) => {

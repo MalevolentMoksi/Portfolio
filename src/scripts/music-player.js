@@ -82,8 +82,9 @@ class MusicPlayer {
     // Load muted state
     this.isMuted = localStorage.getItem(this.STORAGE_KEYS.MUTED) === 'true';
 
-    // Load retracted state
-    this.isRetracted = localStorage.getItem(this.STORAGE_KEYS.RETRACTED) === 'true';
+    // Load retracted state — caché par défaut à la première visite
+    const savedRetracted = localStorage.getItem(this.STORAGE_KEYS.RETRACTED);
+    this.isRetracted = savedRetracted === null ? true : savedRetracted === 'true';
   }
 
   setupAudio() {

@@ -109,7 +109,7 @@ export const academicProjects = [
     image: '/assets/images/algorithm.jpg',
     tags: ['Java', 'Algorithmes', 'Git'],
     technologies: [
-      { name: 'Java', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/openjdk.svg' },
+      { name: 'Java', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
       {
         name: 'IntelliJ IDEA',
         icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/intellijidea.svg',
@@ -125,13 +125,12 @@ export const academicProjects = [
     description: "Conception, implémentation et optimisation d'une base de données relationnelle.",
     teamSize: 'En trinôme',
     image: '/assets/images/bases-de-donnees-1024x734.jpg',
-    tags: ['SQL', 'PostgreSQL', 'Docker', 'Base de données'],
+    tags: ['SQL', 'PostgreSQL', 'Base de données'],
     technologies: [
       {
         name: 'PostgreSQL',
         icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg',
       },
-      { name: 'Docker', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/docker.svg' },
       { name: 'SQL', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/databricks.svg' },
     ],
   },

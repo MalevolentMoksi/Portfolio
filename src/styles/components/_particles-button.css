@@ -16,7 +16,7 @@
 .particles-btn {
   position: relative;
   overflow: visible;
-  border-radius: 50%;
+  /* border-radius héritée de .header-action-btn (50% mobile → 10px desktop) */
 }
 
 .particles-btn--active {
@@ -43,6 +43,7 @@
 }
 
 .particles-progress-ring__circle {
+  /* Le chemin <rect> commence en haut-gauche → rotation pour partir du haut-centre */
   transform: rotate(-90deg);
   transform-origin: 50% 50%;
   stroke-linecap: round;
@@ -51,6 +52,7 @@
     stroke 0.3s ease;
   stroke: var(--color-primary);
   opacity: 0.8;
+  fill: none;
 }
 
 /* Color transitions based on progress */

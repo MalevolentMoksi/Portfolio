@@ -974,19 +974,19 @@ body[data-mood='vaporwave'] .pet-robot {
 .pet-achievements-header {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.62rem;
-  color: rgba(var(--color-primary-rgb), 0.75);
-  margin-bottom: 0.3rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: rgba(var(--color-primary-rgb), 0.85);
+  margin-bottom: 0.45rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   user-select: none;
 }
 
 .pet-achievements-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+  gap: 5px;
   overflow: visible;
 }
 
@@ -995,8 +995,8 @@ body[data-mood='vaporwave'] .pet-robot {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 0.3rem 0.15rem;
+  gap: 3px;
+  padding: 0.45rem 0.3rem;
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -1021,8 +1021,8 @@ body[data-mood='vaporwave'] .pet-robot {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
 }
 
@@ -1031,7 +1031,7 @@ body[data-mood='vaporwave'] .pet-robot {
 }
 
 .pet-ach-label {
-  font-size: 0.52rem;
+  font-size: 0.65rem;
   text-align: center;
   line-height: 1.15;
   max-width: 100%;
@@ -1039,12 +1039,12 @@ body[data-mood='vaporwave'] .pet-robot {
   text-overflow: ellipsis;
   white-space: nowrap;
   color: inherit;
-  opacity: 0.7;
+  opacity: 0.85;
   letter-spacing: 0.02em;
 }
 
 .pet-ach-tile:not(.pet-ach-tile--unlocked) .pet-ach-label {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .pet-ach-lock {

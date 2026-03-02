@@ -994,9 +994,18 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
                 aria-label="Succès"
                 title="Succès"
               >
+                {/* Trophée : coupe + anses + pied + socle */}
                 <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" stroke="none" aria-hidden="true">
-                  <path d="M3 2 L3 6 Q3 10 8 12 Q13 10 13 6 L13 2 Z" opacity="0.8" />
-                  <path d="M6.5 7 L7.5 8.5 L10 5.5" fill="none" stroke="var(--pet-bg, #080808)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Coupe */}
+                  <path d="M4 2 h8 v5 Q12 10 8 11 Q4 10 4 7 Z" />
+                  {/* Anse gauche */}
+                  <path d="M4 3 Q1 3 1 5.5 Q1 8 4 7.5" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                  {/* Anse droite */}
+                  <path d="M12 3 Q15 3 15 5.5 Q15 8 12 7.5" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                  {/* Pied */}
+                  <rect x="7" y="11" width="2" height="2.5" rx="0.4" />
+                  {/* Socle */}
+                  <rect x="5" y="13.5" width="6" height="1.2" rx="0.5" />
                 </svg>
               </button>
               <button className="pet-hud-close" onClick={() => setHudOpen(false)} aria-label="Fermer">

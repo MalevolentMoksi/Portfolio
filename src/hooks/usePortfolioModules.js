@@ -23,9 +23,13 @@ const usePortfolioModules = (trackFiles) => {
   useEffect(() => {
     new UIEnhancements();
 
-    if (document.querySelector('.zoomable')) {
-      new Lightbox();
-    }
+    // Différer au frame suivant pour que React ait fini de peupler le DOM
+    const raf = requestAnimationFrame(() => {
+      if (document.querySelector('.zoomable')) {
+        new Lightbox();
+      }
+    });
+    return () => cancelAnimationFrame(raf);
   }, [location.pathname]);
 };
 

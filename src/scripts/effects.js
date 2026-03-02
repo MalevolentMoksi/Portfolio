@@ -40,7 +40,7 @@ class VisualEffects {
           stroke: { width: 0, color: '#000000' },
         },
         opacity: {
-          value: 0.5,
+          value: 0.7,
           random: true,
           anim: { enable: false },
         },
@@ -53,7 +53,7 @@ class VisualEffects {
           enable: true,
           distance: 150,
           color: '#d4af37',
-          opacity: 0.4,
+          opacity: 0.55,
           width: 1,
         },
         move: {

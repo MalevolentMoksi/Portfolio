@@ -96,7 +96,7 @@ const ProjetSAE4 = () => {
           <ul>
             <li>Conception du schéma relationnel (diagramme & justification)</li>
             <li>Écriture / optimisation des requêtes B1.1 -&gt; B2 (&lt;= 5 ms)</li>
-            <li>Automatisation des tests via conteneur Docker PostgreSQL</li>
+            <li>Automatisation des tests et validation des scripts SQL avec PostgreSQL</li>
             <li>Présentation orale de 5 minutes (slides Canva)</li>
           </ul>
         </section>

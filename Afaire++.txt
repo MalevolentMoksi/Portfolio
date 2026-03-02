@@ -1,0 +1,34 @@
+Tâches manuelles :
+
+- Meilleures idées pour illustration (base de données)
+- Change l'ordre Robot / Particules
+- Mot CM2 + mis en avant
+- Changer la section Moksi's Bazaar pour faire + pro
+- Remplacer dessins par dessins + pro
+- SQLite vs PostgreSQL a corrigé selon la SAE
+
+Tâches requiert Recherches A faire :
+
+- Comment rendre les caresses sur le robot + claires?
+- MiniTerminal Phares font trop "Apple", à remplacer par quelque chose d'autre
+- Est-ce qu'un lien entre les particules et l'Arriere plan en parallax pourrait être fait?
+- Est-ce que le fait que le Parallax soit Inversé n'est pas satisfaisant?
+- Animation entre Ambiences - Défilement (Effet rétro / VHS) + Effet cathodique (animation + visible)
+
+Tâches simples :
+
+Tâches moyennes (besoin expertise IA) :
+
+- Particules : réduire temporairement 'opacité" du main (peut-être faire les particules prendre temporairement le dessus si possible?) + éviter milieu pour les attractions
+- Remplacer tout les tooltips par des trucs plus claires -> prendre exemple sur les tooltips des Succès
+- Snake + réactif au mouvements énervé pour un gameplay + fluide
+- Changer Bouton Robot pour pas donner impression que le bouton ne marche pas
+- L'affiche du HUD du jeu Attrape est trop petit et très peu claire. Il faut que l'HUD prennent tout l'espace
+- Des Petites explication du Robot à la première initialisation, d'une manière ou d'une autre, serait bien
+- Trouver des meilleurs logos pour les technos?
+
+Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
+
+- Attrape : Laisser les stats visible, ou implémenter une manière alternative de montrer les statsen mode Attrape pour montrer , faire en sorte que le robot cherche la balle après lancer et ameliorer les physiques de la balle si possible
+- Comment le site en général pourrait-il être optimisé en termes de performances?
+- Comment le jeu Attrape pourrait-il être optimisé en termes de performances?

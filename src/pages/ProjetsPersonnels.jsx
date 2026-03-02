@@ -321,11 +321,6 @@ const ProjetsPersonnels = () => {
       </article>
     </section>
 
-    <div id="lightbox-overlay" className="hidden">
-      <span id="lightbox-close">&times;</span>
-      <img id="lightbox-img" src="" alt="Aperçu agrandi" />
-      <p id="lightbox-caption"></p>
-    </div>
     </>
   );
 };
