@@ -46,8 +46,8 @@
 }
 
 .project-tech img {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   aspect-ratio: 1/1;
   object-fit: contain;
   filter: var(--tech-icon-filter);
@@ -61,6 +61,12 @@
   margin: 0;
   padding: 0;
   flex-shrink: 0;
+}
+
+/* Devicon colored SVGs — skip mood tint so original colours show */
+.project-tech img.tech-icon--colored {
+  filter: none;
+  opacity: 0.92;
 }
 
 .project-tech img:hover {

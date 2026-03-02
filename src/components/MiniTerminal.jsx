@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import Tooltip from './Tooltip.jsx';
 import { academicProjects, personalProjects, getAllTags } from '@/data/projects.js';
 import { discoverMusicTracks } from '@/utils/discoverMusicTracks.js';
 import SnakeGame from './SnakeGame.jsx';
@@ -285,12 +286,12 @@ const MiniTerminal = () => {
   return (
     <div className="mini-terminal-wrapper" ref={panelRef}>
       {/* Bouton icône dans la barre */}
+      <Tooltip text="Terminal" position="bottom">
       <button
         className="header-action-btn"
         onClick={toggleTerminal}
         aria-label="Ouvrir le mini-terminal"
         aria-expanded={isOpen}
-        title="Terminal"
       >
         <svg
           className={`terminal-icon terminal-icon--${iconState}`}
@@ -316,6 +317,7 @@ const MiniTerminal = () => {
           />
         </svg>
       </button>
+      </Tooltip>
 
       {/* Panneau terminal */}
       {isOpen && createPortal(

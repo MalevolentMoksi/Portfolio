@@ -19,12 +19,6 @@ Tâches simples :
 
 Tâches moyennes (besoin expertise IA) :
 
-- Particules : réduire temporairement 'opacité" du main (peut-être faire les particules prendre temporairement le dessus si possible?) + éviter milieu pour les attractions
-- Remplacer tout les tooltips par des trucs plus claires -> prendre exemple sur les tooltips des Succès
-- Snake + réactif au mouvements énervé pour un gameplay + fluide
-- Changer Bouton Robot pour pas donner impression que le bouton ne marche pas
-- L'affiche du HUD du jeu Attrape est trop petit et très peu claire. Il faut que l'HUD prennent tout l'espace
-- Des Petites explication du Robot à la première initialisation, d'une manière ou d'une autre, serait bien
 - Trouver des meilleurs logos pour les technos?
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :

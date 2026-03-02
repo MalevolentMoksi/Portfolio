@@ -49,9 +49,10 @@ export const normalizeThought = (input) => {
 
 /* ── Composant bulle individuelle ── */
 const Bubble = ({ thought, idx, petX, petY }) => {
-  const xOffsets = [0, -18, 18];
+  // xOffsets décalent légèrement les bulles multiples ; y empile vers le haut
+  const xOffsets = [0, -14, 14];
   const yOffsets = [0, -28, -22];
-  const x = petX - 17 + (xOffsets[idx] ?? 0);
+  const x = petX + (xOffsets[idx] ?? 0);
   const y = petY - 82 + (yOffsets[idx] ?? 0);
 
   const { type, content, label } = thought;
@@ -79,7 +80,7 @@ const Bubble = ({ thought, idx, petX, petY }) => {
     return createPortal(
       <div
         className="pet-thought pet-thought--text"
-        style={{ left: `${x - 12}px`, top: `${y + 4}px`, '--tb-delay': `${idx * 80}ms` }}
+        style={{ left: `${x}px`, top: `${y + 4}px`, '--tb-delay': `${idx * 80}ms` }}
         aria-hidden="true"
       >
         {content}
@@ -94,7 +95,7 @@ const Bubble = ({ thought, idx, petX, petY }) => {
     return createPortal(
       <div
         className="pet-thought pet-thought--reaction"
-        style={{ left: `${x - 8}px`, top: `${y}px`, '--tb-delay': `${idx * 80}ms` }}
+        style={{ left: `${x}px`, top: `${y}px`, '--tb-delay': `${idx * 80}ms` }}
         aria-hidden="true"
       >
         {icon && (

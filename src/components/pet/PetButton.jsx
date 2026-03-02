@@ -3,6 +3,7 @@
    ───────────────────────────────────────────────── */
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMood } from '../../contexts/MoodContext.jsx';
+import Tooltip from '../Tooltip.jsx';
 import {
   LS, DECAY_MS, REACTION_MS, COOLDOWNS, SLEEP_IDLE_MS, ACHIEVEMENTS,
   clamp, readLS, getMood, pickRandom,
@@ -122,6 +123,31 @@ const PetButton = () => {
     }
     prevSpawnedRef.current = isSpawned;
   }, [isSpawned, triggerReaction]);
+
+  /* ── Onboarding : séquence guidée lors du tout premier spawn ── */
+  const onboardingRanRef = useRef(false);
+  useEffect(() => {
+    if (!isSpawned || onboardingRanRef.current) return;
+    if (localStorage.getItem(LS.onboarded)) return;
+    onboardingRanRef.current = true;
+
+    const steps = [
+      { delay: 1200, thought: { type: 'text', content: 'Salut ! Je suis ton robot compagnon 🤖', duration: 3500 } },
+      { delay: 4800, thought: { type: 'text', content: 'Glisse-dépose moi partout sur la page !', duration: 3500 } },
+      { delay: 8500, thought: { type: 'text', content: 'Clique sur moi pour voir mes stats', duration: 3500 } },
+      { delay: 12200, thought: { type: 'text', content: 'Nourris-moi et joue avec moi 💛', duration: 3500 } },
+    ];
+    const timers = steps.map(({ delay, thought }) =>
+      setTimeout(() => handleThought(thought), delay)
+    );
+    // Marquer comme terminé après la dernière bulle
+    timers.push(setTimeout(() => {
+      localStorage.setItem(LS.onboarded, '1');
+    }, 16000));
+    return () => timers.forEach(clearTimeout);
+  // handleThought is stable (useCallback with [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSpawned]);
 
   // Mirror `reaction` and `isSleeping` into refs so timer callbacks always read current values
   useEffect(() => { idleReactionRef.current = reaction; }, [reaction]);
@@ -399,34 +425,67 @@ const PetButton = () => {
   return (
     <>
       {/* Bouton header */}
+      {/* Bouton header — toggle switch animé avec robot */}
+      <Tooltip text={isSpawned ? 'Rappeler le robot' : 'Invoquer le robot'} position="bottom">
       <button
-        className={`header-action-btn pet-btn${needsAttention ? ' pet-btn--attention' : ''}${!isSpawned ? ' pet-btn--off' : ''}`}
+        className={`header-action-btn pet-toggle${isSpawned ? ' pet-toggle--on' : ''}${needsAttention ? ' pet-toggle--attention' : ''}`}
         onClick={toggleSpawn}
         tabIndex={-1}
         aria-label={isSpawned ? 'Rappeler le robot' : 'Invoquer le robot'}
-        title={isSpawned ? 'Rappeler le robot' : 'Invoquer le robot'}
+        role="switch"
+        aria-checked={isSpawned}
       >
-        <svg
-          className={`pet-icon${needsAttention ? ' pet-icon--bob' : ''}`}
-          viewBox="0 0 24 24"
-          width="17"
-          height="17"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <line x1="12" y1="6" x2="12" y2="3" />
-          <circle cx="12" cy="2" r="1.5" fill="currentColor" stroke="none" />
-          <rect x="5" y="6" width="14" height="11" rx="3" />
-          <circle cx="9.5" cy="11" r="1.5" fill="currentColor" stroke="none" />
-          <circle cx="14.5" cy="11" r="1.5" fill="currentColor" stroke="none" />
-          <path d="M9 15 Q12 17 15 15" />
-          <rect x="8" y="17" width="8" height="4" rx="1.5" />
-        </svg>
+        <span className="pet-toggle-track">
+          <span className="pet-toggle-thumb">
+            <svg
+              className={`pet-icon${needsAttention ? ' pet-icon--bob' : ''}${!isSpawned ? ' pet-icon--sleep' : ''}`}
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              {/* Antenne */}
+              <line className="pet-icon-antenna" x1="12" y1="6" x2="12" y2="3" />
+              <circle className="pet-icon-antenna-tip" cx="12" cy="2" r="1.5" fill="currentColor" stroke="none" />
+              {/* Tête */}
+              <rect x="5" y="6" width="14" height="11" rx="3" />
+              {/* Yeux — ronds (éveillé) ou tirets (endormi) */}
+              {isSpawned ? (
+                <>
+                  <circle cx="9.5" cy="11" r="1.5" fill="currentColor" stroke="none" />
+                  <circle cx="14.5" cy="11" r="1.5" fill="currentColor" stroke="none" />
+                </>
+              ) : (
+                <>
+                  <line className="pet-icon-eye-closed" x1="8" y1="11" x2="11" y2="11" strokeWidth="1.8" />
+                  <line className="pet-icon-eye-closed" x1="13" y1="11" x2="16" y2="11" strokeWidth="1.8" />
+                </>
+              )}
+              {/* Bouche — sourire (éveillé) ou plate (endormi) */}
+              {isSpawned ? (
+                <path d="M9 15 Q12 17 15 15" />
+              ) : (
+                <line x1="9.5" y1="15" x2="14.5" y2="15" strokeWidth="1.2" />
+              )}
+              {/* Corps bas */}
+              <rect x="8" y="17" width="8" height="4" rx="1.5" />
+              {/* Zzz flottant — seulement quand endormi */}
+              {!isSpawned && (
+                <g className="pet-icon-zzz">
+                  <text x="18" y="5" fontSize="4" fill="currentColor" stroke="none" fontWeight="700">z</text>
+                  <text x="20" y="2.5" fontSize="3" fill="currentColor" stroke="none" fontWeight="700" opacity="0.6">z</text>
+                </g>
+              )}
+            </svg>
+          </span>
+        </span>
       </button>
+      </Tooltip>
 
       {/* Robot qui se balade (via portail) */}
       {/* Pas d'AnimatePresence ici — WanderingPet rend via portal sur document.body,

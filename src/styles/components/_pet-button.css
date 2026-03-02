@@ -2,9 +2,108 @@
    Pet Button — robot libre qui se balade
    ============================================ */
 
-/* ---- Icône header ---- */
+/* ---- Toggle Switch Header ---- */
+.pet-toggle {
+  position: relative;
+  /* Garde les overrides visuels mais impose la même hauteur que les autres
+     boutons header pour un alignement parfait dans .header--actions */
+  padding: 0 !important;
+  width: auto !important;
+  height: 34px !important;
+  background: none !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+@media (min-width: 769px) {
+  .pet-toggle {
+    height: 42px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .pet-toggle {
+    height: 30px !important;
+  }
+}
+
+.pet-toggle-track {
+  display: flex;
+  align-items: center;
+  width: 42px;
+  height: 22px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  cursor: pointer;
+}
+
+.pet-toggle--on .pet-toggle-track {
+  background: rgba(var(--color-primary-rgb), 0.2);
+  border-color: rgba(var(--color-primary-rgb), 0.5);
+  box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.15);
+}
+
+.pet-toggle-thumb {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1), background 0.3s ease, border-color 0.3s ease;
+}
+
+.pet-toggle--on .pet-toggle-thumb {
+  transform: translateX(20px);
+  background: rgba(20, 20, 20, 0.95);
+  border-color: rgba(var(--color-primary-rgb), 0.4);
+}
+
+/* ---- Icône Robot ---- */
 .pet-icon {
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, filter 0.4s ease, opacity 0.4s ease;
+}
+
+/* Robot endormi : désaturé + antenne qui oscille + Zzz */
+.pet-icon--sleep {
+  filter: grayscale(0.6);
+  opacity: 0.65;
+}
+
+/* Animation antenne qui oscille (mode endormi) */
+.pet-icon--sleep .pet-icon-antenna,
+.pet-icon--sleep .pet-icon-antenna-tip {
+  animation: antenna-sway 3s ease-in-out infinite;
+  transform-origin: 12px 6px;
+}
+
+@keyframes antenna-sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(6deg); }
+  75% { transform: rotate(-6deg); }
+}
+
+/* Zzz flottant */
+.pet-icon-zzz text {
+  animation: zzz-float 2.5s ease-in-out infinite;
+}
+.pet-icon-zzz text:nth-child(2) {
+  animation-delay: 0.8s;
+}
+
+@keyframes zzz-float {
+  0%, 100% { opacity: 0.3; transform: translateY(0); }
+  50% { opacity: 0.9; transform: translateY(-2px); }
 }
 
 @keyframes pet-bob {
@@ -22,20 +121,17 @@
 }
 
 /* Point rouge quand le robot a besoin d'attention */
-.pet-btn {
-  position: relative;
-}
-
-.pet-btn--attention::after {
+.pet-toggle--attention::after {
   content: '';
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: -2px;
+  right: -2px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: #ff5f57;
   animation: pet-attention-pulse 1.5s ease infinite;
+  z-index: 2;
 }
 
 @keyframes pet-attention-pulse {
@@ -48,11 +144,6 @@
     opacity: 0.6;
     transform: scale(0.8);
   }
-}
-
-/* Bouton quand robot est despawn */
-.pet-btn--off {
-  opacity: 0.4;
 }
 
 /* ========== Robot qui se balade ========== */
@@ -617,6 +708,10 @@ body[data-mood='vaporwave'] .pet-robot {
   animation-timing-function: ease-out;
   animation-delay: var(--tb-delay, 0ms);
   opacity: 0;
+  /* Centre horizontalement la bulle sur la coordonnée left (centre du pet).
+     Utilise la propriété `translate` séparée de `transform` pour ne pas
+     interférer avec les keyframes qui animent transform. */
+  translate: -50% 0;
 }
 
 /* ── Symbol bubble (icône SVG, fond pill arrondi) ── */
@@ -647,12 +742,12 @@ body[data-mood='vaporwave'] .pet-robot {
 /* ── Text bubble (speech pill) ── */
 .pet-thought--text {
   --tb-dur: 2s;
-  padding: 3px 8px;
+  padding: 4px 10px;
   background: rgba(8, 8, 8, 0.9);
   border: 1px solid rgba(var(--color-primary-rgb), 0.36);
   border-radius: 12px;
   color: rgba(var(--color-primary-rgb), 0.9);
-  font-size: 0.62rem;
+  font-size: 0.78rem;
   font-family: inherit;
   white-space: nowrap;
   letter-spacing: 0.02em;
@@ -685,7 +780,7 @@ body[data-mood='vaporwave'] .pet-robot {
 }
 
 .pet-thought-label {
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   font-family: inherit;
   letter-spacing: 0.03em;
   white-space: nowrap;
@@ -1118,6 +1213,86 @@ body[data-mood='vaporwave'] .pet-robot {
   background: rgba(0, 0, 0, 0.12);
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
+  transition: background 0.15s ease;
+}
+
+/* Flash bref quand le bot catch la balle */
+.catch-game-overlay--flash {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Écran d'instructions initial ── */
+.catch-game-intro {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: calc(var(--z-lightbox) + 8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 2rem 2.5rem;
+  background: rgba(8, 8, 8, 0.95);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  animation: catch-intro-in 0.4s ease-out both;
+  pointer-events: none;
+  user-select: none;
+}
+
+.catch-game-intro-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: 0.04em;
+}
+
+.catch-game-intro-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.catch-game-intro-step {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.catch-game-intro-icon {
+  font-size: 1.3rem;
+  width: 2rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.catch-game-intro-start {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 0.5rem;
+  animation: catch-intro-blink 2s ease-in-out infinite;
+}
+
+@keyframes catch-intro-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes catch-intro-blink {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
 .catch-game-hint {
@@ -1169,23 +1344,48 @@ body[data-mood='vaporwave'] .pet-robot {
   transform: translateX(-50%);
   z-index: calc(var(--z-lightbox) + 7);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 0.4rem 1.2rem;
+  gap: 2px;
+  padding: 0.6rem 1.8rem;
   background: rgba(8, 8, 8, 0.92);
   border: 1px solid rgba(var(--color-primary-rgb), 0.35);
-  border-radius: 24px;
+  border-radius: 16px;
   color: var(--color-primary);
-  font-size: 1rem;
-  font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.08em;
   pointer-events: none;
   user-select: none;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  min-width: 80px;
-  justify-content: center;
+  min-width: 120px;
+}
+
+.catch-game-score-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.catch-game-score-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+/* Animation de pulse sur le score au catch */
+.catch-game-overlay--flash .catch-game-score-value {
+  transform: scale(1.15);
+}
+
+.catch-game-score-best {
+  font-size: 0.55rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
 }
 
 .catch-game-exit {
@@ -1196,20 +1396,28 @@ body[data-mood='vaporwave'] .pet-robot {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  gap: 6px;
+  width: auto;
+  height: 44px;
+  padding: 0 14px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+  border-radius: 22px;
   background: rgba(8, 8, 8, 0.88);
   color: rgba(255, 255, 255, 0.65);
   cursor: pointer;
-  padding: 0;
   transition:
     background 0.15s,
     color 0.15s,
     border-color 0.15s;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+}
+
+.catch-game-exit-label {
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
 }
 
 .catch-game-exit:hover {

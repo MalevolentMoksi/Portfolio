@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import useDocumentMeta from '@/hooks/useDocumentMeta.js';
 import { academicProjects } from '@/data/projects.js';
 import { getAssetPath } from '@/utils/assetPath.js';
+import Tooltip from '@/components/Tooltip.jsx';
 
 const Projets = () => {
   useDocumentMeta('Projets | Portfolio', 'Mes projets scolaires et professionnels');
@@ -33,14 +34,16 @@ const Projets = () => {
                 <div className="project-tech" role="list" aria-label="Technologies utilisées">
                   {project.technologies.map((tech) => (
                     <div key={tech.name} role="listitem">
+                      <Tooltip text={tech.name}>
                       <img
                         src={tech.icon.startsWith('http') ? tech.icon : getAssetPath(tech.icon)}
                         alt={tech.name}
-                        title={tech.name}
+                        className={tech.colored ? 'tech-icon--colored' : undefined}
                         loading="lazy"
-                        width="30"
-                        height="30"
+                        width="36"
+                        height="36"
                       />
+                      </Tooltip>
                     </div>
                   ))}
                 </div>

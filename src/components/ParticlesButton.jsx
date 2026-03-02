@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import Tooltip from './Tooltip.jsx';
 
 /* ── Configuration des effets ─────────────────────── */
 const EFFECTS = [
@@ -20,6 +21,48 @@ const triggerPetAttract = (x, y, duration) => {
   fire();
   requestAnimationFrame(fire);
   setTimeout(fire, 50);
+};
+
+/**
+ * Active/désactive le mode "foreground" des particules :
+ * - Monte le z-index du canvas au-dessus du main
+ * - Réduit l'opacité du main pour laisser les particules visibles
+ */
+const setParticlesForeground = (active) => {
+  const canvas = document.getElementById('particles-js');
+  const main   = document.querySelector('main');
+  if (canvas) canvas.classList.toggle('particles-foreground', active);
+  if (main)   main.classList.toggle('main--particles-active', active);
+};
+
+/**
+ * Génère un point aléatoire en DEHORS du rectangle central du viewport.
+ * Le centre est exclu pour que l'attraction ne couvre pas le contenu.
+ * Divise le viewport en 4 bandes (haut, bas, gauche, droite).
+ */
+const randomEdgePoint = () => {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  // Hauteur du header sticky (correspond à HEADER_H dans petConstants)
+  const HEADER_H = 75;
+  // Rectangle central exclu : 40% largeur × 50% hauteur, centré
+  const marginX = W * 0.30;
+  const marginY = H * 0.25;
+  const cx1 = marginX, cx2 = W - marginX;
+  // La limite haute de la bande centrale ne peut pas être dans le header
+  const cy1 = Math.max(marginY, HEADER_H + 20);
+  const cy2 = H - marginY;
+
+  // 4 bandes : haut, bas, gauche, droite (excluant le centre et le header)
+  const bands = [
+    // haut : commence après le header pour éviter la zone sticky
+    { x: () => Math.random() * W, y: () => HEADER_H + Math.random() * Math.max(1, cy1 - HEADER_H) },
+    { x: () => Math.random() * W, y: () => cy2 + Math.random() * (H - cy2) },   // bas
+    { x: () => Math.random() * cx1, y: () => cy1 + Math.random() * (cy2 - cy1) }, // gauche
+    { x: () => cx2 + Math.random() * (W - cx2), y: () => cy1 + Math.random() * (cy2 - cy1) }, // droite
+  ];
+  const band = bands[Math.floor(Math.random() * bands.length)];
+  return { x: band.x(), y: band.y() };
 };
 
 /**
@@ -80,6 +123,7 @@ const effects = {
    * et projection radiale de toutes les particules depuis ces coins.
    */
   explode() {
+    setParticlesForeground(true);
     const pJS = getPJS();
     if (!pJS) return;
 
@@ -122,17 +166,18 @@ const effects = {
       pt.vy = (dy / dist) * burst;
     });
 
-    setTimeout(() => smoothRestore(1200), 600);
+    setTimeout(() => { smoothRestore(1200); setParticlesForeground(false); }, 600);
     window.petReact?.('scared');
   },
 
   /**
-   * Attraction : les particules convergent vers un point aléatoire de l'écran.
+   * Attraction : les particules convergent vers un point en bordure de l'écran.
+   * Le centre du viewport est évité pour ne pas cacher le contenu.
    */
   attract() {
-    // cx/cy en pixels CSS — espace du robot (position: fixed, coordonnées viewport).
-    const cx = Math.random() * window.innerWidth;
-    const cy = Math.random() * window.innerHeight;
+    setParticlesForeground(true);
+    // Point aléatoire hors zone centrale
+    const { x: cx, y: cy } = randomEdgePoint();
     triggerPetAttract(cx, cy, 3000);
 
     const pJS = getPJS();
@@ -173,6 +218,7 @@ const effects = {
     setTimeout(() => {
       active = false;
       smoothRestore(1500);
+      setParticlesForeground(false);
     }, 3000);
   },
 
@@ -182,6 +228,7 @@ const effects = {
    * les anciennes pour éviter la disparité.
    */
   storm() {
+    setParticlesForeground(true);
     window.petReact?.('dizzy');
 
     const pJS = getPJS();
@@ -224,6 +271,7 @@ const effects = {
         p2.particles.array.splice(p2.particles.array.length - excess, excess);
       }
       smoothRestore(1800);
+      setParticlesForeground(false);
     }, 3000);
   },
 
@@ -232,6 +280,7 @@ const effects = {
    * Utilise pJS.canvas.h pour une détection de sol fiable.
    */
   gravity() {
+    setParticlesForeground(true);
     window.petReact?.('dizzy');
     window.petGravity?.(3000);
 
@@ -261,6 +310,7 @@ const effects = {
     setTimeout(() => {
       active = false;
       smoothRestore(2000);
+      setParticlesForeground(false);
     }, 3000);
   },
 };
@@ -332,11 +382,11 @@ const ParticlesButton = () => {
   else if (progress > 25) progressClass = 'progress-25';
 
   return (
+    <Tooltip text={`${currentEffect.icon} ${currentEffect.label}`} desc={isActive ? `Chargement ${Math.ceil(progress)}%` : 'Cliquer pour déclencher'} position="bottom">
     <button
       className={`header-action-btn particles-btn ${isActive ? 'particles-btn--active' : ''}`}
       onClick={triggerEffect}
       aria-label={`Effet particules : ${currentEffect.label}`}
-      title={`${currentEffect.icon} ${currentEffect.label}${isActive ? ` (${Math.ceil(progress)}%)` : ''}`}
       disabled={isActive}
     >
       {/* Cooldown Progress Ring */}
@@ -389,6 +439,7 @@ const ParticlesButton = () => {
         <line className="particles-icon__ray particles-icon__ray--4" x1="1" y1="12" x2="4" y2="12" />
       </svg>
     </button>
+    </Tooltip>
   );
 };
 

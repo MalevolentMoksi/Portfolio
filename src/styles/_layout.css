@@ -27,6 +27,13 @@
   height: 100%;
   z-index: 0;
   pointer-events: auto;
+  transition: z-index 0s;
+}
+
+/* Quand un effet particules est actif, le canvas passe devant le main
+   mais reste derrière le header (z-header = 10) */
+#particles-js.particles-foreground {
+  z-index: 5;
 }
 
 /* Main container */
@@ -41,6 +48,13 @@ main {
   z-index: var(--z-base);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.6s ease;
+}
+
+/* Opacité réduite quand les particules prennent le devant */
+main.main--particles-active {
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 /* Section spacing */

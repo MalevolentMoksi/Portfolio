@@ -16,10 +16,10 @@ export const academicProjects = [
     image: '/assets/images/AidemePresentation.png',
     tags: ['React', 'PHP', 'SQLite', 'Vite', 'API REST', 'Git'],
     technologies: [
-      { name: 'React', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/react.svg' },
-      { name: 'Vite', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/vite.svg' },
-      { name: 'PHP', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/php.svg' },
-      { name: 'SQLite', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/sqlite.svg' },
+      { name: 'React', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg', colored: true },
+      { name: 'Vite', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg', colored: true },
+      { name: 'PHP', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg', colored: true },
+      { name: 'SQLite', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg', colored: true },
       { name: 'GitLab', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg' },
     ],
   },
@@ -35,14 +35,14 @@ export const academicProjects = [
     image: '/assets/images/banquets-MEGASAE.jpg',
     tags: ['Java', 'JavaFX', 'Maven', 'SQL', 'Git'],
     technologies: [
-      { name: 'Java', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/openjdk.svg' },
+      { name: 'Java', icon: 'https://dev.java/assets/images/java-affinity-logo-icode-lg.png', colored: true },
       { name: 'JavaFX', icon: '/assets/images/JavaFX.svg' },
       {
         name: 'Maven',
         icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apachemaven.svg',
       },
       { name: 'JUnit 5', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/junit5.svg' },
-      { name: 'SQLite', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/sqlite.svg' },
+      { name: 'SQLite', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg', colored: true },
       { name: 'GitLab', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg' },
       { name: 'Figma', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/figma.svg' },
     ],
@@ -109,7 +109,7 @@ export const academicProjects = [
     image: '/assets/images/algorithm.jpg',
     tags: ['Java', 'Algorithmes', 'Git'],
     technologies: [
-      { name: 'Java', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
+      { name: 'Java', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg', colored: true },
       {
         name: 'IntelliJ IDEA',
         icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/intellijidea.svg',
@@ -129,9 +129,10 @@ export const academicProjects = [
     technologies: [
       {
         name: 'PostgreSQL',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg',
+        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
+        colored: true,
       },
-      { name: 'SQL', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/databricks.svg' },
+      { name: 'SQL', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azuresqldatabase/azuresqldatabase-original.svg', colored: true },
     ],
   },
 ];

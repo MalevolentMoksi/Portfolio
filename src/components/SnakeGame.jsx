@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Tooltip from './Tooltip.jsx';
 
 /* ── Constantes ─────────────────────────────────────── */
 const CELL = 13;       // px par cellule
@@ -10,6 +11,8 @@ const LS_KEY = 'snake-hs';
 
 // ms/tick par niveau (tous les 50 pts on monte d'un niveau)
 const SPEEDS = [150, 125, 105, 88, 72, 58];
+// Profondeur max de la queue de directions (2 = 1 turn buffered)
+const DIR_QUEUE_MAX = 2;
 
 /* ── Helpers ─────────────────────────────────────────── */
 const randCell = (snake) => {
@@ -21,7 +24,6 @@ const randCell = (snake) => {
 };
 
 const hsColor = (i, len) => {
-  // Le segment i sur len : de vert vif (tête) à vert foncé (queue)
   const lightness = Math.max(22, 52 - (i / Math.max(len - 1, 1)) * 26);
   return `hsl(138, 72%, ${lightness}%)`;
 };
@@ -30,8 +32,9 @@ const hsColor = (i, len) => {
 const SnakeGame = ({ onClose }) => {
   const canvasRef  = useRef(null);
   const gRef       = useRef(null);   // état de jeu mutable
-  const intRef     = useRef(null);   // id setInterval
+  const rafRef     = useRef(null);   // id requestAnimationFrame
   const cdRef      = useRef(null);   // id setTimeout countdown
+  const lastTickRef = useRef(0);     // timestamp du dernier tick logique
   const onCloseRef = useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
@@ -47,7 +50,9 @@ const SnakeGame = ({ onClose }) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const { snake, food } = gRef.current;
+    const g = gRef.current;
+    if (!g) return;
+    const { snake, food } = g;
 
     // Fond
     ctx.fillStyle = '#0a0a0a';
@@ -81,7 +86,6 @@ const SnakeGame = ({ onClose }) => {
       const pad = i === 0 ? 1 : 2;
       ctx.fillStyle = hsColor(i, len);
       if (i === 0) {
-        // Tête : lueur verte
         ctx.save();
         ctx.shadowColor = 'rgba(50,255,130,0.55)';
         ctx.shadowBlur = 6;
@@ -95,11 +99,30 @@ const SnakeGame = ({ onClose }) => {
       ctx.fill();
       if (i === 0) ctx.restore();
     });
+
+    // Indicateur visuel de direction bufferisée : dessiner un petit triangle
+    // subtil sur la tête dans la direction de la prochaine queue entry
+    if (g.dirQueue.length > 0 && g.status === 'playing') {
+      const peekDir = g.dirQueue[0];
+      const hx = snake[0].x * CELL + CELL / 2;
+      const hy = snake[0].y * CELL + CELL / 2;
+      ctx.save();
+      ctx.fillStyle = 'rgba(50,255,130,0.35)';
+      ctx.beginPath();
+      const sz = 3;
+      ctx.moveTo(hx + peekDir.dx * sz * 2, hy + peekDir.dy * sz * 2);
+      ctx.lineTo(hx + peekDir.dy * sz, hy + peekDir.dx * sz);
+      ctx.lineTo(hx - peekDir.dy * sz, hy - peekDir.dx * sz);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
   };
 
   /* ── Fin de partie ── */
   const endGame = () => {
-    clearInterval(intRef.current);
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
     const g = gRef.current;
     const prev = parseInt(localStorage.getItem(LS_KEY) || '0', 10);
     const hs = Math.max(prev, g.score);
@@ -109,13 +132,16 @@ const SnakeGame = ({ onClose }) => {
     draw(); // dernier frame
   };
 
-  /* ── Tick de jeu ── */
+  /* ── Tick logique ── */
   const step = () => {
     const g = gRef.current;
     if (!g || g.status !== 'playing') return;
 
-    // Appliquer la prochaine direction
-    g.dir = g.nextDir;
+    // Consommer la prochaine direction de la queue
+    if (g.dirQueue.length > 0) {
+      g.dir = g.dirQueue.shift();
+    }
+
     const head   = g.snake[0];
     const next   = { x: head.x + g.dir.dx, y: head.y + g.dir.dy };
 
@@ -138,30 +164,47 @@ const SnakeGame = ({ onClose }) => {
 
       // Accélération tous les 50 points
       const level    = Math.min(Math.floor(g.score / 50), SPEEDS.length - 1);
-      const newSpeed = SPEEDS[level];
-      if (newSpeed !== g.speed) {
-        g.speed = newSpeed;
-        clearInterval(intRef.current);
-        intRef.current = setInterval(step, newSpeed);
-      }
+      g.speed = SPEEDS[level];
       setUi((u) => ({ ...u, score: g.score }));
     }
+  };
+
+  /* ── Boucle RAF : rendu smooth + tick logique à intervalle fixe ── */
+  const gameLoop = (timestamp) => {
+    const g = gRef.current;
+    if (!g) return;
+
+    // Tick logique à intervalle fixe
+    if (g.status === 'playing') {
+      const elapsed = timestamp - lastTickRef.current;
+      if (elapsed >= g.speed) {
+        step();
+        lastTickRef.current = timestamp;
+      }
+    }
+
+    // Redessiner à chaque frame RAF (60fps)
     draw();
+
+    // Continuer la boucle si le jeu tourne
+    if (g.status === 'playing') {
+      rafRef.current = requestAnimationFrame(gameLoop);
+    }
   };
 
   /* ── Initialisation + countdown 3-2-1 ── */
   const startGame = () => {
-    clearInterval(intRef.current);
+    cancelAnimationFrame(rafRef.current);
     clearTimeout(cdRef.current);
     const hs = parseInt(localStorage.getItem(LS_KEY) || '0', 10);
     gRef.current = {
-      snake:   [{ x: 10, y: 10 }],
-      dir:     { dx: 1, dy: 0 },
-      nextDir: { dx: 1, dy: 0 },
-      food:    randCell([{ x: 10, y: 10 }]),
-      score:   0,
-      status:  'countdown',
-      speed:   SPEEDS[0],
+      snake:    [{ x: 10, y: 10 }],
+      dir:      { dx: 1, dy: 0 },
+      dirQueue: [],               // queue de directions (max DIR_QUEUE_MAX)
+      food:     randCell([{ x: 10, y: 10 }]),
+      score:    0,
+      status:   'countdown',
+      speed:    SPEEDS[0],
     };
     setUi({ score: 0, hs, status: 'countdown', countdown: 3 });
     requestAnimationFrame(draw);
@@ -175,7 +218,8 @@ const SnakeGame = ({ onClose }) => {
       } else {
         gRef.current.status = 'playing';
         setUi((u) => ({ ...u, status: 'playing' }));
-        intRef.current = setInterval(step, SPEEDS[0]);
+        lastTickRef.current = performance.now();
+        rafRef.current = requestAnimationFrame(gameLoop);
       }
     };
     cdRef.current = setTimeout(tick, 1000);
@@ -185,7 +229,7 @@ const SnakeGame = ({ onClose }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     startGame();
-    return () => { clearInterval(intRef.current); clearTimeout(cdRef.current); };
+    return () => { cancelAnimationFrame(rafRef.current); clearTimeout(cdRef.current); };
   }, []);
 
   /* ── Contrôles clavier ── */
@@ -217,11 +261,26 @@ const SnakeGame = ({ onClose }) => {
       }
 
       const newDir = DIR_MAP[e.key];
-      if (newDir && (g.status === 'playing' || g.status === 'countdown')) {
-        if (g.status === 'countdown') return; // bufferiser mais ne pas mouvoir
+      if (newDir) {
+        if (g.status === 'countdown') {
+          // Pendant le countdown : bufferiser la première direction pour le tick 1
+          g.dirQueue = [newDir];
+          return;
+        }
+        if (g.status !== 'playing') return;
+
+        // Vérifier l'inversion contre la dernière direction enregistrée
+        // (la dernière de la queue, ou la direction actuelle si queue vide)
+        const lastDir = g.dirQueue.length > 0
+          ? g.dirQueue[g.dirQueue.length - 1]
+          : g.dir;
         // Bloquer la marche arrière directe
-        if (!(newDir.dx === -g.dir.dx && newDir.dy === -g.dir.dy)) {
-          g.nextDir = newDir;
+        if (newDir.dx === -lastDir.dx && newDir.dy === -lastDir.dy) return;
+        // Ignorer la même direction
+        if (newDir.dx === lastDir.dx && newDir.dy === lastDir.dy) return;
+        // Ajouter à la queue (max DIR_QUEUE_MAX)
+        if (g.dirQueue.length < DIR_QUEUE_MAX) {
+          g.dirQueue.push(newDir);
         }
         return;
       }
@@ -231,12 +290,12 @@ const SnakeGame = ({ onClose }) => {
           if (g.status === 'playing') {
             g.status = 'paused';
             setUi((u) => ({ ...u, status: 'paused' }));
-            clearInterval(intRef.current);
+            cancelAnimationFrame(rafRef.current);
           } else if (g.status === 'paused') {
             g.status = 'playing';
             setUi((u) => ({ ...u, status: 'playing' }));
-            intRef.current = setInterval(step, g.speed);
-            draw();
+            lastTickRef.current = performance.now();
+            rafRef.current = requestAnimationFrame(gameLoop);
           }
           break;
         case 'r': case 'R':
@@ -269,14 +328,15 @@ const SnakeGame = ({ onClose }) => {
           <span className="snake-game__label">Best</span>
           <span className="snake-game__value">{ui.hs}</span>
         </span>
+        <Tooltip text="Fermer" desc="ESC" position="bottom">
         <button
           className="snake-game__close-btn"
           onClick={onClose}
           aria-label="Fermer le jeu"
-          title="ESC pour fermer"
         >
           ✕
         </button>
+        </Tooltip>
       </div>
 
       {/* Canvas + overlay */}

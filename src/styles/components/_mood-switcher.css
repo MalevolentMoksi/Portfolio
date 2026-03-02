@@ -23,32 +23,18 @@
     fill 0.4s ease;
 }
 
-/* Spin animation on mood change — smooth ease-out, no overshoot */
-@keyframes mood-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes mood-pulse {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(1.18);
-  }
-  100% {
-    transform: scale(1);
-  }
+/* Theatrical spin on mood change — burst → overshoot → snap back */
+@keyframes mood-theatrical-spin {
+  0%   { transform: rotate(0deg)   scale(1);    }
+  18%  { transform: rotate(210deg) scale(1.28); } /* burst accélération */
+  52%  { transform: rotate(430deg) scale(0.88); } /* dépassement + compression */
+  72%  { transform: rotate(344deg) scale(1.1);  } /* rebond arrière */
+  86%  { transform: rotate(366deg) scale(0.96); } /* micro-rebond */
+  100% { transform: rotate(360deg) scale(1);    } /* stabilisation */
 }
 
 .mood-icon--spin {
-  animation:
-    mood-spin 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    mood-pulse 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: mood-theatrical-spin 0.85s ease-out forwards;
   transform-origin: center;
 }
 

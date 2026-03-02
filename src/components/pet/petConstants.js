@@ -36,6 +36,7 @@ export const LS = {
   name: 'pet-name',
   feedIndex: 'pet-feedIndex',
   achievements: 'pet-achievements',
+  onboarded: 'pet-onboarded',
 };
 
 /* ── Achievements (id, label, description) ── */

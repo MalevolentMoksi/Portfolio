@@ -158,9 +158,9 @@ const Layout = () => {
 
         {/* Actions interactives — slot droit de la barre de navigation */}
         <div className="header--actions" aria-label="Actions interactives">
+          <PetButton />
           <MoodSwitcher />
           <ParticlesButton />
-          <PetButton />
           <MiniTerminal />
         </div>
       </header>

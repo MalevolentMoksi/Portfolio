@@ -30,6 +30,7 @@
 @import './components/_mood-switcher.css';
 @import './components/_particles-button.css';
 @import './components/_pet-button.css';
+@import './components/_tooltip.css';
 @import './components/_not-found.css';
 
 /* Effects & animations */

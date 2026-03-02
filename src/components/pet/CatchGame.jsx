@@ -53,7 +53,32 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
   const [isHeld, setIsHeld]     = useState(true);
   const [rallies, setRallies]   = useState(0);
   const [showHint, setShowHint] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
+  const [catchFlash, setCatchFlash] = useState(false);
   const hintTimerRef = useRef(null);
+
+  /* ── Best score persistence ── */
+  const LS_BEST = 'catch-best-rallies';
+  const [bestScore, setBestScore] = useState(() =>
+    parseInt(localStorage.getItem(LS_BEST) || '0', 10)
+  );
+
+  /* ── Mise à jour du best score quand rallies change ── */
+  useEffect(() => {
+    if (rallies > bestScore) {
+      setBestScore(rallies);
+      localStorage.setItem(LS_BEST, String(rallies));
+    }
+  }, [rallies, bestScore]);
+
+  /* ── Escape pour quitter ── */
+  useEffect(() => {
+    const handle = (e) => {
+      if (e.key === 'Escape') onGameEnd();
+    };
+    window.addEventListener('keydown', handle);
+    return () => window.removeEventListener('keydown', handle);
+  }, [onGameEnd]);
 
   /* ── Mouse tracking ── */
   useEffect(() => {
@@ -113,6 +138,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
 
   /* ── Throw on click ── */
   const handleClick = useCallback((e) => {
+    if (showIntro) { setShowIntro(false); return; }
     if (holderRef.current !== 'player') return;
     e.stopPropagation();
     const sv = smoothVelRef.current;
@@ -126,7 +152,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
     setShowHint(false);
     clearTimeout(hintTimerRef.current);
     if (aimPathRef.current) aimPathRef.current.setAttribute('d', '');
-  }, []);
+  }, [showIntro]);
 
   /* ── Hint timer ── */
   const startHoldTimer = useCallback(() => {
@@ -215,6 +241,8 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
           catchCooldownRef.current = 18;
           holderRef.current = 'returning';
           setRallies(r => r + 1);
+          setCatchFlash(true);
+          setTimeout(() => setCatchFlash(false), 200);
         }
       }
 
@@ -245,13 +273,37 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
   }, [botPosRef, onBotCatch, startHoldTimer]);
 
   return createPortal(
-    <div className="catch-game-overlay" onClick={handleClick}>
-      {/* Score */}
+    <div className={`catch-game-overlay${catchFlash ? ' catch-game-overlay--flash' : ''}`} onClick={handleClick}>
+
+      {/* Écran d'instructions initial */}
+      {showIntro && (
+        <div className="catch-game-intro">
+          <div className="catch-game-intro-title">🏓 Jeu d'Attrape</div>
+          <div className="catch-game-intro-steps">
+            <div className="catch-game-intro-step">
+              <span className="catch-game-intro-icon">🖱️</span>
+              <span>Bouge la souris pour viser</span>
+            </div>
+            <div className="catch-game-intro-step">
+              <span className="catch-game-intro-icon">👆</span>
+              <span>Clique pour lancer la balle</span>
+            </div>
+            <div className="catch-game-intro-step">
+              <span className="catch-game-intro-icon">🤖</span>
+              <span>Le robot la renvoie — rattrape-la !</span>
+            </div>
+          </div>
+          <div className="catch-game-intro-start">Clique n'importe où pour commencer</div>
+        </div>
+      )}
+
+      {/* HUD Score — agrandi et clair */}
       <div className="catch-game-score">
-        <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" stroke="none" aria-hidden="true">
-          <circle cx="8" cy="8" r="7" />
-        </svg>
-        <span>{rallies}</span>
+        <div className="catch-game-score-label">Rallies</div>
+        <div className="catch-game-score-value">{rallies}</div>
+        {bestScore > 0 && (
+          <div className="catch-game-score-best">Record : {bestScore}</div>
+        )}
       </div>
 
       {/* Aim line — always mounted, path written via ref; viewBox synced to viewport */}
@@ -272,16 +324,17 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd }) => {
         </div>
       )}
 
-      {/* Exit */}
+      {/* Exit — agrandi + raccourci ESC */}
       <button
         className="catch-game-exit"
         onClick={(e) => { e.stopPropagation(); onGameEnd(); }}
-        aria-label="Quitter le jeu"
+        aria-label="Quitter le jeu (ESC)"
       >
-        <svg viewBox="0 0 16 16" width="15" height="15" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" fill="none" aria-hidden="true">
+        <svg viewBox="0 0 16 16" width="16" height="16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" fill="none" aria-hidden="true">
           <line x1="3" y1="3" x2="13" y2="13" />
           <line x1="13" y1="3" x2="3" y2="13" />
         </svg>
+        <span className="catch-game-exit-label">ESC</span>
       </button>
 
       {/* Ball — position written via ref */}

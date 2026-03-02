@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood, MOODS } from '../contexts/MoodContext.jsx';
+import Tooltip from './Tooltip.jsx';
 
 const MOOD_KEYS = Object.keys(MOODS);
 
@@ -53,12 +54,12 @@ const MoodSwitcher = () => {
   return (
     <div className="mood-switcher-wrapper" ref={panelRef}>
       {/* Bouton icône */}
+      <Tooltip text={`Mood : ${currentMood.label}`} position="bottom">
       <button
         className="header-action-btn mood-btn"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Changer l'ambiance visuelle"
         aria-expanded={isOpen}
-        title={`Mood : ${currentMood.label}`}
       >
         <svg
           key={spinKey}
@@ -96,6 +97,7 @@ const MoodSwitcher = () => {
           />
         </svg>
       </button>
+      </Tooltip>
 
       {/* Panneau de sélection */}
       {isOpen && createPortal(

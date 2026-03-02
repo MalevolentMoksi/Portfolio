@@ -16,6 +16,7 @@ import ThoughtBubbleQueue from './ThoughtBubbleQueue.jsx';
 import CatchGame from './CatchGame.jsx';
 import AchievementsPanel from './AchievementsPanel.jsx';
 import { FOOD_ICONS } from './petData.jsx';
+import Tooltip from '../Tooltip.jsx';
 
 // forwardRef permet à AnimatePresence (PetButton) de transmettre sa ref sans warning React.
 // Le portal rend dans document.body donc la ref n'est pas attachée à un DOM node visible.
@@ -972,27 +973,28 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
               ) : (
                 <>
                   <span className="pet-hud-name">{petName}</span>
+                  <Tooltip text="Renommer">
                   <button
                     className="pet-hud-name-pencil"
                     onClick={(e) => { e.stopPropagation(); setNameDraft(petName); setIsEditingName(true); }}
                     aria-label="Renommer"
-                    title="Renommer"
                   >
                     <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M11.5 2.5 L13.5 4.5 L5 13 L2 14 L3 11 Z" />
                       <line x1="10" y1="4" x2="12" y2="6" />
                     </svg>
                   </button>
+                  </Tooltip>
                 </>
               )}
             </span>
             <div className="pet-hud-header-actions">
               {/* Trophy / achievements toggle */}
+              <Tooltip text="Succès">
               <button
                 className={`pet-hud-trophy-btn${achOpen ? ' pet-hud-trophy-btn--active' : ''}`}
                 onClick={(e) => { e.stopPropagation(); setAchOpen((a) => !a); }}
                 aria-label="Succès"
-                title="Succès"
               >
                 {/* Trophée : coupe + anses + pied + socle */}
                 <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" stroke="none" aria-hidden="true">
@@ -1008,6 +1010,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
                   <rect x="5" y="13.5" width="6" height="1.2" rx="0.5" />
                 </svg>
               </button>
+              </Tooltip>
               <button className="pet-hud-close" onClick={() => setHudOpen(false)} aria-label="Fermer">
                 <svg viewBox="0 0 16 16" width="13" height="13" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <line x1="3" y1="3" x2="13" y2="13" />
@@ -1163,13 +1166,12 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
               const r         = 9;
               const circ      = 2 * Math.PI * r;
               return (
+                <Tooltip key={key} text={title}>
                 <button
-                  key={key}
                   className={`pet-action-btn${cooling ? ' pet-action-btn--cooling' : ''}`}
                   onClick={() => onInteract(key)}
                   disabled={cooling}
                   aria-disabled={cooling}
-                  title={title}
                 >
                   <span className="pet-action-btn-inner">
                     {cooling ? (
@@ -1191,6 +1193,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
                     <span className="pet-action-label">{label}</span>
                   </span>
                 </button>
+                </Tooltip>
               );
             })}
           </div>
