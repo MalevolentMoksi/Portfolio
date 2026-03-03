@@ -30,7 +30,7 @@ export const MOOD_TEXT_POOL = {
   woozy:  ['Téléportation... réussie... je crois.', 'Systèmes en cours de stabilisation...', 'Calibration gyroscopique requise.'],
   eat: ['Miam ! Énergie restaurée.', 'Délicieux ! +25% batterie.'],
   petted: ['Séquence câlin reçue. Bonheur ++', 'Chaleur détectée. Agréable.'],
-  play: ['Mode jeu activé !', 'Ha ! Je gagne !', 'Partie enregistrée.'],
+  play: ['Mode jeu activé !', 'Ha ! J\'ai gagné !', 'Partie enregistrée.'],
   sleep: ['Zzz...', 'Mode veille activé...', 'Analyse des rêves en cours...', 'Traitement des souvenirs de la journée...'],
   catch: ['Attrape !', 'À toi !', 'Trop facile !', 'Et hop !'],
 };

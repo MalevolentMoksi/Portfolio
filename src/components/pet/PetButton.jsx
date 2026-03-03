@@ -132,10 +132,10 @@ const PetButton = () => {
     onboardingRanRef.current = true;
 
     const steps = [
-      { delay: 1200, thought: { type: 'text', content: 'Salut ! Je suis ton robot compagnon 🤖', duration: 3500 } },
-      { delay: 4800, thought: { type: 'text', content: 'Glisse-dépose moi partout sur la page !', duration: 3500 } },
-      { delay: 8500, thought: { type: 'text', content: 'Clique sur moi pour voir mes stats', duration: 3500 } },
-      { delay: 12200, thought: { type: 'text', content: 'Nourris-moi et joue avec moi 💛', duration: 3500 } },
+      { delay: 1200, thought: { type: 'text', content: 'Salut ! Je suis ton robot compagnon !', duration: 5000 } },
+      { delay: 6300, thought: { type: 'text', content: 'Je vais me balader un peu partout sur la page !', duration: 5000 } },
+      { delay: 11400, thought: { type: 'text', content: 'Tu peux cliquer sur moi pour voir mes stats,', duration: 5000 } },
+      { delay: 16500, thought: { type: 'text', content: 'me nourrir et jouer avec moi 💛', duration: 5000 } },
     ];
     const timers = steps.map(({ delay, thought }) =>
       setTimeout(() => handleThought(thought), delay)
