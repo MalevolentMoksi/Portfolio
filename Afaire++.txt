@@ -6,12 +6,9 @@ Tâches manuelles :
 - SQLite vs PostgreSQL a corrigé selon la SAE
 
 Tâches requiert Recherches A faire :
-- Succès Bot : Hover sur succès non débloqués donne un indice
 
 Tâches simples :
 
 Tâches moyennes (besoin expertise IA) :
-
-- Trouver des meilleurs logos pour les technos?
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :

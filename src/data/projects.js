@@ -148,7 +148,7 @@ export const academicProjects = [
       },
       {
         name: 'SQL',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azuresqldatabase/azuresqldatabase-original.svg',
+        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/databricks.svg',
       },
     ],
   },
