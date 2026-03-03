@@ -45,17 +45,72 @@ export const LS = {
 
 /* ── Achievements (id, label, description) ── */
 export const ACHIEVEMENTS = [
-  { id: 'wall-bounce', label: 'Premier rebond', desc: 'Le robot a rebondi contre un mur' },
-  { id: 'pet-action', label: 'Câlin reçu', desc: 'Câliné pour la première fois' },
-  { id: 'footer-sit', label: 'Repos sur footer', desc: "Le robot s'est posé sur le pied de page" },
-  { id: 'thrive', label: 'Florissant', desc: "Atteint l'état heureux" },
-  { id: 'particles', label: 'Sensoriel', desc: 'Le robot a repéré les particules' },
-  { id: 'throw', label: 'Lancé !', desc: 'Lancé le robot avec élan' },
-  { id: 'catch-game', label: 'Baseball', desc: "Joué au jeu d'attrape" },
-  { id: 'sleep', label: 'Bonne nuit', desc: "Le robot s'est endormi" },
-  { id: 'combo', label: 'Combo ×3', desc: 'Enchaîné 3 interactions en 7 s' },
-  { id: 'rename', label: 'Rebaptisé', desc: 'Donné un nouveau nom au robot' },
-  { id: 'neglect', label: 'Têtu', desc: 'Resté triste trop longtemps' },
+  {
+    id: 'wall-bounce',
+    label: 'Premier rebond',
+    desc: 'Le robot a rebondi contre un mur',
+    hint: 'Laisse le robot se promener près des bords de la page',
+  },
+  {
+    id: 'pet-action',
+    label: 'Câlin reçu',
+    desc: 'Câliné pour la première fois',
+    hint: 'Utilise le bouton Câliner dans le HUD du robot',
+  },
+  {
+    id: 'footer-sit',
+    label: 'Repos sur footer',
+    desc: "Le robot s'est posé sur le pied de page",
+    hint: "Laisse le robot errer librement jusqu'en bas de la page",
+  },
+  {
+    id: 'thrive',
+    label: 'Florissant',
+    desc: "Atteint l'état heureux",
+    hint: 'Garde la faim et le bonheur tous les deux au-dessus de 60',
+  },
+  {
+    id: 'particles',
+    label: 'Sensoriel',
+    desc: 'Le robot a repéré les particules',
+    hint: 'Active les particules pendant que le robot se balade',
+  },
+  {
+    id: 'throw',
+    label: 'Lancé !',
+    desc: 'Lancé le robot avec élan',
+    hint: 'Fais glisser le robot très rapidement puis relâche-le',
+  },
+  {
+    id: 'catch-game',
+    label: 'Baseball',
+    desc: "Joué au jeu d'attrape",
+    hint: 'Lance une partie via le bouton Jouer dans le HUD du robot',
+  },
+  {
+    id: 'sleep',
+    label: 'Bonne nuit',
+    desc: "Le robot s'est endormi",
+    hint: 'Laisse le robot tranquille sans interagir pendant 30 secondes',
+  },
+  {
+    id: 'combo',
+    label: 'Combo ×3',
+    desc: 'Enchaîné 3 interactions en 7 s',
+    hint: 'Effectue 3 actions différentes sur le robot en moins de 7 s',
+  },
+  {
+    id: 'rename',
+    label: 'Rebaptisé',
+    desc: 'Donné un nouveau nom au robot',
+    hint: 'Change le nom du robot depuis le champ en haut du HUD',
+  },
+  {
+    id: 'neglect',
+    label: 'Têtu',
+    desc: 'Resté triste trop longtemps',
+    hint: "Laisse le robot dans un état triste sans t'en occuper",
+  },
 ];
 
 /* ── Utilitaires ── */

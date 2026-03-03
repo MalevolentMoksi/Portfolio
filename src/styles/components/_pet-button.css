@@ -1206,6 +1206,12 @@ body[data-mood='vaporwave'] .pet-robot {
   color: rgba(255, 255, 255, 0.4);
 }
 
+.pet-ach-tile:not(.pet-ach-tile--unlocked):hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  cursor: help;
+}
+
 .pet-ach-lock {
   opacity: 0.35;
 }
@@ -1232,8 +1238,26 @@ body[data-mood='vaporwave'] .pet-robot {
   white-space: normal;
 }
 
-.pet-ach-tile--unlocked:hover .pet-ach-tooltip {
+.pet-ach-tile--unlocked:hover .pet-ach-tooltip,
+.pet-ach-tile:not(.pet-ach-tile--unlocked):hover .pet-ach-tooltip--hint {
   display: flex;
+}
+
+/* Variante indice pour les succès verrouillés */
+.pet-ach-tooltip--hint {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.pet-ach-tooltip--hint::after {
+  border-top-color: rgba(255, 255, 255, 0.15);
+}
+
+.pet-ach-tooltip-hint-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.35);
 }
 
 /* Petite flèche en bas du tooltip */

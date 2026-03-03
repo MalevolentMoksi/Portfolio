@@ -114,10 +114,15 @@ const AchievementsPanel = ({ unlocked = [] }) => {
                 {isUnlocked ? (ACHIEVEMENT_ICONS[ach.id] || null) : <LockIcon />}
               </div>
               <span className="pet-ach-label">{isUnlocked ? ach.label : '???'}</span>
-              {isUnlocked && (
+              {isUnlocked ? (
                 <div className="pet-ach-tooltip" role="tooltip">
                   <strong className="pet-ach-tooltip-title">{ach.label}</strong>
                   <span className="pet-ach-tooltip-desc">{ach.desc}</span>
+                </div>
+              ) : ach.hint && (
+                <div className="pet-ach-tooltip pet-ach-tooltip--hint" role="tooltip">
+                  <span className="pet-ach-tooltip-hint-label">Indice</span>
+                  <span className="pet-ach-tooltip-desc">{ach.hint}</span>
                 </div>
               )}
             </div>
