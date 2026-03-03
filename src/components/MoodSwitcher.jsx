@@ -41,10 +41,27 @@ const MoodSwitcher = () => {
     const rect = panelRef.current.getBoundingClientRect();
     setPanelPos({ top: rect.bottom + 12, right: window.innerWidth - rect.right });
   }, [isOpen]);
-  /* ── Changer de mood avec animation ── */
+  /* ── Changer de mood avec animation VHS ── */
   const handleMoodChange = useCallback((newMood) => {
     if (newMood === mood) return;
-    setMood(newMood);
+
+    // Overlay VHS flash + scanline
+    const overlay = document.createElement('div');
+    overlay.className = 'mood-vhs-overlay';
+    // Couleur du flash = couleur du mood entrant
+    overlay.style.setProperty('--vhs-color', MOODS[newMood].color);
+    document.body.appendChild(overlay);
+
+    // Changer le mood au milieu de la transition (60 ms)
+    setTimeout(() => {
+      setMood(newMood);
+    }, 60);
+
+    // Retirer l'overlay après la fin de l'animation (200 ms)
+    setTimeout(() => {
+      overlay.remove();
+    }, 200);
+
     // Incrémenter spinKey : React remonte le SVG et l'animation rejoue depuis 0%
     setSpinKey((k) => k + 1);
   }, [mood, setMood]);

@@ -28,6 +28,7 @@
   z-index: 0;
   pointer-events: auto;
   transition: z-index 0s;
+  transform-origin: center center; /* Pour le parallax 3 plans */
 }
 
 /* Quand un effet particules est actif, le canvas passe devant le main

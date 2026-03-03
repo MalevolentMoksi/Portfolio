@@ -113,11 +113,22 @@ const MiniTerminal = () => {
   ]);
   const [input, setInput] = useState('');
   const [iconState, setIconState] = useState('idle'); // idle | open
+  const [sessionTime, setSessionTime] = useState('0s');
   const outputRef = useRef(null);
   const inputRef = useRef(null);
   const panelRef = useRef(null);
   const panelDivRef = useRef(null);
   const [panelPos, setPanelPos] = useState(null);
+
+  /* ── Timer session (titlebar) ── */
+  useEffect(() => {
+    if (!isOpen) return;
+    const sessionStart = parseInt(sessionStorage.getItem('session-start') || Date.now(), 10);
+    const update = () => setSessionTime(formatElapsed(Date.now() - sessionStart));
+    update();
+    const id = setInterval(update, 5000);
+    return () => clearInterval(id);
+  }, [isOpen]);
 
   /* ── Scroll auto ── */
   useEffect(() => {
@@ -334,12 +345,12 @@ const MiniTerminal = () => {
           } : {}}
         >
           <div className="mini-terminal-titlebar">
-            <span className="mini-terminal-dots">
-              <span className="dot dot--red" />
-              <span className="dot dot--yellow" />
-              <span className="dot dot--green" />
+            <span className="mini-terminal-status">
+              <span className="mini-terminal-status-dot" aria-hidden="true" />
+              <span className="mini-terminal-status-label">RUN</span>
             </span>
             <span className="mini-terminal-title">enzo@portfolio:~</span>
+            <span className="mini-terminal-session">{sessionTime}</span>
           </div>
 
           {snakeMode ? (

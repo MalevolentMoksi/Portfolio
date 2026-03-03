@@ -108,6 +108,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   // Hover-to-pet
   const hoverTimerRef = useRef(null);
   const hoverCooldownRef = useRef(0);
+  const [isHovering, setIsHovering] = useState(false);
   // Throw momentum — skip wander speed cap while decaying
   const throwActiveRef = useRef(false);
   // External gravity effect — pulls pet downward when active
@@ -855,11 +856,15 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   /* ── Hover-to-pet — sustained hover triggers petted reaction ── */
   const handlePetHoverEnter = useCallback(() => {
     if (isDraggingRef.current || isSleepingRef.current || hoverCooldownRef.current > 0) return;
+    setIsHovering(true);
     hoverTimerRef.current = setTimeout(() => {
       if (isDraggingRef.current) return;
+      setIsHovering(false);
       onBehavior('petted');
       onHoverPet(); // +5 happiness
       hoverCooldownRef.current = 360; // ~6s cooldown in frames
+      // Label flottant "+5"
+      onThought({ type: 'text', content: '+5 \u{1F49B}', duration: 800 });
       // Cascade heart bubbles
       onThought({ type: 'symbol', content: 'heart' });
       const t1 = setTimeout(() => onThought({ type: 'symbol', content: 'heart' }), 500);
@@ -869,6 +874,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   }, [onBehavior, onThought, onHoverPet]);
 
   const handlePetHoverLeave = useCallback(() => {
+    setIsHovering(false);
     if (hoverTimerRef.current) {
       if (typeof hoverTimerRef.current === 'number') {
         clearTimeout(hoverTimerRef.current);
@@ -945,6 +951,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
     isSleeping && 'pet-wanderer--sleeping',
     moodSpinActive && 'pet-wanderer--mood-spin',
     isCatching && 'pet-wanderer--catching',
+    isHovering && 'pet-wanderer--hovered',
   ].filter(Boolean).join(' ');
 
   return createPortal(
@@ -975,6 +982,13 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         exit={{ scale: 0, opacity: 0, rotate: -180, y: -20 }}
         transition={{ type: 'spring', stiffness: 280, damping: 18 }}
       >
+        {/* Arc de charge hover-to-pet */}
+        {isHovering && (
+          <svg className="pet-charge-ring" viewBox="0 0 72 72" width="72" height="72" aria-hidden="true">
+            <circle className="pet-charge-ring__track" cx="36" cy="36" r="33" />
+            <circle className="pet-charge-ring__fill"  cx="36" cy="36" r="33" />
+          </svg>
+        )}
         {(() => {
           const dir = facingLeft ? -1 : 1;
           const stretch    = Math.min(0.13, Math.max(0, (speedLevel - 0.4) * 0.1));

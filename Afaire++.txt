@@ -7,11 +7,10 @@ Tâches manuelles :
 
 Tâches requiert Recherches A faire :
 
-- Comment rendre les caresses sur le robot + claires?
-- MiniTerminal Phares font trop "Apple", à remplacer par quelque chose d'autre
-- Est-ce qu'un lien entre les particules et l'Arriere plan en parallax pourrait être fait?
-- Est-ce que le fait que le Parallax soit Inversé n'est pas satisfaisant?
-- Animation entre Ambiences - Défilement (Effet rétro / VHS) + Effet cathodique (animation + visible)
+- MiniTerminal : Snake bouton annulé devrait être placé a droite
+ si on ferme le MiniTerminal sur une game de Snake, reouvrir le Terminal reouvre le jeu snake au lieu d'ouvrir le MiniTerminal
+ J'aimerai que le timer qui se met a jour toutes les 5 seconds soit un vrai compteur live.
+- Succès Bot : Hover sur succès non débloqués donne indice
 
 Tâches simples :
 

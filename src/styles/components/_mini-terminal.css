@@ -114,7 +114,7 @@
   }
 }
 
-/* ---- Title bar (faux macOS) ---- */
+/* ---- Title bar (status line) ---- */
 .mini-terminal-titlebar {
   display: flex;
   align-items: center;
@@ -125,31 +125,51 @@
   user-select: none;
 }
 
-.mini-terminal-dots {
+/* ── Status indicator (left) ── */
+.mini-terminal-status {
   display: flex;
+  align-items: center;
   gap: 5px;
+  flex-shrink: 0;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
+.mini-terminal-status-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 4px rgba(var(--color-primary-rgb), 0.6);
+  animation: status-pulse 1.5s ease-in-out infinite;
 }
 
-.dot--red {
-  background: #ff5f57;
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
-.dot--yellow {
-  background: #febc2e;
-}
-.dot--green {
-  background: #28c840;
+
+.mini-terminal-status-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  text-transform: uppercase;
 }
 
 .mini-terminal-title {
+  flex: 1;
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.45);
   letter-spacing: 0.03em;
+  text-align: center;
+}
+
+/* ── Session timer (right) ── */
+.mini-terminal-session {
+  flex-shrink: 0;
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---- Output area ---- */

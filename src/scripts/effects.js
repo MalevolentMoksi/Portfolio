@@ -154,6 +154,11 @@ class VisualEffects {
   }
 
   initParallax() {
+    // ── Toggle 3 plans de profondeur ──────────────────────
+    // true  = fond + particules bougent à vitesses différentes (3 plans de profondeur)
+    // false = comportement original (seul le fond bouge, particules immobiles)
+    const PARALLAX_LAYERS_ENABLED = true;
+
     let mouseX = 0;
     let mouseY = 0;
     let posX = 0;
@@ -161,6 +166,12 @@ class VisualEffects {
 
     const friction = 1 / 12; // Easing factor
     const depth = 0.06; // Movement intensity
+    const particlesDepthRatio = 0.5; // Particules bougent 2× moins que le fond
+    let particlesPosX = 0;
+    let particlesPosY = 0;
+    const particlesCanvas = PARALLAX_LAYERS_ENABLED
+      ? document.getElementById('particles-js')
+      : null;
 
     // Track mouse position
     const handleMouseMove = (e) => {
@@ -188,6 +199,16 @@ class VisualEffects {
       posX += (mouseX - posX) * friction;
       posY += (mouseY - posY) * friction;
       this.background.style.transform = `scale(1.15) translate(${posX}px, ${posY}px)`;
+
+      // Plan intermédiaire : particules à demi-profondeur
+      if (particlesCanvas) {
+        const targetPX = mouseX * particlesDepthRatio;
+        const targetPY = mouseY * particlesDepthRatio;
+        particlesPosX += (targetPX - particlesPosX) * friction;
+        particlesPosY += (targetPY - particlesPosY) * friction;
+        particlesCanvas.style.transform = `scale(1.08) translate(${particlesPosX}px, ${particlesPosY}px)`;
+      }
+
       this._parallaxRafId = requestAnimationFrame(updateParallax);
     };
 
