@@ -27,15 +27,15 @@ const App = () => (
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
-        <Route path="projets" element={<Projets />} />
-        <Route path="projets-personnels" element={<ProjetsPersonnels />} />
-        <Route path="projet-MEGASAE" element={<ProjetMEGASAE />} />
-        <Route path="projet-SAE12" element={<ProjetSAE12 />} />
-        <Route path="projet-SAE3" element={<ProjetSAE3 />} />
-        <Route path="projet-SAE4" element={<ProjetSAE4 />} />
-        <Route path="projet-SAE56" element={<ProjetSAE56 />} />
-        <Route path="projet-SAE3.01" element={<ProjetSAE301 />} />
-      </Route>
+          <Route path="projets" element={<Projets />} />
+          <Route path="projets-personnels" element={<ProjetsPersonnels />} />
+          <Route path="projet-MEGASAE" element={<ProjetMEGASAE />} />
+          <Route path="projet-SAE12" element={<ProjetSAE12 />} />
+          <Route path="projet-SAE3" element={<ProjetSAE3 />} />
+          <Route path="projet-SAE4" element={<ProjetSAE4 />} />
+          <Route path="projet-SAE56" element={<ProjetSAE56 />} />
+          <Route path="projet-SAE3.01" element={<ProjetSAE301 />} />
+        </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
     </Suspense>

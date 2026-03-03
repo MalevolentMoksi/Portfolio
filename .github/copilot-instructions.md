@@ -27,7 +27,6 @@ Modern student portfolio website (React SPA). **Feb 2026 Architecture**: Single-
 - **`FilterBar.jsx`** - Tag/category filter bar for project listings
 - **`Loading.jsx`** - Full-page loading spinner
 - **`ProjectPagination.jsx`** - Pagination controls for project lists
-- **`ThreeScene.jsx`** - Three.js 3-D scene embed
 
 ### Pages Directory (`src/pages/*.jsx`)
 8 React components: `Home.jsx`, `Projets.jsx`, `ProjetsPersonnels.jsx`, `ProjetMEGASAE.jsx`, `ProjetSAE12.jsx`, `ProjetSAE3.jsx`, `ProjetSAE4.jsx`, `ProjetSAE56.jsx`
@@ -55,7 +54,7 @@ These coexist with React, initialized via `usePortfolioModules` hook in `Layout.
 ### CSS Modules (`src/styles/`)
 - **`main.css`** - Central import that bundles all via `@import`
 - **Core**: `_variables.css` (CSS custom properties), `_base.css`, `_layout.css`, `_typography.css`, `_effects.css`
-- **Components** (18 files): `_header.css`, `_footer.css`, `_buttons.css`, `_music-player.css`, `_projects.css`, `_personal-projects.css`, `_breadcrumbs.css`, `_contact-form.css`, `_filter-bar.css`, `_hamburger-menu.css`, `_lightbox.css`, `_loading.css`, `_mini-terminal.css`, `_mood-switcher.css`, `_particles-button.css`, `_pet-button.css`, `_project-pagination.css`, `_three-scene.css`
+- **Components** (17 files): `_header.css`, `_footer.css`, `_buttons.css`, `_music-player.css`, `_projects.css`, `_personal-projects.css`, `_breadcrumbs.css`, `_contact-form.css`, `_filter-bar.css`, `_hamburger-menu.css`, `_lightbox.css`, `_loading.css`, `_mini-terminal.css`, `_mood-switcher.css`, `_particles-button.css`, `_pet-button.css`, `_project-pagination.css`
 - **Dark theme**: Gold accent (#d4af37), CSS variables centralized
 
 ### Assets (`public/assets/`)
@@ -194,10 +193,10 @@ Four interactive widgets live in `.header--actions` inside `Layout.jsx`:
 
 | File | Purpose |
 |------|---------|
-| [vite.config.js](vite.config.js) | Vite 5 build config, path aliases (`@`, `@styles`, etc.), React plugin |
+| [vite.config.js](vite.config.js) | Vite 5 build config, path aliases (`@`, `@styles`, `@hooks`, `@pages`, `@contexts`, `@utils`, `@data`, etc.), React plugin |
 | [src/App.jsx](src/App.jsx) | React Router orchestrator - defines all 8 routes |
 | [src/components/Layout.jsx](src/components/Layout.jsx) | Shared header/footer, initializes legacy modules, wraps pages via `<Outlet />` |
-| [src/components/PetButton.jsx](src/components/PetButton.jsx) | Interactive robot pet — wandering, dragging, stats, reactions, HUD |
+| [src/components/pet/PetButton.jsx](src/components/pet/PetButton.jsx) | Interactive robot pet — wandering, dragging, stats, reactions, HUD |
 | [src/components/MoodSwitcher.jsx](src/components/MoodSwitcher.jsx) | Cycles site mood; writes `data-mood` on `<body>` |
 | [src/contexts/MoodContext.jsx](src/contexts/MoodContext.jsx) | Global mood state provider |
 | [src/contexts/ReadingTimeContext.jsx](src/contexts/ReadingTimeContext.jsx) | Reading time provider (wraps `<Outlet />` in Layout) |

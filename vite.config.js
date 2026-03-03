@@ -40,6 +40,11 @@ export default defineConfig({
       '@scripts': resolve(__dirname, 'src/scripts'),
       '@components': resolve(__dirname, 'src/components'),
       '@assets': resolve(__dirname, 'public/assets'),
+      '@hooks': resolve(__dirname, 'src/hooks'),
+      '@pages': resolve(__dirname, 'src/pages'),
+      '@contexts': resolve(__dirname, 'src/contexts'),
+      '@utils': resolve(__dirname, 'src/utils'),
+      '@data': resolve(__dirname, 'src/data'),
     },
   },
   

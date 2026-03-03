@@ -7,7 +7,7 @@ import HamburgerMenu from './HamburgerMenu.jsx';
 import MiniTerminal from './MiniTerminal.jsx';
 import MoodSwitcher from './MoodSwitcher.jsx';
 import ParticlesButton from './ParticlesButton.jsx';
-import PetButton from './PetButton.jsx';
+import PetButton from './pet/PetButton.jsx';
 import useDocumentMeta from '../hooks/useDocumentMeta.js';
 import usePortfolioModules from '../hooks/usePortfolioModules.js';
 import { getAssetPath } from '../utils/assetPath.js';

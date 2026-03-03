@@ -92,8 +92,7 @@ P2.01-Portfolio/
 │   │   ├── ContactForm.jsx        # Formulaire de contact (Formspree)
 │   │   ├── FilterBar.jsx          # Barre de filtres pour les projets
 │   │   ├── Loading.jsx            # Spinner plein écran
-│   │   ├── ProjectPagination.jsx  # Pagination des listes de projets
-│   │   └── ThreeScene.jsx         # Scène 3D Three.js
+│   │   └── ProjectPagination.jsx  # Pagination des listes de projets
 │   │
 │   ├── pages/                      # Composants pages (routes)
 │   │   ├── Home.jsx               # Page d'accueil
@@ -119,7 +118,6 @@ P2.01-Portfolio/
 │   │   └── discoverMusicTracks.js # Auto-découverte des .m4a dans public/assets/music/
 │   │
 │   ├── scripts/                    # Modules JavaScript legacy (vanilla JS)
-│   │   ├── main.js                # Orchestrateur des modules
 │   │   ├── music-player.js        # Lecteur audio persistant (localStorage)
 │   │   ├── effects.js             # Effets visuels (particles.js, parallaxe)
 │   │   ├── ui-enhancements.js     # Animations UI (typing, glitch, etc.)
@@ -149,8 +147,7 @@ P2.01-Portfolio/
 │           ├── _mood-switcher.css
 │           ├── _particles-button.css
 │           ├── _pet-button.css
-│           ├── _project-pagination.css
-│           └── _three-scene.css
+│           └── _project-pagination.css
 │
 ├── public/                         # Assets statiques (copiés tel quel dans dist/)
 │   └── assets/
@@ -159,7 +156,7 @@ P2.01-Portfolio/
 │       └── videos/                # Vidéos
 │
 ├── dist/                           # Build de production (généré par Vite)
-├── vite.config.js                 # Config Vite (aliases @/, @styles/, etc.)
+├── vite.config.js                 # Config Vite (aliases @/, @styles/, @hooks/, @pages/, @contexts/, @utils/, @data/)
 ├── package.json                   # Dépendances (React 18, React Router 6)
 └── .prettierrc                    # Configuration Prettier
 ```
