@@ -196,25 +196,25 @@ const ProjetsPersonnels = () => {
           <div className="drawing-item">
             <img
               className="zoomable"
-                src={getAssetPath('assets/images/drawings/Goat.jpg')}
+                src={getAssetPath('assets/images/drawings/PowerDrawing.png')}
               width="800"
               height="450"
               loading="lazy"
-              alt="Illustration rapide au crayon"
+              alt="Illustration numérique"
             />
-            <p>Goat de Cult of the Lamb - Illustration rapide au crayon</p>
+            <p>Power de Chainsaw Man - Illustrations numérique</p>
           </div>
 
           <div className="drawing-item">
             <img
               className="zoomable"
-                src={getAssetPath('assets/images/drawings/EBray.jpg')}
+                src={getAssetPath('assets/images/drawings/RamattraDrawing.jpg')}
               width="800"
               height="450"
               loading="lazy"
               alt="Illustration au crayon"
             />
-            <p>Exo Stranger de Destiny 2 - Illustration au crayon</p>
+            <p>Ramattra de Overwatch 2 - Illustration au crayon</p>
           </div>
 
           <div className="drawing-item">
