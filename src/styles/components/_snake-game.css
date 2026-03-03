@@ -54,8 +54,11 @@
   line-height: 1.1;
 }
 
-.snake-game__close-btn {
+.snake-game__close-wrap {
   margin-left: auto;
+}
+
+.snake-game__close-btn {
   background: transparent;
   border: 1px solid rgba(255, 95, 87, 0.35);
   border-radius: 50%;

@@ -215,8 +215,12 @@
 }
 
 @keyframes pet-charge-arc {
-  from { stroke-dashoffset: 207.35; }
-  to   { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 207.35;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* Quand le hover se charge, le glow pulse plus vite */

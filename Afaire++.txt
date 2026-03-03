@@ -6,10 +6,6 @@ Tâches manuelles :
 - SQLite vs PostgreSQL a corrigé selon la SAE
 
 Tâches requiert Recherches A faire :
-
-- MiniTerminal : Snake bouton annulé devrait être placé a droite
- si on ferme le MiniTerminal sur une game de Snake, reouvrir le Terminal reouvre le jeu snake au lieu d'ouvrir le MiniTerminal
- J'aimerai que le timer qui se met a jour toutes les 5 seconds soit un vrai compteur live.
 - Succès Bot : Hover sur succès non débloqués donne indice
 
 Tâches simples :
@@ -19,5 +15,3 @@ Tâches moyennes (besoin expertise IA) :
 - Trouver des meilleurs logos pour les technos?
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
-
-- Attrape : Laisser les stats visible, ou implémenter une manière alternative de montrer les statsen mode Attrape pour montrer , faire en sorte que le robot cherche la balle après lancer et ameliorer les physiques de la balle si possible

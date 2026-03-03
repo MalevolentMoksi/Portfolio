@@ -328,15 +328,17 @@ const SnakeGame = ({ onClose }) => {
           <span className="snake-game__label">Best</span>
           <span className="snake-game__value">{ui.hs}</span>
         </span>
-        <Tooltip text="Fermer" desc="ESC" position="bottom">
-        <button
-          className="snake-game__close-btn"
-          onClick={onClose}
-          aria-label="Fermer le jeu"
-        >
-          ✕
-        </button>
-        </Tooltip>
+        <div className="snake-game__close-wrap">
+          <Tooltip text="Fermer" desc="ESC" position="bottom">
+            <button
+              className="snake-game__close-btn"
+              onClick={onClose}
+              aria-label="Fermer le jeu"
+            >
+              ✕
+            </button>
+          </Tooltip>
+        </div>
       </div>
 
       {/* Canvas + overlay */}

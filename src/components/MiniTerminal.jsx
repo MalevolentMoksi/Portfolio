@@ -55,8 +55,10 @@ Parcours Développeur d'applications.`;
 
 const formatElapsed = (ms) => {
   const totalSec = Math.floor(ms / 1000);
-  const min = Math.floor(totalSec / 60);
+  const hours = Math.floor(totalSec / 3600);
+  const min = Math.floor((totalSec % 3600) / 60);
   const sec = totalSec % 60;
+  if (hours > 0) return `${hours}h ${min.toString().padStart(2, '0')}m ${sec.toString().padStart(2, '0')}s`;
   if (min === 0) return `${sec}s`;
   return `${min}m ${sec.toString().padStart(2, '0')}s`;
 };
@@ -126,7 +128,7 @@ const MiniTerminal = () => {
     const sessionStart = parseInt(sessionStorage.getItem('session-start') || Date.now(), 10);
     const update = () => setSessionTime(formatElapsed(Date.now() - sessionStart));
     update();
-    const id = setInterval(update, 5000);
+    const id = setInterval(update, 1000);
     return () => clearInterval(id);
   }, [isOpen]);
 
@@ -164,6 +166,7 @@ const MiniTerminal = () => {
       ) {
         setIsOpen(false);
         setIconState('idle');
+        setSnakeMode(false);
       }
     };
     // Délai pour ne pas attraper le clic d'ouverture
@@ -181,6 +184,7 @@ const MiniTerminal = () => {
       if (e.key === 'Escape') {
         setIsOpen(false);
         setIconState('idle');
+        setSnakeMode(false);
       }
     };
     document.addEventListener('keydown', handle);

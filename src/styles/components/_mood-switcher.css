@@ -199,8 +199,13 @@ body[data-mood='vaporwave']::after {
 }
 
 @keyframes crt-flicker {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.88; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.88;
+  }
 }
 
 /* ---- VHS transition overlay ---- */
@@ -238,15 +243,27 @@ body[data-mood='vaporwave']::after {
 }
 
 @keyframes vhs-flash-opacity {
-  0%   { opacity: 0; }
-  15%  { opacity: 0.45; }
-  40%  { opacity: 0.2; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.45;
+  }
+  40% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes vhs-sweep {
-  0%   { clip-path: inset(0 0 100% 0); }
-  100% { clip-path: inset(0 0 0% 0); }
+  0% {
+    clip-path: inset(0 0 100% 0);
+  }
+  100% {
+    clip-path: inset(0 0 0% 0);
+  }
 }
 
 /* ---- Responsive ---- */
