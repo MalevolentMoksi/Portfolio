@@ -58,8 +58,8 @@ const ProjetSAE301 = () => {
           >
             <div className="aideme-logo-container" style={transformStyle}>
               <div className={`aideme-logo-inner ${isCelebrating ? 'anim-celebrate' : comboRef.current > 0 ? '' : 'anim-A'}`}>
-                <img src="/assets/images/Logo_Aideme_Mains.png" alt="" className="aideme-logo-part hands" />
-                <img src="/assets/images/Logo_Aideme_Coeur.png" alt="" className="aideme-logo-part heart" />
+                <img src="/assets/images/projects/Logo_Aideme_Mains.png" alt="" className="aideme-logo-part hands" />
+                <img src="/assets/images/projects/Logo_Aideme_Coeur.png" alt="" className="aideme-logo-part heart" />
               </div>
             </div>
           </div>
@@ -486,7 +486,7 @@ const ProjetSAE301 = () => {
           <div className="aideme-preview">
             <div className="aideme-preview-item--desktop">
               <img
-                src="/assets/images/AidemeApplication.png"
+                src="/assets/images/projects/AidemeApplication.png"
                 alt="Interface principale d'Aidémé — vue bureau"
                 className="zoomable"
               />
@@ -494,7 +494,7 @@ const ProjetSAE301 = () => {
             </div>
             <div className="aideme-preview-item--mobile">
               <img
-                src="/assets/images/AidemeAppMobileDarkmode.png"
+                src="/assets/images/projects/AidemeAppMobileDarkmode.png"
                 alt="Interface d'Aidémé — vue mobile en mode sombre"
                 className="zoomable"
               />

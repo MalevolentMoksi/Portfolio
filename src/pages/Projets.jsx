@@ -38,7 +38,7 @@ const Projets = () => {
                       <img
                         src={tech.icon.startsWith('http') ? tech.icon : getAssetPath(tech.icon)}
                         alt={tech.name}
-                        className={tech.colored ? 'tech-icon--colored' : undefined}
+                        className="tech-icon"
                         loading="lazy"
                         width="36"
                         height="36"

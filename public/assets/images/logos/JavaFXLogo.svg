@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 105">
+  <!-- Steam -->
+  <path d="M32 27 Q29 20 32 13 Q35 6 32 0" stroke="black" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M50 27 Q47 20 50 13 Q53 6 50 0" stroke="black" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M68 27 Q65 20 68 13 Q71 6 68 0" stroke="black" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Cup body (trapezoid outline) -->
+  <path d="M13 31 L87 31 L79 84 L21 84 Z" stroke="black" stroke-width="3.5" fill="none" stroke-linejoin="round"/>
+  <!-- Handle -->
+  <path d="M79 44 Q98 44 98 62 Q98 79 79 74" stroke="black" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <!-- Saucer -->
+  <ellipse cx="50" cy="89" rx="43" ry="5.5" stroke="black" stroke-width="3" fill="none"/>
+  <!-- FX label -->
+  <text x="50" y="69" font-family="Arial Black, Arial, sans-serif" font-size="26" font-weight="900" fill="black" text-anchor="middle">FX</text>
+</svg>

@@ -13,28 +13,24 @@ export const academicProjects = [
     description:
       "Conception et développement d'une application Web full-stack (React 19 + PHP 8 + SQLite) permettant aux aidants de coordonner le suivi de personnes dépendantes : contacts, agenda, galerie photo, fichiers et notifications.",
     teamSize: 'En équipe (Team 08 – IUT2 Info UGA)',
-    image: '/assets/images/AidemePresentation.png',
+    image: '/assets/images/projects/AidemePresentation.png',
     tags: ['React', 'PHP', 'SQLite', 'Vite', 'API REST', 'Git'],
     technologies: [
       {
         name: 'React',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
-        colored: true,
+        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/react.svg',
       },
       {
         name: 'Vite',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg',
-        colored: true,
+        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/vite.svg',
       },
       {
         name: 'PHP',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
-        colored: true,
+        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/php.svg',
       },
       {
         name: 'SQLite',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg',
-        colored: true,
+        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/sqlite.svg',
       },
       { name: 'GitLab', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg' },
     ],
@@ -48,15 +44,11 @@ export const academicProjects = [
     description:
       "Développement à partir de zéro d'une application qui pourrait planifier des événements dans des salles pour un utilisateur.",
     teamSize: 'En hexanome (6 personnes)',
-    image: '/assets/images/banquets-MEGASAE.jpg',
+    image: '/assets/images/projects/banquets-MEGASAE.jpg',
     tags: ['Java', 'JavaFX', 'Maven', 'SQL', 'Git'],
     technologies: [
-      {
-        name: 'Java',
-        icon: 'https://dev.java/assets/images/java-affinity-logo-icode-lg.png',
-        colored: true,
-      },
-      { name: 'JavaFX', icon: '/assets/images/JavaFX.svg' },
+      { name: 'Java', icon: '/assets/images/logos/JavaAltLogo.svg' },
+      { name: 'JavaFX', icon: '/assets/images/logos/JavaFXLogo.svg' },
       {
         name: 'Maven',
         icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apachemaven.svg',
@@ -64,8 +56,7 @@ export const academicProjects = [
       { name: 'JUnit 5', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/junit5.svg' },
       {
         name: 'SQLite',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg',
-        colored: true,
+        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/sqlite.svg',
       },
       { name: 'GitLab', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg' },
       { name: 'Figma', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/figma.svg' },
@@ -80,7 +71,7 @@ export const academicProjects = [
     description:
       "La récolte d'informations sur l'entreprise ESN Sopra Steria afin d'en faire un site a type informatif pour un public défini.",
     teamSize: 'En trinôme',
-    image: '/assets/images/6508-sopra-lille-bata-ext-102.jpg',
+    image: '/assets/images/projects/6508-sopra-lille-bata-ext-102.jpg',
     tags: ['HTML', 'CSS', 'JavaScript', 'Figma', 'Git'],
     technologies: [
       { name: 'HTML5', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/html5.svg' },
@@ -101,7 +92,7 @@ export const academicProjects = [
     category: 'SAE 3',
     description: "Installation et schématisation d'un poste Linux Debian.",
     teamSize: 'En monôme',
-    image: '/assets/images/PosteTravailLinux.png',
+    image: '/assets/images/projects/PosteTravailLinux.png',
     tags: ['Linux', 'Bash', 'Git', 'VirtualBox'],
     technologies: [
       { name: 'Linux', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/linux.svg' },
@@ -130,14 +121,10 @@ export const academicProjects = [
     description:
       "Codage, étude et comparaison d'efficacité entre divers algorithmes de comparaisons en Java.",
     teamSize: 'En binôme',
-    image: '/assets/images/algorithm.jpg',
+    image: '/assets/images/projects/algorithm.jpg',
     tags: ['Java', 'Algorithmes', 'Git'],
     technologies: [
-      {
-        name: 'Java',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-        colored: true,
-      },
+      { name: 'Java', icon: '/assets/images/logos/JavaAltLogo.svg' },
       {
         name: 'IntelliJ IDEA',
         icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/intellijidea.svg',
@@ -152,18 +139,16 @@ export const academicProjects = [
     category: 'SAE 4',
     description: "Conception, implémentation et optimisation d'une base de données relationnelle.",
     teamSize: 'En trinôme',
-    image: '/assets/images/bases-de-donnees-1024x734.jpg',
+    image: '/assets/images/projects/bases-de-donnees-1024x734.jpg',
     tags: ['SQL', 'PostgreSQL', 'Base de données'],
     technologies: [
       {
         name: 'PostgreSQL',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
-        colored: true,
+        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg',
       },
       {
         name: 'SQL',
         icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azuresqldatabase/azuresqldatabase-original.svg',
-        colored: true,
       },
     ],
   },
@@ -176,7 +161,7 @@ export const personalProjects = [
     description:
       'Un bot Discord entièrement développé en JavaScript (discord.js), qui offre plusieurs services et jeux réunis sur une même plateforme textuelle.',
     tags: ['JavaScript', 'Discord', 'Python', 'SQL', 'IA'],
-    image: '/assets/images/discordBotIcon.png',
+    image: '/assets/images/projects/discordBotIcon.png',
     link: 'https://github.com/MalevolentMoksi/Moksi-Bazaar',
   },
   {

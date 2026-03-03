@@ -22,7 +22,7 @@ const ProjetsPersonnels = () => {
       <article className="project">
         <h2 id="discord-bot-title">Bot Discord <i>"Moksi's Bazaar"</i></h2>
         <img
-            src={getAssetPath('assets/images/discordBotIcon.png')}
+            src={getAssetPath('assets/images/projects/discordBotIcon.png')}
           loading="lazy"
           alt="Icone du Bot Discord Moksi's Bazaar"
           className="bot-icon"
@@ -152,7 +152,7 @@ const ProjetsPersonnels = () => {
 
             <div className="bot-dashboard-container">
               <img
-                  src={getAssetPath('assets/images/railway-dashboard.png')}
+                  src={getAssetPath('assets/images/projects/railway-dashboard.png')}
                 loading="lazy"
                 alt="Tableau de bord Railway pour le bot Discord"
                 className="bot-dashboard-image"
@@ -262,7 +262,7 @@ const ProjetsPersonnels = () => {
       <article className="project">
         <div className="title-with-logo">
           <h2>Jeux réalisés sur Scratch</h2>
-            <img src={getAssetPath('assets/images/ScratchLogo.png')} width="800" height="450" loading="lazy" alt="Logo Scratch" />
+            <img src={getAssetPath('assets/images/logos/ScratchLogo.png')} width="800" height="450" loading="lazy" alt="Logo Scratch" />
         </div>
 
         <p>
