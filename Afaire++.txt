@@ -3,7 +3,6 @@ Tâches manuelles :
 - Meilleures idées pour illustration (base de données)
 - Changer la section Moksi's Bazaar pour faire + pro
 - Remplacer dessins par dessins + pro
-- SQLite vs PostgreSQL a corrigé selon la SAE
 
 Tâches requiert Recherches A faire :
 

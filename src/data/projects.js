@@ -71,7 +71,7 @@ export const academicProjects = [
     description:
       "La récolte d'informations sur l'entreprise ESN Sopra Steria afin d'en faire un site a type informatif pour un public défini.",
     teamSize: 'En trinôme',
-    image: '/assets/images/projects/6508-sopra-lille-bata-ext-102.jpg',
+    image: '/assets/images/projects/SopraSteriaIllustration.png',
     tags: ['HTML', 'CSS', 'JavaScript', 'Figma', 'Git'],
     technologies: [
       { name: 'HTML5', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/html5.svg' },
@@ -122,6 +122,7 @@ export const academicProjects = [
       "Codage, étude et comparaison d'efficacité entre divers algorithmes de comparaisons en Java.",
     teamSize: 'En binôme',
     image: '/assets/images/projects/algorithm.jpg',
+    video: '/assets/videos/LoopingAlgorithmsVideo.mp4',
     tags: ['Java', 'Algorithmes', 'Git'],
     technologies: [
       { name: 'Java', icon: '/assets/images/logos/JavaAltLogo.svg' },
@@ -139,7 +140,7 @@ export const academicProjects = [
     category: 'SAE 4',
     description: "Conception, implémentation et optimisation d'une base de données relationnelle.",
     teamSize: 'En trinôme',
-    image: '/assets/images/projects/bases-de-donnees-1024x734.jpg',
+    image: '/assets/images/projects/DatabaseIllustration.png',
     tags: ['SQL', 'PostgreSQL', 'Base de données'],
     technologies: [
       {

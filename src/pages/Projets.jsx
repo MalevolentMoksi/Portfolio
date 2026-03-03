@@ -19,13 +19,27 @@ const Projets = () => {
             <article className="project" aria-labelledby={`project-title-${project.id}`}>
               {project.category && <h3>{project.category}</h3>}
               <h2 id={`project-title-${project.id}`}>{project.title}</h2>
-              <img
-                src={getAssetPath(project.image)}
-                alt={`Aperçu du projet : ${project.title}`}
-                loading="lazy"
-                width="800"
-                height="450"
-              />
+              {project.video ? (
+                <video
+                  src={getAssetPath(project.video)}
+                  poster={getAssetPath(project.image)}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  aria-label={`Aperçu du projet : ${project.title}`}
+                  width="800"
+                  height="450"
+                />
+              ) : (
+                <img
+                  src={getAssetPath(project.image)}
+                  alt={`Aperçu du projet : ${project.title}`}
+                  loading="lazy"
+                  width="800"
+                  height="450"
+                />
+              )}
               <p>
                 <strong>{project.teamSize} :</strong> {project.description}
               </p>
