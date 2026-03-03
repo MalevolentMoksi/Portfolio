@@ -1,5 +1,37 @@
 import useDocumentMeta from '@/hooks/useDocumentMeta.js';
 import { getAssetPath } from '@/utils/assetPath.js';
+import Tooltip from '@/components/Tooltip.jsx';
+
+const discordBotTechnologies = [
+  {
+    name: 'JavaScript',
+    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/javascript.svg',
+  },
+  {
+    name: 'Node.js',
+    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/nodedotjs.svg',
+  },
+  {
+    name: 'Discord',
+    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/discord.svg',
+  },
+  {
+    name: 'PostgreSQL',
+    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg',
+  },
+  {
+    name: 'Docker',
+    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/docker.svg',
+  },
+  {
+    name: 'Railway',
+    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/railway.svg',
+  },
+  {
+    name: 'OpenRouter',
+    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/openai.svg',
+  },
+];
 
 const ProjetsPersonnels = () => {
   useDocumentMeta('Projets Personnels | Portfolio', 'Mes projets personnels et illustrations');
@@ -9,8 +41,7 @@ const ProjetsPersonnels = () => {
     <section id="presentation" aria-labelledby="personal-projects-title">
       <h2 id="personal-projects-title">Présentation</h2>
       <p>
-        Voici quelques projets personnels que j'ai réalisés, principalement pour m'amuser et
-        apprendre de nouvelles compétences. Ils reflètent mon intérêt pour la programmation, le
+        Sur cette page sera présenté divers projets personnels et illustrations. Ils reflètent mon intérêt pour la programmation, le
         design et la créativité.
       </p>
       <p>
@@ -22,27 +53,107 @@ const ProjetsPersonnels = () => {
       <article className="project">
         <h2 id="discord-bot-title">Bot Discord <i>"Moksi's Bazaar"</i></h2>
         <img
-            src={getAssetPath('assets/images/projects/discordBotIcon.png')}
+            src={getAssetPath('assets/images/projects/MoksisBazaarIllustration.png')}
           loading="lazy"
           alt="Icone du Bot Discord Moksi's Bazaar"
           className="bot-icon"
         />
 
+                <div className="project-tech" role="list" aria-label="Technologies utilisées pour le bot Discord">
+          {discordBotTechnologies.map((tech) => (
+            <div key={tech.name} role="listitem">
+              <Tooltip text={tech.name}>
+                <img
+                  src={tech.icon}
+                  alt={tech.name}
+                  className="tech-icon"
+                  loading="lazy"
+                  width="36"
+                  height="36"
+                />
+              </Tooltip>
+            </div>
+          ))}
+        </div>
+
         <p>
           <strong>Moksi's Bazaar</strong> est un bot Discord complet développé en <strong>JavaScript/Node.js</strong> (discord.js v14),
           combinant casino, features sociales et IA conversationnelle. Le bot offre :
         </p>
-        <ul className="bot-features-list">
-          <li><strong>15+ mini-jeux de casino</strong> : blackjack (vs dealer), roulette, machine à sous, craps, high/low, slots progressifs, duels PvP, gacha, et même Tetris</li>
-          <li><strong>Système économique persistant</strong> : monnaie virtuelle avec auto-seeding ($10k), classements par serveur, historique de transactions</li>
-          <li><strong>IA conversationnelle avancée</strong> : intégrée à OpenRouter (DeepSeek), analyse d'images en temps réel, adaptation de personnalité selon l'attitude de l'utilisateur (hostile ↔ friendly)</li>
-          <li><strong>Système de relations multi-utilisateurs</strong> : suivi des sentiments, niveaux d'attitude (friendly, neutral, annoyed), mémoire des conversations</li>
-          <li><strong>Infrastructure 24/7</strong> : hébergée sur Railway (Docker), base PostgreSQL persistante avec 8 tables optimisées</li>
-        </ul>
-        <ul>
-          <li><strong>Compétences :</strong> Architecture logicielle, programmation asynchrone, gestion d'états complexes, optimisation API</li>
-          <li><strong>Techniques :</strong> JavaScript (Node.js, discord.js v14), PostgreSQL (8 tables), Docker, Railway, OpenRouter API, Slash Commands, Button Collectors</li>
-        </ul>
+
+
+
+        <div className="bot-features-grid">
+          <div className="bot-feature-card">
+            <svg className="bot-feature-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="12" cy="10" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="16" cy="8" r="1.5" fill="currentColor" stroke="none"/>
+              <path d="M6 21h12M12 17v4"/>
+            </svg>
+            <div>
+              <strong>15+ mini-jeux de casino</strong>
+              <p>Blackjack (vs dealer), roulette, machine à sous, craps, high/low, slots progressifs, duels PvP, gacha, et même Tetris.</p>
+            </div>
+          </div>
+          <div className="bot-feature-card">
+            <svg className="bot-feature-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="2" x2="12" y2="22"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+            <div>
+              <strong>Économie persistante</strong>
+              <p>Monnaie virtuelle avec auto-seeding ($10k), classements par serveur et historique de transactions.</p>
+            </div>
+          </div>
+          <div className="bot-feature-card">
+            <svg className="bot-feature-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="4" width="16" height="16" rx="2"/>
+              <rect x="9" y="9" width="6" height="6"/>
+              <path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/>
+            </svg>
+            <div>
+              <strong>IA conversationnelle</strong>
+              <p>Intégrée à OpenRouter (DeepSeek), analyse d'images en temps réel, personnalité adaptative selon l'attitude de l'utilisateur (hostile ↔ friendly).</p>
+            </div>
+          </div>
+          <div className="bot-feature-card">
+            <svg className="bot-feature-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="7" r="3"/>
+              <circle cx="17" cy="9" r="2.5"/>
+              <path d="M3 20a6 6 0 0 1 12 0"/>
+              <path d="M17 14c2.5 0 5 1.2 5 4"/>
+            </svg>
+            <div>
+              <strong>Système de relations</strong>
+              <p>Suivi des sentiments, niveaux d'attitude (friendly, neutral, annoyed) et mémoire des conversations par utilisateur.</p>
+            </div>
+          </div>
+          <div className="bot-feature-card">
+            <svg className="bot-feature-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="3" width="20" height="5" rx="1"/>
+              <rect x="2" y="11" width="20" height="5" rx="1"/>
+              <circle cx="18" cy="5.5" r="0.75" fill="currentColor" stroke="none"/>
+              <circle cx="18" cy="13.5" r="0.75" fill="currentColor" stroke="none"/>
+              <path d="M6 19h12M12 16v3"/>
+            </svg>
+            <div>
+              <strong>Infrastructure 24/7</strong>
+              <p>Hébergée sur Railway via Docker, base PostgreSQL persistante avec 8 tables optimisées.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bot-skills-section">
+          <p className="bot-skills-label">Compétences acquises</p>
+          <div className="bot-skills-tags">
+            <span className="bot-skill-tag">Architecture logicielle</span>
+            <span className="bot-skill-tag">Programmation asynchrone</span>
+            <span className="bot-skill-tag">Gestion d'états complexes</span>
+            <span className="bot-skill-tag">Optimisation API</span>
+          </div>
+        </div>
         <a
           href="https://github.com/MalevolentMoksi/Moksi-Bazaar"
           className="btn"
@@ -53,7 +164,9 @@ const ProjetsPersonnels = () => {
           Voir le code sur GitHub
         </a>
 
+        <h4 className="video-gallery-title">Démonstrations</h4>
         <div className="video-gallery" role="region" aria-label="Démonstrations vidéo du bot Discord">
+
           <div className="video-item">
             <div className="video-wrapper">
               <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Demonstration du jeu de Blackjack">
@@ -82,7 +195,7 @@ const ProjetsPersonnels = () => {
 
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline>
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Demonstration des fonds et classements">
                   <source src={getAssetPath('assets/videos/currency.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
@@ -119,18 +232,26 @@ const ProjetsPersonnels = () => {
               Une base de données <strong>PostgreSQL</strong> (intégrée à Railway) persiste l'ensemble des données utilisateur.
             </p>
 
-            <h4 className="bot-section-heading">Système de Base de Données</h4>
+            <h4 className="bot-section-heading">Schéma de Base de Données</h4>
             <p>PostgreSQL contient <strong>8 tables structurées</strong> :</p>
-            <ul className="bot-compact-list">
-              <li><code>balances</code> : solde virtuel par utilisateur (auto-seeding $10k)</li>
-              <li><code>user_preferences</code> : contexte utilisateur, attitude, sentiment score</li>
-              <li><code>conversation_memories</code> : historique des messages pour contexte IA (auto-cleanup après 1000 lignes)</li>
-              <li><code>media_cache</code> : cache des descriptions d'images (optimise coûts API OpenRouter)</li>
-              <li><code>reminders</code> : système de rappels persistants avec scheduling</li>
-              <li><code>pending_duels</code> : défis PvP en attente, survit aux redémarrages</li>
-              <li><code>user_cooldowns</code> : cooldowns persistants pour éviter spam</li>
-              <li><code>sleepy_counts</code> : stats de commande par serveur</li>
-            </ul>
+            <table className="bot-schema-table">
+              <thead>
+                <tr>
+                  <th>Table</th>
+                  <th>Rôle</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>balances</code></td><td>Solde virtuel par utilisateur, auto-seeding à $10k</td></tr>
+                <tr><td><code>user_preferences</code></td><td>Contexte utilisateur, attitude et sentiment score</td></tr>
+                <tr><td><code>conversation_memories</code></td><td>Historique IA par utilisateur — auto-cleanup après 1000 lignes</td></tr>
+                <tr><td><code>media_cache</code></td><td>Cache des descriptions d'images pour limiter les appels OpenRouter</td></tr>
+                <tr><td><code>reminders</code></td><td>Rappels persistants avec scheduling inter-redémarrages</td></tr>
+                <tr><td><code>pending_duels</code></td><td>Défis PvP en attente — survit aux redémarrages Docker</td></tr>
+                <tr><td><code>user_cooldowns</code></td><td>Cooldowns persistants anti-spam par commande</td></tr>
+                <tr><td><code>sleepy_counts</code></td><td>Statistiques d'usage par commande et par serveur</td></tr>
+              </tbody>
+            </table>
 
             <h4 className="bot-section-heading">Architecture Logicielle</h4>
             <ul className="bot-compact-list">
@@ -142,12 +263,27 @@ const ProjetsPersonnels = () => {
             </ul>
 
             <h4 className="bot-section-heading">Flux d'Exécution d'une Commande</h4>
-            <ol className="bot-compact-list">
-              <li>Utilisateur appelle une commande slash (ex: <code>/bj bet 500</code>)</li>
-              <li>Bot interroge <code>balances</code> pour vérifier le solde</li>
-              <li>Logique du jeu s'exécute avec button collectors pour les actions du joueur</li>
-              <li>Résultats mis à jour dans PostgreSQL</li>
-              <li>Embed Discord personnalisé avec couleurs/emoji selon le résultat renvoyé</li>
+            <ol className="bot-flow">
+              <li>
+                <span className="bot-flow-step">1</span>
+                <p>Utilisateur appelle une commande slash <code>/bj bet 500</code></p>
+              </li>
+              <li>
+                <span className="bot-flow-step">2</span>
+                <p>Vérification du solde dans <code>balances</code> — rejet si insuffisant</p>
+              </li>
+              <li>
+                <span className="bot-flow-step">3</span>
+                <p>Logique du jeu avec <strong>Button Collectors</strong> discord.js pour les actions du joueur</p>
+              </li>
+              <li>
+                <span className="bot-flow-step">4</span>
+                <p>Mise à jour transactionnelle dans PostgreSQL</p>
+              </li>
+              <li>
+                <span className="bot-flow-step">5</span>
+                <p>Embed Discord renvoyé avec état et résultat de la partie</p>
+              </li>
             </ol>
 
             <div className="bot-dashboard-container">

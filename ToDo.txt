@@ -1,13 +1,15 @@
 Tâches manuelles :
-
-- Meilleures idées pour illustration (base de données)
-- Changer la section Moksi's Bazaar pour faire + pro
-- Remplacer dessins par dessins + pro
+ + d'Arrière plans
+- Crédits
 
 Tâches requiert Recherches A faire :
+- Toast notifications
+- Improve pet visibility
 
 Tâches simples :
 
 Tâches moyennes (besoin expertise IA) :
+- Ajouter des fonctions d'accessibilités
+
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :

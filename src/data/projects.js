@@ -162,7 +162,7 @@ export const personalProjects = [
     description:
       'Un bot Discord entièrement développé en JavaScript (discord.js), qui offre plusieurs services et jeux réunis sur une même plateforme textuelle.',
     tags: ['JavaScript', 'Discord', 'Python', 'SQL', 'IA'],
-    image: '/assets/images/projects/discordBotIcon.png',
+    image: '/assets/images/projects/MoksisBazaarIllustration.png',
     link: 'https://github.com/MalevolentMoksi/Moksi-Bazaar',
   },
   {

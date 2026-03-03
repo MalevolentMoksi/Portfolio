@@ -95,6 +95,10 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   const [isDragging,    setIsDragging]    = useState(false);
   const [dragSpeed,     setDragSpeed]     = useState(0);
   const [dragRotation,  setDragRotation]  = useState(0);
+  // RAF gap & cursor-idle tracking — prevents false reactions on tab resume / mouse re-entry
+  const lastTickTimeRef = useRef(Date.now());
+  const resumeGraceRef = useRef(0);
+  const lastCursorMoveTimeRef = useRef(Date.now());
   // Scroll dizzy detection
   const scrollHistoryRef = useRef([]);
   const scrollDizzyCooldownRef = useRef(0);
@@ -158,6 +162,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   useEffect(() => {
     const onMove = (e) => {
       hasMouseMovedRef.current = true;
+      lastCursorMoveTimeRef.current = Date.now();
       cursorRef.current = { x: e.clientX, y: e.clientY };
     };
     window.addEventListener('mousemove', onMove, { passive: true });
@@ -258,7 +263,23 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   /* ── Boucle d'animation RAF ── */
   useEffect(() => {
     const tick = () => {
-      if (hudOpen || isDraggingRef.current) { rafRef.current = requestAnimationFrame(tick); return; }
+      if (hudOpen || isDraggingRef.current) { lastTickTimeRef.current = Date.now(); rafRef.current = requestAnimationFrame(tick); return; }
+
+      // ── RAF gap detection — suppresses false reactions after tab resume / long pause ──
+      const tickNow = Date.now();
+      if (tickNow - lastTickTimeRef.current > 500) {
+        // Large gap detected (tab was in background, etc.)
+        resumeGraceRef.current = 60;               // ~1 s grace period
+        proximityRef.current.lastDist = Infinity;   // prevent false "sudden approach"
+        proximityRef.current.dwellFrames = 0;
+      }
+      lastTickTimeRef.current = tickNow;
+      if (resumeGraceRef.current > 0) resumeGraceRef.current--;
+
+      // ── Cursor-idle detection — if mouse hasn't moved in >1 s, prevent stale proximity delta ──
+      if (tickNow - lastCursorMoveTimeRef.current > 1000) {
+        proximityRef.current.lastDist = Infinity;
+      }
 
       const p = posRef.current;
       const v = velRef.current;
@@ -513,7 +534,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
       }
       // Bounce dizzy — if fast enough and cooldown expired
       const prox = proximityRef.current;
-      if (bounced) {
+      if (bounced && resumeGraceRef.current === 0) {
         const bspd = Math.sqrt(v.x * v.x + v.y * v.y);
         if (bspd > 1.8 && prox.bounceCooldown === 0) {
           onBehavior('dizzy');
@@ -634,32 +655,35 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
 
         const isSad = petMoodRef.current === 'sad';
 
-        // Dwell excitement — only when happy/content
-        if (!isAttracting && !isSad && dist < 130 && dist > 8) {
-          prox.dwellFrames++;
-          if (prox.dwellFrames >= 90 && prox.exciteCooldown === 0) {
-            onBehavior('excited');
-            prox.exciteCooldown = 300;
+        // ── Skip proximity behaviors during resume grace period ──
+        if (resumeGraceRef.current === 0) {
+          // Dwell excitement — only when happy/content
+          if (!isAttracting && !isSad && dist < 130 && dist > 8) {
+            prox.dwellFrames++;
+            if (prox.dwellFrames >= 90 && prox.exciteCooldown === 0) {
+              onBehavior('excited');
+              prox.exciteCooldown = 300;
+              prox.dwellFrames = 0;
+            }
+          } else {
+            prox.dwellFrames = Math.max(0, prox.dwellFrames - 2);
+          }
+
+          // Sudden close approach → scared (mood-independent — surprise is universal)
+          if (!isAttracting && prox.lastDist - dist > 80 && dist < 160 && prox.scaredCooldown === 0) {
+            onBehavior('scared');
+            prox.scaredCooldown = 180;
             prox.dwellFrames = 0;
           }
-        } else {
-          prox.dwellFrames = Math.max(0, prox.dwellFrames - 2);
-        }
 
-        // Sudden close approach → scared (mood-independent — surprise is universal)
-        if (!isAttracting && prox.lastDist - dist > 80 && dist < 160 && prox.scaredCooldown === 0) {
-          onBehavior('scared');
-          prox.scaredCooldown = 180;
-          prox.dwellFrames = 0;
+          // Sustained high speed → energy burst — only when not sad
+          if (!isAttracting && !isSad && spd > effectiveMaxSpeed * 0.82 && prox.speedCooldown === 0 && prox.exciteCooldown === 0) {
+            onBehavior('excited');
+            prox.speedCooldown = 240;
+            prox.exciteCooldown = 240;
+          }
         }
         prox.lastDist = dist;
-
-        // Sustained high speed → energy burst — only when not sad
-        if (!isAttracting && !isSad && spd > effectiveMaxSpeed * 0.82 && prox.speedCooldown === 0 && prox.exciteCooldown === 0) {
-          onBehavior('excited');
-          prox.speedCooldown = 240;
-          prox.exciteCooldown = 240;
-        }
 
         // Hover-to-pet cooldown decrement
         if (hoverCooldownRef.current > 0) hoverCooldownRef.current--;
