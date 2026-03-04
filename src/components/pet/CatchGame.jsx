@@ -66,7 +66,8 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
   const [rallies, setRallies]   = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
-  const [catchFlash, setCatchFlash] = useState(false);
+  // { x, y } while ripple is active, null otherwise
+  const [catchRipple, setCatchRipple] = useState(null);
   const hintTimerRef = useRef(null);
 
   /* ── Best score persistence ── */
@@ -339,8 +340,8 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
           holderRef.current = 'bot-held';
           botHoldCounterRef.current = CATCH_BOT_HOLD_MIN + Math.floor(Math.random() * CATCH_BOT_HOLD_RANGE);
           setRallies(r => r + 1);
-          setCatchFlash(true);
-          setTimeout(() => setCatchFlash(false), 200);
+          setCatchRipple({ x: bot.x, y: bot.y });
+          setTimeout(() => setCatchRipple(null), 450);
         }
       }
 
@@ -372,7 +373,15 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
   }, [botPosRef, onBotCatch, startHoldTimer, ballInfoRef]);
 
   return createPortal(
-    <div className={`catch-game-overlay${catchFlash ? ' catch-game-overlay--flash' : ''}`} onClick={handleClick}>
+    <div className={`catch-game-overlay${catchRipple ? ' catch-game-overlay--flash' : ''}`} onClick={handleClick}>
+
+      {/* Ripple localisé au point de catch du bot */}
+      {catchRipple && (
+        <div
+          className="catch-ripple"
+          style={{ left: catchRipple.x, top: catchRipple.y }}
+        />
+      )}
 
       {/* Écran d'instructions initial */}
       {showIntro && (

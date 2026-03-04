@@ -1310,9 +1310,24 @@ body[data-mood='vaporwave'] .pet-robot {
   transition: background 0.15s ease;
 }
 
-/* Flash bref quand le bot catch la balle */
-.catch-game-overlay--flash {
-  background: rgba(255, 255, 255, 0.08);
+/* Flash bref quand le bot catch la balle — uniquement pulse score, pas d'overlay */
+
+/* Anneau expansif localisé au point de recatch du bot */
+@keyframes catch-ripple-expand {
+  0%   { transform: translate(-50%, -50%) scale(0.1); opacity: 0.85; }
+  100% { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
+}
+
+.catch-ripple {
+  position: fixed;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2.5px solid var(--color-primary);
+  pointer-events: none;
+  z-index: calc(var(--z-lightbox) + 6);
+  animation: catch-ripple-expand 0.42s cubic-bezier(0.2, 0.8, 0.5, 1) forwards;
+  will-change: transform, opacity;
 }
 
 /* ── Écran d'instructions initial ── */
