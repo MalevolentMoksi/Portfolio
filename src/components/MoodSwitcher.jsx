@@ -54,6 +54,25 @@ const MoodSwitcher = () => {
     overlay.style.setProperty('--vhs-color', MOODS[newMood].color);
     document.body.appendChild(overlay);
 
+    // Bandes glitch horizontales aléatoires (4–6 strips)
+    const stripCount = 4 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < stripCount; i++) {
+      const strip = document.createElement('div');
+      strip.className = 'vhs-strip';
+      const topPct    = Math.random() * 88;
+      const heightPct = 3 + Math.random() * 18;
+      const offsetX   = (Math.random() - 0.5) * 90; // −45px à +45px
+      const delay     = Math.round(Math.random() * 80);
+      strip.style.cssText = [
+        `top: ${topPct.toFixed(1)}%`,
+        `height: ${heightPct.toFixed(1)}%`,
+        `transform: translateX(${offsetX.toFixed(0)}px)`,
+        `background: ${MOODS[newMood].color}`,
+        `animation-delay: ${delay}ms`,
+      ].join('; ');
+      overlay.appendChild(strip);
+    }
+
     // Changer le mood au milieu de la transition (60 ms)
     setTimeout(() => {
       setMood(newMood);

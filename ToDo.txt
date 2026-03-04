@@ -7,10 +7,14 @@ Tâches requiert Recherches A faire :
 - Improve pet visibility
 
 Tâches simples :
-Ajouter/Améliorer effet cathodique, le rendre animé, ajouter des petits effets télévisions + Penser à des effets à mettre pour Vaporwave
+Ajouter/Améliorer effet cathodique, 
+le rendre animé, ajouter des petits effets télévisions + 
+Penser à des effets à mettre pour Vaporwave
+Enlever/Améliorer Flash quand le bot reçoit la balle
 
 Tâches moyennes (besoin expertise IA) :
 - Ajouter des fonctions d'accessibilités
 
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
+Ajouter des petits bonhomes (Améliorer l'ambience)

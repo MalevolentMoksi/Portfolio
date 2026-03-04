@@ -159,8 +159,101 @@
   font-weight: 700;
 }
 
-/* ---- Mood-specific body overlays ---- */
-/* Hacker: subtle scan-line overlay with CRT flicker */
+/* ================================================================
+   Mood-specific body overlays — persistants par ambiance
+   Stratégie : ::before = effet de fond/glitch, ::after = scanlines
+   ================================================================ */
+
+/* ── DEFAULT (or) ── */
+/* ::before : vignette radiale dorée qui respire doucement */
+body[data-mood='default']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  background: radial-gradient(ellipse at 50% 50%, transparent 38%, rgba(0, 0, 0, 0.5) 100%);
+  animation: gold-vignette-breathe 5s ease-in-out infinite;
+}
+
+/* ::after : grain cinéma — tramage croisé doré très subtil */
+body[data-mood='default']::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(212, 175, 55, 0.014) 3px,
+      rgba(212, 175, 55, 0.014) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(212, 175, 55, 0.008) 3px,
+      rgba(212, 175, 55, 0.008) 4px
+    );
+  mix-blend-mode: screen;
+  animation: gold-grain 0.12s steps(1) infinite;
+}
+
+@keyframes gold-vignette-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.78;
+  }
+}
+
+@keyframes gold-grain {
+  0% {
+    background-position:
+      0px 0px,
+      0px 0px;
+  }
+  25% {
+    background-position:
+      1px -2px,
+      2px 1px;
+  }
+  50% {
+    background-position:
+      -2px 1px,
+      -1px 2px;
+  }
+  75% {
+    background-position:
+      2px 2px,
+      1px -1px;
+  }
+  100% {
+    background-position:
+      -1px -1px,
+      -2px 2px;
+  }
+}
+
+/* ── HACKER (vert néon) ── */
+/* ::before : ghost sweep + glitch burst épars — 90 % idle, 10 % actif */
+body[data-mood='hacker']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  background: rgba(0, 255, 65, 0.12);
+  opacity: 0;
+  animation: hacker-glitch-burst 14s linear infinite;
+}
+
+/* ::after : scanlines + flicker irrégulier avec snaps violents */
 body[data-mood='hacker']::after {
   content: '';
   position: fixed;
@@ -169,19 +262,182 @@ body[data-mood='hacker']::after {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 255, 65, 0.015) 2px,
-    rgba(0, 255, 65, 0.015) 4px
+    rgba(0, 255, 65, 0.022) 2px,
+    rgba(0, 255, 65, 0.022) 4px
   );
   pointer-events: none;
   z-index: 9998;
-  animation: crt-flicker 0.08s steps(2) infinite;
+  animation: hacker-crt-flicker 3.5s steps(1) infinite;
 }
 
-/* Vaporwave: gradient background + subtle CRT scanlines */
+@keyframes hacker-glitch-burst {
+  /* Invisible la plupart du temps */
+  0%,
+  17% {
+    opacity: 0;
+    transform: none;
+    clip-path: none;
+  }
+  /* Ghost sweep : une ligne fine descend lentement */
+  18% {
+    opacity: 0;
+    clip-path: inset(0% 0 100% 0);
+    transform: none;
+  }
+  20% {
+    opacity: 0.08;
+    clip-path: inset(0% 0 100% 0);
+    transform: none;
+  }
+  22% {
+    opacity: 0.09;
+    clip-path: inset(18% 0 80% 0);
+    transform: none;
+  }
+  24% {
+    opacity: 0.09;
+    clip-path: inset(44% 0 54% 0);
+    transform: none;
+  }
+  26% {
+    opacity: 0.09;
+    clip-path: inset(70% 0 28% 0);
+    transform: none;
+  }
+  28% {
+    opacity: 0.06;
+    clip-path: inset(100% 0 0% 0);
+    transform: none;
+  }
+  30%,
+  83% {
+    opacity: 0;
+    transform: none;
+    clip-path: none;
+  }
+  /* Glitch burst : 3 frames de décalage violent */
+  84% {
+    opacity: 0;
+    transform: none;
+  }
+  85% {
+    opacity: 0.28;
+    transform: translateX(3px);
+    clip-path: inset(22% 0 73% 0);
+  }
+  86% {
+    opacity: 0.22;
+    transform: translateX(-2px);
+    clip-path: inset(56% 0 37% 0);
+  }
+  87% {
+    opacity: 0.15;
+    transform: translateX(1.5px);
+    clip-path: inset(9% 0 88% 0);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: none;
+    clip-path: none;
+  }
+}
+
+@keyframes hacker-crt-flicker {
+  /* Cycle de 3.5 s — flicker discret la plupart du temps, snap violent ~2/cycle */
+  0%,
+  100% {
+    opacity: 1;
+  }
+  8% {
+    opacity: 0.92;
+  }
+  8.5% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0.95;
+  }
+  30.5% {
+    opacity: 1;
+  }
+  /* Snap violent 1 */
+  55% {
+    opacity: 1;
+  }
+  55.3% {
+    opacity: 0.55;
+  }
+  55.6% {
+    opacity: 1;
+  }
+  55.9% {
+    opacity: 0.72;
+  }
+  56.2% {
+    opacity: 1;
+  }
+  /* Snap violent 2 */
+  82% {
+    opacity: 1;
+  }
+  82.2% {
+    opacity: 0.6;
+  }
+  82.5% {
+    opacity: 1;
+  }
+}
+
+/* ── VAPORWAVE (rose + bleu) ── */
+/* body : gradient sunset animé */
 body[data-mood='vaporwave'] {
-  background: linear-gradient(135deg, #0d001a 0%, #0a1040 50%, #1a0035 100%) !important;
+  background: linear-gradient(
+    160deg,
+    #0d001a 0%,
+    #0a1040 28%,
+    #2d0050 60%,
+    #430070 85%,
+    #0a1040 100%
+  ) !important;
+  background-size: 200% 200% !important;
+  animation: vapor-gradient-pulse 8s ease-in-out infinite;
 }
 
+/* ::before : grille synthwave perspective scrollante en bas de l'écran */
+body[data-mood='vaporwave']::before {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: -50%;
+  width: 200%;
+  height: 50vh;
+  pointer-events: none;
+  z-index: 9996;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 38px,
+      rgba(255, 113, 206, 0.2) 38px,
+      rgba(255, 113, 206, 0.2) 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 38px,
+      rgba(1, 205, 254, 0.14) 38px,
+      rgba(1, 205, 254, 0.14) 40px
+    );
+  background-size: 40px 40px;
+  transform: perspective(320px) rotateX(44deg);
+  transform-origin: center bottom;
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
+  animation: vapor-grid-scroll 2.5s linear infinite;
+}
+
+/* ::after : scanlines rose + flicker CRT */
 body[data-mood='vaporwave']::after {
   content: '';
   position: fixed;
@@ -190,21 +446,85 @@ body[data-mood='vaporwave']::after {
     0deg,
     transparent,
     transparent 2px,
-    rgba(255, 113, 206, 0.012) 2px,
-    rgba(255, 113, 206, 0.012) 4px
+    rgba(255, 113, 206, 0.022) 2px,
+    rgba(255, 113, 206, 0.022) 4px
   );
   pointer-events: none;
   z-index: 9998;
-  animation: crt-flicker 0.08s steps(2) infinite;
+  animation: vapor-crt-flicker 4s steps(1) infinite;
 }
 
-@keyframes crt-flicker {
+@keyframes vapor-gradient-pulse {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes vapor-grid-scroll {
+  0% {
+    background-position: 0px 0px;
+  }
+  100% {
+    background-position: 0px 40px;
+  }
+}
+
+@keyframes vapor-crt-flicker {
   0%,
   100% {
     opacity: 1;
   }
-  50% {
-    opacity: 0.88;
+  12% {
+    opacity: 0.9;
+  }
+  12.5% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.94;
+  }
+  45.5% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  70.2% {
+    opacity: 0.62;
+  }
+  70.5% {
+    opacity: 0.95;
+  }
+  70.8% {
+    opacity: 0.72;
+  }
+  71.1% {
+    opacity: 1;
+  }
+}
+
+/* Hue-rotate lent sur le contenu vaporwave — appliqué sur main pour
+   ne pas perturber les éléments fixed (header, toasts, modals) */
+body[data-mood='vaporwave'] main {
+  animation: vapor-hue-drift 10s ease-in-out infinite;
+}
+
+@keyframes vapor-hue-drift {
+  0%,
+  100% {
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    filter: hue-rotate(8deg);
+  }
+  75% {
+    filter: hue-rotate(-8deg);
   }
 }
 
@@ -214,10 +534,9 @@ body[data-mood='vaporwave']::after {
   inset: 0;
   z-index: 99999;
   pointer-events: none;
-  animation: vhs-flash 200ms ease-out both;
 }
 
-/* Flash coloré */
+/* Flash coloré de fond */
 .mood-vhs-overlay::before {
   content: '';
   position: absolute;
@@ -226,7 +545,7 @@ body[data-mood='vaporwave']::after {
   animation: vhs-flash-opacity 200ms ease-out both;
 }
 
-/* Scanline horizontale qui descend */
+/* Balayage scanline qui descend */
 .mood-vhs-overlay::after {
   content: '';
   position: absolute;
@@ -235,8 +554,8 @@ body[data-mood='vaporwave']::after {
     0deg,
     transparent,
     transparent 2px,
-    rgba(255, 255, 255, 0.04) 2px,
-    rgba(255, 255, 255, 0.04) 4px
+    rgba(255, 255, 255, 0.06) 2px,
+    rgba(255, 255, 255, 0.06) 4px
   );
   animation: vhs-sweep 180ms linear both;
   animation-delay: 20ms;
@@ -250,7 +569,7 @@ body[data-mood='vaporwave']::after {
     opacity: 0.45;
   }
   40% {
-    opacity: 0.2;
+    opacity: 0.18;
   }
   100% {
     opacity: 0;
@@ -263,6 +582,31 @@ body[data-mood='vaporwave']::after {
   }
   100% {
     clip-path: inset(0 0 0% 0);
+  }
+}
+
+/* Bandes horizontales glitch — enfants générés dynamiquement en JS */
+.vhs-strip {
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation: vhs-strip-flash 200ms steps(3) both;
+}
+
+@keyframes vhs-strip-flash {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.38;
+  }
+  60% {
+    opacity: 0.18;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
