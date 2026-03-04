@@ -402,20 +402,20 @@ const PetButton = () => {
 
   /* ── Toggle spawn (recharge les stats si elles étaient basses) ── */
   const toggleSpawn = useCallback(() => {
-    setIsSpawned((prev) => {
-      const next = !prev;
-      if (next) {
-        setStats((s) => ({
-          hunger: s.hunger < 10 ? 50 : Math.round(s.hunger),
-          happiness: s.happiness < 10 ? 50 : Math.round(s.happiness),
-        }));
-        showToast('Robot invoqué !', { type: 'info', duration: 2500 });
-      } else {
-        showToast('Robot rappelé', { type: 'info', duration: 2000 });
-      }
-      return next;
-    });
-  }, [showToast]);
+    // showToast doit être appelé HORS du state updater — React StrictMode
+    // invoque les updaters deux fois pour détecter les side effects impurs.
+    const next = !isSpawned;
+    if (next) {
+      setStats((s) => ({
+        hunger: s.hunger < 10 ? 50 : Math.round(s.hunger),
+        happiness: s.happiness < 10 ? 50 : Math.round(s.happiness),
+      }));
+      showToast('Robot invoqué !', { type: 'info', duration: 2500 });
+    } else {
+      showToast('Robot rappelé', { type: 'info', duration: 2000 });
+    }
+    setIsSpawned(next);
+  }, [isSpawned, showToast]);
 
 
   // Achievement unlocks driven by state changes in PetButton

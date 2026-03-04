@@ -76,7 +76,7 @@ const MoodSwitcher = () => {
     // Changer le mood au milieu de la transition (60 ms)
     setTimeout(() => {
       setMood(newMood);
-      showToast(`Ambiance : ${MOODS[newMood].label}`, { type: 'info', duration: 2500 });
+      showToast(`${MOODS[newMood].emoji}  Ambiance « ${MOODS[newMood].label} » activée`, { type: 'info', duration: 4000 });
     }, 60);
 
     // Retirer l'overlay après la fin de l'animation (200 ms)
