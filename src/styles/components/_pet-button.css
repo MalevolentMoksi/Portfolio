@@ -181,6 +181,7 @@
   user-select: none;
   touch-action: none; /* active le drag tactile sans déclencher le scroll */
   transition: none; /* position gérée par JS */
+  will-change: transform;
 }
 
 .pet-wanderer--dragging {
@@ -226,6 +227,11 @@
 /* Quand le hover se charge, le glow pulse plus vite */
 .pet-wanderer--hovered .pet-svg-wrap {
   animation: pet-glow-breathe-hover 1.2s ease-in-out infinite;
+}
+
+/* Pause glow pendant le jeu d'attrape — économise les compositing GPU */
+.pet-wanderer--catching .pet-svg-wrap {
+  animation-play-state: paused;
 }
 
 /* Flip horizontal géré en JSX (transform sur .pet-svg-wrap) */
@@ -1408,6 +1414,9 @@ body[data-mood='vaporwave'] .pet-robot {
 
 .catch-ball {
   position: fixed;
+  left: 0;
+  top: 0;
+  will-change: transform;
   pointer-events: none;
   z-index: calc(var(--z-lightbox) + 6);
   color: var(--color-primary);

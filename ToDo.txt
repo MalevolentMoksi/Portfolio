@@ -3,10 +3,11 @@ Tâches manuelles :
 - Crédits
 
 Tâches requiert Recherches A faire :
-- Toast notifications
+- Toast notifications appears twice on bot summon, needs precision on MoodSwitcher Toasts
 - Improve pet visibility
 
 Tâches simples :
+Ajouter/Améliorer effet cathodique, le rendre animé, ajouter des petits effets télévisions + Penser à des effets à mettre pour Vaporwave
 
 Tâches moyennes (besoin expertise IA) :
 - Ajouter des fonctions d'accessibilités

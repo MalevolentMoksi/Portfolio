@@ -4,7 +4,7 @@
    ══════════════════════════════════════════════ */
 import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 import {
   PET_SIZE, HALF,
   BASE_SPEED, MAX_SPEED, MAGNET_RADIUS, MAGNET_SPEED,
@@ -18,19 +18,31 @@ import CatchGame from './CatchGame.jsx';
 import AchievementsPanel from './AchievementsPanel.jsx';
 import { FOOD_ICONS } from './petData.jsx';
 import Tooltip from '../Tooltip.jsx';
+import { byTier } from '@utils/performanceTier.js';
+
+// Intercept prediction loop cap — adapté au tier de performance
+const INTERCEPT_STEPS = byTier({ high: 40, mid: 25, low: 15 });
 
 // forwardRef permet à AnimatePresence (PetButton) de transmettre sa ref sans warning React.
 // Le portal rend dans document.body donc la ref n'est pas attachée à un DOM node visible.
 const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onThought, onHoverPet, cooldowns, thoughtQueue, hudThought, sizeScale, speedMult, isSleeping, moodSpinActive, petName, onRename, feedIconIndex, achievements, onUnlock, isCatching, onGameEnd }, _ref) {
   const PET_TOP_MIN = HALF;
-  const [pos, setPos] = useState(() => ({
-    x: HALF + Math.random() * (window.innerWidth - PET_SIZE),
-    y: PET_TOP_MIN + 60 + Math.random() * (window.innerHeight - PET_TOP_MIN - 150),
-  }));
+  // Position initiale aléatoire (calculée une seule fois)
+  const posRef = useRef(null);
+  if (!posRef.current) {
+    posRef.current = {
+      x: HALF + Math.random() * (window.innerWidth - PET_SIZE),
+      y: PET_TOP_MIN + 60 + Math.random() * (window.innerHeight - PET_TOP_MIN - 150),
+    };
+  }
+  // Motion values pour position — bypass le cycle render React (pas de re-render à 60fps)
+  const petLeft = useMotionValue(posRef.current.x - HALF);
+  const petTop  = useMotionValue(posRef.current.y - HALF);
   const [facingLeft, setFacingLeft] = useState(false);
   const [hudOpen, setHudOpen] = useState(false);
   const [gaze, setGaze] = useState({ x: 0, y: 0 });
-  const [speedLevel, setSpeedLevel] = useState(0);
+  // speedLevel en ref (stretch visuel subtil, mis à jour au prochain render déclenché par autre chose)
+  const speedLevelRef = useRef(0);
   const [isResting, setIsResting] = useState(false);
   // HUD inline rename editing
   const [isEditingName, setIsEditingName] = useState(false);
@@ -48,15 +60,16 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   }, [onBehavior]);
 
   // Ticker pour mettre à jour les compte-à-rebours des cooldowns
+  // Ne tourne que quand le HUD est ouvert — pas de re-renders pendant le jeu
   const [, setCdTick] = useState(0);
   useEffect(() => {
+    if (!hudOpen) return;
     const anyCooling = Object.values(cooldowns).some((t) => t > Date.now());
     if (!anyCooling) return;
     const id = setInterval(() => setCdTick((n) => n + 1), 100);
     return () => clearInterval(id);
-  }, [cooldowns]);
+  }, [cooldowns, hudOpen]);
 
-  const posRef = useRef(pos);
   const velRef = useRef({ x: (Math.random() - 0.5) * BASE_SPEED * 2, y: (Math.random() - 0.5) * BASE_SPEED * 2 });
   // Desired velocity — slowly drifts for organic wandering
   const desiredVRef = useRef((() => {
@@ -123,6 +136,8 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   const headerBottomRef = useRef(0);
   // Ball info bridge — CatchGame writes ball state, RAF reads for seek steering
   const ballInfoRef = useRef(null);
+  // Cached intercept target — recomputed every 10 frames, not every frame
+  const cachedInterceptRef = useRef(null);
   // Catching ref for RAF closure
   const isCatchingRef = useRef(false);
   useEffect(() => { isCatchingRef.current = isCatching; }, [isCatching]);
@@ -314,26 +329,29 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         p.y = clamp(p.y + v.y, PET_TOP_MIN, vh - HALF);
 
         if (frameRef.current % 2 === 0) {
-          setPos({ x: p.x, y: p.y });
-          setSpeedLevel(Math.sqrt(v.x * v.x + v.y * v.y));
+          petLeft.set(p.x - HALF);
+          petTop.set(p.y - HALF);
+          speedLevelRef.current = Math.sqrt(v.x * v.x + v.y * v.y);
 
           if (v.x > 0.08)       flipHysteresisRef.current = Math.min(flipHysteresisRef.current + 1,  20);
           else if (v.x < -0.08) flipHysteresisRef.current = Math.max(flipHysteresisRef.current - 1, -20);
           if (flipHysteresisRef.current >=  15) setFacingLeft(false);
           if (flipHysteresisRef.current <= -15) setFacingLeft(true);
 
-          const gdx = cursorRef.current.x - p.x;
-          const gdy = cursorRef.current.y - p.y;
-          const gdist = Math.sqrt(gdx * gdx + gdy * gdy) || 1;
-          const gazeStrength = Math.min(1, gdist / 260);
-          const MAX_GAZE = 1.8;
-          if (!hasMouseMovedRef.current) {
-            setGaze({ x: 0, y: 0 });
-          } else {
-            setGaze({
-              x: (gdx / gdist) * gazeStrength * MAX_GAZE,
-              y: (gdy / gdist) * gazeStrength * MAX_GAZE,
-            });
+          if (frameRef.current % 6 === 0) {
+            const gdx = cursorRef.current.x - p.x;
+            const gdy = cursorRef.current.y - p.y;
+            const gdist = Math.sqrt(gdx * gdx + gdy * gdy) || 1;
+            const gazeStrength = Math.min(1, gdist / 260);
+            const MAX_GAZE = 1.8;
+            if (!hasMouseMovedRef.current) {
+              setGaze({ x: 0, y: 0 });
+            } else {
+              setGaze({
+                x: (gdx / gdist) * gazeStrength * MAX_GAZE,
+                y: (gdy / gdist) * gazeStrength * MAX_GAZE,
+              });
+            }
           }
 
           if (hoverCooldownRef.current > 0) hoverCooldownRef.current--;
@@ -348,37 +366,42 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         const bi = ballInfoRef.current;
         // Only seek when ball is flying (thrown by player)
         if (bi.holder === 'flying') {
-          // Simulate ball trajectory to find best interception point
-          let sx = bi.x, sy = bi.y, svx = bi.vx, svy = bi.vy;
-          const seekSpd = CATCH_SEEK_SPEED;
-          const bw = window.innerWidth, bh = window.innerHeight;
-          const ballR = 11; // CATCH_BALL_SIZE / 2
-          let bestPt = { x: sx, y: sy };
-          for (let i = 1; i <= 60; i++) {
-            svy += CATCH_BALL_GRAVITY;
-            svx *= 0.997; svy *= 0.997;
-            sx += svx; sy += svy;
-            // Wall bounces (same logic as CatchGame)
-            if (sx < ballR)          { sx = ballR;          svx =  Math.abs(svx) * BOUNCE_RESTITUTION; }
-            else if (sx > bw - ballR){ sx = bw - ballR;     svx = -Math.abs(svx) * BOUNCE_RESTITUTION; }
-            if (sy < ballR)                { sy = ballR;            svy =  Math.abs(svy) * BOUNCE_RESTITUTION; }
-            else if (sy > bh - ballR - 4) { sy = bh - ballR - 4;  svy = -Math.abs(svy) * BOUNCE_RESTITUTION; }
-            // Can the bot reach this point in i frames?
-            const dx = sx - p.x, dy = sy - p.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist <= seekSpd * i + CATCH_BOT_RADIUS * 0.7) {
+          // Throttle: recompute intercept every 10 frames, cache between
+          if (frameRef.current % 10 === 0 || !cachedInterceptRef.current) {
+            let sx = bi.x, sy = bi.y, svx = bi.vx, svy = bi.vy;
+            const seekSpd = CATCH_SEEK_SPEED;
+            const bw = window.innerWidth, bh = window.innerHeight;
+            const ballR = 11; // CATCH_BALL_SIZE / 2
+            let bestPt = { x: sx, y: sy };
+            for (let i = 1; i <= INTERCEPT_STEPS; i++) {
+              svy += CATCH_BALL_GRAVITY;
+              svx *= 0.997; svy *= 0.997;
+              sx += svx; sy += svy;
+              // Wall bounces (same logic as CatchGame)
+              if (sx < ballR)          { sx = ballR;          svx =  Math.abs(svx) * BOUNCE_RESTITUTION; }
+              else if (sx > bw - ballR){ sx = bw - ballR;     svx = -Math.abs(svx) * BOUNCE_RESTITUTION; }
+              if (sy < ballR)                { sy = ballR;            svy =  Math.abs(svy) * BOUNCE_RESTITUTION; }
+              else if (sy > bh - ballR - 4) { sy = bh - ballR - 4;  svy = -Math.abs(svy) * BOUNCE_RESTITUTION; }
+              // Can the bot reach this point in i frames? (squared distance — avoid sqrt)
+              const dx = sx - p.x, dy = sy - p.y;
+              const distSq = dx * dx + dy * dy;
+              const thresh = seekSpd * i + CATCH_BOT_RADIUS * 0.7;
+              if (distSq <= thresh * thresh) {
+                bestPt = { x: sx, y: sy };
+                break;
+              }
               bestPt = { x: sx, y: sy };
-              break;
             }
-            bestPt = { x: sx, y: sy };
+            cachedInterceptRef.current = bestPt;
           }
 
           // Steer toward interception point
+          const bestPt = cachedInterceptRef.current;
           const tdx = bestPt.x - p.x;
           const tdy = bestPt.y - p.y;
           const tdist = Math.sqrt(tdx * tdx + tdy * tdy);
           if (tdist > 4) {
-            const speed = Math.min(seekSpd, 1.2 + tdist * 0.01);
+            const speed = Math.min(CATCH_SEEK_SPEED, 1.2 + tdist * 0.01);
             v.x = (tdx / tdist) * speed;
             v.y = (tdy / tdist) * speed;
           } else {
@@ -402,25 +425,28 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         p.y = clamp(p.y + v.y, PET_TOP_MIN, vh - HALF);
 
         if (frameRef.current % 2 === 0) {
-          setPos({ x: p.x, y: p.y });
-          setSpeedLevel(Math.sqrt(v.x * v.x + v.y * v.y));
+          petLeft.set(p.x - HALF);
+          petTop.set(p.y - HALF);
+          speedLevelRef.current = Math.sqrt(v.x * v.x + v.y * v.y);
 
           if (v.x > 0.08)       flipHysteresisRef.current = Math.min(flipHysteresisRef.current + 1,  20);
           else if (v.x < -0.08) flipHysteresisRef.current = Math.max(flipHysteresisRef.current - 1, -20);
           if (flipHysteresisRef.current >=  15) setFacingLeft(false);
           if (flipHysteresisRef.current <= -15) setFacingLeft(true);
 
-          // Gaze toward ball when flying, toward cursor otherwise
-          const gazeTarget = bi.holder === 'flying' ? { x: bi.x, y: bi.y } : cursorRef.current;
-          const gdx = gazeTarget.x - p.x;
-          const gdy = gazeTarget.y - p.y;
-          const gdist = Math.sqrt(gdx * gdx + gdy * gdy) || 1;
-          const gazeStrength = Math.min(1, gdist / 260);
-          const MAX_GAZE = 1.8;
-          setGaze({
-            x: (gdx / gdist) * gazeStrength * MAX_GAZE,
-            y: (gdy / gdist) * gazeStrength * MAX_GAZE,
-          });
+          if (frameRef.current % 6 === 0) {
+            // Gaze toward ball when flying, toward cursor otherwise
+            const gazeTarget = bi.holder === 'flying' ? { x: bi.x, y: bi.y } : cursorRef.current;
+            const gdx = gazeTarget.x - p.x;
+            const gdy = gazeTarget.y - p.y;
+            const gdist = Math.sqrt(gdx * gdx + gdy * gdy) || 1;
+            const gazeStrength = Math.min(1, gdist / 260);
+            const MAX_GAZE = 1.8;
+            setGaze({
+              x: (gdx / gdist) * gazeStrength * MAX_GAZE,
+              y: (gdy / gdist) * gazeStrength * MAX_GAZE,
+            });
+          }
 
           if (hoverCooldownRef.current > 0) hoverCooldownRef.current--;
         }
@@ -455,8 +481,9 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         p.x = clamp(p.x + v.x, HALF, vw - HALF);
         p.y = clamp(p.y + v.y, PET_TOP_MIN, vh - HALF);
         if (frameRef.current % 2 === 0) {
-          setPos({ x: p.x, y: p.y });
-          setSpeedLevel(Math.sqrt(v.x * v.x + v.y * v.y));
+          petLeft.set(p.x - HALF);
+          petTop.set(p.y - HALF);
+          speedLevelRef.current = Math.sqrt(v.x * v.x + v.y * v.y);
         }
         rafRef.current = requestAnimationFrame(tick);
         return;
@@ -478,8 +505,9 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         p.x = clamp(p.x + v.x, HALF, vw - HALF);
         p.y = clamp(p.y + v.y, PET_TOP_MIN, vh - HALF);
         if (frameRef.current % 2 === 0) {
-          setPos({ x: p.x, y: p.y });
-          setSpeedLevel(Math.sqrt(v.x * v.x + v.y * v.y));
+          petLeft.set(p.x - HALF);
+          petTop.set(p.y - HALF);
+          speedLevelRef.current = Math.sqrt(v.x * v.x + v.y * v.y);
         }
         rafRef.current = requestAnimationFrame(tick);
         return;
@@ -624,8 +652,9 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
 
       // All state updates batched every 2 frames (~30fps render)
       if (frameRef.current % 2 === 0) {
-        setPos({ x: p.x, y: p.y });
-        setSpeedLevel(spd);
+        petLeft.set(p.x - HALF);
+        petTop.set(p.y - HALF);
+        speedLevelRef.current = spd;
 
         // Flip with hysteresis — commits only after 15 consecutive frames in new direction
         if (v.x > 0.08)       flipHysteresisRef.current = Math.min(flipHysteresisRef.current + 1,  20);
@@ -633,19 +662,21 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         if (flipHysteresisRef.current >=  15) setFacingLeft(false);
         if (flipHysteresisRef.current <= -15) setFacingLeft(true);
 
-        // Gaze: pupils follow cursor direction, clamped to eye socket range
-        const gdx = cursorRef.current.x - p.x;
-        const gdy = cursorRef.current.y - p.y;
-        const gdist = Math.sqrt(gdx * gdx + gdy * gdy) || 1;
-        const gazeStrength = Math.min(1, gdist / 260);
-        const MAX_GAZE = 1.8;
-        if (!hasMouseMovedRef.current) {
-          setGaze({ x: 0, y: 0 });
-        } else {
-          setGaze({
-            x: (gdx / gdist) * gazeStrength * MAX_GAZE,
-            y: (gdy / gdist) * gazeStrength * MAX_GAZE,
-          });
+        if (frameRef.current % 6 === 0) {
+          // Gaze: pupils follow cursor direction, clamped to eye socket range
+          const gdx = cursorRef.current.x - p.x;
+          const gdy = cursorRef.current.y - p.y;
+          const gdist = Math.sqrt(gdx * gdx + gdy * gdy) || 1;
+          const gazeStrength = Math.min(1, gdist / 260);
+          const MAX_GAZE = 1.8;
+          if (!hasMouseMovedRef.current) {
+            setGaze({ x: 0, y: 0 });
+          } else {
+            setGaze({
+              x: (gdx / gdist) * gazeStrength * MAX_GAZE,
+              y: (gdy / gdist) * gazeStrength * MAX_GAZE,
+            });
+          }
         }
 
         // ── Proximity & movement behaviors ──────────────────────────────
@@ -755,7 +786,8 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
     const nx = clamp(e.clientX - dragOffsetRef.current.x, HALF, vw - HALF);
     const ny = clamp(e.clientY - dragOffsetRef.current.y, PET_TOP_MIN, vh - HALF);
     posRef.current = { x: nx, y: ny };
-    setPos({ x: nx, y: ny });
+    petLeft.set(nx - HALF);
+    petTop.set(ny - HALF);
     // Update facing direction immediately while dragging
     const dx = e.movementX;
     if (Math.abs(dx) > 0.5) {
@@ -841,7 +873,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
     const ro = new ResizeObserver(recompute);
     if (hudRef.current) ro.observe(hudRef.current);
     return () => { cancelAnimationFrame(id); window.removeEventListener('resize', recompute); ro.disconnect(); };
-  }, [hudOpen, pos]);
+  }, [hudOpen]);
 
   /* ── Focus management — modal-like ── */
   useEffect(() => {
@@ -984,7 +1016,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
       <motion.div
         ref={robotRef}
         className={wandererClass}
-        style={{ left: `${pos.x - HALF}px`, top: `${pos.y - HALF}px` }}
+        style={{ left: petLeft, top: petTop }}
         onClick={() => { if (!dragHasMovedRef.current) toggleHud(); }}
         onPointerDown={handleDragStart}
         onPointerMove={handleDragMove}
@@ -1015,7 +1047,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
         )}
         {(() => {
           const dir = facingLeft ? -1 : 1;
-          const stretch    = Math.min(0.13, Math.max(0, (speedLevel - 0.4) * 0.1));
+          const stretch    = Math.min(0.13, Math.max(0, (speedLevelRef.current - 0.4) * 0.1));
           const isFastDrag = isDragging && dragSpeed > DRAG_FAST_THRESHOLD;
           const dragScale  = isFastDrag
             ? 1 + Math.min(0.6, (dragSpeed - DRAG_FAST_THRESHOLD) * 0.035)
@@ -1060,7 +1092,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
       </motion.div>
 
       {/* Pensees flottantes */}
-      <ThoughtBubbleQueue queue={thoughtQueue} petX={pos.x} petY={pos.y} />
+      <ThoughtBubbleQueue queue={thoughtQueue} petX={posRef.current.x} petY={posRef.current.y} />
 
       {/* HUD flottant */}
       {hudOpen && (

@@ -10,14 +10,16 @@ import {
   CATCH_BOT_RADIUS, BOUNCE_RESTITUTION,
   CATCH_BOT_HOLD_MIN, CATCH_BOT_HOLD_RANGE, CATCH_BOT_THROW_SPREAD,
 } from './petConstants.js';
+import { byTier } from '@utils/performanceTier.js';
 
 const BALL_R        = CATCH_BALL_SIZE / 2;
 const PLAYER_CATCH  = 85;           // zone de recatch joueur — plus généreuse
 const BOT_CATCH     = CATCH_BOT_RADIUS;
 const BALL_TOP_MIN  = BALL_R;
 const VEL_HIST_MAX  = 6;
-const AIM_STEPS     = 22;           // prévisualisation plus longue
+const AIM_STEPS     = byTier({ high: 22, mid: 16, low: 10 });
 const AIM_DT        = 2.5;
+const AIM_DIRTY_THRESH = 0.3; // seuil de changement pour recalculer la visée
 const HINT_DELAY_MS = 3000;
 const VEL_SMOOTH    = 0.55;         // EMA plus réactif (vs 0.35 avant)
 const AIR_FRICTION  = 0.997;        // friction air plus forte (vs 0.999) — réduit les rebonds interminables
@@ -56,6 +58,9 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
   const aimSvgRef  = useRef(null);
   const aimPathRef = useRef(null);
 
+  /* ── Dirty flag for buildAim — skip expensive SVG rebuild when aim unchanged ── */
+  const prevAimVelRef = useRef({ x: 0, y: 0 });
+
   /* ── React state only for conditional rendering (infrequent changes) ── */
   const [isHeld, setIsHeld]     = useState(true);
   const [rallies, setRallies]   = useState(0);
@@ -69,14 +74,16 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
   const [bestScore, setBestScore] = useState(() =>
     parseInt(localStorage.getItem(LS_BEST) || '0', 10)
   );
+  const bestRef = useRef(bestScore);
 
   /* ── Mise à jour du best score quand rallies change ── */
   useEffect(() => {
-    if (rallies > bestScore) {
+    if (rallies > bestRef.current) {
+      bestRef.current = rallies;
       setBestScore(rallies);
       localStorage.setItem(LS_BEST, String(rallies));
     }
-  }, [rallies, bestScore]);
+  }, [rallies]);
 
   /* ── Escape pour quitter ── */
   useEffect(() => {
@@ -96,6 +103,16 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
     };
     window.addEventListener('mousemove', onMove, { passive: true });
     return () => window.removeEventListener('mousemove', onMove);
+  }, []);
+
+  /* ── SVG viewBox — set once on mount + resize, not every frame ── */
+  useEffect(() => {
+    const syncViewBox = () => {
+      if (aimSvgRef.current) aimSvgRef.current.setAttribute('viewBox', `0 0 ${window.innerWidth} ${window.innerHeight}`);
+    };
+    syncViewBox();
+    window.addEventListener('resize', syncViewBox);
+    return () => window.removeEventListener('resize', syncViewBox);
   }, []);
 
   /* ── Raw mouse velocity from history ── */
@@ -204,11 +221,15 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
         const sv = smoothVelRef.current;
         sv.x += (t.vx - sv.x) * VEL_SMOOTH;
         sv.y += (t.vy - sv.y) * VEL_SMOOTH;
-        if (aimSvgRef.current) aimSvgRef.current.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
-        if (aimPathRef.current) aimPathRef.current.setAttribute('d', buildAim(bp.x, bp.y, sv.x, sv.y));
+        // Only rebuild aim path when smoothed velocity changed meaningfully
+        const pav = prevAimVelRef.current;
+        const dvx = sv.x - pav.x, dvy = sv.y - pav.y;
+        if (dvx * dvx + dvy * dvy > AIM_DIRTY_THRESH * AIM_DIRTY_THRESH) {
+          pav.x = sv.x; pav.y = sv.y;
+          if (aimPathRef.current) aimPathRef.current.setAttribute('d', buildAim(bp.x, bp.y, sv.x, sv.y));
+        }
         if (ballElRef.current) {
-          ballElRef.current.style.left = `${bp.x - BALL_R}px`;
-          ballElRef.current.style.top  = `${bp.y - BALL_R}px`;
+          ballElRef.current.style.transform = `translate(${bp.x - BALL_R}px,${bp.y - BALL_R}px)`;
         }
         rafRef.current = requestAnimationFrame(tick);
         return;
@@ -283,8 +304,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
         }
 
         if (ballElRef.current) {
-          ballElRef.current.style.left = `${bp.x - BALL_R}px`;
-          ballElRef.current.style.top  = `${bp.y - BALL_R}px`;
+          ballElRef.current.style.transform = `translate(${bp.x - BALL_R}px,${bp.y - BALL_R}px)`;
         }
         rafRef.current = requestAnimationFrame(tick);
         return;
@@ -340,10 +360,9 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
         snapToPlayer(bv);
       }
 
-      // Move ball via DOM
+      // Move ball via DOM — transform is compositor-only, avoids layout recalc
       if (ballElRef.current) {
-        ballElRef.current.style.left = `${bp.x - BALL_R}px`;
-        ballElRef.current.style.top  = `${bp.y - BALL_R}px`;
+        ballElRef.current.style.transform = `translate(${bp.x - BALL_R}px,${bp.y - BALL_R}px)`;
       }
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -415,11 +434,10 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
         )}
       </div>}
 
-      {/* Aim line — always mounted, path written via ref; viewBox synced to viewport */}
+      {/* Aim line — always mounted, path written via ref; viewBox managed by resize listener */}
       <svg
         ref={aimSvgRef}
         className="catch-aim-line"
-        viewBox={`0 0 ${window.innerWidth} ${window.innerHeight}`}
         preserveAspectRatio="none"
       >
         <path ref={aimPathRef} d="" fill="none" stroke="currentColor"
@@ -446,11 +464,11 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
         <span className="catch-game-exit-label">ESC</span>
       </button>
 
-      {/* Ball — position written via ref */}
+      {/* Ball — position written via ref using transform (GPU-composited) */}
       <div
         ref={ballElRef}
         className={`catch-ball${isHeld ? ' catch-ball--held' : ''}`}
-        style={{ left: `${startX - BALL_R}px`, top: `${startY - BALL_R}px` }}
+        style={{ transform: `translate(${startX - BALL_R}px,${startY - BALL_R}px)` }}
       >
         <svg viewBox="0 0 22 22" width={CATCH_BALL_SIZE} height={CATCH_BALL_SIZE}>
           <defs>
