@@ -8,6 +8,7 @@ import { startFpsMonitor } from '../utils/performanceTier.js';
 
 let musicPlayerInstance = null;
 let visualEffectsInstance = null;
+let uiEnhancementsInstance = null;
 
 const usePortfolioModules = (trackFiles) => {
   const location = useLocation();
@@ -26,7 +27,11 @@ const usePortfolioModules = (trackFiles) => {
   }, [trackFiles]);
 
   useEffect(() => {
-    new UIEnhancements();
+    if (!uiEnhancementsInstance) {
+      uiEnhancementsInstance = new UIEnhancements();
+    } else {
+      uiEnhancementsInstance.reinit();
+    }
 
     // Différer au frame suivant pour que React ait fini de peupler le DOM
     const raf = requestAnimationFrame(() => {

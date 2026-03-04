@@ -16,9 +16,22 @@ class UIEnhancements {
     this.initFooterClock();
   }
 
+  // Appelé à chaque changement de route (même instance réutilisée)
+  reinit() {
+    this.initTypingEffect();
+    this.initVideoHover();
+  }
+
   initTypingEffect() {
     const element = document.getElementById('main-title');
     if (!element) return;
+
+    // Annuler toute animation en cours avant d'en démarrer une nouvelle,
+    // pour éviter que deux chaînes de setTimeout tournent en parallèle.
+    if (this._typingTimeout) {
+      clearTimeout(this._typingTimeout);
+      this._typingTimeout = null;
+    }
 
     // Toujours lire le texte courant défini par React; ne pas réutiliser
     // dataset.originalText qui peut contenir le texte d'une page précédente.
@@ -38,8 +51,9 @@ class UIEnhancements {
       if (i <= fullText.length) {
         element.textContent = fullText.slice(0, i);
         i++;
-        setTimeout(typeLetter, 50);
+        this._typingTimeout = setTimeout(typeLetter, 50);
       } else {
+        this._typingTimeout = null;
         element.classList.remove('typing');
         element.dataset.typed = 'true';
       }
