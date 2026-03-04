@@ -4,11 +4,52 @@ import { useToast } from '../contexts/ToastContext.jsx';
 import { getPerformanceTier } from '../utils/performanceTier.js';
 
 /* ── Configuration des effets ─────────────────────── */
+const EFFECT_ICONS = {
+  explode: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity="0.25" />
+      <line x1="12" y1="2"  x2="12" y2="5.5" />
+      <line x1="12" y1="18.5" x2="12" y2="22" />
+      <line x1="2"  y1="12" x2="5.5"  y2="12" />
+      <line x1="18.5" y1="12" x2="22" y2="12" />
+      <line x1="5.6"  y1="5.6"  x2="7.9"  y2="7.9" />
+      <line x1="16.1" y1="16.1" x2="18.4" y2="18.4" />
+      <line x1="18.4" y1="5.6"  x2="16.1" y2="7.9" />
+      <line x1="7.9"  y1="16.1" x2="5.6"  y2="18.4" />
+    </svg>
+  ),
+  attract: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity="0.25" />
+      <path d="M12 2 L12 6"   markerEnd="url(#arr)" />
+      <path d="M22 12 L18 12" />
+      <path d="M12 22 L12 18" />
+      <path d="M2 12 L6 12" />
+      <polygon points="12,7 10.5,4.5 13.5,4.5"  fill="currentColor" stroke="none" />
+      <polygon points="17,12 19.5,10.5 19.5,13.5" fill="currentColor" stroke="none" />
+      <polygon points="12,17 10.5,19.5 13.5,19.5"  fill="currentColor" stroke="none" />
+      <polygon points="7,12 4.5,10.5 4.5,13.5"  fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  storm: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="13,2 7,13 12,13 11,22 17,11 12,11" fill="currentColor" fillOpacity="0.2" />
+    </svg>
+  ),
+  gravity: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="18" r="2.5" fill="currentColor" fillOpacity="0.25" />
+      <line x1="12" y1="3" x2="12" y2="15" />
+      <polyline points="8,11 12,15.5 16,11" />
+    </svg>
+  ),
+};
+
 const EFFECTS = [
-  { key: 'explode',  label: 'Explosion',   icon: '💥', duration: 1800 },
-  { key: 'attract',  label: 'Attraction',  icon: '🧲', duration: 3000 },
-  { key: 'storm',    label: 'Tempête',     icon: '⚡', duration: 3000 },
-  { key: 'gravity',  label: 'Gravité',     icon: '🌑', duration: 3000 },
+  { key: 'explode',  label: 'Explosion',   duration: 1800, toast: 'Explosion — particules projetées !' },
+  { key: 'attract',  label: 'Attraction',  duration: 3000, toast: 'Attraction — convergence en cours\u2026' },
+  { key: 'storm',    label: 'Temp\u00eate',     duration: 3000, toast: 'Temp\u00eate — turbulences maximales !' },
+  { key: 'gravity',  label: 'Gravit\u00e9',     duration: 3000, toast: 'Gravit\u00e9 — les particules chutent !' },
 ];
 
 /* ── Helpers : accès sécurisé à pJS ── */
@@ -356,7 +397,7 @@ const ParticlesButton = () => {
     const signal = { cancelled: false, _unmounted: false };
     effectSignalRef.current = signal;
 
-    showToast(effect.label, { type: 'info', duration: 2000 });
+    showToast(effect.toast, { type: 'info', duration: effect.duration, icon: EFFECT_ICONS[effect.key] });
     const result = effects[effect.key](signal);
 
     // Intercepter le smoothRestore retourné par l'effet (via getter lazy)
@@ -434,7 +475,7 @@ const ParticlesButton = () => {
   else if (progress > 25) progressClass = 'progress-25';
 
   return (
-    <Tooltip text={`${currentEffect.icon} ${currentEffect.label}`} desc={isActive ? `Chargement ${Math.ceil(progress)}%` : 'Cliquer pour déclencher'} position="bottom">
+    <Tooltip text={currentEffect.label} desc={isActive ? `Chargement ${Math.ceil(progress)}%` : 'Cliquer pour déclencher'} position="bottom">
     <button
       className={`header-action-btn particles-btn ${isActive ? 'particles-btn--active' : ''}`}
       onClick={triggerEffect}
