@@ -176,6 +176,7 @@ Four interactive widgets live in `.header--actions` inside `Layout.jsx`:
 - **Relative imports**: Use module aliases `@/`, `@styles/`, `@assets/` (defined in vite.config.js)
 - **Asset paths**: Always absolute (`/assets/images/...`, `/assets/music/...`) in code and HTML
 - **Accessibility**: Use semantic HTML (`<header>`, `<main>`, `<article>`), `aria-` attributes where needed
+- **Icons**: Prefer custom SVG icons over emojis for UI elements. Define reusable SVG components/objects at module level (e.g., `EFFECT_ICONS` in `ParticlesButton.jsx`). Pass SVG elements to `showToast()` via the `icon` option instead of embedding emojis in text strings.
 
 ## Testing Workflow
 

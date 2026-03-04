@@ -1,5 +1,6 @@
-const Footer = () => (
+const Footer = ({ diorama }) => (
   <footer className="site-footer">
+    {diorama}
     <div className="footer-inner">
       <div className="footer-left">Enzo Morello &copy; 2026</div>
       <div className="footer-center footer-bubbles">

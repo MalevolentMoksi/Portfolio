@@ -112,9 +112,9 @@ const randomEdgePoint = () => {
  * Vitesse de base réelle d'une particule : les particules.js initialisent
  * chaque composante à (random - 0.5) * speed / 3, donc la magnitude RMS
  * est environ speed / (3 * sqrt(2)) ≈ speed * 0.235.
- * On prend 0.22 * speed comme cible de retour.
+ * Avec le mode gentle (speed = 1), le baseline est ~0.22 px/frame.
  */
-const getBaseSpeed = () => (getPJS()?.particles.move.speed ?? 2) * 0.22;
+const getBaseSpeed = () => (getPJS()?.particles.move.speed ?? 1) * 0.22;
 
 /**
  * Décélération exponentielle smooth : ramène toutes les particules vers
@@ -221,7 +221,7 @@ const effects = {
     let restoreHandle = null;
     setTimeout(() => {
       if (!signal.cancelled) {
-        restoreHandle = smoothRestore(1200);
+        restoreHandle = smoothRestore(1800);
         setParticlesForeground(false);
       }
     }, 600);
@@ -287,8 +287,8 @@ const effects = {
     if (!pJS) return { restoreHandle: null };
 
     const originalCount = pJS.particles.array.length;
-    // Adapter le nombre de particules bonus au tier
-    const maxBonus = getPerformanceTier() === 'low' ? 30 : (getPerformanceTier() === 'mid' ? 50 : 80);
+    // Adapter le nombre de particules bonus au tier (proportionnel au baseline réduit)
+    const maxBonus = getPerformanceTier() === 'low' ? 20 : (getPerformanceTier() === 'mid' ? 40 : 60);
     const bonus = Math.min(originalCount, maxBonus);
     const stormSpeed = 5;
     const pxr = pJS.canvas.pxratio ?? 1;
@@ -322,7 +322,7 @@ const effects = {
       if (excess > 0) {
         p2.particles.array.splice(p2.particles.array.length - excess, excess);
       }
-      restoreHandle = smoothRestore(1800);
+      restoreHandle = smoothRestore(2200);
       setParticlesForeground(false);
     }, 3000);
     return { get restoreHandle() { return restoreHandle; } };

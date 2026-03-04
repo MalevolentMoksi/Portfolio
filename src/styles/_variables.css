@@ -46,6 +46,7 @@
   /* Z-Index Scale */
   --z-background: -1;
   --z-base: 1;
+  --z-ambient: 2;
   --z-header: 10;
   --z-music-player: 100;
   --z-lightbox: 1000;

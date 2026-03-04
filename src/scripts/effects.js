@@ -38,9 +38,9 @@ class VisualEffects {
     const tier = getPerformanceTier();
     const isMobile = window.innerWidth <= 768;
 
-    // Adapter le nombre de particules au tier de performance
+    // ── Gentle particles : moins de particules, plus espacées ──
     const particleCount = byTier({
-      high: isMobile ? 40 : 80,
+      high: isMobile ? 42 : 85,
       mid: isMobile ? 30 : 60,
       low: isMobile ? 20 : 35,
     });
@@ -48,14 +48,18 @@ class VisualEffects {
     // retina_detect ON uniquement sur tier 'high' — quadruple la surface canvas sinon
     const retinaDetect = tier === 'high';
 
-    // Réduire la distance de liaison sur low tier (moins de calculs de proximité)
-    const linkDistance = byTier({ high: 150, mid: 150, low: 120 });
+    // Distance de liaison adaptée au tier
+    const linkDistance = byTier({ high: 160, mid: 145, low: 120 });
+
+    // Animations douces (twinkling opacité + respiration taille)
+    // Désactivées sur low tier pour économiser le CPU
+    const enableAnims = tier !== 'low';
 
     particlesJS('particles-js', {
       particles: {
         number: {
           value: particleCount,
-          density: { enable: true, value_area: 800 },
+          density: { enable: true, value_area: 950 },
         },
         color: { value: '#d4af37' },
         shape: {
@@ -63,27 +67,37 @@ class VisualEffects {
           stroke: { width: 0, color: '#000000' },
         },
         opacity: {
-          value: 0.7,
+          value: 0.4,
           random: true,
-          anim: { enable: false },
+          anim: {
+            enable: enableAnims,
+            speed: 0.6,
+            opacity_min: 0.08,
+            sync: false,
+          },
         },
         size: {
-          value: 3,
+          value: 4.8,
           random: true,
-          anim: { enable: false },
+          anim: {
+            enable: enableAnims,
+            speed: 1.5,
+            size_min: 1.2,
+            sync: false,
+          },
         },
         line_linked: {
           enable: true,
           distance: linkDistance,
           color: '#d4af37',
-          opacity: 0.55,
-          width: 1,
+          opacity: 0.18,
+          width: 0.6,
         },
         move: {
           enable: true,
-          speed: 2,
+          speed: 1,
           direction: 'none',
-          random: false,
+          random: true,
           straight: false,
           out_mode: 'out',
           bounce: false,
@@ -92,11 +106,16 @@ class VisualEffects {
       interactivity: {
         detect_on: 'canvas',
         events: {
+          onhover: { enable: enableAnims, mode: 'grab' },
           onclick: { enable: true, mode: 'push' },
           resize: true,
         },
         modes: {
-          push: { particles_nb: byTier({ high: 4, mid: 3, low: 2 }) },
+          grab: {
+            distance: 160,
+            line_linked: { opacity: 0.35 },
+          },
+          push: { particles_nb: byTier({ high: 3, mid: 2, low: 1 }) },
         },
       },
       retina_detect: retinaDetect,

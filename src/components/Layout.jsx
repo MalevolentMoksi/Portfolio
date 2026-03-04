@@ -13,6 +13,8 @@ import usePortfolioModules from '../hooks/usePortfolioModules.js';
 import { getAssetPath } from '../utils/assetPath.js';
 import { discoverMusicTracks } from '../utils/discoverMusicTracks.js';
 import { ReadingTimeProvider } from '../contexts/ReadingTimeContext.jsx';
+import AmbientEffects from './ambient/AmbientEffects.jsx';
+import FooterDiorama from './ambient/FooterDiorama.jsx';
 
 const trackFiles = discoverMusicTracks();
 
@@ -180,7 +182,8 @@ const Layout = () => {
         </ReadingTimeProvider>
       </main>
 
-      <Footer />
+      <Footer diorama={<FooterDiorama />} />
+      <AmbientEffects />
       <BackToTopButton />
     </>
   );

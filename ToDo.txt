@@ -3,12 +3,12 @@ Tâches manuelles :
 - Crédits
 
 Tâches requiert Recherches A faire :
-- Toast notifications appears twice on bot summon, needs precision on MoodSwitcher Toasts
 - Improve pet visibility
 
 Tâches simples :
 
 Tâches moyennes (besoin expertise IA) :
+Refaire le Home esthétiquement
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
 Ajouter des petits bonhomes (Améliorer l'ambience)

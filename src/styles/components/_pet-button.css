@@ -1314,8 +1314,14 @@ body[data-mood='vaporwave'] .pet-robot {
 
 /* Anneau expansif localisé au point de recatch du bot */
 @keyframes catch-ripple-expand {
-  0%   { transform: translate(-50%, -50%) scale(0.1); opacity: 0.85; }
-  100% { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.6);
+    opacity: 0;
+  }
 }
 
 .catch-ripple {
