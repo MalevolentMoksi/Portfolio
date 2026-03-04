@@ -1570,3 +1570,56 @@ body[data-mood='vaporwave'] .pet-robot {
   border-color: rgba(255, 80, 80, 0.5);
   color: #ff5050;
 }
+
+/* ── Reduced motion ─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pet-toggle-thumb,
+  .pet-icon,
+  .pet-icon--sleep,
+  .pet-wanderer,
+  .pet-charge-ring__track {
+    transition: none !important;
+  }
+
+  .pet-icon--sleep .pet-icon-antenna,
+  .pet-icon--sleep .pet-icon-antenna-tip,
+  .pet-icon-zzz text,
+  .pet-icon--bob,
+  .pet-toggle--attention::after {
+    animation: none !important;
+  }
+
+  .pet-expression--shake .pet-wanderer-body,
+  .pet-expression--bounce .pet-wanderer-body,
+  .pet-expression--woozy .pet-wanderer-body {
+    animation: none !important;
+  }
+
+  .pet-antenna--spin,
+  .pet-antenna--waggle-l,
+  .pet-antenna--waggle-r {
+    animation: none !important;
+  }
+
+  .pet-glow,
+  .pet-led-left,
+  .pet-led-right,
+  .pet-loader-bar {
+    animation: none !important;
+  }
+
+  .pet-thought-bubble,
+  .pet-thought-pop {
+    animation: none !important;
+  }
+
+  .pet-sleep-zzz,
+  .pet-snore-ring,
+  .pet-spiral {
+    animation: none !important;
+  }
+
+  .pet-circuit-line {
+    animation: none !important;
+  }
+}

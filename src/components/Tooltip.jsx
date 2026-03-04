@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useId, cloneElement, isValidElement, Children } from 'react';
 
 /**
  * Tooltip universel — remplace les `title` natifs par un tooltip stylisé.
@@ -15,6 +15,7 @@ const Tooltip = ({ text, desc, position = 'top', delay = 320, children }) => {
   const wrapRef = useRef(null);
   const tipRef  = useRef(null);
   const timer   = useRef(null);
+  const tooltipId = useId();
 
   /* Vérifie si le tooltip déborde du viewport et bascule si nécessaire */
   const checkFlip = useCallback(() => {
@@ -64,6 +65,7 @@ const Tooltip = ({ text, desc, position = 'top', delay = 320, children }) => {
       onMouseLeave={hide}
       onFocus={show}
       onBlur={hide}
+      aria-describedby={visible && text ? tooltipId : undefined}
     >
       {children}
       {visible && text && (
@@ -71,6 +73,7 @@ const Tooltip = ({ text, desc, position = 'top', delay = 320, children }) => {
           className={`tooltip tooltip--${actualPos}`}
           ref={tipRef}
           role="tooltip"
+          id={tooltipId}
         >
           <strong className="tooltip-text">{text}</strong>
           {desc && <span className="tooltip-desc">{desc}</span>}

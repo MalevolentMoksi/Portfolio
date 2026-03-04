@@ -194,8 +194,8 @@ header.header--main {
   margin-bottom: 0.2rem;
 }
 
-.header--secondary .header--hero h3,
-.header--secondary .header--hero h4 {
+.header--secondary .header--hero h2.header-subheading,
+.header--secondary .header--hero h3.header-subheading-alt {
   font-size: 0.85rem;
   margin-top: 0;
   margin-bottom: 0;
@@ -283,8 +283,8 @@ header.header--main .hamburger-toggle {
     font-size: var(--font-size-h2);
   }
 
-  .header--secondary .header--hero h3,
-  .header--secondary .header--hero h4 {
+  .header--secondary .header--hero h2.header-subheading,
+  .header--secondary .header--hero h3.header-subheading-alt {
     font-size: 0.9rem;
   }
 
@@ -329,8 +329,8 @@ header.header--main .hamburger-toggle {
     margin-bottom: 0.1rem;
   }
 
-  .header--secondary .header--hero h3,
-  .header--secondary .header--hero h4 {
+  .header--secondary .header--hero h2.header-subheading,
+  .header--secondary .header--hero h3.header-subheading-alt {
     font-size: 0.8rem;
   }
 }

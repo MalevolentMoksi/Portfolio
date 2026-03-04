@@ -35,7 +35,7 @@ class Lightbox {
     overlay.id = 'lightbox-overlay';
     overlay.className = 'hidden';
     overlay.innerHTML = `
-      <span id="lightbox-close" aria-label="Fermer">&times;</span>
+      <button id="lightbox-close" aria-label="Fermer la lightbox" class="lightbox-close-btn">&times;</button>
       <button id="lightbox-prev" aria-label="Image précédente" class="lightbox-nav lightbox-prev">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
@@ -59,7 +59,20 @@ class Lightbox {
         const gallery = img.closest('section') || img.closest('article') || document.body;
         this.galleryImages = Array.from(gallery.querySelectorAll('.zoomable'));
         this.currentImageIndex = this.galleryImages.indexOf(img);
+        this._triggerElement = img;
         this.open(img);
+      });
+      // Make zoomable images keyboard-accessible
+      if (!img.hasAttribute('tabindex')) img.setAttribute('tabindex', '0');
+      if (!img.getAttribute('role')) img.setAttribute('role', 'button');
+      if (!img.getAttribute('aria-label')) {
+        img.setAttribute('aria-label', `Agrandir : ${img.alt || 'image'}`);
+      }
+      img.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          img.click();
+        }
       });
     });
 
@@ -105,6 +118,25 @@ class Lightbox {
         } else if (e.key === 'ArrowRight') {
           e.preventDefault();
           this.showNext();
+        } else if (e.key === 'Tab') {
+          // Focus trap: keep Tab within lightbox
+          const focusable = this.overlay.querySelectorAll(
+            'button, [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusable.length === 0) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey) {
+            if (document.activeElement === first) {
+              e.preventDefault();
+              last.focus();
+            }
+          } else {
+            if (document.activeElement === last) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
         }
       });
     }
@@ -112,7 +144,7 @@ class Lightbox {
 
   open(img) {
     this.img.src = img.src;
-    this.img.alt = img.alt;
+    this.img.alt = img.alt || '';
 
     // Get caption from next element if it exists
     const captionElement = img.nextElementSibling;
@@ -120,6 +152,9 @@ class Lightbox {
 
     this.overlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden'; // Prevent scroll
+
+    // Move focus into lightbox for keyboard access
+    this.closeBtn?.focus();
 
     // Update nav button visibility
     this.updateNavVisibility();
@@ -129,6 +164,11 @@ class Lightbox {
     this.overlay.classList.add('hidden');
     document.body.style.overflow = ''; // Restore scroll
     this.currentImageIndex = -1;
+    // Restore focus to the image that triggered the lightbox
+    if (this._triggerElement) {
+      this._triggerElement.focus();
+      this._triggerElement = null;
+    }
     this.galleryImages = [];
   }
 

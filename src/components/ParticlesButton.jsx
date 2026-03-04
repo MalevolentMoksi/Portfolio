@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Tooltip from './Tooltip.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 import { getPerformanceTier } from '../utils/performanceTier.js';
 
 /* ── Configuration des effets ─────────────────────── */
@@ -330,6 +331,7 @@ const effects = {
 /* ── Composant ─────────────────────────────────────── */
 
 const ParticlesButton = () => {
+  const { showToast } = useToast();
   const [effectIndex, setEffectIndex] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [activeEffectKey, setActiveEffectKey] = useState(null);
@@ -354,6 +356,7 @@ const ParticlesButton = () => {
     const signal = { cancelled: false, _unmounted: false };
     effectSignalRef.current = signal;
 
+    showToast(effect.label, { type: 'info', duration: 2000 });
     const result = effects[effect.key](signal);
 
     // Intercepter le smoothRestore retourné par l'effet (via getter lazy)

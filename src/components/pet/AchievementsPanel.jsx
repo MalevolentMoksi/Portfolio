@@ -101,7 +101,7 @@ const AchievementsPanel = ({ unlocked = [] }) => {
         <span aria-hidden="true">🏆</span>
         <span>Succès — {count}/{total}</span>
       </div>
-      <div className="pet-achievements-grid">
+      <div className="pet-achievements-grid" role="list">
         {ACHIEVEMENTS.map((ach) => {
           const isUnlocked = unlocked.includes(ach.id);
           return (
@@ -109,6 +109,8 @@ const AchievementsPanel = ({ unlocked = [] }) => {
               key={ach.id}
               className={`pet-ach-tile${isUnlocked ? ' pet-ach-tile--unlocked' : ''}`}
               aria-label={isUnlocked ? ach.label : 'Verrouillé'}
+              role="listitem"
+              tabIndex={0}
             >
               <div className="pet-ach-icon">
                 {isUnlocked ? (ACHIEVEMENT_ICONS[ach.id] || null) : <LockIcon />}

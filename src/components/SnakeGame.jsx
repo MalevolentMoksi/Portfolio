@@ -322,11 +322,11 @@ const SnakeGame = ({ onClose }) => {
       <div className="snake-game__hud">
         <span className="snake-game__score">
           <span className="snake-game__label">Score</span>
-          <span className="snake-game__value">{ui.score}</span>
+          <span className="snake-game__value" aria-live="polite" aria-atomic="true">{ui.score}</span>
         </span>
         <span className="snake-game__score">
           <span className="snake-game__label">Best</span>
-          <span className="snake-game__value">{ui.hs}</span>
+          <span className="snake-game__value" aria-live="polite" aria-atomic="true">{ui.hs}</span>
         </span>
         <div className="snake-game__close-wrap">
           <Tooltip text="Fermer" desc="ESC" position="bottom">
@@ -343,7 +343,14 @@ const SnakeGame = ({ onClose }) => {
 
       {/* Canvas + overlay */}
       <div className="snake-game__canvas-wrap">
-        <canvas ref={canvasRef} width={W} height={H} className="snake-game__canvas" />
+        <canvas
+          ref={canvasRef}
+          width={W}
+          height={H}
+          className="snake-game__canvas"
+          role="img"
+          aria-label="Jeu Snake — utilisez les touches directionnelles pour jouer"
+        />
 
         {ui.status !== 'playing' && (
           <div className="snake-game__overlay">

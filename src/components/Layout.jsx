@@ -140,15 +140,15 @@ const Layout = () => {
         <nav className="header--nav-desktop" aria-label="Navigation principale">
           <ul>
             <li>
-              <NavLink to="/" end aria-current={({ isActive }) => isActive ? "page" : undefined}>
+              <NavLink to="/" end>
                 Accueil
               </NavLink>
             </li>
             <li>
-              <NavLink to="/projets" aria-current={({ isActive }) => isActive ? "page" : undefined}>Projets</NavLink>
+              <NavLink to="/projets">Projets</NavLink>
             </li>
             <li>
-              <NavLink to="/projets-personnels" aria-current={({ isActive }) => isActive ? "page" : undefined}>Projets personnels</NavLink>
+              <NavLink to="/projets-personnels">Projets personnels</NavLink>
             </li>
           </ul>
         </nav>
@@ -157,7 +157,7 @@ const Layout = () => {
         <HamburgerMenu />
 
         {/* Actions interactives — slot droit de la barre de navigation */}
-        <div className="header--actions" aria-label="Actions interactives">
+        <div className="header--actions" role="toolbar" aria-label="Actions interactives">
           <PetButton />
           <MoodSwitcher />
           <ParticlesButton />
@@ -168,8 +168,8 @@ const Layout = () => {
       <section className="header--secondary" aria-label="En-tête secondaire de la page">
         <div className="header--hero">
           <h1 id="main-title">{config.heading}</h1>
-          {config.subheading ? <h3>{config.subheading}</h3> : null}
-          {config.subheadingAlt ? <h4>{config.subheadingAlt}</h4> : null}
+          {config.subheading ? <h3 className="header-subheading">{config.subheading}</h3> : null}
+          {config.subheadingAlt ? <h4 className="header-subheading-alt">{config.subheadingAlt}</h4> : null}
         </div>
       </section>
 

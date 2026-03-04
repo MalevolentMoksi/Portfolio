@@ -2,6 +2,18 @@
    Project Components Styles
    ============================================ */
 
+/* Category label (was h3 — now a <p> for correct heading hierarchy) */
+.project-category {
+  font-size: var(--font-size-h3);
+  margin-bottom: var(--space-sm);
+  color: var(--color-primary);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent-light));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
 #project-list .project {
   margin-bottom: var(--space-xl);
   padding: var(--space-lg);

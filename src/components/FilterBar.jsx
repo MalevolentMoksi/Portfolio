@@ -44,7 +44,7 @@ const FilterBar = ({ onFilterChange }) => {
   };
 
   return (
-    <div className="filter-bar">
+    <nav className="filter-bar" aria-label="Filtres par technologie">
       <div className="filter-header">
         <h3>Filtrer par technologie</h3>
         {selectedTags.length > 0 && (
@@ -100,7 +100,7 @@ const FilterBar = ({ onFilterChange }) => {
           </div>
         </div>
       )}
-    </div>
+    </nav>
   );
 };
 

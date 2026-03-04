@@ -125,11 +125,19 @@ class MusicPlayer {
     this.isLoading = false;
     this.updateLoadingState();
     this.stopVisualizer();
+    window.showToast?.('Impossible de charger la piste audio', { type: 'error', duration: 4000 });
   }
 
   handleKeyboardShortcuts(e) {
-    // Évite les raccourcis si on tape dans un input
-    if (e.target.matches('input, textarea, [contenteditable]')) return;
+    // Évite les raccourcis si on tape dans un input ou si le focus est sur un élément interactif
+    if (
+      e.target.matches(
+        'input, textarea, select, button, a, [contenteditable], [role="textbox"], [role="searchbox"]'
+      )
+    )
+      return;
+    // Évite les raccourcis si le focus est dans un dialog (terminal, lightbox, etc.)
+    if (e.target.closest('[role="dialog"]')) return;
 
     switch (e.code) {
       case 'Space':
@@ -569,6 +577,12 @@ class MusicPlayer {
     this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
     this.updateTrackInfo();
 
+    const meta = this.trackMeta[this.currentTrackIndex];
+    window.showToast?.(meta?.title || this.formatTitle(this.trackFiles[this.currentTrackIndex]), {
+      type: 'info',
+      duration: 2500,
+    });
+
     if (!this.isPaused) {
       this.audio.play().catch(() => {
         // Playback failed
@@ -908,6 +922,12 @@ class MusicPlayer {
     this.audio.currentTime = 0; // Reset playback to start of track
     this.updateTrackInfo();
     this.populateQueueMenu();
+
+    const meta = this.trackMeta[this.currentTrackIndex];
+    window.showToast?.(meta?.title || this.formatTitle(this.trackFiles[this.currentTrackIndex]), {
+      type: 'info',
+      duration: 2500,
+    });
 
     if (!this.isPaused) {
       this.audio.play().catch(() => {

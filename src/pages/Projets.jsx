@@ -4,6 +4,8 @@ import { academicProjects } from '@/data/projects.js';
 import { getAssetPath } from '@/utils/assetPath.js';
 import Tooltip from '@/components/Tooltip.jsx';
 
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 const Projets = () => {
   useDocumentMeta('Projets | Portfolio', 'Mes projets scolaires et professionnels');
 
@@ -17,13 +19,13 @@ const Projets = () => {
         {academicProjects.map((project, index) => (
           <div key={project.id}>
             <article className="project" aria-labelledby={`project-title-${project.id}`}>
-              {project.category && <h3>{project.category}</h3>}
               <h2 id={`project-title-${project.id}`}>{project.title}</h2>
+              {project.category && <p className="project-category">{project.category}</p>}
               {project.video ? (
                 <video
                   src={getAssetPath(project.video)}
                   poster={getAssetPath(project.image)}
-                  autoPlay
+                  autoPlay={!prefersReducedMotion}
                   muted
                   loop
                   playsInline

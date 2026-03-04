@@ -273,3 +273,13 @@ span.snake-game__cd-key {
     width: 95vw;
   }
 }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .snake-game__overlay {
+    animation: none !important;
+  }
+  .snake-game__cd-num {
+    animation: none !important;
+  }
+}

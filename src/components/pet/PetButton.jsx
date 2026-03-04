@@ -3,6 +3,7 @@
    ───────────────────────────────────────────────── */
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMood } from '../../contexts/MoodContext.jsx';
+import { useToast } from '../../contexts/ToastContext.jsx';
 import Tooltip from '../Tooltip.jsx';
 import {
   LS, DECAY_MS, REACTION_MS, COOLDOWNS, SLEEP_IDLE_MS, ACHIEVEMENTS,
@@ -14,6 +15,7 @@ import { normalizeThought } from './ThoughtBubbleQueue.jsx';
 
 const PetButton = () => {
   const { mood } = useMood();
+  const { showToast } = useToast();
   const [isSpawned, setIsSpawned] = useState(() => localStorage.getItem(LS.spawned) === 'true');
   const [stats, setStats] = useState(() => {
     // Réinitialise à ~50% à chaque chargement de page (synchrone, évite le délai d'un useEffect)
@@ -392,8 +394,11 @@ const PetButton = () => {
   const handleRename = useCallback((newName) => {
     const trimmed = newName.trim().slice(0, 18) || 'Mon Robot';
     setPetName(trimmed);
-    if (trimmed !== 'Mon Robot') unlockAchievement('rename');
-  }, [unlockAchievement]);
+    if (trimmed !== 'Mon Robot') {
+      unlockAchievement('rename');
+      showToast(`Robot renommé : ${trimmed}`, { type: 'success', duration: 2500 });
+    }
+  }, [unlockAchievement, showToast]);
 
   /* ── Toggle spawn (recharge les stats si elles étaient basses) ── */
   const toggleSpawn = useCallback(() => {
@@ -404,10 +409,13 @@ const PetButton = () => {
           hunger: s.hunger < 10 ? 50 : Math.round(s.hunger),
           happiness: s.happiness < 10 ? 50 : Math.round(s.happiness),
         }));
+        showToast('Robot invoqué !', { type: 'info', duration: 2500 });
+      } else {
+        showToast('Robot rappelé', { type: 'info', duration: 2000 });
       }
       return next;
     });
-  }, []);
+  }, [showToast]);
 
 
   // Achievement unlocks driven by state changes in PetButton
@@ -430,7 +438,7 @@ const PetButton = () => {
       <button
         className={`header-action-btn pet-toggle${isSpawned ? ' pet-toggle--on' : ''}${needsAttention ? ' pet-toggle--attention' : ''}`}
         onClick={toggleSpawn}
-        tabIndex={-1}
+        tabIndex={0}
         aria-label={isSpawned ? 'Rappeler le robot' : 'Invoquer le robot'}
         role="switch"
         aria-checked={isSpawned}

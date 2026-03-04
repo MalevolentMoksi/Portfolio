@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood, MOODS } from '../contexts/MoodContext.jsx';
+import { useToast } from '../contexts/ToastContext.jsx';
 import Tooltip from './Tooltip.jsx';
 
 const MOOD_KEYS = Object.keys(MOODS);
 
 const MoodSwitcher = () => {
   const { mood, setMood } = useMood();
+  const { showToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [spinKey, setSpinKey] = useState(0);
   const panelRef = useRef(null);
@@ -55,6 +57,7 @@ const MoodSwitcher = () => {
     // Changer le mood au milieu de la transition (60 ms)
     setTimeout(() => {
       setMood(newMood);
+      showToast(`Ambiance : ${MOODS[newMood].label}`, { type: 'info', duration: 2500 });
     }, 60);
 
     // Retirer l'overlay après la fin de l'animation (200 ms)

@@ -177,7 +177,7 @@ const MiniTerminal = () => {
     };
   }, [isOpen]);
 
-  /* ── Fermer avec Escape ── */
+  /* ── Fermer avec Escape + focus trap ── */
   useEffect(() => {
     if (!isOpen) return;
     const handle = (e) => {
@@ -185,6 +185,18 @@ const MiniTerminal = () => {
         setIsOpen(false);
         setIconState('idle');
         setSnakeMode(false);
+      }
+      // Focus trap : garder Tab dans le dialog
+      if (e.key === 'Tab' && panelDivRef.current) {
+        const focusable = panelDivRef.current.querySelectorAll('input, button, [tabindex]:not([tabindex=\"-1\"])');
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
       }
     };
     document.addEventListener('keydown', handle);
@@ -361,7 +373,7 @@ const MiniTerminal = () => {
             <SnakeGame onClose={closeSnake} />
           ) : (
             <>
-              <div className="mini-terminal-output" ref={outputRef}>
+              <div className="mini-terminal-output" ref={outputRef} aria-live="polite" aria-relevant="additions">
                 {lines.map((line, i) => (
                   <div key={i} className={`mini-terminal-line mini-terminal-line--${line.type}`}>
                     {line.text.split('\n').map((segment, j) => (

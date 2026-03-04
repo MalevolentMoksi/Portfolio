@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useToast } from '@/contexts/ToastContext.jsx';
 import '@styles/components/_contact-form.css';
 
 const FORM_ENDPOINT = import.meta.env.VITE_FORMSPREE_ENDPOINT || 'https://formspree.io/f/xreaoyjd';
@@ -8,6 +9,7 @@ const MAX_EMAIL_LENGTH = 254;
 const MAX_MESSAGE_LENGTH = 2000;
 
 const ContactForm = () => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -116,13 +118,16 @@ const ContactForm = () => {
         setFormData({ name: '', email: '', message: '', website: '' });
         mountTimestampRef.current = Date.now();
         clearStatusLater();
+        showToast('Message envoyé avec succès !', { type: 'success' });
       } else {
         setSubmitStatus('error');
         clearStatusLater();
+        showToast('Erreur lors de l\'envoi. Veuillez réessayer.', { type: 'error' });
       }
     } catch {
       setSubmitStatus('error');
       clearStatusLater();
+      showToast('Erreur réseau. Vérifiez votre connexion.', { type: 'error' });
     } finally {
       setIsSubmitting(false);
     }

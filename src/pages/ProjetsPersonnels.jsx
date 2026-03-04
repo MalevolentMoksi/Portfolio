@@ -208,7 +208,7 @@ const ProjetsPersonnels = () => {
 
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline>
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Démonstration du jeu de Machine à Sous">
                   <source src={getAssetPath('assets/videos/slots.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
@@ -426,7 +426,7 @@ const ProjetsPersonnels = () => {
         <div className="video-gallery video-gallery-spaced">
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline>
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Démonstration du jeu Stickman Adventure">
                   <source src={getAssetPath('assets/videos/stickman.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>
@@ -441,7 +441,7 @@ const ProjetsPersonnels = () => {
 
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline>
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Démonstration du jeu RPG 1.2v">
                   <source src={getAssetPath('assets/videos/RPG.mp4')} type="video/mp4" />
                 Votre navigateur ne supporte pas la balise video.
               </video>

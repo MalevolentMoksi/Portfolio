@@ -31,6 +31,7 @@
 @import './components/_pet-button.css';
 @import './components/_tooltip.css';
 @import './components/_not-found.css';
+@import './components/_toast.css';
 
 /* Effects & animations */
 @import './_effects.css';
