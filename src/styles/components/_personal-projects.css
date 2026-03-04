@@ -181,8 +181,28 @@
 
 /* Discord Bot Project Styling */
 .bot-icon {
-  max-width: 280px;
-  margin-bottom: 1.5rem;
+  display: block;
+  max-width: 220px;
+  margin: 0 auto var(--space-lg);
+  border-radius: var(--border-radius-md);
+  border: 2px solid rgba(var(--color-primary-rgb), 0.4);
+  box-shadow:
+    0 0 28px rgba(var(--color-primary-rgb), 0.22),
+    0 6px 18px rgba(0, 0, 0, 0.45);
+  background: rgba(var(--color-secondary-rgb), 0.55);
+  padding: var(--space-sm);
+  transition:
+    box-shadow var(--transition-base),
+    border-color var(--transition-base),
+    transform var(--transition-base);
+}
+
+.bot-icon:hover {
+  border-color: rgba(var(--color-primary-rgb), 0.75);
+  box-shadow:
+    0 0 48px rgba(var(--color-primary-rgb), 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.5);
+  transform: translateY(-4px);
 }
 
 /* Feature cards grid — flex-wrap so 5 items sit 3+2 centered */

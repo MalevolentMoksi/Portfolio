@@ -167,6 +167,8 @@ header.header--main {
 .header--secondary .header--hero {
   text-align: center;
   width: 100%;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.18);
 }
 
 .header--hero-home {
@@ -189,14 +191,49 @@ header.header--main {
 }
 
 .header--secondary .header--hero h1 {
-  font-size: 1.4rem;
+  font-size: clamp(1.5rem, 3.5vw, 2.1rem);
   margin-top: 0;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-pale) 0%,
+    var(--color-primary) 45%,
+    var(--color-accent-light) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(var(--color-primary-rgb), 0.35));
 }
 
-.header--secondary .header--hero h2.header-subheading,
-.header--secondary .header--hero h3.header-subheading-alt {
-  font-size: 0.85rem;
+/* h3.header-subheading — sous-titre principal */
+.header--secondary .header--hero h3.header-subheading {
+  font-size: 0.9rem;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+/* h4.header-subheading-alt — mention complémentaire */
+.header--secondary .header--hero h4.header-subheading-alt {
+  font-size: 0.82rem;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-text);
+  opacity: 0.72;
+}
+
+/* Compatibilité : anciens sélecteurs h2/h3 (inutilisés mais conservés) */
+.header--secondary .header--hero h2.header-subheading {
+  font-size: 0.9rem;
   margin-top: 0;
   margin-bottom: 0;
   font-weight: 400;
@@ -280,12 +317,13 @@ header.header--main .hamburger-toggle {
   }
 
   .header--secondary .header--hero h1 {
-    font-size: var(--font-size-h2);
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
   }
 
-  .header--secondary .header--hero h2.header-subheading,
-  .header--secondary .header--hero h3.header-subheading-alt {
-    font-size: 0.9rem;
+  .header--secondary .header--hero h3.header-subheading,
+  .header--secondary .header--hero h4.header-subheading-alt,
+  .header--secondary .header--hero h2.header-subheading {
+    font-size: 0.82rem;
   }
 
   .header--hero-home {
@@ -325,12 +363,13 @@ header.header--main .hamburger-toggle {
   }
 
   .header--secondary .header--hero h1 {
-    font-size: 1.4rem;
-    margin-bottom: 0.1rem;
+    font-size: 1.3rem;
+    margin-bottom: 0.15rem;
   }
 
-  .header--secondary .header--hero h2.header-subheading,
-  .header--secondary .header--hero h3.header-subheading-alt {
-    font-size: 0.8rem;
+  .header--secondary .header--hero h3.header-subheading,
+  .header--secondary .header--hero h4.header-subheading-alt,
+  .header--secondary .header--hero h2.header-subheading {
+    font-size: 0.75rem;
   }
 }
