@@ -165,20 +165,25 @@ const DistantSilhouettes = () => {
   }, [mood]);
 
   // ── Hauteur du document (pour convertir les fractions en px) ──
-  const getDocHeight = useCallback(() =>
-    Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, window.innerHeight),
-  []);
+  // Lire la hauteur depuis #root (contenu React) et non body,
+  // pour éviter une boucle : les silhouettes (portaled dans body)
+  // gonflaient body.scrollHeight → ResizeObserver → repositionnement → etc.
+  const getDocHeight = useCallback(() => {
+    const root = document.getElementById('root');
+    return Math.max(root?.scrollHeight ?? 0, window.innerHeight);
+  }, []);
 
   const [docHeight, setDocHeight] = useState(getDocHeight);
 
   useEffect(() => {
-    // Recalculer quand le body se redimensionne
+    // Recalculer quand le contenu React se redimensionne
+    const root = document.getElementById('root');
     const handleResize = () => setDocHeight(getDocHeight());
     handleResize(); // sync immédiat au montage / changement de mood
 
-    if (typeof ResizeObserver !== 'undefined') {
+    if (root && typeof ResizeObserver !== 'undefined') {
       const ro = new ResizeObserver(handleResize);
-      ro.observe(document.body);
+      ro.observe(root);
       return () => ro.disconnect();
     }
     // Fallback pour les navigateurs sans ResizeObserver
@@ -225,7 +230,7 @@ const DistantSilhouettes = () => {
 
   return createPortal(
     <>{silhouettes}</>,
-    document.body
+    document.getElementById('ambient-root') || document.body
   );
 };
 

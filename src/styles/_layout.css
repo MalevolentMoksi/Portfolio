@@ -18,6 +18,18 @@
   -webkit-filter: blur(4px);
 }
 
+/* Conteneur des couches ambient (silhouettes, commuters).
+   position:absolute + inset:0 → même taille que body.
+   overflow:clip → les enfants à grands `top` ne gonflent pas
+   le scrollHeight de body (évite le gap sous le footer). */
+#ambient-root {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+  z-index: var(--z-ambient, 2);
+}
+
 /* Particles.js container */
 #particles-js {
   position: fixed;

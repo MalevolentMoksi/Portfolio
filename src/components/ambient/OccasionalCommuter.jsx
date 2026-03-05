@@ -271,7 +271,7 @@ const OccasionalCommuter = () => {
 
   return createPortal(
     <CommuterVehicle key={vehicle.key} type={vehicle.type} duration={DURATIONS[vehicle.type]} />,
-    document.body
+    document.getElementById('ambient-root') || document.body
   );
 };
 
