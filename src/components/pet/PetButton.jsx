@@ -177,7 +177,7 @@ const PetButton = () => {
 
   /* ── Dégradation en session (ralentie si thriving) + freeze pendant catch ── */
   // Approche probabiliste : évite les décimales (pas de multiplicateur flottant)
-  // Thriving (>85/85) : déclin avec 20% de probabilité par tick → ≈5× plus lent
+  // Thriving (>85/85) : déclin très ralenti + hunger décline plus lentement que happiness
   useEffect(() => {
     if (!isSpawned) return;
     decayRef.current = setInterval(() => {
@@ -188,10 +188,12 @@ const PetButton = () => {
       }
       setStats((s) => {
         const thriving = s.hunger > 85 && s.happiness > 85;
-        if (thriving && Math.random() > 0.2) return s; // skip ce tick
+        // Thriving effect: skip decay with high probability (different rates per stat)
+        const hungerSkip = thriving && Math.random() > 0.15;  // 85% skip when thriving
+        const happinessSkip = thriving && Math.random() > 0.30; // 70% skip when thriving
         return {
-          hunger: clamp(s.hunger - 2),
-          happiness: clamp(s.happiness - 1),
+          hunger: clamp(s.hunger - (hungerSkip ? 0 : 1.5)),
+          happiness: clamp(s.happiness - (happinessSkip ? 0 : 0.75)),
         };
       });
     }, DECAY_MS);
