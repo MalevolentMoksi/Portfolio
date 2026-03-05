@@ -1270,6 +1270,318 @@ body[data-mood='industrial'] footer {
   }
 }
 
+/* ────────────────────────────────────────────
+   4. Footer Walkers — silhouettes qui traversent le pied de page
+   ──────────────────────────────────────────── */
+
+/* Stage — conteneur absolu calé juste au-dessus du footer */
+.footer-walkers-stage {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+}
+
+/* ─── Horizon ground strip ─── */
+.footer-horizon {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-primary) 8%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary) 4%, transparent) 35%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  opacity: 0.6;
+}
+
+/* ─── Walker — positionné en absolu ─── */
+.footer-walker {
+  position: fixed;
+  bottom: 28px;
+  z-index: calc(var(--z-ambient, 0) + 1);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  will-change: left, transform;
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent));
+}
+
+.footer-walker.walker--visible {
+  opacity: 0.75;
+}
+
+/* ─── Walking bob animation ─── */
+.walker--walking .walker-body {
+  animation: walker-bob 0.38s ease-in-out infinite alternate;
+}
+
+@keyframes walker-bob {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-1.8px);
+  }
+}
+
+/* ─── Scanning posture ─── */
+.walker--scanning .walker-body {
+  transform: rotate(-8deg);
+  transition: transform 0.35s ease;
+}
+
+/* Pulsation subtile quand le walker scan — simule un « scan beam » */
+.walker--scanning .walker-body::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 18px;
+  height: 2px;
+  margin-left: -9px;
+  background: currentColor;
+  opacity: 0;
+  animation: scan-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes scan-pulse {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scaleX(1.2);
+  }
+}
+
+/* ─── Sitting posture ─── */
+.walker--sitting .walker-body {
+  transform: scaleY(0.72) translateY(4px);
+  transition: transform 0.4s ease;
+}
+
+/* ─── Invoking posture (summoning Ghost) ─── */
+.walker--invoking .walker-body {
+  animation: invoke-pose 1.5s ease-in-out infinite;
+}
+
+@keyframes invoke-pose {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px) rotate(2deg);
+  }
+}
+
+/* ─── Standing (transitional after sit) ─── */
+.walker--standing .walker-body {
+  transform: scaleY(1) translateY(0);
+  transition: transform 0.35s ease;
+}
+
+/* ─── Head — cursor awareness rotation ─── */
+.walker-head {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transition: transform 0.18s ease-out;
+}
+
+/* ─── Ghost hologram slot ─── */
+.walker-ghost-slot {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.walker-ghost-slot--active {
+  opacity: 1;
+}
+
+.walker-ghost-slot--active .walker-ghost {
+  animation: ghost-float 3.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--color-primary) 50%, transparent))
+    drop-shadow(0 0 10px color-mix(in srgb, var(--color-primary) 20%, transparent));
+}
+
+@keyframes ghost-float {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-6px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(-4deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* ─── Campfire slot ─── */
+.walker-campfire-slot {
+  position: absolute;
+  bottom: -2px;
+  left: -22px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.walker-campfire-slot--active {
+  opacity: 1;
+}
+
+/* Flames flicker */
+.campfire-flame {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+.campfire-flame--1 {
+  animation: flame-dance-1 0.7s ease-in-out infinite alternate;
+}
+.campfire-flame--2 {
+  animation: flame-dance-2 0.55s ease-in-out infinite alternate;
+  animation-delay: -0.15s;
+}
+.campfire-flame--3 {
+  animation: flame-dance-3 0.65s ease-in-out infinite alternate;
+  animation-delay: -0.3s;
+}
+
+@keyframes flame-dance-1 {
+  0% {
+    transform: scaleY(1) scaleX(1);
+    opacity: 0.65;
+  }
+  50% {
+    transform: scaleY(1.15) scaleX(0.9);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scaleY(0.85) scaleX(1.08);
+    opacity: 0.55;
+  }
+}
+
+@keyframes flame-dance-2 {
+  0% {
+    transform: scaleY(0.9) translateX(0);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scaleY(1.1) translateX(1px);
+    opacity: 0.6;
+  }
+}
+
+@keyframes flame-dance-3 {
+  0% {
+    transform: scaleY(1.05) translateX(0);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scaleY(0.8) translateX(-1px);
+    opacity: 0.55;
+  }
+}
+
+/* Sparks rise */
+.campfire-spark {
+  animation: spark-rise 1.6s ease-out infinite;
+}
+
+.campfire-spark--1 {
+  animation-duration: 1.4s;
+}
+.campfire-spark--2 {
+  animation-delay: -0.5s;
+  animation-duration: 1.8s;
+}
+.campfire-spark--3 {
+  animation-delay: -1s;
+  animation-duration: 2s;
+}
+
+@keyframes spark-rise {
+  0% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  60% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-10px) translateX(3px);
+    opacity: 0;
+  }
+}
+
+/* Campfire ground glow — halo lumineux au sol */
+.walker-campfire-slot--active .walker-campfire {
+  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--color-primary) 30%, transparent));
+}
+
+/* ─── Mood overrides ─── */
+body[data-mood='hacker'] .footer-walker {
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 4px rgba(0, 255, 136, 0.25));
+}
+
+body[data-mood='vaporwave'] .footer-walker {
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 4px rgba(255, 121, 242, 0.25));
+}
+
+body[data-mood='europa'] .footer-walker {
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 4px rgba(136, 204, 255, 0.2));
+}
+
+body[data-mood='industrial'] .footer-walker {
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 4px rgba(255, 136, 68, 0.25));
+}
+
+/* Horizon adapts to mood too */
+body[data-mood='hacker'] .footer-horizon {
+  opacity: 0.45;
+}
+
+body[data-mood='europa'] .footer-horizon {
+  opacity: 0.35;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .footer-walkers-stage {
+    display: none;
+  }
+}
+
 /* Reduced motion — already handled globally in _variables.css + _effects.css,
    but be explicit for ambient layers */
 @media (prefers-reduced-motion: reduce) {
@@ -1282,7 +1594,8 @@ body[data-mood='industrial'] footer {
   .industrial-spark,
   .industrial-neon-sign,
   .industrial-steam-puff,
-  .industrial-pipe-fixture {
+  .industrial-pipe-fixture,
+  .footer-walkers-stage {
     display: none !important;
   }
 

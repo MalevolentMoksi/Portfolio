@@ -17,6 +17,7 @@
 
 import DistantSilhouettes from './DistantSilhouettes.jsx';
 import OccasionalCommuter from './OccasionalCommuter.jsx';
+// import FooterWalkers from './FooterWalkers.jsx'; // désactivé — voir FooterWalkers.jsx
 import EuropaSnowfall from './EuropaSnowfall.jsx';
 import EuropaIcicles from './EuropaIcicles.jsx';
 import EuropaFrost from './EuropaFrost.jsx';
@@ -28,6 +29,7 @@ import PowerSurge from './PowerSurge.jsx';
 const AmbientEffects = () => (
   <>
     <OccasionalCommuter />
+    {/* <FooterWalkers /> */}
     <DistantSilhouettes />
     <EuropaSnowfall />
     <EuropaIcicles />
