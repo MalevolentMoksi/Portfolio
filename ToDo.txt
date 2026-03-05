@@ -14,3 +14,54 @@ Remove Bot Scared on Quick mouse
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
 Ajouter des petits bonhomes (Améliorer l'ambience)
+
+
+
+Plan Home : Plan: Refonte visuelle de la page Home
+Transformer la page d'accueil de 4 blocs de texte "plats" en 4 sections distinctes et visuellement riches, chacune avec son propre traitement visuel inspiré des patterns déjà utilisés dans ProjetsPersonnels. Aucun contenu ne disparaît — uniquement la mise en forme qui change.
+
+Sections & transformations
+
+1. "À propos" — carte biographie accentuée
+Remplace l'article.presentation-block centré. Devient une grande carte horizontale avec :
+
+Un épais filet gauche gold (border-left: 4px solid var(--color-primary))
+Le texte de présentation existant
+En dessous : 3 pills/badges statiques (IUT2 de Grenoble, BUT Informatique, 2ème année) dans le style des bot-skill-tag déjà définis
+2. "Compétences" — 3 cartes de catégorie avec SVG
+Remplace la <ul> à puces. Crée 3 bot-feature-card (style déjà défini dans _personal-projects.css) :
+
+Développement Web : HTML/CSS, JS, PHP, React, Vite — icône SVG </> maison
+Développement Système / Back : Java, Python, C, C++, SQL — icône SVG {...} ou circuit
+Outils & Environnement : Git, Linux, Bash, JavaFX — icône SVG terminal/engrenage
+Chaque carte liste ses technos en bot-skills-tags à l'intérieur de la carte.
+
+3. "Mon parcours" — timeline verticale
+Remplace le <p> plat (Bac générale, etc.). Une liste HTML avec pseudo-elements CSS :
+
+Ligne verticale gold (::before sur le <ul>)
+Chaque <li> = un nœud (point gold + date + titre + établissement)
+Actuellement 2 entrées : Bac Général (2024) + BUT Informatique (2024–présent)
+Style nouveau .timeline / .timeline-item à ajouter dans _projects.css
+4. "Centres d'intérêt" — 4 mini-cartes avec SVG
+Remplace la <ul> simple. 4 éléments en grille 2×2 (ou flex-wrap) :
+
+Art (pinceau SVG), Jeux-Vidéo (manette SVG), Musique (note SVG), Cinéma (clap SVG)
+Style .hobby-card : centré, icône gold en haut, label en dessous, fond avec border semi-transparent — similaire au bot-feature-card mais sans description longue
+5. Section Contact — inchangée
+
+Fichiers modifiés
+
+Home.jsx — restructuration complète du JSX (pas de changement de contenu)
+_projects.css — ajout des classes .timeline, .timeline-item, .hobby-card en bas du fichier (les classes bot-feature-card et bot-skill-tag sont déjà disponibles depuis _personal-projects.css)
+main.css — aucune modification nécessaire (_personal-projects.css et _projects.css sont déjà importés)
+Vérification
+
+npm run dev → vérifier visuellement l'affichage à 375px (mobile) et 1024px (desktop)
+Les bot-feature-card doivent passer en colonne unique sur mobile (le flex-wrap existant s'y prête)
+La timeline doit rester lisible en colonne sur petit écran
+Décisions
+
+Cartes catégories SVG choisies plutôt que les icônes simple-icons (plus de hiérarchie visuelle, pas besoin d'une icône par techno)
+Pas de photo, donc la section À propos reste textuelle mais "caractérisée" par les badges et l'accent border
+Réutilisation des classes CSS existantes (bot-feature-card, bot-skill-tag) pour la cohérence de style — aucune duplication de code CSS
