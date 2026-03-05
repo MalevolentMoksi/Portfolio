@@ -121,12 +121,90 @@ const DriftingShip = ({ size = 50 }) => (
   </svg>
 );
 
+/** Cristal de glace (mood: europa) — formation géométrique givrée avec reflets */
+const IceShard = ({ size = 80 }) => (
+  <svg
+    width={size}
+    height={size * 1.2}
+    viewBox="0 0 40 48"
+    fill="none"
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    {/* Cristal principal — forme hexagonale allongée */}
+    <g className="sil-ice-facet">
+      <polygon
+        points="20,2 32,14 32,34 20,46 8,34 8,14"
+        stroke="currentColor"
+        strokeWidth="0.8"
+        fill="none"
+        opacity="0.7"
+      />
+    </g>
+    {/* Facettes internes — reflets géométriques */}
+    <g className="sil-ice-facet sil-ice-facet--inner">
+      <line x1="20" y1="2" x2="20" y2="46" stroke="currentColor" strokeWidth="0.4" opacity="0.25" />
+      <line x1="8" y1="14" x2="32" y2="34" stroke="currentColor" strokeWidth="0.3" opacity="0.2" />
+      <line x1="32" y1="14" x2="8" y2="34" stroke="currentColor" strokeWidth="0.3" opacity="0.2" />
+    </g>
+    {/* Petit éclat satellite */}
+    <polygon
+      className="sil-ice-facet"
+      points="35,8 39,14 35,20 31,14"
+      stroke="currentColor"
+      strokeWidth="0.5"
+      fill="none"
+      opacity="0.4"
+    />
+    {/* Micro-cristal */}
+    <polygon
+      className="sil-ice-facet sil-ice-facet--inner"
+      points="5,36 2,42 8,42"
+      stroke="currentColor"
+      strokeWidth="0.4"
+      fill="none"
+      opacity="0.3"
+    />
+  </svg>
+);
+
+/** Engrenage mécanique (mood: industrial) — cog avec dents visibles */
+const GearMachine = ({ size = 70 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 48 48"
+    fill="none"
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    {/* Grand engrenage — rotation lente */}
+    <g className="sil-gear">
+      <circle cx="24" cy="24" r="14" stroke="currentColor" strokeWidth="0.8" fill="none" opacity="0.6" />
+      <circle cx="24" cy="24" r="5" stroke="currentColor" strokeWidth="0.6" fill="none" opacity="0.4" />
+      {/* Dents (8 dents réparties sur 360°) */}
+      <rect x="22" y="6"  width="4" height="5" rx="0.5" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.5" />
+      <rect x="22" y="37" width="4" height="5" rx="0.5" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.5" />
+      <rect x="6"  y="22" width="5" height="4" rx="0.5" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.5" />
+      <rect x="37" y="22" width="5" height="4" rx="0.5" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.5" />
+      <rect x="10" y="10" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.4" transform="rotate(45 12 12)" />
+      <rect x="34" y="10" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.4" transform="rotate(45 36 12)" />
+      <rect x="10" y="34" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.4" transform="rotate(45 12 36)" />
+      <rect x="34" y="34" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.4" transform="rotate(45 36 36)" />
+    </g>
+    {/* Petit engrenage — rotation inverse */}
+    <g className="sil-gear sil-gear--reverse" style={{ transformOrigin: '40px 12px' }}>
+      <circle cx="40" cy="12" r="6" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.35" />
+      <circle cx="40" cy="12" r="2" stroke="currentColor" strokeWidth="0.4" fill="none" opacity="0.25" />
+      <rect x="39" y="4" width="2" height="3" rx="0.3" stroke="currentColor" strokeWidth="0.4" fill="none" opacity="0.3" />
+      <rect x="39" y="17" width="2" height="3" rx="0.3" stroke="currentColor" strokeWidth="0.4" fill="none" opacity="0.3" />
+      <rect x="32" y="11" width="3" height="2" rx="0.3" stroke="currentColor" strokeWidth="0.4" fill="none" opacity="0.3" />
+    </g>
+  </svg>
+);
+
 /* ─── Configuration par silhouette ─── */
 
-/**
- * Chaque silhouette a une position verticale, une durée,
- * un delay et un type d'animation de dérive.
- */
 /**
  * Positions verticales exprimées en fraction (0–1) de la hauteur
  * totale du document — les silhouettes se répartissent sur toute la page
@@ -145,6 +223,20 @@ const HACKER_CONFIGS = [
   { topFrac: 0.75, duration: '42s', delay: '8s',  drift: 'drift-ltr' },
 ];
 
+/* Europa — cristaux dérivant en diagonale, lents et majestueux */
+const EUROPA_CONFIGS = [
+  { topFrac: 0.12, duration: '65s', delay: '0s',  drift: 'drift-diagonal' },
+  { topFrac: 0.40, duration: '80s', delay: '10s', drift: 'drift-rtl-slow' },
+  { topFrac: 0.68, duration: '55s', delay: '22s', drift: 'drift-diagonal' },
+];
+
+/* Industrial — engrenages montant lentement (chaleur ascendante) */
+const INDUSTRIAL_CONFIGS = [
+  { topFrac: 0.20, duration: '60s', delay: '0s',  drift: 'drift-upward' },
+  { topFrac: 0.50, duration: '75s', delay: '14s', drift: 'drift-upward' },
+  { topFrac: 0.78, duration: '50s', delay: '6s',  drift: 'drift-upward' },
+];
+
 /* ─── Composant ─── */
 
 const DistantSilhouettes = () => {
@@ -159,6 +251,10 @@ const DistantSilhouettes = () => {
         return { ShapeComponent: DataStream, configs: HACKER_CONFIGS };
       case 'vaporwave':
         return { ShapeComponent: DriftingShip, configs: SILHOUETTE_CONFIGS };
+      case 'europa':
+        return { ShapeComponent: IceShard, configs: EUROPA_CONFIGS };
+      case 'industrial':
+        return { ShapeComponent: GearMachine, configs: INDUSTRIAL_CONFIGS };
       default:
         return { ShapeComponent: BirdFlock, configs: SILHOUETTE_CONFIGS };
     }
@@ -194,7 +290,7 @@ const DistantSilhouettes = () => {
   // Commande console de test : window.testSilhouettes('default'|'hacker'|'vaporwave')
   useEffect(() => {
     window.testSilhouettes = (testMood) => {
-      const validMood = ['default', 'hacker', 'vaporwave'].includes(testMood) ? testMood : mood;
+      const validMood = ['default', 'hacker', 'vaporwave', 'europa', 'industrial'].includes(testMood) ? testMood : mood;
       console.log(`Testing silhouettes with mood: ${validMood}`);
     };
     return () => {
@@ -214,7 +310,7 @@ const DistantSilhouettes = () => {
         style={{
           top: Math.round(cfg.topFrac * docHeight) + 'px',
           left: 0,
-          '--sil-opacity': mood === 'hacker' ? '0.18' : '0.30',
+          '--sil-opacity': mood === 'hacker' ? '0.18' : mood === 'europa' ? '0.25' : '0.30',
           animationName: cfg.drift,
           animationDuration: cfg.duration,
           animationDelay: cfg.delay,

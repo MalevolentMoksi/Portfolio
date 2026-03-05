@@ -769,6 +769,490 @@
 }
 
 /* ────────────────────────────────────────────
+   Europa — ice shard micro-animations
+   ──────────────────────────────────────────── */
+
+/* Shimmer subtil sur les facettes de cristal — reflets de lumière */
+.sil-ice-facet {
+  animation: ice-shimmer 4s ease-in-out infinite;
+}
+
+.sil-ice-facet--inner {
+  animation-delay: 1.5s;
+  animation-duration: 5s;
+}
+
+@keyframes ice-shimmer {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ────────────────────────────────────────────
+   Industrial — gear micro-animations
+   ──────────────────────────────────────────── */
+
+/* Rotation lente des engrenages */
+.sil-gear {
+  transform-box: fill-box;
+  transform-origin: center center;
+  animation: gear-rotate 18s linear infinite;
+}
+
+.sil-gear--reverse {
+  animation-direction: reverse;
+  animation-duration: 12s;
+}
+
+@keyframes gear-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dérive ascendante — chaleur industrielle montante */
+@keyframes drift-upward {
+  0% {
+    transform: translateX(-5%) translateY(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: var(--sil-opacity, 0.3);
+  }
+  50% {
+    transform: translateX(3%) translateY(-40vh);
+    opacity: var(--sil-opacity, 0.3);
+  }
+  95% {
+    opacity: var(--sil-opacity, 0.3);
+  }
+  100% {
+    transform: translateX(8%) translateY(-90vh);
+    opacity: 0;
+  }
+}
+
+/* ────────────────────────────────────────────
+   Europa Snowfall — flocons CSS
+   ──────────────────────────────────────────── */
+
+.europa-snowflake {
+  position: fixed;
+  border-radius: 50%;
+  background: rgba(224, 242, 254, 0.6);
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+  will-change: transform, opacity;
+  animation:
+    snowfall linear infinite,
+    snowflake-wobble ease-in-out infinite;
+}
+
+@keyframes snowfall {
+  0% {
+    transform: translateY(-20px) translateX(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: var(--flake-opacity, 0.4);
+  }
+  90% {
+    opacity: var(--flake-opacity, 0.4);
+  }
+  100% {
+    transform: translateY(100vh) translateX(0);
+    opacity: 0;
+  }
+}
+
+@keyframes snowflake-wobble {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(12px);
+  }
+  75% {
+    transform: translateX(-12px);
+  }
+}
+
+/* ────────────────────────────────────────────
+   Industrial Rising Embers — braises montantes
+   ──────────────────────────────────────────── */
+
+.industrial-ember {
+  position: fixed;
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+  will-change: transform, opacity;
+  animation: ember-rise linear forwards;
+}
+
+@keyframes ember-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.9;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.6;
+    transform: translateY(-50vh) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-85vh) scale(0.3);
+  }
+}
+
+/* ────────────────────────────────────────────
+   Industrial Sparks — étincelles horizontales
+   ──────────────────────────────────────────── */
+
+.industrial-spark {
+  position: fixed;
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+  will-change: transform, opacity;
+  animation: spark-burst linear forwards;
+}
+
+@keyframes spark-burst {
+  0% {
+    transform: translateX(0) scaleX(1);
+    opacity: 1;
+  }
+  30% {
+    opacity: 0.9;
+    transform: translateX(calc(var(--spark-dir, 1) * 30px)) scaleX(0.7);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(calc(var(--spark-dir, 1) * 80px)) scaleX(0.2);
+  }
+}
+
+/* ────────────────────────────────────────────
+   Europa Icicles — stalactites de glace
+   ──────────────────────────────────────────── */
+
+.europa-icicles-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+}
+
+.europa-icicle {
+  opacity: 0;
+  transform-origin: top center;
+  animation: icicle-grow 1.5s ease-out forwards;
+}
+
+@keyframes icicle-grow {
+  0% {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.europa-icicle-drip {
+  opacity: 0;
+  animation: icicle-drip 1.2s ease-in infinite;
+}
+
+@keyframes icicle-drip {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  10% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+}
+
+/* ────────────────────────────────────────────
+   Europa Frost — craquelures de givre + congère
+   ──────────────────────────────────────────── */
+
+.europa-frost-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+}
+
+.europa-frost-crack {
+  animation: frost-draw-in 3s ease-out forwards;
+}
+
+@keyframes frost-draw-in {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ── Europa snow accumulation — on top of main and footer ── */
+/* Uses pseudo-elements so the snow sits on actual DOM elements,
+   not floating in viewport space. */
+
+body[data-mood='europa'] main {
+  position: relative;
+}
+
+body[data-mood='europa'] main::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 12px;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    /* Bumpy snow profile via radial gradient blobs */
+    radial-gradient(ellipse 60px 10px at 8% 100%, rgba(224, 242, 254, 0.22) 0%, transparent 100%),
+    radial-gradient(ellipse 90px 12px at 22% 100%, rgba(200, 230, 250, 0.18) 0%, transparent 100%),
+    radial-gradient(ellipse 70px 9px at 40% 100%, rgba(224, 242, 254, 0.2) 0%, transparent 100%),
+    radial-gradient(ellipse 110px 11px at 58% 100%, rgba(200, 230, 250, 0.16) 0%, transparent 100%),
+    radial-gradient(ellipse 80px 10px at 75% 100%, rgba(224, 242, 254, 0.19) 0%, transparent 100%),
+    radial-gradient(ellipse 95px 12px at 92% 100%, rgba(200, 230, 250, 0.17) 0%, transparent 100%);
+  animation: europa-snow-settle 8s ease-out forwards;
+  opacity: 0;
+}
+
+body[data-mood='europa'] footer {
+  position: relative;
+}
+
+body[data-mood='europa'] footer::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse 50px 7px at 12% 100%, rgba(224, 242, 254, 0.2) 0%, transparent 100%),
+    radial-gradient(ellipse 80px 8px at 35% 100%, rgba(200, 230, 250, 0.16) 0%, transparent 100%),
+    radial-gradient(ellipse 65px 7px at 55% 100%, rgba(224, 242, 254, 0.18) 0%, transparent 100%),
+    radial-gradient(ellipse 90px 8px at 78% 100%, rgba(200, 230, 250, 0.15) 0%, transparent 100%),
+    radial-gradient(ellipse 55px 7px at 95% 100%, rgba(224, 242, 254, 0.17) 0%, transparent 100%);
+  animation: europa-snow-settle 8s ease-out 2s forwards;
+  opacity: 0;
+}
+
+@keyframes europa-snow-settle {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.3);
+  }
+  40% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* ────────────────────────────────────────────
+   Industrial Neon Signs — enseignes néon
+   ──────────────────────────────────────────── */
+
+.industrial-neon-sign {
+  position: absolute;
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+  opacity: 0;
+  animation: neon-appear 1s ease-out forwards;
+}
+
+.industrial-neon-sign--hazard {
+  width: 80px;
+  height: 55px;
+}
+
+.industrial-neon-sign--bolt {
+  width: 65px;
+  height: 65px;
+}
+
+.industrial-neon-sign--caution {
+  width: 140px;
+  height: 60px;
+}
+
+/* Lueur néon sur les traits SVG */
+.neon-stroke {
+  filter: drop-shadow(0 0 4px #ff5722) drop-shadow(0 0 8px rgba(255, 87, 34, 0.4));
+  animation: neon-flicker 4s steps(1) infinite;
+}
+
+.neon-stroke--accent {
+  filter: drop-shadow(0 0 4px #ffd600) drop-shadow(0 0 8px rgba(255, 214, 0, 0.4));
+}
+
+.neon-text {
+  filter: drop-shadow(0 0 4px #ff5722) drop-shadow(0 0 10px rgba(255, 87, 34, 0.5));
+  animation: neon-flicker 4s steps(1) infinite;
+  animation-delay: -1.5s;
+}
+
+@keyframes neon-appear {
+  0% {
+    opacity: 0;
+    filter: brightness(0.3);
+  }
+  60% {
+    opacity: 0.75;
+    filter: brightness(1.2);
+  }
+  100% {
+    opacity: 0.7;
+    filter: brightness(1);
+  }
+}
+
+@keyframes neon-flicker {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  4% {
+    opacity: 0.65;
+  }
+  4.5% {
+    opacity: 0.7;
+  }
+  18% {
+    opacity: 0.7;
+  }
+  18.2% {
+    opacity: 0.3;
+  }
+  18.5% {
+    opacity: 0.72;
+  }
+  18.7% {
+    opacity: 0.35;
+  }
+  19% {
+    opacity: 0.7;
+  }
+  52% {
+    opacity: 0.68;
+  }
+  52.3% {
+    opacity: 0.72;
+  }
+  78% {
+    opacity: 0.7;
+  }
+  78.2% {
+    opacity: 0.1;
+  }
+  78.4% {
+    opacity: 0.65;
+  }
+  78.6% {
+    opacity: 0.7;
+  }
+  93% {
+    opacity: 0.68;
+  }
+  93.2% {
+    opacity: 0.72;
+  }
+}
+
+/* ────────────────────────────────────────────
+   Industrial Steam — tuyaux + jets de vapeur
+   ──────────────────────────────────────────── */
+
+/* Tuyau métallique ancré au bord supérieur du footer (dépasse vers le haut) */
+.industrial-pipe-fixture {
+  position: absolute;
+  top: -48px; /* hauteur du tuyau : le bas affleure le bord supérieur du footer */
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: calc(var(--z-ambient, 0) + 1);
+  opacity: 0.55;
+}
+
+.industrial-steam-puff {
+  position: absolute;
+  top: -65px; /* légèrement au-dessus de l'embout du tuyau */
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(158, 158, 158, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+  will-change: transform, opacity;
+  animation: steam-puff ease-out forwards;
+}
+
+@keyframes steam-puff {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.18;
+  }
+  100% {
+    transform: scale(4) translateY(-80px);
+    opacity: 0;
+  }
+}
+
+/* ────────────────────────────────────────────
+   Industrial — neon strip lights (CSS-only)
+   ──────────────────────────────────────────── */
+
+body[data-mood='industrial'] header {
+  box-shadow:
+    0 2px 0 rgba(255, 87, 34, 0.35),
+    0 4px 12px rgba(255, 87, 34, 0.1);
+}
+
+body[data-mood='industrial'] footer {
+  box-shadow:
+    0 -2px 0 rgba(255, 87, 34, 0.25),
+    0 -4px 10px rgba(255, 87, 34, 0.08);
+}
+
+/* ────────────────────────────────────────────
    Responsive & accessibility
    ──────────────────────────────────────────── */
 
@@ -790,7 +1274,15 @@
    but be explicit for ambient layers */
 @media (prefers-reduced-motion: reduce) {
   .ambient-commuter,
-  .ambient-silhouette {
+  .ambient-silhouette,
+  .europa-snowflake,
+  .europa-icicles-bar,
+  .europa-frost-overlay,
+  .industrial-ember,
+  .industrial-spark,
+  .industrial-neon-sign,
+  .industrial-steam-puff,
+  .industrial-pipe-fixture {
     display: none !important;
   }
 

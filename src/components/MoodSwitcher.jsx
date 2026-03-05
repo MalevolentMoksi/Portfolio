@@ -119,13 +119,17 @@ const MoodSwitcher = () => {
             strokeWidth="0.5"
             strokeOpacity="0.6"
           />
-          {/* 3 satellites orbitaux */}
-          <circle className="mood-dot mood-dot--1" cx="12" cy="3.5" r="1.8"
+          {/* 5 satellites orbitaux — pentagone régulier (r=9.5, centre 12,12) */}
+          <circle className="mood-dot mood-dot--1" cx="12" cy="2.5" r="1.5"
             fill={MOODS.default.color} opacity={mood === 'default' ? 1 : 0.35} />
-          <circle className="mood-dot mood-dot--2" cx="4.6" cy="17" r="1.8"
+          <circle className="mood-dot mood-dot--2" cx="21.0" cy="6.1" r="1.5"
             fill={MOODS.hacker.color} opacity={mood === 'hacker' ? 1 : 0.35} />
-          <circle className="mood-dot mood-dot--3" cx="19.4" cy="17" r="1.8"
+          <circle className="mood-dot mood-dot--3" cx="17.6" cy="19.7" r="1.5"
             fill={MOODS.vaporwave.color} opacity={mood === 'vaporwave' ? 1 : 0.35} />
+          <circle className="mood-dot mood-dot--4" cx="6.4" cy="19.7" r="1.5"
+            fill={MOODS.europa.color} opacity={mood === 'europa' ? 1 : 0.35} />
+          <circle className="mood-dot mood-dot--5" cx="3.0" cy="6.1" r="1.5"
+            fill={MOODS.industrial.color} opacity={mood === 'industrial' ? 1 : 0.35} />
           {/* Orbite ring */}
           <circle cx="12" cy="12" r="9.5"
             fill="none"

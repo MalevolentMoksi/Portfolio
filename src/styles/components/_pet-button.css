@@ -357,6 +357,14 @@ body[data-mood='vaporwave'] .pet-robot {
   --pet-color: #ff71ce;
 }
 
+body[data-mood='europa'] .pet-robot {
+  --pet-color: #00e5ff;
+}
+
+body[data-mood='industrial'] .pet-robot {
+  --pet-color: #ff5722;
+}
+
 /* ---- Animations du robot ---- */
 @keyframes pet-shake {
   0%,

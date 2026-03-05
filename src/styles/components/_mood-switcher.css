@@ -528,6 +528,294 @@ body[data-mood='vaporwave'] main {
   }
 }
 
+/* ── EUROPA (cryo / frozen sci-fi) ── */
+/* ::before : frost creep vignette — bords gelés qui respirent */
+body[data-mood='europa']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  box-shadow:
+    inset 0 0 120px rgba(173, 216, 230, 0.12),
+    inset 0 0 250px rgba(0, 229, 255, 0.06);
+  background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(11, 19, 30, 0.6) 100%);
+  animation: europa-frost-breathe 6s ease-in-out infinite;
+}
+
+/* ::after : grain glacé très subtil — cristaux de givre */
+body[data-mood='europa']::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 4px,
+      rgba(224, 242, 254, 0.012) 4px,
+      rgba(224, 242, 254, 0.012) 5px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 4px,
+      rgba(0, 229, 255, 0.008) 4px,
+      rgba(0, 229, 255, 0.008) 5px
+    );
+  mix-blend-mode: screen;
+  animation: europa-grain 0.15s steps(1) infinite;
+}
+
+@keyframes europa-frost-breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes europa-grain {
+  0% {
+    background-position:
+      0px 0px,
+      0px 0px;
+  }
+  25% {
+    background-position:
+      1px -1px,
+      -1px 2px;
+  }
+  50% {
+    background-position:
+      -2px 1px,
+      1px -1px;
+  }
+  75% {
+    background-position:
+      2px 2px,
+      -2px 1px;
+  }
+  100% {
+    background-position:
+      -1px -2px,
+      2px -2px;
+  }
+}
+
+/* ── INDUSTRIAL (forge / cyber-brutalist) ── */
+/* ::before : nappe de fumée horizontale — brume industrielle */
+body[data-mood='industrial']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 87, 34, 0.015) 12%,
+    transparent 25%,
+    rgba(191, 54, 12, 0.02) 40%,
+    transparent 55%,
+    rgba(255, 214, 0, 0.01) 70%,
+    transparent 85%,
+    rgba(255, 87, 34, 0.012) 100%
+  );
+  background-size: 200% 100%;
+  animation: industrial-smoke-pan 22s linear infinite;
+  opacity: 0.7;
+}
+
+/* ::after : scanlines orange subtiles — stables, pas de flicker (mécanique) */
+body[data-mood='industrial']::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(255, 87, 34, 0.018) 3px,
+    rgba(255, 87, 34, 0.018) 4px
+  );
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.85;
+}
+
+@keyframes industrial-smoke-pan {
+  0% {
+    background-position: 0% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ── Europa : glassmorphism givrée ── */
+body[data-mood='europa'] .project-card,
+body[data-mood='europa'] .mood-panel,
+body[data-mood='europa'] header {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background: rgba(224, 242, 254, 0.05) !important;
+  border-color: rgba(0, 229, 255, 0.15);
+}
+
+body[data-mood='europa'] .project-card:hover,
+body[data-mood='europa'] a:hover,
+body[data-mood='europa'] button:hover {
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.25);
+}
+
+/* ── Industrial : brutalisme — 3 niveaux commutables ── */
+/* Niveau FULL : tout angulaire + ombres dures + boutons physiques */
+body[data-mood='industrial'].brutalist-full .project-card,
+body[data-mood='industrial'].brutalist-full .mood-panel,
+body[data-mood='industrial'].brutalist-full button,
+body[data-mood='industrial'].brutalist-full input,
+body[data-mood='industrial'].brutalist-full textarea,
+body[data-mood='industrial'].brutalist-full .filter-tag,
+body[data-mood='industrial'].brutalist-full header {
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--color-primary);
+}
+
+body[data-mood='industrial'].brutalist-full button:active,
+body[data-mood='industrial'].brutalist-full .filter-tag:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+/* Niveau MODERATE : cards + boutons angulaires, le reste conservé */
+body[data-mood='industrial'].brutalist-moderate .project-card,
+body[data-mood='industrial'].brutalist-moderate button,
+body[data-mood='industrial'].brutalist-moderate input,
+body[data-mood='industrial'].brutalist-moderate textarea,
+body[data-mood='industrial'].brutalist-moderate .filter-tag {
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--color-primary);
+}
+
+body[data-mood='industrial'].brutalist-moderate button:active,
+body[data-mood='industrial'].brutalist-moderate .filter-tag:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+/* Niveau MINIMAL : ombres dures uniquement, border-radius préservé */
+body[data-mood='industrial'].brutalist-minimal .project-card,
+body[data-mood='industrial'].brutalist-minimal button,
+body[data-mood='industrial'].brutalist-minimal .filter-tag {
+  box-shadow: 4px 4px 0 var(--color-primary);
+}
+
+body[data-mood='industrial'].brutalist-minimal button:active,
+body[data-mood='industrial'].brutalist-minimal .filter-tag:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+/* ── Industrial : glitch twitch sur headers — sporadique ── */
+body[data-mood='industrial'] h1,
+body[data-mood='industrial'] h2 {
+  animation: industrial-glitch-twitch 20s steps(1) infinite;
+}
+
+@keyframes industrial-glitch-twitch {
+  0%,
+  92% {
+    transform: none;
+  }
+  92.5% {
+    transform: translateX(-3px);
+  }
+  93% {
+    transform: translateX(2px);
+  }
+  93.5% {
+    transform: translateX(-1px) skewX(-1deg);
+  }
+  94% {
+    transform: translateX(2px) skewX(0.5deg);
+  }
+  94.5% {
+    transform: none;
+  }
+  96% {
+    transform: translateX(1px);
+  }
+  96.3% {
+    transform: translateX(-2px);
+  }
+  96.6% {
+    transform: none;
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* ── Industrial : power surge — classe ajoutée par JS (400ms) ── */
+/* Subtil scintillement électrique — baisse légère puis snap retour */
+body[data-mood='industrial'].power-surge-active main,
+body[data-mood='industrial'].power-surge-active header {
+  animation: power-surge-flash 0.4s ease-out both;
+}
+
+/* Les enseignes néon réagissent plus fort pendant la surtension */
+body[data-mood='industrial'].power-surge-active .neon-stroke,
+body[data-mood='industrial'].power-surge-active .neon-text {
+  animation: neon-surge-react 0.4s steps(3) both;
+}
+
+@keyframes power-surge-flash {
+  0% {
+    filter: brightness(1);
+  }
+  10% {
+    filter: brightness(0.82);
+  }
+  25% {
+    filter: brightness(0.9);
+  }
+  40% {
+    filter: brightness(0.78);
+  }
+  55% {
+    filter: brightness(0.95);
+  }
+  70% {
+    filter: brightness(0.85);
+  }
+  85% {
+    filter: brightness(1.05);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@keyframes neon-surge-react {
+  0% {
+    opacity: 0.7;
+  }
+  33% {
+    opacity: 0.15;
+  }
+  66% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
 /* ---- VHS transition overlay ---- */
 .mood-vhs-overlay {
   position: fixed;

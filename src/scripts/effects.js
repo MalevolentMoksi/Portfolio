@@ -35,64 +35,134 @@ class VisualEffects {
       return;
     }
 
+    const currentMood = document.body.getAttribute('data-mood') || 'default';
+    this._applyParticlesConfig(currentMood);
+
+    this.particlesLoaded = true;
+
+    // Exposer les fonctions globales pour les composants React
+    window.updateParticlesMood = (mood) => this.updateParticlesMood(mood);
+    window.reconfigureParticles = (mood) => this.reconfigureParticles(mood);
+  }
+
+  /**
+   * Construit la config particles.js adaptée au mood.
+   * Europa → blizzard horizontal (blanc/cyan, rapide, traits fins)
+   * Industrial → cendres flottantes (orange, lent, remontée verticale)
+   * Autres → particules dorées classiques (ou recolorées)
+   */
+  _getParticlesConfig(mood) {
     const tier = getPerformanceTier();
     const isMobile = window.innerWidth <= 768;
+    const retinaDetect = tier === 'high';
+    const enableAnims = tier !== 'low';
 
-    // ── Gentle particles : moins de particules, plus espacées ──
+    if (mood === 'europa') {
+      // Blizzard horizontal — traits blancs/cyan rapides
+      const count = byTier({
+        high: isMobile ? 60 : 120,
+        mid: isMobile ? 40 : 80,
+        low: isMobile ? 25 : 45,
+      });
+      return {
+        particles: {
+          number: { value: count, density: { enable: true, value_area: 800 } },
+          color: { value: ['#ffffff', '#E0F2FE', '#7DD3FC', '#00E5FF'] },
+          shape: { type: 'edge', stroke: { width: 0, color: '#000' } },
+          opacity: {
+            value: 0.5,
+            random: true,
+            anim: { enable: enableAnims, speed: 1.2, opacity_min: 0.1, sync: false },
+          },
+          size: { value: 2.5, random: true, anim: { enable: false } },
+          line_linked: { enable: true, distance: 80, color: '#7DD3FC', opacity: 0.08, width: 0.3 },
+          move: {
+            enable: true,
+            speed: byTier({ high: 4, mid: 3, low: 2 }),
+            direction: 'left',
+            random: true,
+            straight: true,
+            out_mode: 'out',
+            bounce: false,
+          },
+        },
+        interactivity: {
+          detect_on: 'canvas',
+          events: { onhover: { enable: false }, onclick: { enable: false }, resize: true },
+          modes: {},
+        },
+        retina_detect: retinaDetect,
+      };
+    }
+
+    if (mood === 'industrial') {
+      // Cendres/poussière flottante — orange, lent, montée verticale
+      const count = byTier({
+        high: isMobile ? 12 : 22,
+        mid: isMobile ? 8 : 15,
+        low: isMobile ? 5 : 10,
+      });
+      return {
+        particles: {
+          number: { value: count, density: { enable: true, value_area: 1200 } },
+          color: { value: ['#FF5722', '#FF8A65', '#FFD600', '#BF360C'] },
+          shape: { type: 'edge', stroke: { width: 0, color: '#000' } },
+          opacity: {
+            value: 0.35,
+            random: true,
+            anim: { enable: enableAnims, speed: 0.4, opacity_min: 0.05, sync: false },
+          },
+          size: {
+            value: 3.2,
+            random: true,
+            anim: { enable: enableAnims, speed: 0.8, size_min: 0.8, sync: false },
+          },
+          line_linked: { enable: false },
+          move: {
+            enable: true,
+            speed: byTier({ high: 0.7, mid: 0.5, low: 0.3 }),
+            direction: 'top',
+            random: true,
+            straight: false,
+            out_mode: 'out',
+            bounce: false,
+          },
+        },
+        interactivity: {
+          detect_on: 'canvas',
+          events: { onhover: { enable: false }, onclick: { enable: false }, resize: true },
+          modes: {},
+        },
+        retina_detect: retinaDetect,
+      };
+    }
+
+    // Default / hacker / vaporwave — config classique
+    const MOOD_COLORS = { default: '#d4af37', hacker: '#00ff41', vaporwave: '#ff71ce' };
+    const color = MOOD_COLORS[mood] || MOOD_COLORS.default;
     const particleCount = byTier({
       high: isMobile ? 42 : 85,
       mid: isMobile ? 30 : 60,
       low: isMobile ? 20 : 35,
     });
-
-    // retina_detect ON uniquement sur tier 'high' — quadruple la surface canvas sinon
-    const retinaDetect = tier === 'high';
-
-    // Distance de liaison adaptée au tier
     const linkDistance = byTier({ high: 160, mid: 145, low: 120 });
 
-    // Animations douces (twinkling opacité + respiration taille)
-    // Désactivées sur low tier pour économiser le CPU
-    const enableAnims = tier !== 'low';
-
-    particlesJS('particles-js', {
+    return {
       particles: {
-        number: {
-          value: particleCount,
-          density: { enable: true, value_area: 950 },
-        },
-        color: { value: '#d4af37' },
-        shape: {
-          type: 'circle',
-          stroke: { width: 0, color: '#000000' },
-        },
+        number: { value: particleCount, density: { enable: true, value_area: 950 } },
+        color: { value: color },
+        shape: { type: 'circle', stroke: { width: 0, color: '#000000' } },
         opacity: {
           value: 0.4,
           random: true,
-          anim: {
-            enable: enableAnims,
-            speed: 0.6,
-            opacity_min: 0.08,
-            sync: false,
-          },
+          anim: { enable: enableAnims, speed: 0.6, opacity_min: 0.08, sync: false },
         },
         size: {
           value: 4.8,
           random: true,
-          anim: {
-            enable: enableAnims,
-            speed: 1.5,
-            size_min: 1.2,
-            sync: false,
-          },
+          anim: { enable: enableAnims, speed: 1.5, size_min: 1.2, sync: false },
         },
-        line_linked: {
-          enable: true,
-          distance: linkDistance,
-          color: '#d4af37',
-          opacity: 0.18,
-          width: 0.6,
-        },
+        line_linked: { enable: true, distance: linkDistance, color, opacity: 0.18, width: 0.6 },
         move: {
           enable: true,
           speed: 1,
@@ -111,36 +181,50 @@ class VisualEffects {
           resize: true,
         },
         modes: {
-          grab: {
-            distance: 160,
-            line_linked: { opacity: 0.35 },
-          },
+          grab: { distance: 160, line_linked: { opacity: 0.35 } },
           push: { particles_nb: byTier({ high: 3, mid: 2, low: 1 }) },
         },
       },
       retina_detect: retinaDetect,
-    });
-
-    this.particlesLoaded = true;
-
-    // Appliquer le mood sauvegardé si les particules viennent de charger
-    const currentMood = document.body.getAttribute('data-mood');
-    if (currentMood && currentMood !== 'default') {
-      this.updateParticlesMood(currentMood);
-    }
-
-    // Exposer les fonctions globales pour les composants React
-    window.updateParticlesMood = (mood) => this.updateParticlesMood(mood);
+    };
   }
 
   /**
-   * Met à jour les couleurs des particules selon le mood actif
+   * Applique une config particles.js (destroy puis reinit)
+   */
+  _applyParticlesConfig(mood) {
+    // Détruire l'instance existante
+    try {
+      if (window.pJSDom?.[0]?.pJS) {
+        window.pJSDom[0].pJS.fn.vendors.destroypJS();
+        window.pJSDom = [];
+      }
+    } catch {
+      /* ignore */
+    }
+
+    const config = this._getParticlesConfig(mood);
+    particlesJS('particles-js', config);
+  }
+
+  /**
+   * Met à jour les couleurs des particules selon le mood actif.
+   * Pour les moods standard (default, hacker, vaporwave) — simple recoloration.
+   * Pour europa/industrial — délègue à reconfigureParticles() car la physique change.
    */
   updateParticlesMood(mood) {
+    // Europa et Industrial nécessitent une reconfiguration complète
+    if (mood === 'europa' || mood === 'industrial') {
+      this.reconfigureParticles(mood);
+      return;
+    }
+
     const MOOD_COLORS = {
       default: '#d4af37',
       hacker: '#00ff41',
       vaporwave: '#ff71ce',
+      europa: '#00E5FF',
+      industrial: '#FF5722',
     };
 
     const color = MOOD_COLORS[mood] || MOOD_COLORS.default;
@@ -170,6 +254,19 @@ class VisualEffects {
     } catch (e) {
       console.warn('Impossible de mettre à jour les couleurs des particules:', e);
     }
+  }
+
+  /**
+   * Reconfigure complètement particles.js pour un mood donné.
+   * Détruit l'instance existante et réinitialise avec la config adaptée.
+   * Nécessaire pour europa (blizzard) et industrial (cendres) qui changent
+   * la physique des particules, pas seulement les couleurs.
+   */
+  reconfigureParticles(mood) {
+    if (typeof particlesJS === 'undefined') return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return;
+    this._applyParticlesConfig(mood);
+    this.particlesLoaded = true;
   }
 
   initParallax() {

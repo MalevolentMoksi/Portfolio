@@ -2,12 +2,17 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 
 /* ── Configuration des moods ─────────────────────── */
 export const MOODS = {
-  default:   { label: 'Default',   emoji: '◆', color: '#d4af37', rgb: '212, 175, 55' },
-  hacker:    { label: 'Terminal',    emoji: '>', color: '#00ff41', rgb: '0, 255, 65' },
-  vaporwave: { label: 'Vaporwave', emoji: '~', color: '#ff71ce', rgb: '255, 113, 206' },
+  default:    { label: 'Default',    emoji: '◆', color: '#d4af37', rgb: '212, 175, 55' },
+  hacker:     { label: 'Terminal',   emoji: '>', color: '#00ff41', rgb: '0, 255, 65' },
+  vaporwave:  { label: 'Vaporwave',  emoji: '~', color: '#ff71ce', rgb: '255, 113, 206' },
+  europa:     { label: 'Europa',     emoji: '❄', color: '#00E5FF', rgb: '0, 229, 255' },
+  industrial: { label: 'Industriel', emoji: '⚙', color: '#FF5722', rgb: '255, 87, 34' },
 };
 
-const MOOD_ORDER = ['default', 'hacker', 'vaporwave'];
+const MOOD_ORDER = ['default', 'hacker', 'vaporwave', 'europa', 'industrial'];
+
+/* Niveau de brutalisme pour le mood Industrial : 'full' | 'moderate' | 'minimal' */
+const INDUSTRIAL_BRUTALIST_LEVEL = 'minimal';
 
 const MoodContext = createContext({
   mood: 'default',
@@ -31,15 +36,23 @@ export const MoodProvider = ({ children }) => {
   const applyMood = useCallback((m) => {
     document.body.setAttribute('data-mood', m);
 
-    // Mettre à jour les particules quand elles sont prêtes
-    const tryUpdate = () => {
-      if (typeof window.updateParticlesMood === 'function') {
+    // Gérer la classe brutalist pour le mood Industrial
+    document.body.classList.remove('brutalist-full', 'brutalist-moderate', 'brutalist-minimal');
+    if (m === 'industrial') {
+      document.body.classList.add(`brutalist-${INDUSTRIAL_BRUTALIST_LEVEL}`);
+    }
+
+    // Reconfigurer les particules (physique + couleurs) pour le nouveau mood
+    const tryReconfigure = () => {
+      if (typeof window.reconfigureParticles === 'function') {
+        window.reconfigureParticles(m);
+      } else if (typeof window.updateParticlesMood === 'function') {
         window.updateParticlesMood(m);
       }
     };
-    tryUpdate();
+    tryReconfigure();
     // Retry si les particules ne sont pas encore chargées
-    setTimeout(tryUpdate, 500);
+    setTimeout(tryReconfigure, 500);
   }, []);
 
   const setMood = useCallback((newMood) => {

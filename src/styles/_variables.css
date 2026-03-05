@@ -131,6 +131,48 @@ body[data-mood='vaporwave'] {
   --bg-color: #0d001a;
 }
 
+/* ============================================
+   Mood Overrides — Europa (cryo / frozen sci-fi)
+   ============================================ */
+body[data-mood='europa'] {
+  --color-primary: #00e5ff;
+  --color-primary-rgb: 0, 229, 255;
+  --tech-icon-filter: invert(72%) sepia(98%) saturate(1200%) hue-rotate(156deg) brightness(104%)
+    contrast(103%);
+  --color-secondary: #0b131e;
+  --color-secondary-rgb: 11, 19, 30;
+  --color-text: #e0f2fe;
+  --color-bg: #070d14;
+  --color-accent-light: #e0f2fe;
+  --color-accent-pale: #7dd3fc;
+  --color-accent: #00e5ff;
+  --primary-color: #00e5ff;
+  --secondary-color: #0b131e;
+  --text-color: #e0f2fe;
+  --bg-color: #070d14;
+}
+
+/* ============================================
+   Mood Overrides — Industrial (forge / cyber-brutalist)
+   ============================================ */
+body[data-mood='industrial'] {
+  --color-primary: #ff5722;
+  --color-primary-rgb: 255, 87, 34;
+  --tech-icon-filter: invert(42%) sepia(93%) saturate(1352%) hue-rotate(351deg) brightness(101%)
+    contrast(110%);
+  --color-secondary: #1a1a1a;
+  --color-secondary-rgb: 26, 26, 26;
+  --color-text: #9e9e9e;
+  --color-bg: #121212;
+  --color-accent-light: #ffccbc;
+  --color-accent-pale: #ffd600;
+  --color-accent: #ff5722;
+  --primary-color: #ff5722;
+  --secondary-color: #1a1a1a;
+  --text-color: #9e9e9e;
+  --bg-color: #121212;
+}
+
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
   :root {
