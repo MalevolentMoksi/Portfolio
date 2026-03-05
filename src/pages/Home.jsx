@@ -61,6 +61,7 @@ const Home = () => {
                 <span className="bot-skill-tag">HTML / CSS</span>
                 <span className="bot-skill-tag">JavaScript</span>
                 <span className="bot-skill-tag">PHP</span>
+                <span className="bot-skill-tag">Symfony</span>
                 <span className="bot-skill-tag">React</span>
                 <span className="bot-skill-tag">Vite</span>
               </div>
