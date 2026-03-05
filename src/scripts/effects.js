@@ -13,6 +13,7 @@ class VisualEffects {
     this._mouseMoveHandler = null;
     this._visibilityHandler = null;
     this._parallaxRunning = false;
+    this._canvasResizeObserver = null;
     this.init();
   }
 
@@ -122,6 +123,9 @@ class VisualEffects {
     });
 
     this.particlesLoaded = true;
+
+    // ── Synchroniser la hauteur du canvas avec la page entière ──
+    this._syncCanvasHeight();
 
     // Appliquer le mood sauvegardé si les particules viennent de charger
     const currentMood = document.body.getAttribute('data-mood');
@@ -251,6 +255,38 @@ class VisualEffects {
   }
 
   /**
+   * Synchronise le canvas interne particles.js avec la taille du
+   * conteneur #particles-js (qui s'étire automatiquement via CSS
+   * top:0 + bottom:0). On observe #root (le contenu React) plutôt
+   * que body pour éviter une boucle de feedback : la hauteur du
+   * conteneur absolute ne ré-influe pas sur #root.
+   */
+  _syncCanvasHeight() {
+    const root = document.getElementById('root');
+    if (!root) return;
+
+    const resizeParticlesCanvas = () => {
+      try {
+        const pJS = window.pJSDom?.[0]?.pJS;
+        if (pJS?.fn?.vendors?.resize) {
+          pJS.fn.vendors.resize();
+        }
+      } catch {
+        /* particles.js pas encore prêt */
+      }
+    };
+
+    // Redimensionner une première fois après l'init
+    requestAnimationFrame(resizeParticlesCanvas);
+
+    // Observer les changements de taille du contenu React
+    if (typeof ResizeObserver !== 'undefined') {
+      this._canvasResizeObserver = new ResizeObserver(() => resizeParticlesCanvas());
+      this._canvasResizeObserver.observe(root);
+    }
+  }
+
+  /**
    * Nettoie toutes les ressources (RAF, listeners).
    * Appelé lors du démontage du hook usePortfolioModules.
    */
@@ -264,6 +300,10 @@ class VisualEffects {
     }
     if (this._visibilityHandler) {
       document.removeEventListener('visibilitychange', this._visibilityHandler);
+    }
+    if (this._canvasResizeObserver) {
+      this._canvasResizeObserver.disconnect();
+      this._canvasResizeObserver = null;
     }
     this._parallaxRunning = false;
   }

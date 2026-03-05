@@ -31,6 +31,7 @@ html {
 }
 
 body {
+  position: relative; /* Bloc englobant pour les couches ambient (absolute) */
   font-family: var(--font-family-base);
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);

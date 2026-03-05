@@ -13,7 +13,7 @@
  *  - low  → aucune (composant retourne null)
  */
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext.jsx';
 
@@ -127,17 +127,22 @@ const DriftingShip = ({ size = 50 }) => (
  * Chaque silhouette a une position verticale, une durée,
  * un delay et un type d'animation de dérive.
  */
+/**
+ * Positions verticales exprimées en fraction (0–1) de la hauteur
+ * totale du document — les silhouettes se répartissent sur toute la page
+ * au lieu d'être collées au viewport.
+ */
 const SILHOUETTE_CONFIGS = [
-  { top: '18vh', duration: '55s', delay: '0s',  drift: 'drift-diagonal' },
-  { top: '45vh', duration: '70s', delay: '12s', drift: 'drift-rtl-slow' },
-  { top: '68vh', duration: '48s', delay: '25s', drift: 'drift-diagonal' },
+  { topFrac: 0.15, duration: '55s', delay: '0s',  drift: 'drift-diagonal' },
+  { topFrac: 0.45, duration: '70s', delay: '12s', drift: 'drift-rtl-slow' },
+  { topFrac: 0.72, duration: '48s', delay: '25s', drift: 'drift-diagonal' },
 ];
 
 /* Variantes ajustées pour le data-stream (hacker) — horizontal */
 const HACKER_CONFIGS = [
-  { top: '22vh', duration: '50s', delay: '0s',  drift: 'drift-ltr' },
-  { top: '50vh', duration: '65s', delay: '15s', drift: 'drift-ltr' },
-  { top: '72vh', duration: '42s', delay: '8s',  drift: 'drift-ltr' },
+  { topFrac: 0.18, duration: '50s', delay: '0s',  drift: 'drift-ltr' },
+  { topFrac: 0.50, duration: '65s', delay: '15s', drift: 'drift-ltr' },
+  { topFrac: 0.75, duration: '42s', delay: '8s',  drift: 'drift-ltr' },
 ];
 
 /* ─── Composant ─── */
@@ -158,6 +163,28 @@ const DistantSilhouettes = () => {
         return { ShapeComponent: BirdFlock, configs: SILHOUETTE_CONFIGS };
     }
   }, [mood]);
+
+  // ── Hauteur du document (pour convertir les fractions en px) ──
+  const getDocHeight = useCallback(() =>
+    Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, window.innerHeight),
+  []);
+
+  const [docHeight, setDocHeight] = useState(getDocHeight);
+
+  useEffect(() => {
+    // Recalculer quand le body se redimensionne
+    const handleResize = () => setDocHeight(getDocHeight());
+    handleResize(); // sync immédiat au montage / changement de mood
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(handleResize);
+      ro.observe(document.body);
+      return () => ro.disconnect();
+    }
+    // Fallback pour les navigateurs sans ResizeObserver
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [getDocHeight]);
 
   // Commande console de test : window.testSilhouettes('default'|'hacker'|'vaporwave')
   useEffect(() => {
@@ -180,7 +207,7 @@ const DistantSilhouettes = () => {
         key={`${mood}-sil-${i}`}
         className="ambient-silhouette"
         style={{
-          top: cfg.top,
+          top: Math.round(cfg.topFrac * docHeight) + 'px',
           left: 0,
           '--sil-opacity': mood === 'hacker' ? '0.18' : '0.30',
           animationName: cfg.drift,

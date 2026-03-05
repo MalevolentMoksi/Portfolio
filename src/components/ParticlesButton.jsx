@@ -109,6 +109,17 @@ const randomEdgePoint = () => {
 };
 
 /**
+ * Convertit des coordonnées viewport (clientX/Y, 0‥innerW/H) en
+ * coordonnées internes particles.js (absolues depuis le haut du document).
+ * Le canvas est désormais position:absolute → son origine = haut du document.
+ * `pxr` est le canvas.pxratio fourni par pJS (1 ou devicePixelRatio).
+ */
+const vpToCanvas = (vx, vy, pxr) => ({
+  x: (vx + window.scrollX) * pxr,
+  y: (vy + window.scrollY) * pxr,
+});
+
+/**
  * Vitesse de base réelle d'une particule : les particules.js initialisent
  * chaque composante à (random - 0.5) * speed / 3, donc la magnitude RMS
  * est environ speed / (3 * sqrt(2)) ≈ speed * 0.235.
@@ -117,38 +128,89 @@ const randomEdgePoint = () => {
 const getBaseSpeed = () => (getPJS()?.particles.move.speed ?? 1) * 0.22;
 
 /**
- * Décélération exponentielle smooth : ramène toutes les particules vers
- * baseSpeed sur `duration` ms sans snap brutal.
+ * Restauration smooth après un effet :
+ *   1. Vitesse  — décroissance exponentielle vers baseSpeed (comportement existant)
+ *   2. Direction — chaque particule reçoit un angle-cible aléatoire au démarrage ;
+ *      sa vélocité est progressivement orientée vers cet angle (dispersion organique)
+ *   3. Particules arrêtées — les particules à v≈0 (typiquement après attract ou
+ *      gravity) reçoivent une impulsion aléatoire plutôt que d'être ignorées
+ *   4. Hors-viewport — les particules hors de la zone visible (après explode ou
+ *      gravity) sont redirigées vers le centre du viewport courant avec un taux
+ *      de virage plus fort
+ *
  * Retourne un handle { cancel() } pour annuler la boucle depuis l'extérieur.
  */
 const smoothRestore = (duration = 1500) => {
   const baseSpeed = getBaseSpeed();
-  const frames = duration * 0.06;
-  const k = Math.pow(0.05, 1 / frames);
+  const frames = duration * 0.06; // ~nb de frames à 60 fps
+  const k = Math.pow(0.05, 1 / frames); // facteur de décroissance exponentielle
   const start = performance.now();
   let cancelled = false;
   let rafId = null;
+
+  // Pré-assigner un angle-cible aléatoire à chaque particule existante.
+  // Les nouvelles particules apparues depuis le début de l'effet en recevront
+  // un à la première frame où elles sont rencontrées.
+  const targetAngles = new WeakMap();
+  const assignTarget = (pt) => {
+    if (!targetAngles.has(pt)) {
+      targetAngles.set(pt, Math.random() * Math.PI * 2);
+    }
+  };
+  getPJS()?.particles.array.forEach(assignTarget);
 
   const frame = () => {
     if (cancelled) return;
     const elapsed = performance.now() - start;
     const done = elapsed >= duration;
+    const t = Math.min(elapsed / duration, 1); // 0 → 1
     const p = getPJS();
     if (!p) return;
 
-    p.particles.array.forEach((pt) => {
-      const mag = Math.sqrt(pt.vx * pt.vx + pt.vy * pt.vy);
-      if (mag < 0.001) return;
+    // Bornes du viewport courant en coordonnées canvas absolues
+    const pxr = p.canvas.pxratio ?? 1;
+    const vpL = window.scrollX * pxr;
+    const vpT = window.scrollY * pxr;
+    const vpR = (window.scrollX + window.innerWidth) * pxr;
+    const vpB = (window.scrollY + window.innerHeight) * pxr;
+    const vpCx = (vpL + vpR) / 2;
+    const vpCy = (vpT + vpB) / 2;
 
-      let targetMag;
-      if (done) {
-        targetMag = baseSpeed;
-      } else {
-        targetMag = baseSpeed + (mag - baseSpeed) * k;
+    p.particles.array.forEach((pt) => {
+      assignTarget(pt);
+      const mag = Math.sqrt(pt.vx * pt.vx + pt.vy * pt.vy);
+
+      // ── Particule arrêtée : impulsion aléatoire ──────────────────
+      if (mag < 0.001) {
+        const a = targetAngles.get(pt);
+        pt.vx = Math.cos(a) * baseSpeed;
+        pt.vy = Math.sin(a) * baseSpeed;
+        return;
       }
-      const ratio = targetMag / mag;
-      pt.vx *= ratio;
-      pt.vy *= ratio;
+
+      // ── Vitesse : décroissance exponentielle vers baseSpeed ───────
+      const targetMag = done ? baseSpeed : baseSpeed + (mag - baseSpeed) * k;
+
+      // ── Direction : virage progressif vers l'angle-cible ─────────
+      const inViewport = pt.x >= vpL && pt.x <= vpR && pt.y >= vpT && pt.y <= vpB;
+
+      // Hors-viewport → pointer vers le centre du viewport; sinon angle random
+      const targetAngle = inViewport
+        ? targetAngles.get(pt)
+        : Math.atan2(vpCy - pt.y, vpCx - pt.x);
+
+      // Taux de virage (rad/frame) : augmente légèrement au fil du temps pour
+      // accélérer la convergence en fin de restore. Plus fort hors-viewport.
+      const steerRate = inViewport ? 0.03 + t * 0.04 : 0.09 + t * 0.09;
+
+      const currentAngle = Math.atan2(pt.vy, pt.vx);
+      let da = targetAngle - currentAngle;
+      if (da >  Math.PI) da -= Math.PI * 2;
+      if (da < -Math.PI) da += Math.PI * 2;
+      const newAngle = currentAngle + Math.sign(da) * Math.min(Math.abs(da), steerRate);
+
+      pt.vx = Math.cos(newAngle) * targetMag;
+      pt.vy = Math.sin(newAngle) * targetMag;
     });
 
     if (!done) rafId = requestAnimationFrame(frame);
@@ -194,21 +256,24 @@ const effects = {
     // Adapter le nombre de particules spawnées au tier
     const spawnCount = getPerformanceTier() === 'low' ? 8 : 15;
 
+    // Les spawns sont en coordonnées canvas absolues (origine = haut du document).
+    // On ajoute scrollX/Y pour que les coins soient dans le viewport courant.
     for (let i = 0; i < spawnCount; i++) {
       pJS.fn.modes.pushParticles(1, {
-        pos_x: Math.random() * zoneW * pxr,
-        pos_y: (headerH + Math.random() * (zoneH - headerH)) * pxr,
+        pos_x: (window.scrollX + Math.random() * zoneW) * pxr,
+        pos_y: (window.scrollY + headerH + Math.random() * (zoneH - headerH)) * pxr,
       });
     }
     for (let i = 0; i < spawnCount; i++) {
       pJS.fn.modes.pushParticles(1, {
-        pos_x: (W - Math.random() * zoneW) * pxr,
-        pos_y: (headerH + Math.random() * (zoneH - headerH)) * pxr,
+        pos_x: (window.scrollX + W - Math.random() * zoneW) * pxr,
+        pos_y: (window.scrollY + headerH + Math.random() * (zoneH - headerH)) * pxr,
       });
     }
 
-    const cx = (W / 2) * pxr;
-    const cy = (H / 4) * pxr;
+    // Centre de projection : 25 % depuis le haut du viewport courant
+    const cx = (window.scrollX + W / 2) * pxr;
+    const cy = (window.scrollY + H / 4) * pxr;
     pJS.particles.array.forEach((pt) => {
       const dx = pt.x - cx;
       const dy = pt.y - cy;
@@ -234,15 +299,15 @@ const effects = {
    */
   attract(signal) {
     setParticlesForeground(true);
-    const { x: cx, y: cy } = randomEdgePoint();
-    triggerPetAttract(cx, cy, 3000);
+    const { x: cx, y: cy } = randomEdgePoint(); // coordonnées viewport
+    triggerPetAttract(cx, cy, 3000); // le pet reste en viewport coords (position:fixed)
 
     const pJS = getPJS();
     if (!pJS) return { restoreHandle: null };
 
+    // Convertir le point d'attraction en coordonnées canvas absolues
     const pxr = pJS.canvas.pxratio ?? 1;
-    const pcx = cx * pxr;
-    const pcy = cy * pxr;
+    const { x: pcx, y: pcy } = vpToCanvas(cx, cy, pxr);
 
     const pull = () => {
       if (signal.cancelled) return;
@@ -293,10 +358,11 @@ const effects = {
     const stormSpeed = 5;
     const pxr = pJS.canvas.pxratio ?? 1;
 
+    // Spawner dans le viewport courant (canvas en coords absolues)
     for (let i = 0; i < bonus; i++) {
       pJS.fn.modes.pushParticles(1, {
-        pos_x: Math.random() * window.innerWidth * pxr,
-        pos_y: Math.random() * window.innerHeight * pxr,
+        pos_x: (window.scrollX + Math.random() * window.innerWidth) * pxr,
+        pos_y: (window.scrollY + Math.random() * window.innerHeight) * pxr,
       });
     }
 
@@ -343,7 +409,14 @@ const effects = {
       if (signal.cancelled) return;
       const p = getPJS();
       if (!p) return;
-      const floor = p.canvas.h - 4;
+      // Sol = bas du viewport courant en coordonnées canvas absolues.
+      // On utilise window.scrollY en live pour suivre l'utilisateur s'il scroll
+      // pendant l'effet, mais on plafonne au bas réel du canvas.
+      const pxr = p.canvas.pxratio ?? 1;
+      const floor = Math.min(
+        (window.scrollY + window.innerHeight - 4) * pxr,
+        p.canvas.h - 4,
+      );
 
       p.particles.array.forEach((pt) => {
         pt.vy += 0.18;

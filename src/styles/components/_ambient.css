@@ -11,7 +11,7 @@
    ──────────────────────────────────────────── */
 
 .ambient-layer {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: var(--z-ambient, 0);
   pointer-events: none;
@@ -23,7 +23,7 @@
    ──────────────────────────────────────────── */
 
 .ambient-commuter {
-  position: fixed;
+  position: absolute;
   left: 0;
   z-index: var(--z-ambient, 0);
   pointer-events: none;
@@ -32,27 +32,30 @@
   will-change: transform, opacity;
 }
 
-/* Spacecraft — straight horizontal high flyby */
+/* Spacecraft — straight horizontal high flyby
+   Le `top` est défini en inline-style par OccasionalCommuter.jsx
+   selon le scroll courant. */
 .commuter-spacecraft {
-  top: 8vh;
   animation-name: commuter-fly-ltr;
   animation-timing-function: linear;
   animation-fill-mode: both;
   animation-duration: 30s; /* overridden by inline style */
 }
 
-/* Satellite — gentle arc across mid-screen */
+/* Satellite — gentle arc across mid-screen
+   Le `top` est défini en inline-style par OccasionalCommuter.jsx
+   selon le scroll courant. */
 .commuter-satellite {
-  top: 20vh;
   animation-name: commuter-arc;
   animation-timing-function: ease-in-out;
   animation-fill-mode: both;
   animation-duration: 35s; /* overridden by inline style */
 }
 
-/* Rover — crawls along footer top edge */
+/* Rover — crawls along footer top edge
+   Le `top` est défini en inline-style par OccasionalCommuter.jsx
+   pour coller au bord supérieur du <footer>. */
 .commuter-rover {
-  bottom: 80px;
   animation-name: commuter-fly-ltr;
   animation-timing-function: linear;
   animation-fill-mode: both;
@@ -486,7 +489,7 @@
    ──────────────────────────────────────────── */
 
 .ambient-silhouette {
-  position: fixed;
+  position: absolute;
   z-index: var(--z-ambient, 0);
   pointer-events: none;
   will-change: transform;
@@ -550,9 +553,6 @@
 /* Battement d'ailes — chaque aile pivote autour de l'apex (corps)
    L'aile gauche monte (rotate négatif) tandis que la droite monte
    symétriquement, créant un vrai battement. */
-.sil-bird {
-  /* Le group ne touche pas au transform en lui-même */
-}
 
 .sil-wing {
   transform-box: fill-box;

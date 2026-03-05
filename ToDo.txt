@@ -1,6 +1,7 @@
 Tâches manuelles :
  + d'Arrière plans
 - Crédits
+- Changer les gradiants du mood Or
 
 Tâches requiert Recherches A faire :
 - Improve pet visibility
@@ -9,6 +10,7 @@ Tâches simples :
 
 Tâches moyennes (besoin expertise IA) :
 Refaire le Home esthétiquement
+Remove Bot Scared on Quick mouse
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
 Ajouter des petits bonhomes (Améliorer l'ambience)

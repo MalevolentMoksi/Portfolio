@@ -11,7 +11,7 @@
  * garantir que le navigateur démarre bien l'animation.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 
 /* ─── Constantes de timing ─── */
@@ -138,13 +138,43 @@ const randomType = () => VEHICLE_TYPES[Math.floor(Math.random() * VEHICLE_TYPES.
 /* ─── Composant interne : rendu du véhicule avec animation en deux phases ─── */
 
 /**
+ * Décalage vertical par type — fraction du viewport au-dessus du scroll actuel.
+ * Puisque les commuters sont position: absolute, on calcule un `top` en pixels
+ * relatif au document au moment du spawn pour qu'ils apparaissent dans le viewport courant.
+ */
+const VIEWPORT_OFFSETS = {
+  spacecraft: 0.08,  // 8% du viewport depuis le haut courant
+  satellite:  0.20,  // 20% du viewport
+};
+
+/**
  * CommuterVehicle — monte le div sans la classe d'animation,
  * puis l'ajoute au frame suivant pour garantir que le navigateur
  * lance bien l'animation CSS.
+ *
+ * Le `top` est calculé en pixels à partir de window.scrollY
+ * (ou du footer.offsetTop pour le rover) puisque les commuters
+ * sont maintenant position: absolute et scrollent avec la page.
  */
 const CommuterVehicle = ({ type, duration }) => {
   const divRef = useRef(null);
   const [animating, setAnimating] = useState(false);
+
+  // Calculer la position verticale absolue à l'instant du spawn
+  const topPx = useMemo(() => {
+    if (type === 'rover') {
+      // Le rover roule au sommet du footer — on soustrait la hauteur du SVG
+      // (56 px) pour que les roues reposent sur le bord supérieur du footer.
+      const ROVER_SVG_HEIGHT = 56;
+      const footer = document.querySelector('footer');
+      if (footer) return (footer.offsetTop - ROVER_SVG_HEIGHT) + 'px';
+      // Fallback : bas du document moins la hauteur du rover
+      return Math.max(document.body.scrollHeight, window.innerHeight) - ROVER_SVG_HEIGHT + 'px';
+    }
+    // Spacecraft / satellite : fraction du viewport, ancrée au scroll courant
+    const frac = VIEWPORT_OFFSETS[type] ?? 0.10;
+    return Math.round(window.scrollY + window.innerHeight * frac) + 'px';
+  }, [type]);
 
   // Phase 2 : ajouter la classe d'animation au prochain frame
   useEffect(() => {
@@ -161,7 +191,7 @@ const CommuterVehicle = ({ type, duration }) => {
     <div
       ref={divRef}
       className={`ambient-commuter ${cssClass}`}
-      style={animating ? { animationDuration: `${duration}s` } : undefined}
+      style={animating ? { top: topPx, animationDuration: `${duration}s` } : { top: topPx }}
       aria-hidden="true"
     >
       <VehicleSVG />
