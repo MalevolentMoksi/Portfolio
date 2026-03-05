@@ -84,7 +84,7 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
   const robotRef = useRef(null);
   const prevHudOpenRef = useRef(false);
   // Proximity + movement behavior tracking (frame-counted cooldowns)
-  const proximityRef = useRef({ dwellFrames: 0, lastDist: Infinity, exciteCooldown: 0, scaredCooldown: 0, speedCooldown: 0, avoidDwellFrames: 0, avoidThoughtCooldown: 0, bounceCooldown: 0 });
+  const proximityRef = useRef({ dwellFrames: 0, lastDist: Infinity, exciteCooldown: 0, speedCooldown: 0, avoidDwellFrames: 0, avoidThoughtCooldown: 0, bounceCooldown: 0 });
   // petMood in a ref so the RAF closure is never stale
   const petMoodRef = useRef(petMood);
   useEffect(() => { petMoodRef.current = petMood; }, [petMood]);
@@ -681,7 +681,6 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
 
         // ── Proximity & movement behaviors ──────────────────────────────
         if (prox.exciteCooldown > 0) prox.exciteCooldown--;
-        if (prox.scaredCooldown > 0) prox.scaredCooldown--;
         if (prox.speedCooldown  > 0) prox.speedCooldown--;
 
         const isSad = petMoodRef.current === 'sad';
@@ -698,13 +697,6 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
             }
           } else {
             prox.dwellFrames = Math.max(0, prox.dwellFrames - 2);
-          }
-
-          // Sudden close approach → scared (mood-independent — surprise is universal)
-          if (!isAttracting && prox.lastDist - dist > 80 && dist < 160 && prox.scaredCooldown === 0) {
-            onBehavior('scared');
-            prox.scaredCooldown = 180;
-            prox.dwellFrames = 0;
           }
 
           // Sustained high speed → energy burst — only when not sad

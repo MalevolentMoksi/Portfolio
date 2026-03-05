@@ -1,5 +1,5 @@
 Tâches manuelles :
- + d'Arrière plans
+- Arrière-plan pour SAE3.01
 - Crédits
 - Changer les gradiants du mood Or
 
