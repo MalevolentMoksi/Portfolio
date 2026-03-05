@@ -17,51 +17,32 @@ Ajouter des petits bonhomes (Améliorer l'ambience)
 
 
 
-Plan Home : Plan: Refonte visuelle de la page Home
-Transformer la page d'accueil de 4 blocs de texte "plats" en 4 sections distinctes et visuellement riches, chacune avec son propre traitement visuel inspiré des patterns déjà utilisés dans ProjetsPersonnels. Aucun contenu ne disparaît — uniquement la mise en forme qui change.
+3. The "Footer Ecosystem"
 
-Sections & transformations
+Transform your footer from a bar into a horizon line.
 
-1. "À propos" — carte biographie accentuée
-Remplace l'article.presentation-block centré. Devient une grande carte horizontale avec :
+    The Concept: A "Horizon" component sitting just above the footer line.
 
-Un épais filet gauche gold (border-left: 4px solid var(--color-primary))
-Le texte de présentation existant
-En dessous : 3 pills/badges statiques (IUT2 de Grenoble, BUT Informatique, 2ème année) dans le style des bot-skill-tag déjà définis
-2. "Compétences" — 3 cartes de catégorie avec SVG
-Remplace la <ul> à puces. Crée 3 bot-feature-card (style déjà défini dans _personal-projects.css) :
+    The Activity: Tiny, 2D silhouettes of "Guardians" or "Explorers" that walk across the footer, but occasionally stop to "scan" a project or sit down by a campfire.
 
-Développement Web : HTML/CSS, JS, PHP, React, Vite — icône SVG </> maison
-Développement Système / Back : Java, Python, C, C++, SQL — icône SVG {...} ou circuit
-Outils & Environnement : Git, Linux, Bash, JavaFX — icône SVG terminal/engrenage
-Chaque carte liste ses technos en bot-skills-tags à l'intérieur de la carte.
+    Ambition Level: Give them "States." One might walk halfway across, stop to look at your GitHub icon, pull out a holographic "Ghost" (referencing your background themes), and then continue walking. It’s a scripted play that happens regardless of user input.
 
-3. "Mon parcours" — timeline verticale
-Remplace le <p> plat (Bac générale, etc.). Une liste HTML avec pseudo-elements CSS :
+4. Automated Terminal "Ghost" Activity
 
-Ligne verticale gold (::before sur le <ul>)
-Chaque <li> = un nœud (point gold + date + titre + établissement)
-Actuellement 2 entrées : Bac Général (2024) + BUT Informatique (2024–présent)
-Style nouveau .timeline / .timeline-item à ajouter dans _projects.css
-4. "Centres d'intérêt" — 4 mini-cartes avec SVG
-Remplace la <ul> simple. 4 éléments en grille 2×2 (ou flex-wrap) :
+Since you have a MiniTerminal, you can make the site feel like it’s being "maintained" by an AI.
 
-Art (pinceau SVG), Jeux-Vidéo (manette SVG), Musique (note SVG), Cinéma (clap SVG)
-Style .hobby-card : centré, icône gold en haut, label en dessous, fond avec border semi-transparent — similaire au bot-feature-card mais sans description longue
-5. Section Contact — inchangée
+    The Concept: A "System Log" overlay that occasionally appears in a corner or within the terminal.
 
-Fichiers modifiés
+    The Activity: Very faint, low-opacity text scrolling in a "debug" window that says things like [System] Scanning archives..., [Pet] Sleeping..., or [Network] Connection stable at IUT2.
 
-Home.jsx — restructuration complète du JSX (pas de changement de contenu)
-_projects.css — ajout des classes .timeline, .timeline-item, .hobby-card en bas du fichier (les classes bot-feature-card et bot-skill-tag sont déjà disponibles depuis _personal-projects.css)
-main.css — aucune modification nécessaire (_personal-projects.css et _projects.css sont déjà importés)
-Vérification
+    Ambition Level: This isn't for the user to read—it's "texture." It creates the illusion that the portfolio is a living machine running background processes while the user browses.
 
-npm run dev → vérifier visuellement l'affichage à 375px (mobile) et 1024px (desktop)
-Les bot-feature-card doivent passer en colonne unique sur mobile (le flex-wrap existant s'y prête)
-La timeline doit rester lisible en colonne sur petit écran
-Décisions
+5. The "Portal" or "Wormhole" Event
 
-Cartes catégories SVG choisies plutôt que les icônes simple-icons (plus de hiérarchie visuelle, pas besoin d'une icône par techno)
-Pas de photo, donc la section À propos reste textuelle mais "caractérisée" par les badges et l'accent border
-Réutilisation des classes CSS existantes (bot-feature-card, bot-skill-tag) pour la cohérence de style — aucune duplication de code CSS
+A rare, high-impact background event.
+
+    The Concept: Once every 10 minutes, a "Jump" effect occurs in the distant background image.
+
+    The Activity: A small point of light expands into a circle (a portal), a ship exits, and the portal collapses.
+
+    Ambition Level: This requires a dedicated Canvas layer. It’s the ultimate "charm" because it’s so rare that a user might only see it once, making it feel like a genuine, unscripted event in the site's "universe."
