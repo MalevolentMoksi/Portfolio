@@ -1583,6 +1583,156 @@ body[data-mood='europa'] .footer-horizon {
   }
 }
 
+/* ────────────────────────────────────────────
+   Observation Drone — Ghost / Pod flottant
+   ──────────────────────────────────────────── */
+
+.obs-drone {
+  position: fixed;
+  z-index: var(--z-ambient, 2);
+  pointer-events: none;
+  opacity: 0;
+  color: var(--color-primary);
+  will-change: transform, opacity, left;
+  transition:
+    left 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 1.4s ease;
+}
+
+.obs-drone-body {
+  display: block;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.obs-drone-hull {
+  transition: fill 0.4s ease;
+}
+
+/* Anneau orbital — rotation lente continue */
+.obs-drone-ring {
+  transform-origin: 50% 50%;
+  animation: drone-spin-ring 9s linear infinite paused;
+}
+
+/* Œil central — pulse subtil */
+.obs-drone-eye {
+  animation: drone-eye-pulse 2.4s ease-in-out infinite paused;
+}
+
+/* Cône de scan — masqué par défaut */
+.obs-drone-cone {
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 8px currentColor);
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+/* Phase active — débloquer les animations */
+.obs-drone--active .obs-drone-ring {
+  animation-play-state: running;
+}
+
+.obs-drone--active .obs-drone-eye {
+  animation-play-state: running;
+}
+
+.obs-drone--active .obs-drone-body {
+  animation: drone-float 2.8s ease-in-out infinite alternate;
+}
+
+/* Phase scanning — cône visible + eye blink */
+.obs-drone--scanning .obs-drone-cone {
+  opacity: 1;
+  animation: drone-cone-pulse 1.8s ease-in-out infinite;
+}
+
+.obs-drone--scanning .obs-drone-eye {
+  animation: drone-eye-blink 3s steps(1) infinite;
+}
+
+/* Keyframes — drone float (bob vertical) */
+@keyframes drone-float {
+  0% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(5px);
+  }
+}
+
+/* Keyframes — anneau orbital */
+@keyframes drone-spin-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Keyframes — pulse doux de l'œil */
+@keyframes drone-eye-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+    r: 7;
+  }
+}
+
+/* Keyframes — blink de l'œil pendant le scan */
+@keyframes drone-eye-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  48% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+  52% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.1;
+  }
+  82% {
+    opacity: 1;
+  }
+}
+
+/* Keyframes — pulsation du cône de scan */
+@keyframes drone-cone-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    filter: drop-shadow(0 0 6px currentColor);
+  }
+  50% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 14px currentColor);
+  }
+}
+
+/* ────────────────────────────────────────────
+   Ambient Boids — Canvas plein écran (flock)
+   ──────────────────────────────────────────── */
+
+.ambient-boids-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-ambient, 2);
+  pointer-events: none;
+  opacity: 0.8;
+}
+
 /* Reduced motion — already handled globally in _variables.css + _effects.css,
    but be explicit for ambient layers */
 @media (prefers-reduced-motion: reduce) {
@@ -1596,7 +1746,9 @@ body[data-mood='europa'] .footer-horizon {
   .industrial-neon-sign,
   .industrial-steam-puff,
   .industrial-pipe-fixture,
-  .footer-walkers-stage {
+  .footer-walkers-stage,
+  .obs-drone,
+  .ambient-boids-canvas {
     display: none !important;
   }
 

@@ -7,31 +7,9 @@ Tâches requiert Recherches A faire :
 - Improve pet visibility
 
 Tâches simples :
-
+Increase Attrape effect on bot happiness
 Tâches moyennes (besoin expertise IA) :
-Maj favicon
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
 
 
-
-
-1. The Observation Drone (The "Ghost" / "Pod" Effect)
-
-Instead of a human walking, use a floating mechanical companion (think of a Ghost from Destiny or a Pod from Nier: Automata).
-
-    The Concept: A small, sleek geometric SVG (like a floating diamond or a metallic sphere with a glowing "eye") that occasionally drifts out from behind one of your content cards.
-
-    The Activity: It floats over to a blank space, projects a translucent CSS "scanning cone" (a simple gradient triangle) onto the background for a few seconds, "blinks," and then floats back behind the card to hide.
-
-    Why it works: It requires zero sprite sheets. It's just a single SVG element manipulated by CSS transform (translate and float up/down) or Framer Motion. It gives the exact same charm as a walking character but is 100x easier to build.
-
-2. Ambient Boids (Cyber-Flocks)
-
-You want life? Simulate a flock of lifeforms in the distant background.
-
-    The Concept: Have you ever seen the game Journey or Abzû? They use glowing, paper-like shapes that swim/fly together. You can implement a simple "Boids" flocking algorithm on a background Canvas.
-
-    The Activity: 20 or 30 tiny glowing triangles (representing distant birds, fish, or nanobots) that fluidly swim around the deep background, avoiding your text cards and occasionally scattering if the user's mouse gets too close.
-
-    Why it works: It’s a classic, highly respected computer science algorithm. Having a Boids simulation running in the background of a developer's portfolio is a massive flex of your coding skills, and it looks incredibly beautiful and organic.

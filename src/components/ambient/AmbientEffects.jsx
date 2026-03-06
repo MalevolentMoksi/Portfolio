@@ -23,6 +23,8 @@
 import { lazy, Suspense } from 'react';
 import DistantSilhouettes from './DistantSilhouettes.jsx';
 import OccasionalCommuter from './OccasionalCommuter.jsx';
+// import ObservationDrone from './ObservationDrone.jsx';
+// import AmbientBoids from './AmbientBoids.jsx';
 // import FooterWalkers from './FooterWalkers.jsx'; // désactivé — voir FooterWalkers.jsx
 
 // Groupe Europa — chargé seulement quand le mood europa est activé
@@ -41,6 +43,8 @@ const AmbientEffects = () => (
     <OccasionalCommuter />
     {/* <FooterWalkers /> */}
     <DistantSilhouettes />
+    {/* <ObservationDrone /> */}
+    {/* <AmbientBoids /> */}
     <Suspense fallback={null}>
       <EuropaSnowfall />
       <EuropaIcicles />
