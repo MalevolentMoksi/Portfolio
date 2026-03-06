@@ -257,77 +257,63 @@ class MusicPlayer {
     }
 
     // Charger la piste courante immédiatement, stagger les autres
-    // pour ne pas saturer le réseau et le thread principal au démarrage
+    // pour ne pas saturer le réseau et le thread principal au démarrage.
+    // jsmediatags.read() accepte une URL directement : il utilise des requêtes
+    // HTTP Range pour ne télécharger que les octets des tags ID3, sans récupérer
+    // l'intégralité du fichier audio.
     const loadTrack = (filename, idx) => {
       const url = getAssetPath(`assets/music/${filename}`);
 
-      return fetch(url)
-        .then((response) => {
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.blob();
-        })
-        .then((blob) => {
-          return new Promise((resolve) => {
-            try {
-              window.jsmediatags.read(blob, {
-                onSuccess: (tag) => {
-                  this.trackMeta[idx].title = tag.tags.title || this.formatTitle(filename);
-                  this.trackMeta[idx].artist = tag.tags.artist || 'Unknown Artist';
+      return new Promise((resolve) => {
+        try {
+          window.jsmediatags.read(url, {
+            onSuccess: (tag) => {
+              this.trackMeta[idx].title = tag.tags.title || this.formatTitle(filename);
+              this.trackMeta[idx].artist = tag.tags.artist || 'Unknown Artist';
 
-                  // Extract album art
-                  if (tag.tags.picture) {
-                    const { data, format } = tag.tags.picture;
-                    let binary = '';
-                    for (let i = 0; i < data.length; i++) {
-                      binary += String.fromCharCode(data[i]);
-                    }
-                    const base64String = window.btoa(binary);
-                    this.trackMeta[idx].pictureDataURL = `data:${format};base64,${base64String}`;
-                  }
+              // Extract album art
+              if (tag.tags.picture) {
+                const { data, format } = tag.tags.picture;
+                let binary = '';
+                for (let i = 0; i < data.length; i++) {
+                  binary += String.fromCharCode(data[i]);
+                }
+                const base64String = window.btoa(binary);
+                this.trackMeta[idx].pictureDataURL = `data:${format};base64,${base64String}`;
+              }
 
-                  if (idx === this.currentTrackIndex) {
-                    this.updateTrackInfo();
-                  }
+              if (idx === this.currentTrackIndex) {
+                this.updateTrackInfo();
+              }
 
-                  // Refresh queue menu if open to show updated metadata
-                  if (this.isQueueOpen) {
-                    this.populateQueueMenu();
-                  }
+              // Refresh queue menu if open to show updated metadata
+              if (this.isQueueOpen) {
+                this.populateQueueMenu();
+              }
 
-                  resolve();
-                },
-                onError: (error) => {
-                  console.warn(`Failed to read metadata for ${filename}:`, error);
-                  this.trackMeta[idx] = this.createFallbackMeta(filename);
-                  if (idx === this.currentTrackIndex) {
-                    this.updateTrackInfo();
-                  }
-                  if (this.isQueueOpen) {
-                    this.populateQueueMenu();
-                  }
-                  resolve();
-                },
-              });
-            } catch (error) {
-              console.warn(`Failed to initialize metadata reader for ${filename}:`, error);
+              resolve();
+            },
+            onError: (error) => {
+              console.warn(`Failed to read metadata for ${filename}:`, error);
               this.trackMeta[idx] = this.createFallbackMeta(filename);
               if (idx === this.currentTrackIndex) {
                 this.updateTrackInfo();
               }
+              if (this.isQueueOpen) {
+                this.populateQueueMenu();
+              }
               resolve();
-            }
+            },
           });
-        })
-        .catch((error) => {
-          console.warn(`Failed to fetch metadata for ${filename}:`, error);
+        } catch (error) {
+          console.warn(`Failed to initialize metadata reader for ${filename}:`, error);
           this.trackMeta[idx] = this.createFallbackMeta(filename);
           if (idx === this.currentTrackIndex) {
             this.updateTrackInfo();
           }
-          if (this.isQueueOpen) {
-            this.populateQueueMenu();
-          }
-        });
+          resolve();
+        }
+      });
     };
 
     // Piste courante chargée immédiatement, les autres décalées de 400ms chacune
