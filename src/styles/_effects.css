@@ -2,20 +2,6 @@
    Visual Effects & Animations
    ============================================ */
 
-/* Cursor trail (replaced with CSS-only solution) */
-#cursor-trail {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 8px;
-  background: linear-gradient(to right, var(--color-primary), transparent);
-  pointer-events: none;
-  z-index: var(--z-cursor-trail);
-  transform-origin: left center;
-  opacity: 0.8;
-  filter: blur(2px);
-}
-
 /* Global image hover effects */
 img {
   transition:

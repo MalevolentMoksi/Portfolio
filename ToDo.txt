@@ -2,6 +2,19 @@ Tâches manuelles :
 - Arrière-plan pour SAE3.01
 - Crédits
 - Changer les gradiants du mood Or
+🔴 CRITICAL
+1. Uncompressed images — biggest issue on the site
+
+File sizes found:
+
+pyramids2.png — 7.5 MB
+beyondlight.png — 7.3 MB
+ADA1.jpg — 5.6 MB
+DatabaseIllustration.png — 4.9 MB
+GoatLamb.jpg — 4.0 MB
+SpaceStation.png — 3.9 MB
+Only 3 of 40 images use .webp. Everything else is raw PNG/JPG with no modern format, no resolution capping, no compression. Backgrounds are displayed at full screen width with object-fit: cover — serving 7 MB for an image that renders behind a blur and 30% opacity is massive waste. Converting backgrounds to .webp at ≤1920px/150KB would cut image payload by ~95% for the 3 heaviest routes alone.
+
 
 Tâches requiert Recherches A faire :
 - Improve pet visibility
@@ -13,35 +26,37 @@ Tâches moyennes (besoin expertise IA) :
 Maj favicon
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
+Site Optimization
 
 
 
-3. The "Footer Ecosystem"
 
-Transform your footer from a bar into a horizon line.
 
-    The Concept: A "Horizon" component sitting just above the footer line.
 
-    The Activity: Tiny, 2D silhouettes of "Guardians" or "Explorers" that walk across the footer, but occasionally stop to "scan" a project or sit down by a campfire.
 
-    Ambition Level: Give them "States." One might walk halfway across, stop to look at your GitHub icon, pull out a holographic "Ghost" (referencing your background themes), and then continue walking. It’s a scripted play that happens regardless of user input.
 
-4. Automated Terminal "Ghost" Activity
 
-Since you have a MiniTerminal, you can make the site feel like it’s being "maintained" by an AI.
 
-    The Concept: A "System Log" overlay that occasionally appears in a corner or within the terminal.
 
-    The Activity: Very faint, low-opacity text scrolling in a "debug" window that says things like [System] Scanning archives..., [Pet] Sleeping..., or [Network] Connection stable at IUT2.
 
-    Ambition Level: This isn't for the user to read—it's "texture." It creates the illusion that the portfolio is a living machine running background processes while the user browses.
 
-5. The "Portal" or "Wormhole" Event
 
-A rare, high-impact background event.
+1. The Observation Drone (The "Ghost" / "Pod" Effect)
 
-    The Concept: Once every 10 minutes, a "Jump" effect occurs in the distant background image.
+Instead of a human walking, use a floating mechanical companion (think of a Ghost from Destiny or a Pod from Nier: Automata).
 
-    The Activity: A small point of light expands into a circle (a portal), a ship exits, and the portal collapses.
+    The Concept: A small, sleek geometric SVG (like a floating diamond or a metallic sphere with a glowing "eye") that occasionally drifts out from behind one of your content cards.
 
-    Ambition Level: This requires a dedicated Canvas layer. It’s the ultimate "charm" because it’s so rare that a user might only see it once, making it feel like a genuine, unscripted event in the site's "universe."
+    The Activity: It floats over to a blank space, projects a translucent CSS "scanning cone" (a simple gradient triangle) onto the background for a few seconds, "blinks," and then floats back behind the card to hide.
+
+    Why it works: It requires zero sprite sheets. It's just a single SVG element manipulated by CSS transform (translate and float up/down) or Framer Motion. It gives the exact same charm as a walking character but is 100x easier to build.
+
+2. Ambient Boids (Cyber-Flocks)
+
+You want life? Simulate a flock of lifeforms in the distant background.
+
+    The Concept: Have you ever seen the game Journey or Abzû? They use glowing, paper-like shapes that swim/fly together. You can implement a simple "Boids" flocking algorithm on a background Canvas.
+
+    The Activity: 20 or 30 tiny glowing triangles (representing distant birds, fish, or nanobots) that fluidly swim around the deep background, avoiding your text cards and occasionally scattering if the user's mouse gets too close.
+
+    Why it works: It’s a classic, highly respected computer science algorithm. Having a Boids simulation running in the background of a developer's portfolio is a massive flex of your coding skills, and it looks incredibly beautiful and organic.
