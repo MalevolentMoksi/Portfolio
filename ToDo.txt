@@ -7,15 +7,12 @@ Tâches requiert Recherches A faire :
 - Improve pet visibility
 
 Tâches simples :
-Subtle BackToTop Button apparition
 Parfois l'écriture du titre s'arrête en plein milieu
 
 Tâches moyennes (besoin expertise IA) :
-Refaire le Home esthétiquement
-Remove Bot Scared on Quick mouse
+Maj favicon
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
-Ajouter des petits bonhomes (Améliorer l'ambience)
 
 
 

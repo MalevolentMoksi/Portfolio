@@ -106,21 +106,24 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   z-index: 100;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
   transition:
-    opacity var(--transition-base),
-    transform var(--transition-base),
+    opacity 0.35s ease,
+    transform 0.35s ease,
     box-shadow 0.3s ease,
     background 0.3s ease,
     border-color 0.3s ease;
 }
 
 #back-to-top.show {
-  display: flex;
   opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
   animation:
     float-bob 6s ease-in-out infinite,
     pulse-glow 4s ease-in-out infinite;
