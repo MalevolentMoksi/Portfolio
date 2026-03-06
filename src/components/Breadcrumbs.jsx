@@ -3,7 +3,7 @@ import { useReadingTime } from '@/contexts/ReadingTimeContext.jsx';
 
 /**
  * Breadcrumbs Component
- * Affiche le fil d'Ariane pour la navigation hiérarchique
+ * Affiche le fil d'Ariane pour la navigation hiérarchique avec connaissance de la structure du site
  */
 const Breadcrumbs = () => {
   const location = useLocation();
@@ -19,16 +19,41 @@ const Breadcrumbs = () => {
     'projet-SAE3': "Installation d'un poste pour le développement",
     'projet-SAE4': "Création d'une base de données",
     'projet-SAE56': "Création d'un site institutionnel",
+    'projet-SAE3.01': "Application Web pour les aidants",
   };
 
-  // Mapping des chemins vers leurs parents
-  const pathParents = {
-    'projet-MEGASAE': '/projets',
-    'projet-SAE12': '/projets',
-    'projet-SAE3': '/projets',
-    'projet-SAE4': '/projets',
-    'projet-SAE56': '/projets',
+  // Génère le fil d'Ariane en respectant la hiérarchie du site
+  const generateBreadcrumbTrail = () => {
+    const trail = [{ label: 'Accueil', path: '/', isCurrent: false }];
+
+    if (pathnames.length === 0) {
+      return trail;
+    }
+
+    const firstSegment = pathnames[0];
+
+    // Si c'est une page de projet (projet-MEGASAE, projet-SAE12, etc.)
+    // → Accueil › Projets › ProjetXXXX
+    if (firstSegment.startsWith('projet-')) {
+      trail.push({ label: 'Projets', path: '/projets', isCurrent: false });
+      const label = pathLabels[firstSegment] || firstSegment;
+      trail.push({ label, path: `/${firstSegment}`, isCurrent: true });
+    }
+    // Si c'est la page Projets
+    // → Accueil › Projets
+    else if (firstSegment === 'projets') {
+      trail.push({ label: 'Projets', path: '/projets', isCurrent: true });
+    }
+    // Si c'est la page Projets personnels
+    // → Accueil › Projets personnels
+    else if (firstSegment === 'projets-personnels') {
+      trail.push({ label: 'Projets personnels', path: '/projets-personnels', isCurrent: true });
+    }
+
+    return trail;
   };
+
+  const breadcrumbTrail = generateBreadcrumbTrail();
 
   // Ne pas afficher sur la page d'accueil
   if (pathnames.length === 0) return null;
@@ -36,41 +61,18 @@ const Breadcrumbs = () => {
   return (
     <nav className="breadcrumbs" aria-label="Fil d'Ariane">
       <ol>
-        <li>
-          <Link to="/">Accueil</Link>
-        </li>
-        
-        {pathnames.map((segment, index) => {
-          const isLast = index === pathnames.length - 1;
-          const label = pathLabels[segment] || segment;
-          
-          // Pour les pages de projets, inclure le parent "Projets" si nécessaire
-          const needsProjectsParent = 
-            pathParents[segment] === '/projets' && 
-            !pathnames.includes('projets') &&
-            index === 0;
-          
-          return (
-            <li key={segment}>
-              {needsProjectsParent && (
-                <>
-                  <span className="breadcrumb-separator" aria-hidden="true">›</span>
-                  <Link to="/projets">Projets</Link>
-                </>
-              )}
-              <span className="breadcrumb-separator" aria-hidden="true">›</span>
-              {isLast ? (
-                <span className="breadcrumb-current" aria-current="page">
-                  {label}
-                </span>
-              ) : (
-                <Link to={`/${pathnames.slice(0, index + 1).join('/')}`}>
-                  {label}
-                </Link>
-              )}
-            </li>
-          );
-        })}
+        {breadcrumbTrail.map((crumb, index) => (
+          <li key={crumb.path}>
+            {index > 0 && <span className="breadcrumb-separator" aria-hidden="true">›</span>}
+            {crumb.isCurrent ? (
+              <span className="breadcrumb-current" aria-current="page">
+                {crumb.label}
+              </span>
+            ) : (
+              <Link to={crumb.path}>{crumb.label}</Link>
+            )}
+          </li>
+        ))}
       </ol>
       {readingTime ? (
         <span className="reading-time" aria-live="polite">
