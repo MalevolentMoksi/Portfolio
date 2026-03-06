@@ -4,18 +4,49 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml" />
+
+    <!-- Preload images for high-traffic routes — élimine le délai de chargement au premier accès -->
+    <link
+      rel="preload"
+      as="image"
+      href="/assets/images/backgrounds/risk-of-rain-2-launch-update.jpg"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="/assets/images/backgrounds/destiny-2-landshaft-fentezi.webp"
+    />
+
+    <!-- Preconnect aux domaines CDN pour éliminer le coût DNS+TCP+TLS au premier accès -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
+    <!-- Font Awesome — chargement non-bloquant (media swap trick) -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      media="print"
+      onload="this.media = 'all'"
     />
+    <!-- Fallback si JS désactivé -->
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      />
+    </noscript>
+
     <title>Portfolio - Enzo Morello</title>
     <meta
       name="description"
       content="Portfolio d'Enzo Morello, étudiant en BUT Informatique à l'IUT2 de Grenoble"
     />
-    <script type="module" crossorigin src="/assets/index-DAQuboGi.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/framer-CQHGefhC.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-qE9BjEeR.css">
+    <script type="module" crossorigin src="/assets/index-DBe9Jw36.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-klDO_2i7.js">
+    <link rel="modulepreload" crossorigin href="/assets/framer-EwPduGCt.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-C6tn_9Su.css">
   </head>
   <body>
     <div id="root"></div>
