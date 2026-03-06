@@ -2,41 +2,16 @@ Tâches manuelles :
 - Arrière-plan pour SAE3.01
 - Crédits
 - Changer les gradiants du mood Or
-🔴 CRITICAL
-1. Uncompressed images — biggest issue on the site
-
-File sizes found:
-
-pyramids2.png — 7.5 MB
-beyondlight.png — 7.3 MB
-ADA1.jpg — 5.6 MB
-DatabaseIllustration.png — 4.9 MB
-GoatLamb.jpg — 4.0 MB
-SpaceStation.png — 3.9 MB
-Only 3 of 40 images use .webp. Everything else is raw PNG/JPG with no modern format, no resolution capping, no compression. Backgrounds are displayed at full screen width with object-fit: cover — serving 7 MB for an image that renders behind a blur and 30% opacity is massive waste. Converting backgrounds to .webp at ≤1920px/150KB would cut image payload by ~95% for the 3 heaviest routes alone.
-
 
 Tâches requiert Recherches A faire :
 - Improve pet visibility
 
 Tâches simples :
-Parfois l'écriture du titre s'arrête en plein milieu
 
 Tâches moyennes (besoin expertise IA) :
 Maj favicon
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
-Site Optimization
-
-
-
-
-
-
-
-
-
-
 
 
 

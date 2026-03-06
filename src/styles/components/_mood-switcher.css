@@ -199,7 +199,9 @@ body[data-mood='default']::after {
       rgba(212, 175, 55, 0.008) 4px
     );
   mix-blend-mode: screen;
-  animation: gold-grain 0.12s steps(1) infinite;
+  /* animation: gold-grain supprimée — background-position shifts ne sont pas
+     compositables : chaque étape force un repaint full-screen sans bénéfice
+     visuel perceptible. Le grain statique est identique à l'œil. */
 }
 
 @keyframes gold-vignette-breathe {
@@ -212,33 +214,7 @@ body[data-mood='default']::after {
   }
 }
 
-@keyframes gold-grain {
-  0% {
-    background-position:
-      0px 0px,
-      0px 0px;
-  }
-  25% {
-    background-position:
-      1px -2px,
-      2px 1px;
-  }
-  50% {
-    background-position:
-      -2px 1px,
-      -1px 2px;
-  }
-  75% {
-    background-position:
-      2px 2px,
-      1px -1px;
-  }
-  100% {
-    background-position:
-      -1px -1px,
-      -2px 2px;
-  }
-}
+/* @keyframes gold-grain retiré — voir commentaire sur body[data-mood='default']::after */
 
 /* ── HACKER (vert néon) ── */
 /* ::before : ghost sweep + glitch burst épars — 90 % idle, 10 % actif */
@@ -454,6 +430,12 @@ body[data-mood='vaporwave']::after {
   animation: vapor-crt-flicker 4s steps(1) infinite;
 }
 
+/* Performance gate : masquer la grille vaporwave sur low-tier pour éviter
+   le coût de composition (perspective(320px) + rotateX + mask-image). */
+body[data-perf-tier='low'][data-mood='vaporwave']::before {
+  display: none !important;
+}
+
 @keyframes vapor-gradient-pulse {
   0% {
     background-position: 0% 50%;
@@ -509,24 +491,9 @@ body[data-mood='vaporwave']::after {
   }
 }
 
-/* Hue-rotate lent sur le contenu vaporwave — appliqué sur main pour
-   ne pas perturber les éléments fixed (header, toasts, modals) */
-body[data-mood='vaporwave'] main {
-  animation: vapor-hue-drift 10s ease-in-out infinite;
-}
-
-@keyframes vapor-hue-drift {
-  0%,
-  100% {
-    filter: hue-rotate(0deg);
-  }
-  25% {
-    filter: hue-rotate(8deg);
-  }
-  75% {
-    filter: hue-rotate(-8deg);
-  }
-}
+/* vapor-hue-drift supprimé — filter: hue-rotate() sur <main> force un repaint
+   de tout le sous-arbre DOM à chaque frame (pas compositable). Le décalage
+   ±8° était imperceptible visuellement et coûtait ~30-50% du budget GPU. */
 
 /* ── EUROPA (cryo / frozen sci-fi) ── */
 /* ::before : frost creep vignette — bords gelés qui respirent */
@@ -566,7 +533,8 @@ body[data-mood='europa']::after {
       rgba(0, 229, 255, 0.008) 5px
     );
   mix-blend-mode: screen;
-  animation: europa-grain 0.15s steps(1) infinite;
+  /* animation: europa-grain supprimée — même raison que gold-grain :
+     background-position non-compositable, repaint full-screen inutile. */
 }
 
 @keyframes europa-frost-breathe {
@@ -579,33 +547,7 @@ body[data-mood='europa']::after {
   }
 }
 
-@keyframes europa-grain {
-  0% {
-    background-position:
-      0px 0px,
-      0px 0px;
-  }
-  25% {
-    background-position:
-      1px -1px,
-      -1px 2px;
-  }
-  50% {
-    background-position:
-      -2px 1px,
-      1px -1px;
-  }
-  75% {
-    background-position:
-      2px 2px,
-      -2px 1px;
-  }
-  100% {
-    background-position:
-      -1px -2px,
-      2px -2px;
-  }
-}
+/* @keyframes europa-grain retiré — voir commentaire sur body[data-mood='europa']::after */
 
 /* ── INDUSTRIAL (forge / cyber-brutalist) ── */
 /* ::before : nappe de fumée horizontale — brume industrielle */
@@ -763,9 +705,15 @@ body[data-mood='industrial'] h2 {
 
 /* ── Industrial : power surge — classe ajoutée par JS (400ms) ── */
 /* Subtil scintillement électrique — baisse légère puis snap retour */
-body[data-mood='industrial'].power-surge-active main,
+
+/* header : petit élément fixed → filter: brightness acceptable ici */
 body[data-mood='industrial'].power-surge-active header {
   animation: power-surge-flash 0.4s ease-out both;
+}
+
+/* main : utilise opacity au lieu de filter — compositable GPU, zéro repaint */
+body[data-mood='industrial'].power-surge-active main {
+  animation: power-surge-dim 0.4s ease-out both;
 }
 
 /* Les enseignes néon réagissent plus fort pendant la surtension */
@@ -798,6 +746,34 @@ body[data-mood='industrial'].power-surge-active .neon-text {
   }
   100% {
     filter: brightness(1);
+  }
+}
+
+/* Équivalent opacity de power-surge-flash pour <main> — GPU-compositable */
+@keyframes power-surge-dim {
+  0% {
+    opacity: 1;
+  }
+  10% {
+    opacity: 0.82;
+  }
+  25% {
+    opacity: 0.9;
+  }
+  40% {
+    opacity: 0.78;
+  }
+  55% {
+    opacity: 0.95;
+  }
+  70% {
+    opacity: 0.85;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
   }
 }
 

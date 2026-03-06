@@ -295,6 +295,12 @@ class VisualEffects {
       const y = e.clientY - window.innerHeight / 2;
       mouseX = x * depth;
       mouseY = y * depth;
+
+      // Relancer le RAF s'il s'est arrêté après convergence
+      if (!this._parallaxRunning && this.background) {
+        this._parallaxRunning = true;
+        this._parallaxRafId = requestAnimationFrame(updateParallax);
+      }
     };
 
     // Throttle mousemove for performance
@@ -311,6 +317,12 @@ class VisualEffects {
     window.addEventListener('mousemove', this._mouseMoveHandler);
 
     // Smooth animation loop — with visibility-aware pause
+    // Seuil de convergence : en-dessous de cette valeur la différence est
+    // sub-pixel et invisible, mais le RAF continuait quand même à tourner
+    // à 60 fps en invalidant l'arbre de composition. Le loop redémarre
+    // automatiquement sur le prochain mousemove.
+    const SETTLE_THRESHOLD = 0.05;
+
     const updateParallax = () => {
       posX += (mouseX - posX) * friction;
       posY += (mouseY - posY) * friction;
@@ -323,6 +335,21 @@ class VisualEffects {
         particlesPosX += (targetPX - particlesPosX) * friction;
         particlesPosY += (targetPY - particlesPosY) * friction;
         particlesCanvas.style.transform = `scale(1.08) translate(${particlesPosX}px, ${particlesPosY}px)`;
+      }
+
+      // Arrêter le RAF quand la position a convergé (aucun mouvement perceptible)
+      const bgSettled =
+        Math.abs(mouseX - posX) < SETTLE_THRESHOLD && Math.abs(mouseY - posY) < SETTLE_THRESHOLD;
+      const pxSettled =
+        !particlesCanvas ||
+        (Math.abs(mouseX * particlesDepthRatio - particlesPosX) < SETTLE_THRESHOLD &&
+          Math.abs(mouseY * particlesDepthRatio - particlesPosY) < SETTLE_THRESHOLD);
+
+      if (bgSettled && pxSettled) {
+        // Loop en pause — reprendra sur le prochain mousemove
+        this._parallaxRafId = null;
+        this._parallaxRunning = false;
+        return;
       }
 
       this._parallaxRafId = requestAnimationFrame(updateParallax);
