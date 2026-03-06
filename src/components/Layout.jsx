@@ -6,6 +6,7 @@ import Footer from './Footer.jsx';
 import HamburgerMenu from './HamburgerMenu.jsx';
 import MiniTerminal from './MiniTerminal.jsx';
 import MoodSwitcher from './MoodSwitcher.jsx';
+import { useMood } from '../contexts/MoodContext.jsx';
 import ParticlesButton from './ParticlesButton.jsx';
 import PetButton from './pet/PetButton.jsx';
 import useDocumentMeta from '../hooks/useDocumentMeta.js';
@@ -84,6 +85,7 @@ const pageConfig = {
 const Layout = () => {
   const location = useLocation();
   const config = pageConfig[location.pathname] || pageConfig['/'];
+  const { mood } = useMood();
 
   useDocumentMeta(config.metaTitle, config.metaDescription);
   usePortfolioModules(trackFiles);
@@ -117,6 +119,14 @@ const Layout = () => {
     const tier = getPerformanceTier();
     document.body.setAttribute('data-perf-tier', tier);
   }, []);
+
+  // Swap favicon selon le mood actif
+  useEffect(() => {
+    const link = document.querySelector('link[rel="icon"]');
+    if (link) {
+      link.href = getAssetPath(`assets/images/favicon-${mood}.svg`);
+    }
+  }, [mood]);
 
 
 

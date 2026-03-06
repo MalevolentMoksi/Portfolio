@@ -6,12 +6,12 @@
     </filter>
   </defs>
   <style>
-    .bg     { fill: #0a0a0a; }
-    .ring   { fill: none; stroke: #a0a0a0; stroke-width: 1.2; opacity: .45; }
-    .e-halo { fill: #e8e8e8; opacity: .35; }
-    .e-core { fill: #a0a0a0; }
-    .c-halo { fill: #e8e8e8; opacity: .3; }
-    .c-core { fill: #e8e8e8; }
+    .bg     { fill: #080600; }
+    .ring   { fill: none; stroke: #d4af37; stroke-width: 1.2; opacity: .45; }
+    .e-halo { fill: #ffe17e; opacity: .35; }
+    .e-core { fill: #d4af37; }
+    .c-halo { fill: #ffe17e; opacity: .3; }
+    .c-core { fill: #ffe17e; }
     .orbit-outer { transform-origin: 32px 32px; animation: cw  7s linear     infinite; }
     .orbit-inner { transform-origin: 32px 32px; animation: ccw 4s linear     infinite; }
     .center-grp  { transform-origin: 32px 32px; animation: pls 1.8s ease-in-out infinite; }
