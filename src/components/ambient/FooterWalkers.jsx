@@ -340,9 +340,9 @@ const SingleWalker = ({ id: walkerId, character, startX, phases, footerRef, onDo
   const applyPosition = useCallback(() => {
     if (!elRef.current) return;
     const px = xToPx();
-    elRef.current.style.left = `${px}px`;
-    // Flip horizontal selon la direction
-    elRef.current.style.transform = `scaleX(${facingRef.current})`;
+    // Utilise transform pour la position ET le flip — left n'est plus touché.
+    // translateX est composité GPU ; left forcerait layout + paint à chaque frame.
+    elRef.current.style.transform = `translateX(${px}px) scaleX(${facingRef.current})`;
   }, [xToPx]);
 
   /** Avance vers la phase suivante */

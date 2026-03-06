@@ -80,8 +80,9 @@ main section {
   border-radius: 8px;
   padding: 1.5rem 2rem;
   margin-bottom: 2.5rem;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  /* backdrop-filter retiré : main porte déjà un blur(8px) qui couvre visuellement
+     l'ensemble, et N couches simultanées forcent N repaints GPU à chaque frame
+     du parallax RAF — coût prohibitif sur GPU bas de gamme. */
 }
 
 section:last-child {

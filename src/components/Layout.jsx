@@ -124,7 +124,8 @@ const Layout = () => {
         alt=""
         id="background"
         aria-hidden="true"
-        loading="lazy"
+        loading="eager"
+        fetchPriority="high"
       />
 
       <header
