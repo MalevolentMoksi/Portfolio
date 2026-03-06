@@ -77,7 +77,7 @@ class UIEnhancements {
         () => GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
       ).join('');
 
-    setInterval(() => {
+    this._glitchInterval = setInterval(() => {
       target.textContent = randomString(GLITCH_LENGTH);
     }, INTERVAL);
   }
@@ -182,7 +182,13 @@ class UIEnhancements {
     };
 
     updateClock();
-    setInterval(updateClock, 1000);
+    this._clockInterval = setInterval(updateClock, 1000);
+  }
+
+  destroy() {
+    clearInterval(this._glitchInterval);
+    clearInterval(this._clockInterval);
+    if (this._typingTimeout) clearTimeout(this._typingTimeout);
   }
 }
 

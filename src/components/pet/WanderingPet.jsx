@@ -716,7 +716,24 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
     };
 
     rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
+
+    // Pause explicite quand l'onglet est masqué — plus déterministe que la
+    // détection post-hoc du gap RAF (cohérent avec VisualEffects.initParallax).
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      } else if (rafRef.current === null) {
+        lastTickTimeRef.current = Date.now(); // réinitialise le gap détecteur
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, [hudOpen]);
 
   /* ── Fermer le HUD au clic extérieur ── */

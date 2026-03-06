@@ -16,8 +16,10 @@ export default defineConfig({
     rollupOptions: {
       input: resolve(__dirname, 'src/index.html'),
       output: {
-        // Séparer Framer Motion en chunk dédié — chargé à la demande
+        // Vendor split : les librairies stables sont mises en cache indépendamment
+        // des déploiements de l'app.
         manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom'],
           'framer': ['framer-motion'],
         },
       },
