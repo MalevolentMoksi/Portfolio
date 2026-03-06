@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="%BASE_URL%assets/images/favicon.svg" type="image/svg+xml" />
 
+
+    <!-- Preload images for high-traffic routes — élimine le délai de chargement au premier accès -->
+    <link rel="preload" as="image" href="/assets/images/backgrounds/risk-of-rain-2-launch-update.jpg" />
+    <link rel="preload" as="image" href="/assets/images/backgrounds/destiny-2-landshaft-fentezi.webp" />
+
     <!-- Preconnect aux domaines CDN pour éliminer le coût DNS+TCP+TLS au premier accès -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
