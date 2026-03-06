@@ -43,19 +43,19 @@ const pageConfig = {
   },
   '/projet-MEGASAE': {
     heading: 'Projet cardinal - Application de planification de banquets',
-    backgroundSrc: getAssetPath('assets/images/backgrounds/beyondlight.png'),
+    backgroundSrc: getAssetPath('assets/images/backgrounds/beyondlight.webp'),
     metaTitle: 'Projet cardinal - Application de gestion de banquets',
     metaDescription: "Portfolio d'Enzo Morello - Projet cardinal",
   },
   '/projet-SAE12': {
     heading: "Projet Implémentation d'un besoin client | Comparaison d'approches algorithmiques",
-    backgroundSrc: getAssetPath('assets/images/backgrounds/Destiny-2-Pyramids2.jpg'),
+    backgroundSrc: getAssetPath('assets/images/backgrounds/pyramids2.webp'),
     metaTitle: "Projet Implémentation d'un besoin client",
     metaDescription: "Portfolio d'Enzo Morello - Projet SAE12",
   },
   '/projet-SAE3': {
     heading: "Installation d'un poste pour le développement | Carte mentale & Présentation",
-    backgroundSrc: getAssetPath('assets/images/backgrounds/SpaceStation.png'),
+    backgroundSrc: getAssetPath('assets/images/backgrounds/SpaceStation.webp'),
     metaTitle: "Installation d'un poste pour le développement",
     metaDescription: "Portfolio d'Enzo Morello - Projet SAE3",
   },
@@ -67,14 +67,14 @@ const pageConfig = {
   },
   '/projet-SAE56': {
     heading: "Projet - Création d'un site institutionnel",
-    backgroundSrc: getAssetPath('assets/images/backgrounds/pyramids2.png'),
+    backgroundSrc: getAssetPath('assets/images/backgrounds/pyramids2.webp'),
     metaTitle: 'Projet - Création site web institutionnel',
     metaDescription: "Portfolio d'Enzo Morello - Projet SAE56",
   },
   '/projet-SAE3.01': {
     heading: "Aidémé – Application Web de coordination pour les aidants",
     subheading: 'Une plateforme collaborative pour gérer le suivi des personnes dépendantes',
-    backgroundSrc: getAssetPath('assets/images/backgrounds/pyramids2.png'),
+    backgroundSrc: getAssetPath('assets/images/backgrounds/pyramids2.webp'),
     metaTitle: 'Aidémé – Application Web pour les aidants',
     metaDescription: "Portfolio d'Enzo Morello - Projet SAE 3.01 : application full-stack React + PHP",
   },
@@ -125,7 +125,7 @@ const Layout = () => {
         id="background"
         aria-hidden="true"
         loading="eager"
-        fetchPriority="high"
+        fetchpriority="high"
       />
 
       <header

@@ -71,7 +71,7 @@ export const academicProjects = [
     description:
       "La récolte d'informations sur l'entreprise ESN Sopra Steria afin d'en faire un site a type informatif pour un public défini.",
     teamSize: 'En trinôme',
-    image: '/assets/images/projects/SopraSteriaIllustration.png',
+    image: '/assets/images/projects/SopraSteriaIllustration.webp',
     tags: ['HTML', 'CSS', 'JavaScript', 'Figma', 'Git'],
     technologies: [
       { name: 'HTML5', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/html5.svg' },
@@ -140,7 +140,7 @@ export const academicProjects = [
     category: 'SAE 4',
     description: "Conception, implémentation et optimisation d'une base de données relationnelle.",
     teamSize: 'En trinôme',
-    image: '/assets/images/projects/DatabaseIllustration.png',
+    image: '/assets/images/projects/DatabaseIllustration.webp',
     tags: ['SQL', 'PostgreSQL', 'Base de données'],
     technologies: [
       {

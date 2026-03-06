@@ -262,7 +262,9 @@ class MusicPlayer {
     // HTTP Range pour ne télécharger que les octets des tags ID3, sans récupérer
     // l'intégralité du fichier audio.
     const loadTrack = (filename, idx) => {
-      const url = getAssetPath(`assets/music/${filename}`);
+      const relUrl = getAssetPath(`assets/music/${filename}`);
+      // jsmediatags XhrFileReader requires an absolute URL (http/https)
+      const url = relUrl.startsWith('http') ? relUrl : window.location.origin + relUrl;
 
       return new Promise((resolve) => {
         try {
