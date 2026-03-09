@@ -387,6 +387,16 @@ const PetButton = () => {
     setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness + 5)) }));
   }, []);
 
+  /* ── Bot catch success: increase happiness (CatchGame effect) ── */
+  const handleBotCatchSuccess = useCallback(() => {
+    // Random happiness gain between 1 and 10 (inclusive)
+    const gain = 1 + Math.floor(Math.random() * 10);
+    setStats((s) => ({ ...s, happiness: clamp(s.happiness + gain) }));
+    // Small visual feedback: heart thought and numeric label
+    handleThought({ type: 'symbol', content: 'heart' });
+    handleThought({ type: 'text', content: `+${gain}`, duration: 900 });
+  }, [handleThought]);
+
   /* ── Catch game end ── */
   const handleGameEnd = useCallback(() => {
     setIsCatching(false);
@@ -511,6 +521,7 @@ const PetButton = () => {
           petMood={petMood}
           onInteract={handleInteract}
           onBehavior={triggerReaction}
+          onBotCatchSuccess={handleBotCatchSuccess}
           onThought={handleThought}
           onHoverPet={handleHoverPet}
           cooldowns={cdEnds}

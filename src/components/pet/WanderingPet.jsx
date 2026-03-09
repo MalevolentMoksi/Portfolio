@@ -25,7 +25,7 @@ const INTERCEPT_STEPS = byTier({ high: 40, mid: 25, low: 15 });
 
 // forwardRef permet à AnimatePresence (PetButton) de transmettre sa ref sans warning React.
 // Le portal rend dans document.body donc la ref n'est pas attachée à un DOM node visible.
-const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onThought, onHoverPet, cooldowns, thoughtQueue, hudThought, sizeScale, speedMult, isSleeping, moodSpinActive, petName, onRename, feedIconIndex, achievements, onUnlock, isCatching, onGameEnd }, _ref) {
+const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeState, mouthExpr, petMood, onInteract, onBehavior, onBotCatchSuccess, onThought, onHoverPet, cooldowns, thoughtQueue, hudThought, sizeScale, speedMult, isSleeping, moodSpinActive, petName, onRename, feedIconIndex, achievements, onUnlock, isCatching, onGameEnd }, _ref) {
   const PET_TOP_MIN = HALF;
   // Position initiale aléatoire (calculée une seule fois)
   const posRef = useRef(null);
@@ -57,7 +57,14 @@ const WanderingPet = forwardRef(function WanderingPet ({ stats, expression, eyeS
     onBehavior('excited');
     setCatchSpring(true);
     setTimeout(() => setCatchSpring(false), 450);
-  }, [onBehavior]);
+    try {
+      if (typeof onBotCatchSuccess === 'function') onBotCatchSuccess();
+    } catch (e) {
+      // defensive: don't break the game if parent callback throws
+      // eslint-disable-next-line no-console
+      console.error('onBotCatchSuccess threw', e);
+    }
+  }, [onBehavior, onBotCatchSuccess]);
 
   // Ticker pour mettre à jour les compte-à-rebours des cooldowns
   // Ne tourne que quand le HUD est ouvert — pas de re-renders pendant le jeu

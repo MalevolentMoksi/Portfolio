@@ -1313,8 +1313,8 @@ body[data-mood='industrial'] .pet-robot {
   z-index: calc(var(--z-lightbox) + 3);
   cursor: crosshair;
   background: rgba(0, 0, 0, 0.12);
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
   transition: background 0.15s ease;
 }
 
@@ -1439,6 +1439,15 @@ body[data-mood='industrial'] .pet-robot {
   user-select: none;
   animation: pet-thought-rise 0.5s ease-out both;
   white-space: nowrap;
+}
+
+/* Ensure pet thought bubbles are above the overlay while the catch game is active */
+body[data-catching="true"] .pet-thought,
+body[data-catching="true"] .pet-thought--symbol,
+body[data-catching="true"] .pet-thought--text,
+body[data-catching="true"] .pet-thought--reaction {
+  z-index: calc(var(--z-lightbox) + 6);
+  pointer-events: none;
 }
 
 .catch-ball {

@@ -116,6 +116,16 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
     return () => window.removeEventListener('resize', syncViewBox);
   }, []);
 
+  /* ── Mark body as catching so overlay blur can exempt pet & thoughts ── */
+  useEffect(() => {
+    const prev = document.body.dataset.catching;
+    document.body.dataset.catching = 'true';
+    return () => {
+      if (prev === undefined) delete document.body.dataset.catching;
+      else document.body.dataset.catching = prev;
+    };
+  }, []);
+
   /* ── Raw mouse velocity from history ── */
   const getRawVel = () => {
     const h = velHistRef.current;
