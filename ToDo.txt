@@ -7,7 +7,7 @@ Tâches requiert Recherches A faire :
 - Improve pet visibility
 
 Tâches simples :
-Increase Attrape effect on bot happiness
+
 Tâches moyennes (besoin expertise IA) :
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :

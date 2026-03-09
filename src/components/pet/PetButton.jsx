@@ -182,19 +182,33 @@ const PetButton = () => {
     if (!isSpawned) return;
     decayRef.current = setInterval(() => {
       if (isCatchingRef.current) {
-        // Catch game: freeze hunger, gain happiness slowly
-        setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness + 0.5)) }));
+        // Catch game: freeze hunger, gain happiness slowly.
+        // Use probabilistic integer increments (avg +0.5) to avoid decimals.
+        setStats((s) => {
+          const base = Math.round(s.happiness);
+          const inc = Math.random() < 0.5 ? 1 : 0; // +1 half the time -> avg +0.5
+          return { ...s, happiness: clamp(base + inc) };
+        });
         return;
       }
+
       setStats((s) => {
         const thriving = s.hunger > 85 && s.happiness > 85;
         // Thriving effect: skip decay with high probability (different rates per stat)
         const hungerSkip = thriving && Math.random() > 0.15;  // 85% skip when thriving
         const happinessSkip = thriving && Math.random() > 0.30; // 70% skip when thriving
-        return {
-          hunger: clamp(s.hunger - (hungerSkip ? 0 : 1.5)),
-          happiness: clamp(s.happiness - (happinessSkip ? 0 : 0.75)),
-        };
+
+        // Use integer-only deltas sampled probabilistically so values remain integers:
+        // - hunger: avg 1.5 when not skipped => choose 1 or 2 with equal chance
+        // - happiness: avg 0.75 when not skipped => subtract 1 with 75% chance
+        let hungerDelta = 0;
+        if (!hungerSkip) hungerDelta = Math.random() < 0.5 ? 1 : 2;
+        let happinessDelta = 0;
+        if (!happinessSkip) happinessDelta = Math.random() < 0.75 ? 1 : 0;
+
+        const newHunger = clamp(Math.round(s.hunger) - hungerDelta);
+        const newHappiness = clamp(Math.round(s.happiness) - happinessDelta);
+        return { hunger: newHunger, happiness: newHappiness };
       });
     }, DECAY_MS);
     return () => clearInterval(decayRef.current);
@@ -384,14 +398,14 @@ const PetButton = () => {
 
   /* ── Hover-pet stat bump (+5 happiness) ── */
   const handleHoverPet = useCallback(() => {
-    setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness + 5)) }));
+    setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness) + 5) }));
   }, []);
 
   /* ── Bot catch success: increase happiness (CatchGame effect) ── */
   const handleBotCatchSuccess = useCallback(() => {
     // Random happiness gain between 1 and 10 (inclusive)
     const gain = 1 + Math.floor(Math.random() * 10);
-    setStats((s) => ({ ...s, happiness: clamp(s.happiness + gain) }));
+    setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness) + gain) }));
     // Small visual feedback: heart thought and numeric label
     handleThought({ type: 'symbol', content: 'heart' });
     handleThought({ type: 'text', content: `+${gain}`, duration: 900 });
