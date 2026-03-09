@@ -1442,10 +1442,10 @@ body[data-mood='industrial'] .pet-robot {
 }
 
 /* Ensure pet thought bubbles are above the overlay while the catch game is active */
-body[data-catching="true"] .pet-thought,
-body[data-catching="true"] .pet-thought--symbol,
-body[data-catching="true"] .pet-thought--text,
-body[data-catching="true"] .pet-thought--reaction {
+body[data-catching='true'] .pet-thought,
+body[data-catching='true'] .pet-thought--symbol,
+body[data-catching='true'] .pet-thought--text,
+body[data-catching='true'] .pet-thought--reaction {
   z-index: calc(var(--z-lightbox) + 6);
   pointer-events: none;
 }
