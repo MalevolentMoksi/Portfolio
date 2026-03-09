@@ -73,7 +73,9 @@ class MusicPlayer {
     this.savedTime = !isNaN(savedTime) && savedTime >= 0 ? savedTime : 0;
 
     // Load paused state
-    this.isPaused = localStorage.getItem(this.STORAGE_KEYS.IS_PAUSED) === 'true';
+    // Première visite (clé absente) => lecteur arrêté par défaut (pas d'autoplay).
+    const savedPausedState = localStorage.getItem(this.STORAGE_KEYS.IS_PAUSED);
+    this.isPaused = savedPausedState === null ? true : savedPausedState === 'true';
 
     // Load volume state
     const savedVolume = parseFloat(localStorage.getItem(this.STORAGE_KEYS.VOLUME));
