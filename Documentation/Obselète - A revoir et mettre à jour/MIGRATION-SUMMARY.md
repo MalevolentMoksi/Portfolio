@@ -135,6 +135,3 @@ npm run preview  # Tester la prod localement
 | **Performance** | N/A | Lazy loading de routes prêt |
 
 ---
-
-**Archivage complété par:** AI Coding Assistant  
-**Tous les fichiers obsolètes sont saufs en `_archive/` - **AUCUN fichier critique n'a été perdu**
