@@ -30,7 +30,7 @@
  *    Le FPS monitor prendra le relais pour dégrader si nécessaire.
  */
 
-const SS_KEY     = 'perf-tier-v3'; // v3 : seuil abaissé à 4 cœurs, cap mobile supprimé
+const SS_KEY = 'perf-tier-v3'; // v3 : seuil abaissé à 4 cœurs, cap mobile supprimé
 const SS_FPS_KEY = 'perf-fps-v3';
 
 // Safe sessionStorage helpers — some environments (privacy extensions)
@@ -88,7 +88,7 @@ const detectTierSync = () => {
    Cache session + API publique
    ──────────────────────────────────────────── */
 
-let _cached     = null;
+let _cached = null;
 let _fpsRunning = false;
 
 /**
@@ -132,7 +132,12 @@ export const getPerformanceTier = () => {
  *                                           (5 s pour laisser React s'hydrater
  *                                           et l'app SPA se stabiliser)
  */
-export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs = 5000, warmupFrames = 10 } = {}) => {
+export const startFpsMonitor = ({
+  sampleFrames = 90,
+  fpsThreshold = 35,
+  delayMs = 5000,
+  warmupFrames = 10,
+} = {}) => {
   // Ne mesurer qu'une fois par session (flag stocké) — accès protégé
   if (safeSessionGet(SS_FPS_KEY)) return;
   if (_fpsRunning) return;
@@ -140,8 +145,8 @@ export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs 
   const startRun = () => {
     _fpsRunning = true;
     let frameIndex = 0; // total frames seen (including warmup)
-    let count      = 0; // frames counted toward sampleFrames
-    let start      = 0;
+    let count = 0; // frames counted toward sampleFrames
+    let start = 0;
 
     const cleanup = () => {
       _fpsRunning = false;
@@ -167,14 +172,14 @@ export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs 
 
       if (count >= sampleFrames) {
         const elapsed = now - start;
-        const avgFps  = (count / elapsed) * 1000;
+        const avgFps = (count / elapsed) * 1000;
 
         // Save a compact value for diagnostics (protected)
         safeSessionSet(SS_FPS_KEY, avgFps.toFixed(1));
 
         if (avgFps < fpsThreshold) {
           const current = getPerformanceTier();
-          let degraded  = 'low';
+          let degraded = 'low';
           if (current === 'high') degraded = 'mid';
           else if (current === 'mid') degraded = 'low';
 
@@ -188,7 +193,8 @@ export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs 
           try {
             if (degraded !== current && (degraded === 'mid' || degraded === 'low')) {
               if (typeof window !== 'undefined' && typeof window.showToast === 'function') {
-                const msg = "Performance réduite : une version allégée du site a été activée en raison des capacités de votre appareil. Certaines animations et effets ont été réduits pour améliorer la fluidité.";
+                const msg =
+                  'Performance réduite : une version allégée du site a été activée en raison des capacités de votre appareil. Certaines animations et effets ont été réduits pour améliorer la fluidité.';
                 // duration = 0 -> persistent (user must dismiss)
                 window.showToast(msg, { type: 'warning', duration: 0 });
               }
