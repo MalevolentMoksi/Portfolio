@@ -48,14 +48,23 @@ const ToastItem = ({ toast, onDismiss }) => {
   }, [toast.id, onDismiss]);
 
   useEffect(() => {
-    timerRef.current = setTimeout(dismiss, toast.duration);
-    return () => clearTimeout(timerRef.current);
+    // If duration is a positive finite number, auto-dismiss after that delay.
+    // A duration <= 0 (or non-finite) means a persistent toast that must be
+    // dismissed by the user.
+    if (Number.isFinite(toast.duration) && toast.duration > 0) {
+      timerRef.current = setTimeout(dismiss, toast.duration);
+      return () => clearTimeout(timerRef.current);
+    }
+    return () => {};
   }, [toast.duration, dismiss]);
 
   // Pause timer on hover
   const handleMouseEnter = () => clearTimeout(timerRef.current);
   const handleMouseLeave = () => {
-    timerRef.current = setTimeout(dismiss, 1200);
+    // Only restart a short auto-dismiss when the toast is non-persistent.
+    if (Number.isFinite(toast.duration) && toast.duration > 0) {
+      timerRef.current = setTimeout(dismiss, 1200);
+    }
   };
 
   const icon = toast.icon || TOAST_ICONS[toast.type] || TOAST_ICONS.info;

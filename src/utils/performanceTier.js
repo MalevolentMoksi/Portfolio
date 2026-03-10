@@ -5,32 +5,33 @@
  * visuelle (particules, retina, effets).
  *
  * Tiers :
- *  - 'high' : machine puissante → qualité maximale, retina ON
- *  - 'mid'  : machine intermédiaire → qualité réduite, retina OFF
- *  - 'low'  : machine faible → qualité minimale, retina OFF
+ * - 'high' : machine puissante → qualité maximale, retina ON
+ * - 'mid'  : machine intermédiaire → qualité réduite, retina OFF
+ * - 'low'  : machine faible → qualité minimale, retina OFF
  *
  * Critères — uniquement basés sur des APIs standardisées et fiables :
  *
- *  1. prefers-reduced-motion (W3C Media Queries Level 5)
- *     → Respecte les préférences du système d'exploitation.
- *        Forcé à 'low' pour garantir l'accessibilité.
+ * 1. prefers-reduced-motion (W3C Media Queries Level 5)
+ *    → Respecte les préférences du système d'exploitation.
+ *      Forcé à 'low' pour garantir l'accessibilité.
  *
- *  2. navigator.hardwareConcurrency (HTML Living Standard)
- *     → Nombre de processeurs logiques disponibles.
- *        Standardisé, supporté depuis Chrome 37 / Firefox 48 / Safari 10.1.
- *        Seul signal hardware retenu — navigator.deviceMemory est délibérément
- *        imprécis (Chrome le bucketise à 0.25/0.5/1/2/4/8 et le plafonne à 8
- *        pour limiter le fingerprinting) et n'est pas disponible sur Firefox.
+ * 2. navigator.hardwareConcurrency (HTML Living Standard)
+ *    → Nombre de processeurs logiques disponibles.
+ *      Standardisé, supporté depuis Chrome 37 / Firefox 48 / Safari 10.1.
+ *      Seul signal hardware retenu — navigator.deviceMemory est délibérément
+ *      imprécis (Chrome le bucketise à 0.25/0.5/1/2/4/8 et le plafonne à 8
+ *      pour limiter le fingerprinting) et n'est pas disponible sur Firefox.
  *
- * Seuils hardwareConcurrency :
- *  - < 4 cœurs  → 'low'  (mono/dual-core, machines très anciennes)
- *  - 4–7 cœurs  → 'mid'  (quad-core : ère 2015-2019 typique, mobile actuel)
- *  - ≥ 8 cœurs  → 'high' sur desktop, 'mid' sur mobile
- *                 (les CPU mobiles avec 8 cœurs restent limités thermiquement)
+ * Seuils hardwareConcurrency (desktop ET mobile) :
+ *  - < 4 cœurs → 'low'  (mono/dual-core, machines très anciennes)
+ *  - ≥ 4 cœurs → 'high' (quad-core et plus — desktop & mobile modernes)
+ *    Le mobile n'est plus plafonné à 'mid' : les SoC modernes (Apple Silicon,
+ *    Snapdragon) gèrent très bien les particules et effets WebGL.
+ *    Le FPS monitor prendra le relais pour dégrader si nécessaire.
  */
 
-const SS_KEY = 'perf-tier-v2'; // v2 : supprime deviceMemory, invalide l'ancien cache
-const SS_FPS_KEY = 'perf-fps-v2';
+const SS_KEY     = 'perf-tier-v3'; // v3 : seuil abaissé à 4 cœurs, cap mobile supprimé
+const SS_FPS_KEY = 'perf-fps-v3';
 
 // Safe sessionStorage helpers — some environments (privacy extensions)
 // may throw on access to storage. We silently ignore failures.
@@ -65,31 +66,29 @@ const detectTierSync = () => {
   }
 
   // 2. hardwareConcurrency — seul signal hardware retenu
-  //    Retourne 0 ou undefined si non supporté → fallback grace: 'mid'
+  // Retourne 0 ou undefined si non supporté → fallback grace: 'mid'
   const cores = navigator.hardwareConcurrency || 0;
-  const isMobile = window.innerWidth <= 768;
 
   if (cores === 0) {
     // API non disponible (très rare) → prudence
-    return isMobile ? 'low' : 'mid';
+    return 'mid';
   }
 
   // Moins de 4 cœurs logiques → machine clairement faible
   if (cores < 4) return 'low';
 
-  // 4–7 cœurs : mid sur desktop et mobile
-  if (cores < 8) return 'mid';
-
-  // ≥ 8 cœurs : high sur desktop, mid sur mobile
-  // (les SoC mobiles avec 8 cœurs ont des contraintes thermiques importantes)
-  return isMobile ? 'mid' : 'high';
+  // ≥ 4 cœurs : 'high' sur desktop ET mobile.
+  // Les SoC mobiles modernes (Apple Silicon, Snapdragon) ont d'excellentes
+  // performances single-thread et GPU. On laisse le FPS monitor dégrader
+  // si le device chauffe ou lag réellement.
+  return 'high';
 };
 
 /* ────────────────────────────────────────────
    Cache session + API publique
    ──────────────────────────────────────────── */
 
-let _cached = null;
+let _cached     = null;
 let _fpsRunning = false;
 
 /**
@@ -121,17 +120,19 @@ export const getPerformanceTier = () => {
 /**
  * Mesure le FPS réel sur les N premières frames.
  * Si le FPS moyen est inférieur à `threshold`, abaisse le tier :
- *  - 'high' → 'mid',  'mid' → 'low'
+ *   - 'high' → 'mid', 'mid' → 'low'
  *
  * Cette mesure ne s'exécute qu'UNE fois par session (flag sessionStorage).
  * Elle est différée pour ne pas interférer avec l'hydratation React.
  *
- * @param {object}  [opts]
- * @param {number}  [opts.sampleFrames=90] — nombre de frames à échantillonner
- * @param {number}  [opts.fpsThreshold=35] — seuil en dessous duquel on abaisse
- * @param {number}  [opts.delayMs=2000]    — délai avant de commencer la mesure
+ * @param {object} [opts]
+ * @param {number} [opts.sampleFrames=90]  — nombre de frames à échantillonner
+ * @param {number} [opts.fpsThreshold=35]  — seuil en dessous duquel on abaisse
+ * @param {number} [opts.delayMs=5000]     — délai avant de commencer la mesure
+ *                                           (5 s pour laisser React s'hydrater
+ *                                           et l'app SPA se stabiliser)
  */
-export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs = 2000, warmupFrames = 10 } = {}) => {
+export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs = 5000, warmupFrames = 10 } = {}) => {
   // Ne mesurer qu'une fois par session (flag stocké) — accès protégé
   if (safeSessionGet(SS_FPS_KEY)) return;
   if (_fpsRunning) return;
@@ -139,8 +140,8 @@ export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs 
   const startRun = () => {
     _fpsRunning = true;
     let frameIndex = 0; // total frames seen (including warmup)
-    let count = 0; // frames counted toward sampleFrames
-    let start = 0;
+    let count      = 0; // frames counted toward sampleFrames
+    let start      = 0;
 
     const cleanup = () => {
       _fpsRunning = false;
@@ -166,20 +167,35 @@ export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs 
 
       if (count >= sampleFrames) {
         const elapsed = now - start;
-        const avgFps = (count / elapsed) * 1000;
+        const avgFps  = (count / elapsed) * 1000;
 
         // Save a compact value for diagnostics (protected)
         safeSessionSet(SS_FPS_KEY, avgFps.toFixed(1));
 
         if (avgFps < fpsThreshold) {
           const current = getPerformanceTier();
-          let degraded = 'low';
+          let degraded  = 'low';
           if (current === 'high') degraded = 'mid';
           else if (current === 'mid') degraded = 'low';
 
           // Mettre à jour le cache et le sessionStorage (protégé)
           _cached = degraded;
           safeSessionSet(SS_KEY, degraded);
+
+          // Si le tier a été abaissé, afficher une notification persistante
+          // pour informer l'utilisateur qu'une version dégradée du site est
+          // activée afin d'améliorer la fluidité.
+          try {
+            if (degraded !== current && (degraded === 'mid' || degraded === 'low')) {
+              if (typeof window !== 'undefined' && typeof window.showToast === 'function') {
+                const msg = "Performance réduite : une version allégée du site a été activée en raison des capacités de votre appareil. Certaines animations et effets ont été réduits pour améliorer la fluidité.";
+                // duration = 0 -> persistent (user must dismiss)
+                window.showToast(msg, { type: 'warning', duration: 0 });
+              }
+            }
+          } catch (e) {
+            // ignore errors when showing toast
+          }
         }
 
         cleanup();
