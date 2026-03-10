@@ -32,6 +32,24 @@
 const SS_KEY = 'perf-tier-v2'; // v2 : supprime deviceMemory, invalide l'ancien cache
 const SS_FPS_KEY = 'perf-fps-v2';
 
+// Safe sessionStorage helpers — some environments (privacy extensions)
+// may throw on access to storage. We silently ignore failures.
+const safeSessionGet = (key) => {
+  try {
+    return sessionStorage.getItem(key);
+  } catch (e) {
+    return null;
+  }
+};
+
+const safeSessionSet = (key, value) => {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch (e) {
+    // ignore
+  }
+};
+
 /* ────────────────────────────────────────────
    Détection synchrone basée sur les hints hardware
    ──────────────────────────────────────────── */
@@ -72,6 +90,7 @@ const detectTierSync = () => {
    ──────────────────────────────────────────── */
 
 let _cached = null;
+let _fpsRunning = false;
 
 /**
  * Retourne le tier de performance courant (sync, pas de mesure).
@@ -83,15 +102,15 @@ let _cached = null;
 export const getPerformanceTier = () => {
   if (_cached) return _cached;
 
-  // Vérifier si déjà mesuré/abaissé dans cette session
-  const stored = sessionStorage.getItem(SS_KEY);
+  // Vérifier si déjà mesuré/abaissé dans cette session (protéger l'accès)
+  const stored = safeSessionGet(SS_KEY);
   if (stored === 'high' || stored === 'mid' || stored === 'low') {
     _cached = stored;
     return _cached;
   }
 
   _cached = detectTierSync();
-  sessionStorage.setItem(SS_KEY, _cached);
+  safeSessionSet(SS_KEY, _cached);
   return _cached;
 };
 
@@ -112,45 +131,79 @@ export const getPerformanceTier = () => {
  * @param {number}  [opts.fpsThreshold=35] — seuil en dessous duquel on abaisse
  * @param {number}  [opts.delayMs=2000]    — délai avant de commencer la mesure
  */
-export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs = 2000 } = {}) => {
-  // Ne mesurer qu'une fois par session
-  if (sessionStorage.getItem(SS_FPS_KEY)) return;
+export const startFpsMonitor = ({ sampleFrames = 90, fpsThreshold = 35, delayMs = 2000, warmupFrames = 10 } = {}) => {
+  // Ne mesurer qu'une fois par session (flag stocké) — accès protégé
+  if (safeSessionGet(SS_FPS_KEY)) return;
+  if (_fpsRunning) return;
 
-  const run = () => {
-    let count = 0;
+  const startRun = () => {
+    _fpsRunning = true;
+    let frameIndex = 0; // total frames seen (including warmup)
+    let count = 0; // frames counted toward sampleFrames
     let start = 0;
 
+    const cleanup = () => {
+      _fpsRunning = false;
+    };
+
     const tick = (now) => {
-      if (count === 0) {
-        start = now;
+      // If page hidden, abort sampling — we'll try again next session/visibility
+      if (document.hidden) {
+        cleanup();
+        return;
       }
+
+      frameIndex++;
+
+      // Warm-up frames — ignore first few frames to avoid measuring jitter
+      if (frameIndex <= warmupFrames) {
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      if (count === 0) start = now;
       count++;
+
       if (count >= sampleFrames) {
         const elapsed = now - start;
-        const avgFps = (sampleFrames / elapsed) * 1000;
-        sessionStorage.setItem(SS_FPS_KEY, avgFps.toFixed(1));
+        const avgFps = (count / elapsed) * 1000;
+
+        // Save a compact value for diagnostics (protected)
+        safeSessionSet(SS_FPS_KEY, avgFps.toFixed(1));
 
         if (avgFps < fpsThreshold) {
           const current = getPerformanceTier();
-          let degraded;
+          let degraded = 'low';
           if (current === 'high') degraded = 'mid';
           else if (current === 'mid') degraded = 'low';
-          else degraded = 'low';
 
-          // Mettre à jour le cache et le sessionStorage
+          // Mettre à jour le cache et le sessionStorage (protégé)
           _cached = degraded;
-          sessionStorage.setItem(SS_KEY, degraded);
+          safeSessionSet(SS_KEY, degraded);
         }
-        return; // Fin de la mesure
+
+        cleanup();
+        return;
       }
+
       requestAnimationFrame(tick);
     };
 
     requestAnimationFrame(tick);
   };
 
-  // Différer pour ne pas rivaliser avec l'hydratation initiale
-  setTimeout(run, delayMs);
+  // Si l'onglet est masqué maintenant, attendre qu'il soit visible
+  if (document.hidden) {
+    const onVis = () => {
+      if (!document.hidden) {
+        document.removeEventListener('visibilitychange', onVis);
+        setTimeout(startRun, delayMs);
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+  } else {
+    setTimeout(startRun, delayMs);
+  }
 };
 
 /* ────────────────────────────────────────────
