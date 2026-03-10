@@ -49,6 +49,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
   const velHistRef       = useRef([]);
   const smoothVelRef     = useRef({ x: 0, y: 0 });
   const rafRef           = useRef(null);
+  const prevTimeRef      = useRef(null);
 
   /* ── Bot-held phase ── */
   const botHoldCounterRef = useRef(0);
@@ -212,11 +213,17 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
 
   /* ══ Main physics RAF loop ══ */
   useEffect(() => {
-    const tick = () => {
+    const tick = (now) => {
+      // delta-time normalization: dt == 1.0 at 60 FPS
+      const dt = prevTimeRef.current === null
+        ? 1
+        : Math.min((now - prevTimeRef.current) / (1000 / 60), 3);
+      prevTimeRef.current = now;
+
       const vw = window.innerWidth, vh = window.innerHeight;
       const bp = ballPosRef.current, bv = ballVelRef.current;
       const holder = holderRef.current;
-      if (catchCooldownRef.current > 0) catchCooldownRef.current--;
+      if (catchCooldownRef.current > 0) catchCooldownRef.current = Math.max(0, catchCooldownRef.current - dt);
 
       // ── Expose ball state to WanderingPet for seek steering ──
       if (ballInfoRef) {
@@ -230,8 +237,10 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
 
         const t = targetVel();
         const sv = smoothVelRef.current;
-        sv.x += (t.vx - sv.x) * VEL_SMOOTH;
-        sv.y += (t.vy - sv.y) * VEL_SMOOTH;
+        // dt-correct exponential moving average
+        const emaFactor = 1 - (1 - VEL_SMOOTH) ** dt;
+        sv.x += (t.vx - sv.x) * emaFactor;
+        sv.y += (t.vy - sv.y) * emaFactor;
         // Only rebuild aim path when smoothed velocity changed meaningfully
         const pav = prevAimVelRef.current;
         const dvx = sv.x - pav.x, dvy = sv.y - pav.y;
@@ -251,9 +260,9 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
         const bot = botPosRef.current;
         bp.x = bot.x;
         bp.y = bot.y;
-        botHoldCounterRef.current--;
+        botHoldCounterRef.current -= dt;
 
-        if (botHoldCounterRef.current <= 0) {
+          if (botHoldCounterRef.current <= 0) {
           // ── Weighted random throw style ──────────────────────────────
           //   50% direct  — straight line, fixed speed
           //   30% arc     — medium ballistic parabola
@@ -324,9 +333,10 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
       /* ── Ball in flight / returning ── */
       const prevX = bp.x;
       const prevY = bp.y;
-      bv.y += CATCH_BALL_GRAVITY;
-      bv.x *= AIR_FRICTION; bv.y *= AIR_FRICTION;
-      bp.x += bv.x;  bp.y += bv.y;
+      // Integrate forces using dt so physics are wall-clock consistent
+      bv.y += CATCH_BALL_GRAVITY * dt;
+      bv.x *= AIR_FRICTION ** dt; bv.y *= AIR_FRICTION ** dt;
+      bp.x += bv.x * dt;  bp.y += bv.y * dt;
 
       // Wall bounces
       if (bp.x < BALL_R)               { bp.x = BALL_R;            bv.x =  Math.abs(bv.x) * BOUNCE_RESTITUTION; }
@@ -379,7 +389,10 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
     };
 
     rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      prevTimeRef.current = null;
+    };
   }, [botPosRef, onBotCatch, startHoldTimer, ballInfoRef]);
 
   return createPortal(
