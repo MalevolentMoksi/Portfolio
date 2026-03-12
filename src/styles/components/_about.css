@@ -1,0 +1,322 @@
+/* ============================================
+   Page About — Stack technique & Architecture
+   ============================================ */
+
+.about-intro {
+  color: var(--color-text);
+  opacity: 0.8;
+  margin-bottom: var(--space-lg);
+  max-width: 680px;
+}
+
+/* ─── Stack technique ─────────────────────── */
+.about-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.about-tech-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  background: rgba(var(--color-secondary-rgb), 0.55);
+  border: 1px solid rgba(var(--tech-accent, var(--color-primary)), 0.22);
+  border-top: 2px solid var(--tech-accent, var(--color-primary));
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition:
+    border-color var(--transition-base),
+    transform var(--transition-fast);
+}
+
+.about-tech-card:hover {
+  border-color: rgba(var(--tech-accent, var(--color-primary)), 0.55);
+  transform: translateY(-2px);
+}
+
+.about-tech-icon {
+  display: flex;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--tech-accent, var(--color-primary));
+  margin-bottom: 2px;
+}
+
+.about-tech-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.about-tech-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.about-tech-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.about-tech-role {
+  font-size: 0.78rem;
+  color: var(--tech-accent, var(--color-primary));
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.about-tech-desc {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  opacity: 0.7;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+/* ─── Architecture ────────────────────────── */
+.about-arch-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+}
+
+.about-arch-entry {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.1);
+}
+
+.about-arch-entry:last-child {
+  border-bottom: none;
+}
+
+.about-arch-term {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding-top: 2px;
+}
+
+.about-arch-detail ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.about-arch-detail li {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  opacity: 0.8;
+  padding-left: var(--space-sm);
+  position: relative;
+  line-height: 1.5;
+}
+
+.about-arch-detail li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  opacity: 0.55;
+}
+
+/* ─── Système de thèmes ───────────────────── */
+.about-mood-palette {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.about-mood-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.about-mood-circle {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--mood-color);
+  box-shadow:
+    0 0 0 3px rgba(var(--mood-rgb), 0.15),
+    0 0 18px rgba(var(--mood-rgb), 0.3);
+}
+
+.about-mood-name {
+  font-size: 0.78rem;
+  color: var(--color-text);
+  opacity: 0.7;
+  letter-spacing: 0.04em;
+}
+
+.about-theme-note {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  opacity: 0.6;
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-xl);
+  max-width: 620px;
+  line-height: 1.6;
+}
+
+.about-theme-note code {
+  font-family: monospace;
+  font-size: 0.82em;
+  color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.1);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ─── Effets & ambiance ───────────────────── */
+.about-ambient-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.about-ambient-card {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  background: rgba(var(--color-secondary-rgb), 0.45);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.12);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  transition: border-color var(--transition-base);
+}
+
+.about-ambient-card:hover {
+  border-color: rgba(var(--color-primary-rgb), 0.3);
+}
+
+.about-ambient-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  color: var(--color-primary);
+  margin-top: 2px;
+}
+
+.about-ambient-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.about-ambient-name {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.about-ambient-desc {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  opacity: 0.65;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ─── Statistiques ────────────────────────── */
+.about-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.about-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-md) var(--space-sm);
+  background: rgba(var(--color-secondary-rgb), 0.45);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.12);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.about-stat-value {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--color-primary);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.about-stat-label {
+  font-size: 0.78rem;
+  color: var(--color-text);
+  opacity: 0.6;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ─── Responsive ──────────────────────────── */
+@media (max-width: 768px) {
+  .about-stack-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-arch-entry {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+  }
+
+  .about-arch-term {
+    padding-top: 0;
+  }
+
+  .about-ambient-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+  }
+
+  .about-mood-palette {
+    gap: var(--space-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .about-stack-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-stat-value {
+    font-size: 1.8rem;
+  }
+}

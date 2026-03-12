@@ -7,7 +7,7 @@
   z-index: var(--z-base);
   background: rgba(26, 26, 26, 0.7);
   border-top: 2px solid var(--primary-color);
-  padding: 32px;
+  padding: 20px 32px;
   margin-top: var(--space-xl);
   color: var(--text-color);
   font-size: 1rem;
@@ -84,6 +84,237 @@
   font-family: monospace;
   font-size: 1.2rem;
   color: var(--color-primary);
+}
+
+/* ─── Footer top — micro-navigation + MoodEchoDot ─── */
+.footer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  max-width: 900px;
+  margin: 0 auto var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.16);
+}
+
+.footer-top-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.footer-top-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-text);
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1.5px solid;
+  border-color: rgba(var(--color-primary-rgb), 0.35);
+  border-radius: 20px;
+  background: rgba(var(--color-primary-rgb), 0.06);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition:
+    all var(--transition-base),
+    text-shadow var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.footer-top-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-primary-rgb), 0.08),
+    rgba(var(--color-primary-rgb), 0.02)
+  );
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.footer-top-link:hover,
+.footer-top-link:focus-visible {
+  color: var(--color-primary);
+  border-color: rgba(var(--color-primary-rgb), 0.8);
+  background: rgba(var(--color-primary-rgb), 0.12);
+  box-shadow:
+    0 4px 16px rgba(var(--color-primary-rgb), 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  text-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.4);
+}
+
+.footer-top-link:hover::before,
+.footer-top-link:focus-visible::before {
+  opacity: 1;
+}
+
+.footer-top-link.active {
+  color: var(--color-primary);
+  border-color: rgba(var(--color-primary-rgb), 0.9);
+  background: rgba(var(--color-primary-rgb), 0.14);
+  box-shadow:
+    0 6px 20px rgba(var(--color-primary-rgb), 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  text-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.45);
+}
+
+.footer-top-link.active::before {
+  opacity: 1;
+}
+
+/* Disabled / current page state: non-interactive */
+.footer-top-link[aria-disabled='true'] {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.95;
+  box-shadow: none;
+}
+
+.footer-top-link[aria-disabled='true']::before {
+  opacity: 1;
+}
+
+/* ─── FooterWidget — Cycling widget (timer / badge / orbit) ─── */
+.footer-widget {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  min-width: 60px;
+  color: var(--color-text);
+}
+
+.footer-widget-state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: footer-widget-fade-in 0.7s cubic-bezier(0.32, 0, 0.67, 0);
+}
+
+@keyframes footer-widget-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Timer state */
+.footer-widget-timer {
+  font-family: monospace;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.footer-widget-timer .footer-widget-icon {
+  font-size: 1.1em;
+}
+
+/* Badge state */
+.footer-widget-badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.footer-widget-badge .footer-widget-icon {
+  color: var(--color-primary);
+  font-size: 0.9em;
+}
+
+/* Orbit state */
+.footer-widget-orbit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  width: 56px;
+  color: var(--color-primary);
+}
+
+.footer-widget-orbit-svg {
+  color: var(--color-primary);
+  opacity: 0.7;
+}
+
+.footer-widget-orbit-dot {
+  transform-origin: 20px 20px;
+  animation: footer-widget-orbit-spin 8s linear infinite;
+}
+
+@keyframes footer-widget-orbit-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Multi-orbit animations for Cosmic Satellite */
+.footer-widget-orbit-1 {
+  transform-origin: 20px 20px;
+  animation: footer-widget-orbit-fast 8s linear infinite;
+}
+
+@keyframes footer-widget-orbit-fast {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.footer-widget-orbit-2 {
+  transform-origin: 20px 20px;
+  animation: footer-widget-orbit-medium 12s linear infinite reverse;
+}
+
+@keyframes footer-widget-orbit-medium {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.footer-widget-orbit-3 {
+  transform-origin: 20px 20px;
+  animation: footer-widget-orbit-slow 16s linear infinite;
+}
+
+@keyframes footer-widget-orbit-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Text styling */
+.footer-widget-text {
+  opacity: 0.8;
 }
 
 /* Responsive Footer */

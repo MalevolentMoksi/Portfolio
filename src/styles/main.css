@@ -32,6 +32,9 @@
 @import './components/_tooltip.css';
 @import './components/_not-found.css';
 @import './components/_toast.css';
+@import './components/_mood-echo.css';
+@import './components/_about.css';
+@import './components/_credits.css';
 
 /* Ambient decorative layers */
 @import './components/_ambient.css';

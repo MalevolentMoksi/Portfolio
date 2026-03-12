@@ -2,11 +2,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
+const buildDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+
 export default defineConfig({
   plugins: [react()],
   root: 'src',
   base: '/',
   publicDir: '../public',
+  define: {
+    __BUILD_DATE__: JSON.stringify(buildDate),
+  },
   
   build: {
     outDir: '../dist',

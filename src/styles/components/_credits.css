@@ -1,0 +1,177 @@
+/* ============================================
+   Page Crédits — Musique, Visuels, Formation
+   ============================================ */
+
+.credits-intro {
+  color: var(--color-text);
+  opacity: 0.75;
+  margin-bottom: var(--space-lg);
+  max-width: 640px;
+  line-height: 1.65;
+}
+
+/* ─── Titres de section avec icône ───────────── */
+.credits-section-icon {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: 0.45em;
+  color: var(--color-primary);
+  position: relative;
+  top: -0.05em;
+}
+
+.credits-section-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ─── Section Musique ────────────────────────── */
+.credits-music-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.credits-music-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-sm) 0 var(--space-sm) var(--space-md);
+  border-left: 2px solid rgba(var(--color-primary-rgb), 0.2);
+  transition: border-color var(--transition-fast);
+  counter-increment: music-counter;
+}
+
+.credits-music-entry + .credits-music-entry {
+  margin-top: 2px;
+}
+
+.credits-music-entry:hover {
+  border-left-color: var(--color-primary);
+}
+
+.credits-artist-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: 0.01em;
+}
+
+.credits-artist-note {
+  font-size: 0.86rem;
+  color: var(--color-text);
+  opacity: 0.6;
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* ─── Section Visuels ────────────────────────── */
+.credits-visuals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.credits-visual-card {
+  padding: var(--space-md);
+  background: rgba(var(--color-secondary-rgb), 0.5);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.14);
+  border-top: 2px solid rgba(var(--color-primary-rgb), 0.45);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color var(--transition-base);
+}
+
+.credits-visual-card:hover {
+  border-top-color: var(--color-primary);
+}
+
+.credits-visual-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.credits-game-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.credits-game-year {
+  font-size: 0.78rem;
+  font-family: monospace;
+  color: var(--color-primary);
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.credits-game-studio {
+  font-size: 0.84rem;
+  color: var(--color-primary);
+  opacity: 0.85;
+  margin: 0;
+  font-weight: 500;
+}
+
+.credits-visual-note {
+  font-size: 0.82rem;
+  color: var(--color-text);
+  opacity: 0.55;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ─── Section Formation ──────────────────────── */
+.credits-education-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(var(--color-secondary-rgb), 0.45);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.14);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xl);
+}
+
+.credits-edu-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  display: block;
+}
+
+.credits-edu-note {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  opacity: 0.75;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ─── Responsive ─────────────────────────────── */
+@media (max-width: 600px) {
+  .credits-visuals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .credits-visual-header {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .credits-education-card {
+    padding: var(--space-md);
+  }
+}

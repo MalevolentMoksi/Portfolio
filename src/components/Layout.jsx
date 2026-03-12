@@ -74,11 +74,28 @@ const pageConfig = {
     metaDescription: "Portfolio d'Enzo Morello - Projet SAE56",
   },
   '/projet-SAE3.01': {
-    heading: "Aidémé – Application Web de coordination pour les aidants",
+    heading: 'Aidémé – Application Web de coordination pour les aidants',
     subheading: 'Une plateforme collaborative pour gérer le suivi des personnes dépendantes',
     backgroundSrc: getAssetPath('assets/images/backgrounds/pyramids2.webp'),
     metaTitle: 'Aidémé – Application Web pour les aidants',
-    metaDescription: "Portfolio d'Enzo Morello - Projet SAE 3.01 : application full-stack React + PHP",
+    metaDescription:
+      "Portfolio d'Enzo Morello - Projet SAE 3.01 : application full-stack React + PHP",
+  },
+  '/about': {
+    heading: 'À propos du portfolio',
+    subheading: 'Stack technique, architecture et choix de conception',
+    backgroundSrc: getAssetPath('assets/images/backgrounds/risk-of-rain-2-launch-update.jpg'),
+    metaTitle: 'À propos | Portfolio - Enzo Morello',
+    metaDescription:
+      "Architecture et stack technique du portfolio d'Enzo Morello — React, Vite, Framer Motion, CSS sur mesure.",
+  },
+  '/credits': {
+    heading: 'Crédits',
+    subheading: 'Musique, visuels et remerciements',
+    backgroundSrc: getAssetPath('assets/images/backgrounds/risk-of-rain-2-launch-update.jpg'),
+    metaTitle: 'Crédits | Portfolio - Enzo Morello',
+    metaDescription:
+      "Remerciements et crédits du portfolio d'Enzo Morello — artistes, studios et équipe pédagogique.",
   },
 };
 
@@ -128,11 +145,11 @@ const Layout = () => {
     }
   }, [mood]);
 
-
-
   return (
     <>
-      <a href="#main" className="skip-to-content">Aller au contenu principal</a>
+      <a href="#main" className="skip-to-content">
+        Aller au contenu principal
+      </a>
       <div id="particles-js" aria-hidden="true"></div>
       <img
         src={config.backgroundSrc}
@@ -145,9 +162,7 @@ const Layout = () => {
         fetchpriority="high"
       />
 
-      <header
-        className="header--main"
-      >
+      <header className="header--main">
         {/* Branding Section */}
         <div className="header--branding">
           <NavLink to="/" className="brand-logo" aria-label="Accueil - Enzo MORELLO">
@@ -189,7 +204,9 @@ const Layout = () => {
         <div className="header--hero">
           <h1 id="main-title">{config.heading}</h1>
           {config.subheading ? <h3 className="header-subheading">{config.subheading}</h3> : null}
-          {config.subheadingAlt ? <h4 className="header-subheading-alt">{config.subheadingAlt}</h4> : null}
+          {config.subheadingAlt ? (
+            <h4 className="header-subheading-alt">{config.subheadingAlt}</h4>
+          ) : null}
         </div>
       </section>
 

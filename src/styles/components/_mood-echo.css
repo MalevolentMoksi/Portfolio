@@ -1,0 +1,172 @@
+/* ============================================
+   MoodEchoDot — Indicateur de thème interactif
+   ============================================ */
+
+.mood-echo {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* ─── Pastille principale ─────────────────── */
+.mood-echo__dot {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: var(--echo-color, var(--color-primary));
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 8px rgba(var(--echo-rgb, var(--color-primary-rgb)), 0.5);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.mood-echo__dot:hover,
+.mood-echo__dot--open {
+  transform: scale(1.18);
+  box-shadow: 0 0 16px rgba(var(--echo-rgb, var(--color-primary-rgb)), 0.75);
+}
+
+/* Anneau de pulse */
+.mood-echo__glow {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--echo-color, var(--color-primary));
+  opacity: 0.45;
+  animation: echo-pulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes echo-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+.mood-echo__dot--open .mood-echo__glow {
+  animation: none;
+  opacity: 0;
+}
+
+/* ─── Panel de sélection (s'ouvre vers le haut) ─── */
+.mood-echo__panel {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  background: rgba(8, 8, 8, 0.94);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.22);
+  border-radius: var(--radius-md);
+  padding: 8px 8px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.6);
+  animation: echo-panel-in 0.16s ease;
+  z-index: var(--z-header);
+}
+
+/* Petite flèche pointant vers la pastille */
+.mood-echo__panel::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: rgba(8, 8, 8, 0.94);
+  border-right: 1px solid rgba(var(--color-primary-rgb), 0.22);
+  border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.22);
+  transform: rotate(45deg);
+}
+
+@keyframes echo-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ─── Swatches individuels ─────────────────── */
+.mood-echo__swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  min-width: 46px;
+}
+
+.mood-echo__swatch:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mood-echo__swatch-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--swatch-color);
+  box-shadow: 0 0 5px rgba(var(--swatch-rgb), 0.4);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.mood-echo__swatch--active .mood-echo__swatch-dot {
+  box-shadow: 0 0 10px rgba(var(--swatch-rgb), 0.8);
+  outline: 2px solid var(--swatch-color);
+  outline-offset: 2px;
+}
+
+.mood-echo__swatch:hover .mood-echo__swatch-dot {
+  transform: scale(1.25);
+}
+
+.mood-echo__swatch-name {
+  font-size: 0.64rem;
+  color: var(--color-text);
+  opacity: 0.55;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  transition:
+    opacity var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.mood-echo__swatch--active .mood-echo__swatch-name {
+  opacity: 1;
+  color: var(--swatch-color);
+}
+
+.mood-echo__swatch:hover .mood-echo__swatch-name {
+  opacity: 0.85;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .mood-echo__panel {
+    right: -8px;
+  }
+}

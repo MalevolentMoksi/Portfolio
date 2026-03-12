@@ -1,6 +1,44 @@
-const Footer = ({ diorama }) => (
-  <footer className="site-footer">
-    {diorama}
+import { NavLink, useLocation } from 'react-router-dom';
+import FooterWidget from './FooterWidget.jsx';
+
+const Footer = ({ diorama }) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const FooterLink = ({ to, children }) => {
+    const isActive = currentPath === to;
+    if (isActive) {
+      return (
+        <span className="footer-top-link active" aria-current="page" aria-disabled="true">
+          {children}
+        </span>
+      );
+    }
+
+    return (
+      <NavLink
+        to={to}
+        className={({ isActive }) => (isActive ? 'footer-top-link active' : 'footer-top-link')}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        {children}
+      </NavLink>
+    );
+  };
+
+  return (
+    <footer className="site-footer">
+      {diorama}
+
+      {/* ─── Bande supérieure : micro-navigation + indicateur de thème ─── */}
+      <div className="footer-top">
+        <nav className="footer-top-nav" aria-label="Navigation secondaire">
+          <FooterLink to="/about">À propos du portfolio</FooterLink>
+          <FooterLink to="/credits">Crédits</FooterLink>
+        </nav>
+        <FooterWidget />
+      </div>
+
     <div className="footer-inner">
       <div className="footer-left">Enzo Morello &copy; 2026</div>
       <div className="footer-center footer-bubbles">
@@ -56,6 +94,7 @@ const Footer = ({ diorama }) => (
       </div>
     </div>
   </footer>
-);
+  );
+};
 
 export default Footer;

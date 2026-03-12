@@ -49,6 +49,16 @@ const Breadcrumbs = () => {
     else if (firstSegment === 'projets-personnels') {
       trail.push({ label: 'Projets personnels', path: '/projets-personnels', isCurrent: true });
     }
+    // Si c'est la page À propos
+    // → Accueil › À propos
+    else if (firstSegment === 'about') {
+      trail.push({ label: 'À propos', path: '/about', isCurrent: true });
+    }
+    // Si c'est la page Crédits
+    // → Accueil › Crédits
+    else if (firstSegment === 'credits') {
+      trail.push({ label: 'Crédits', path: '/credits', isCurrent: true });
+    }
 
     return trail;
   };
