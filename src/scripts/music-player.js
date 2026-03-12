@@ -59,6 +59,7 @@ class MusicPlayer {
     this.render();
     this.setupVisualizer();
     this.attachEventListeners();
+    this.setupMoodListener();
   }
 
   loadState() {
@@ -497,6 +498,26 @@ class MusicPlayer {
     this.elements.peekBtn.addEventListener('click', () => this.unretract());
   }
 
+  setupMoodListener() {
+    // Watch for mood changes on body element and update visualizer in real-time
+    const observer = new MutationObserver(() => {
+      this.onMoodChange();
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-mood'],
+    });
+  }
+
+  onMoodChange() {
+    // If music is playing, the next frame will pick up the new color
+    // If music is stopped, redraw the idle wave with the new color
+    if (this.audio.paused || this.isPaused) {
+      this.renderIdleWave();
+    }
+  }
+
   updateLoadingState() {
     if (!this.elements.loadingIndicator) return;
     this.elements.loadingIndicator.style.display = this.isLoading ? 'flex' : 'none';
@@ -862,6 +883,7 @@ class MusicPlayer {
         const meta = this.trackMeta[index];
         const isCurrentTrack = index === this.currentTrackIndex;
         const liClass = isCurrentTrack ? 'queue-item current' : 'queue-item';
+          const artistColor = 'rgba(var(--color-primary-rgb), 0.7)';
 
         // Build aria-label from current metadata
         const ariaLabel = isCurrentTrack
@@ -880,7 +902,7 @@ class MusicPlayer {
               <span style="color: var(--color-primary); font-weight: 600; font-size: 0.8rem; flex-shrink: 0;">${index === this.currentTrackIndex ? '▶' : ''}</span>
               <div style="min-width: 0; flex: 1;">
                 <div style="font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.title}</div>
-                <div style="font-size: 0.8rem; color: rgba(212, 175, 55, 0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.artist}</div>
+                <div style="font-size: 0.8rem; color: ${artistColor}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.artist}</div>
               </div>
             </div>
           </div>
@@ -932,7 +954,7 @@ class MusicPlayer {
       if (index === this.currentTrackIndex) {
         item.classList.add('current');
         item.style.borderLeftColor = 'var(--color-primary)';
-        item.style.backgroundColor = 'rgba(212, 175, 55, 0.1)';
+        item.style.backgroundColor = 'rgba(var(--color-primary-rgb), 0.1)';
       } else {
         item.classList.remove('current');
         item.style.borderLeftColor = 'transparent';
