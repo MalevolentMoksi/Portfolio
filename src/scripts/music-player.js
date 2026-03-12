@@ -883,7 +883,7 @@ class MusicPlayer {
         const meta = this.trackMeta[index];
         const isCurrentTrack = index === this.currentTrackIndex;
         const liClass = isCurrentTrack ? 'queue-item current' : 'queue-item';
-          const artistColor = 'rgba(var(--color-primary-rgb), 0.7)';
+        const artistColor = 'rgba(var(--color-primary-rgb), 0.7)';
 
         // Build aria-label from current metadata
         const ariaLabel = isCurrentTrack
