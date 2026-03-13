@@ -10,6 +10,9 @@
  *  7. IndustrialNeons    — enseignes néon SVG (industrial)
  *  8. IndustrialSteam    — jets de vapeur (industrial)
  *  9. PowerSurge         — surtension périodique (industrial)
+ * 10. ElectricalGrid     — grille électrique perspective (industrial)
+ * 11. FloatingGeometry   — géométrie dorée flottante (default)
+ * 12. DigitalRain        — pluie de glyphes (hacker)
  *
  * Rendu une seule fois dans Layout.jsx.
  *
@@ -37,6 +40,11 @@ const RisingEmbers    = lazy(() => import('./RisingEmbers.jsx'));
 const IndustrialNeons = lazy(() => import('./IndustrialNeons.jsx'));
 const IndustrialSteam = lazy(() => import('./IndustrialSteam.jsx'));
 const PowerSurge      = lazy(() => import('./PowerSurge.jsx'));
+const ElectricalGrid  = lazy(() => import('./ElectricalGrid.jsx'));
+
+// Groupe signatures default/hacker
+// const FloatingGeometry = lazy(() => import('./FloatingGeometry.jsx')); // désactivé
+const DigitalRain      = lazy(() => import('./DigitalRain.jsx'));
 
 const AmbientEffects = () => (
   <>
@@ -53,6 +61,9 @@ const AmbientEffects = () => (
       <IndustrialNeons />
       <IndustrialSteam />
       <PowerSurge />
+      <ElectricalGrid />
+     {/*   <FloatingGeometry /> */}
+      <DigitalRain />
     </Suspense>
   </>
 );

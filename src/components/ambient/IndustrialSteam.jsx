@@ -5,7 +5,7 @@
  * Positions aléatoires dans la zone centrale [24 %, 76 %] pour éviter
  * les silhouettes-dioramas placées dans les flancs [0–22 %] et [78–100 %].
  *
- * Performance-gated : high → 4 tuyaux, mid → 2, low → 0
+ * Performance-gated : high → 6 tuyaux, mid → 3, low → 0
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
@@ -13,14 +13,14 @@ import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext.jsx';
 import { getPerformanceTier } from '@/utils/performanceTier.js';
 
-const VENT_COUNTS = { high: 4, mid: 2, low: 0 };
-const PUFF_INTERVAL_MIN = 4000;  // 4 s
-const PUFF_INTERVAL_MAX = 10000; // 10 s
+const VENT_COUNTS = { high: 6, mid: 3, low: 0 };
+const PUFF_INTERVAL_MIN = 2600;  // 2.6 s
+const PUFF_INTERVAL_MAX = 7000; // 7 s
 
 /* Zone centrale du footer (%) — évite les flancs des dioramas [1–22] et [78–99] */
 const PIPE_ZONE_MIN = 24;
 const PIPE_ZONE_MAX = 76;
-const MIN_PIPE_GAP = 10; // % de la largeur du footer
+const MIN_PIPE_GAP = 7; // % de la largeur du footer
 
 function pickPipePositions(count) {
   if (count === 0) return [];
@@ -85,8 +85,8 @@ const IndustrialSteam = () => {
 
   const spawnPuff = useCallback((ventX) => {
     const id = ++_puffId;
-    const size = 14 + Math.random() * 16;       // 14–30 px
-    const duration = 5 + Math.random() * 3;      // 5–8 s
+    const size = 20 + Math.random() * 22;       // 20–42 px
+    const duration = 4.2 + Math.random() * 2.6; // 4.2–6.8 s
     const xJitter = (Math.random() - 0.5) * 2;   // ±1 % de décalage
 
     const puff = { id, x: ventX + xJitter, size, duration };

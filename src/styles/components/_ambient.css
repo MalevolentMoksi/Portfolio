@@ -893,6 +893,7 @@
   z-index: var(--z-ambient, 0);
   will-change: transform, opacity;
   animation: ember-rise linear forwards;
+  opacity: 0.95;
 }
 
 @keyframes ember-rise {
@@ -904,12 +905,12 @@
     opacity: 1;
   }
   60% {
-    opacity: 0.6;
-    transform: translateY(-50vh) scale(0.8);
+    opacity: 0.72;
+    transform: translateY(-54vh) scale(0.95);
   }
   100% {
     opacity: 0;
-    transform: translateY(-85vh) scale(0.3);
+    transform: translateY(-92vh) scale(0.45);
   }
 }
 
@@ -924,6 +925,7 @@
   z-index: var(--z-ambient, 0);
   will-change: transform, opacity;
   animation: spark-burst linear forwards;
+  opacity: 0.95;
 }
 
 @keyframes spark-burst {
@@ -932,12 +934,99 @@
     opacity: 1;
   }
   30% {
-    opacity: 0.9;
-    transform: translateX(calc(var(--spark-dir, 1) * 30px)) scaleX(0.7);
+    opacity: 0.95;
+    transform: translateX(calc(var(--spark-dir, 1) * 36px)) scaleX(0.8);
   }
   100% {
     opacity: 0;
-    transform: translateX(calc(var(--spark-dir, 1) * 80px)) scaleX(0.2);
+    transform: translateX(calc(var(--spark-dir, 1) * 110px)) scaleX(0.25);
+  }
+}
+
+/* ────────────────────────────────────────────
+   Industrial Electrical Grid — signature 3D layer
+   ──────────────────────────────────────────── */
+
+.industrial-electrical-grid {
+  position: fixed;
+  bottom: -8px;
+  left: -12%;
+  width: 124%;
+  height: 42vh;
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+  transform-origin: center bottom;
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, transparent 100%);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, transparent 100%);
+}
+
+.industrial-electrical-grid--high {
+  transform: perspective(360px) rotateX(47deg);
+}
+
+.industrial-electrical-grid--mid {
+  transform: perspective(310px) rotateX(44deg);
+  opacity: 0.85;
+}
+
+.industrial-electrical-grid--low {
+  transform: none;
+  height: 20vh;
+  opacity: 0.58;
+}
+
+.industrial-grid-svg,
+.industrial-grid-arcs {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.industrial-grid-line {
+  stroke: rgba(255, 87, 34, 0.32);
+  stroke-width: 0.7;
+}
+
+.industrial-grid-line--v {
+  stroke: rgba(255, 214, 0, 0.18);
+}
+
+.industrial-grid-arc {
+  fill: none;
+  stroke: #ffd600;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-dasharray: 7 14;
+  filter: drop-shadow(0 0 6px rgba(255, 214, 0, 0.85)) drop-shadow(0 0 11px rgba(255, 87, 34, 0.65));
+  opacity: 0;
+  animation: industrial-arc-zap 2.4s steps(4) infinite;
+}
+
+@keyframes industrial-arc-zap {
+  /* Long dormant period — arc stays invisible most of the time */
+  0%,
+  87%,
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+  /* Brief visible zap in the last ~10% of the cycle */
+  89% {
+    opacity: 0.95;
+    stroke-dashoffset: -8;
+  }
+  92% {
+    opacity: 0.5;
+    stroke-dashoffset: -18;
+  }
+  94% {
+    opacity: 0.82;
+    stroke-dashoffset: -26;
+  }
+  97% {
+    opacity: 0;
+    stroke-dashoffset: -34;
   }
 }
 
@@ -1112,17 +1201,17 @@ body[data-mood='europa'] footer::before {
 
 /* Lueur néon sur les traits SVG */
 .neon-stroke {
-  filter: drop-shadow(0 0 4px #ff5722) drop-shadow(0 0 8px rgba(255, 87, 34, 0.4));
-  animation: neon-flicker 4s steps(1) infinite;
+  filter: drop-shadow(0 0 5px #ff5722) drop-shadow(0 0 12px rgba(255, 87, 34, 0.55));
+  animation: neon-flicker 3.3s steps(1) infinite;
 }
 
 .neon-stroke--accent {
-  filter: drop-shadow(0 0 4px #ffd600) drop-shadow(0 0 8px rgba(255, 214, 0, 0.4));
+  filter: drop-shadow(0 0 6px #ffd600) drop-shadow(0 0 12px rgba(255, 214, 0, 0.55));
 }
 
 .neon-text {
-  filter: drop-shadow(0 0 4px #ff5722) drop-shadow(0 0 10px rgba(255, 87, 34, 0.5));
-  animation: neon-flicker 4s steps(1) infinite;
+  filter: drop-shadow(0 0 5px #ff5722) drop-shadow(0 0 12px rgba(255, 87, 34, 0.62));
+  animation: neon-flicker 3.3s steps(1) infinite;
   animation-delay: -1.5s;
 }
 
@@ -1204,7 +1293,7 @@ body[data-mood='europa'] footer::before {
   transform: translateX(-50%);
   pointer-events: none;
   z-index: calc(var(--z-ambient, 0) + 1);
-  opacity: 0.55;
+  opacity: 0.68;
 }
 
 .industrial-steam-puff {
@@ -1212,7 +1301,12 @@ body[data-mood='europa'] footer::before {
   top: -65px; /* légèrement au-dessus de l'embout du tuyau */
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(158, 158, 158, 0.25) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(205, 205, 205, 0.42) 0%,
+    rgba(160, 160, 160, 0.2) 38%,
+    transparent 74%
+  );
   pointer-events: none;
   z-index: var(--z-ambient, 0);
   will-change: transform, opacity;
@@ -1225,14 +1319,148 @@ body[data-mood='europa'] footer::before {
     opacity: 0;
   }
   10% {
-    opacity: 0.3;
+    opacity: 0.5;
   }
   50% {
-    opacity: 0.18;
+    opacity: 0.3;
   }
   100% {
-    transform: scale(4) translateY(-80px);
+    transform: scale(4.8) translateY(-92px);
     opacity: 0;
+  }
+}
+
+/* ────────────────────────────────────────────
+   Default Floating Geometry — signature layer
+   ──────────────────────────────────────────── */
+
+.default-floating-geometry {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+}
+
+.default-floating-shape {
+  position: absolute;
+  color: rgba(212, 175, 55, 0.8);
+  background: radial-gradient(
+    circle,
+    rgba(255, 225, 126, 0.22) 0%,
+    rgba(212, 175, 55, 0.08) 56%,
+    transparent 100%
+  );
+  border: 1px solid rgba(255, 225, 126, 0.2);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.18);
+  animation:
+    default-shape-float var(--float-drift, 22s) ease-in-out infinite,
+    default-shape-rotate var(--float-rotate, 18s) linear infinite;
+  animation-delay: var(--float-delay, 0s), var(--float-delay, 0s);
+}
+
+.default-floating-shape--orb {
+  border-radius: 50%;
+}
+
+.default-floating-shape--diamond {
+  border-radius: 8px;
+  rotate: 45deg;
+}
+
+.default-floating-shape--triangle {
+  width: 0 !important;
+  height: 0 !important;
+  border-left: 22px solid transparent;
+  border-right: 22px solid transparent;
+  border-bottom: 40px solid rgba(255, 225, 126, 0.2);
+  background: none;
+  box-shadow: none;
+}
+
+.default-floating-shape--ring {
+  border-radius: 50%;
+  background: transparent;
+  border-width: 2px;
+}
+
+.default-floating-shape--bar {
+  border-radius: 999px;
+  height: 20px !important;
+}
+
+@keyframes default-shape-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-22px);
+  }
+}
+
+@keyframes default-shape-rotate {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* ────────────────────────────────────────────
+   Hacker Digital Rain — signature layer
+   ──────────────────────────────────────────── */
+
+.hacker-digital-rain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-ambient, 0);
+  overflow: hidden;
+}
+
+.hacker-rain-column {
+  position: fixed;
+  top: 0;
+  white-space: pre;
+  line-height: 1.05;
+  color: rgba(0, 255, 65, 0.5);
+  text-shadow:
+    0 0 4px rgba(0, 255, 65, 0.35),
+    0 0 8px rgba(0, 255, 65, 0.1);
+  animation: hacker-rain-fall linear infinite;
+  opacity: 0.3;
+}
+
+.hacker-digital-rain--mid .hacker-rain-column {
+  opacity: 0.22;
+  color: rgba(0, 255, 65, 0.38);
+  text-shadow:
+    0 0 3px rgba(0, 255, 65, 0.25),
+    0 0 6px rgba(0, 255, 65, 0.08);
+}
+
+@keyframes hacker-rain-fall {
+  /* Falls into view — visible for ~38% of the cycle */
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  4% {
+    opacity: 0.28;
+  }
+  34% {
+    opacity: 0.24;
+  }
+  40% {
+    opacity: 0;
+    transform: translateY(108vh);
+  }
+  /* Snap back invisibly and stay dormant for the rest of the cycle */
+  41% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100%);
   }
 }
 
@@ -1746,6 +1974,9 @@ body[data-mood='europa'] .footer-horizon {
   .industrial-neon-sign,
   .industrial-steam-puff,
   .industrial-pipe-fixture,
+  .industrial-electrical-grid,
+  .default-floating-geometry,
+  .hacker-digital-rain,
   .footer-walkers-stage,
   .obs-drone,
   .ambient-boids-canvas {

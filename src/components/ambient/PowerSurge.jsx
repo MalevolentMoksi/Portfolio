@@ -1,7 +1,7 @@
 /**
  * PowerSurge — Effet de surtension pour le mood Industrial.
  *
- * Toutes les 30–45 secondes, ajoute brièvement la classe `.power-surge-active`
+ * Toutes les 22–34 secondes, ajoute brièvement la classe `.power-surge-active`
  * sur document.body. Le CSS correspondant (_mood-switcher.css) fait baisser
  * la luminosité de main/header puis la ramène d'un coup — simulant une
  * alimentation instable typique d'un complexe industriel.
@@ -12,9 +12,9 @@
 import { useEffect, useRef } from 'react';
 import { useMood } from '@/contexts/MoodContext.jsx';
 
-const SURGE_MIN_MS = 30_000;  // 30 s
-const SURGE_MAX_MS = 45_000;  // 45 s
-const SURGE_DURATION_MS = 400; // durée du flash
+const SURGE_MIN_MS = 22_000;  // 22 s
+const SURGE_MAX_MS = 34_000;  // 34 s
+const SURGE_DURATION_MS = 520; // durée du flash
 
 const PowerSurge = () => {
   const { mood } = useMood();

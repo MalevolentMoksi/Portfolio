@@ -172,8 +172,11 @@ body[data-mood='default']::before {
   inset: 0;
   pointer-events: none;
   z-index: 9997;
-  background: radial-gradient(ellipse at 50% 50%, transparent 38%, rgba(0, 0, 0, 0.5) 100%);
-  animation: gold-vignette-breathe 5s ease-in-out infinite;
+  background:
+    radial-gradient(ellipse at 14% 24%, rgba(255, 225, 126, 0.14) 0%, transparent 42%),
+    radial-gradient(ellipse at 84% 72%, rgba(212, 175, 55, 0.12) 0%, transparent 46%),
+    radial-gradient(ellipse at 50% 50%, transparent 34%, rgba(0, 0, 0, 0.55) 100%);
+  animation: gold-vignette-breathe 6s ease-in-out infinite;
 }
 
 /* ::after : grain cinéma — tramage croisé doré très subtil */
@@ -224,7 +227,10 @@ body[data-mood='hacker']::before {
   inset: 0;
   pointer-events: none;
   z-index: 9997;
-  background: rgba(0, 255, 65, 0.12);
+  background:
+    radial-gradient(circle at 12% 20%, rgba(0, 255, 65, 0.18) 0%, transparent 38%),
+    radial-gradient(circle at 86% 76%, rgba(0, 255, 166, 0.1) 0%, transparent 44%),
+    rgba(0, 255, 65, 0.13);
   opacity: 0;
   animation: hacker-glitch-burst 14s linear infinite;
 }
@@ -244,6 +250,11 @@ body[data-mood='hacker']::after {
   pointer-events: none;
   z-index: 9998;
   animation: hacker-crt-flicker 3.5s steps(1) infinite;
+}
+
+body[data-perf-tier='low'][data-mood='hacker']::before {
+  opacity: 0.45;
+  animation: none;
 }
 
 @keyframes hacker-glitch-burst {
@@ -297,18 +308,18 @@ body[data-mood='hacker']::after {
     transform: none;
   }
   85% {
-    opacity: 0.28;
-    transform: translateX(3px);
+    opacity: 0.35;
+    transform: translateX(4px);
     clip-path: inset(22% 0 73% 0);
   }
   86% {
-    opacity: 0.22;
-    transform: translateX(-2px);
+    opacity: 0.26;
+    transform: translateX(-3px);
     clip-path: inset(56% 0 37% 0);
   }
   87% {
-    opacity: 0.15;
-    transform: translateX(1.5px);
+    opacity: 0.2;
+    transform: translateX(2px);
     clip-path: inset(9% 0 88% 0);
   }
   88%,
@@ -342,13 +353,13 @@ body[data-mood='hacker']::after {
     opacity: 1;
   }
   55.3% {
-    opacity: 0.55;
+    opacity: 0.45;
   }
   55.6% {
     opacity: 1;
   }
   55.9% {
-    opacity: 0.72;
+    opacity: 0.65;
   }
   56.2% {
     opacity: 1;
@@ -358,7 +369,7 @@ body[data-mood='hacker']::after {
     opacity: 1;
   }
   82.2% {
-    opacity: 0.6;
+    opacity: 0.52;
   }
   82.5% {
     opacity: 1;
@@ -560,17 +571,17 @@ body[data-mood='industrial']::before {
   background: repeating-linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 87, 34, 0.015) 12%,
+    rgba(255, 87, 34, 0.04) 12%,
     transparent 25%,
-    rgba(191, 54, 12, 0.02) 40%,
+    rgba(191, 54, 12, 0.06) 40%,
     transparent 55%,
-    rgba(255, 214, 0, 0.01) 70%,
+    rgba(255, 214, 0, 0.035) 70%,
     transparent 85%,
-    rgba(255, 87, 34, 0.012) 100%
+    rgba(255, 87, 34, 0.03) 100%
   );
   background-size: 200% 100%;
-  animation: industrial-smoke-pan 22s linear infinite;
-  opacity: 0.7;
+  animation: industrial-smoke-pan 17s linear infinite;
+  opacity: 0.9;
 }
 
 /* ::after : scanlines orange subtiles — stables, pas de flicker (mécanique) */
@@ -578,16 +589,24 @@ body[data-mood='industrial']::after {
   content: '';
   position: fixed;
   inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 3px,
-    rgba(255, 87, 34, 0.018) 3px,
-    rgba(255, 87, 34, 0.018) 4px
-  );
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 87, 34, 0.04) 2px,
+      rgba(255, 87, 34, 0.04) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 26px,
+      rgba(255, 214, 0, 0.02) 26px,
+      rgba(255, 214, 0, 0.02) 27px
+    );
   pointer-events: none;
   z-index: 9998;
-  opacity: 0.85;
+  opacity: 0.95;
 }
 
 @keyframes industrial-smoke-pan {
@@ -708,18 +727,18 @@ body[data-mood='industrial'] h2 {
 
 /* header : petit élément fixed → filter: brightness acceptable ici */
 body[data-mood='industrial'].power-surge-active header {
-  animation: power-surge-flash 0.4s ease-out both;
+  animation: power-surge-flash 0.52s ease-out both;
 }
 
 /* main : utilise opacity au lieu de filter — compositable GPU, zéro repaint */
 body[data-mood='industrial'].power-surge-active main {
-  animation: power-surge-dim 0.4s ease-out both;
+  animation: power-surge-dim 0.52s ease-out both;
 }
 
 /* Les enseignes néon réagissent plus fort pendant la surtension */
 body[data-mood='industrial'].power-surge-active .neon-stroke,
 body[data-mood='industrial'].power-surge-active .neon-text {
-  animation: neon-surge-react 0.4s steps(3) both;
+  animation: neon-surge-react 0.52s steps(4) both;
 }
 
 @keyframes power-surge-flash {
@@ -755,19 +774,19 @@ body[data-mood='industrial'].power-surge-active .neon-text {
     opacity: 1;
   }
   10% {
-    opacity: 0.82;
+    opacity: 0.72;
   }
   25% {
-    opacity: 0.9;
+    opacity: 0.84;
   }
   40% {
-    opacity: 0.78;
+    opacity: 0.66;
   }
   55% {
-    opacity: 0.95;
+    opacity: 0.9;
   }
   70% {
-    opacity: 0.85;
+    opacity: 0.74;
   }
   85% {
     opacity: 1;

@@ -5,8 +5,8 @@
  * simulant des étincelles de forge. ~20 % de chance de spawner une étincelle
  * horizontale (spark) au lieu d'une braise verticale.
  *
- * Performance-gated : high → 30 braises, mid → 5, low → 0
- * Spawn continu via useEffect + interval (une braise toutes les 1–2 s).
+ * Performance-gated : high → 42 braises, mid → 18, low → 0
+ * Spawn continu via useEffect + interval (une braise toutes les ~0.5–1.2 s).
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -14,9 +14,9 @@ import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext.jsx';
 import { getPerformanceTier } from '@/utils/performanceTier.js';
 
-const MAX_EMBERS = { high: 30, mid: 12, low: 0 };
-const SPAWN_MIN_MS = 1000;
-const SPAWN_MAX_MS = 2000;
+const MAX_EMBERS = { high: 42, mid: 18, low: 0 };
+const SPAWN_MIN_MS = 550;
+const SPAWN_MAX_MS = 1200;
 
 let _emberId = 0;
 
@@ -30,7 +30,7 @@ const RisingEmbers = () => {
 
   const spawnEmber = useCallback(() => {
     const id = ++_emberId;
-    const isSpark = Math.random() < 0.2; // 20 % → étincelle horizontale
+    const isSpark = Math.random() < 0.28; // 28 % → plus d'étincelles horizontales
 
     // Couleur : orange dominant, parfois jaune ou rouge foncé
     const colors = ['#FF5722', '#FF8A65', '#FFD600', '#FF6E40', '#BF360C'];
@@ -38,16 +38,16 @@ const RisingEmbers = () => {
 
     let ember;
     if (isSpark) {
-      const width = 20 + Math.random() * 35;     // 20–55 px
+      const width = 24 + Math.random() * 48;     // 24–72 px
       const left = 10 + Math.random() * 80;      // 10–90 vw
       const top = 20 + Math.random() * 60;       // 20–80 vh
-      const duration = 0.3 + Math.random() * 0.3; // 0.3–0.6 s
+      const duration = 0.25 + Math.random() * 0.35; // 0.25–0.6 s
       const direction = Math.random() > 0.5 ? 1 : -1;
       ember = { id, spark: true, width, left, top, duration, color, direction };
     } else {
-      const size = 2 + Math.random() * 3;        // 2–5 px
+      const size = 3 + Math.random() * 4.5;      // 3–7.5 px
       const left = 5 + Math.random() * 90;       // 5–95 vw
-      const duration = 6 + Math.random() * 6;    // 6–12 s
+      const duration = 5 + Math.random() * 5;    // 5–10 s
       ember = { id, spark: false, size, left, duration, color };
     }
 
@@ -102,7 +102,7 @@ const RisingEmbers = () => {
               left: e.left + 'vw',
               top: e.top + 'vh',
               background: e.color,
-              boxShadow: `0 0 6px ${e.color}, 0 0 12px rgba(255, 87, 34, 0.4)`,
+              boxShadow: `0 0 10px ${e.color}, 0 0 20px rgba(255, 87, 34, 0.55)`,
               animationDuration: e.duration + 's',
               '--spark-dir': e.direction,
             }}
@@ -117,7 +117,7 @@ const RisingEmbers = () => {
               left: e.left + 'vw',
               bottom: '5%',
               background: e.color,
-              boxShadow: `0 0 ${e.size * 2}px ${e.color}, 0 0 ${e.size * 4}px rgba(255, 87, 34, 0.3)`,
+              boxShadow: `0 0 ${e.size * 3}px ${e.color}, 0 0 ${e.size * 6}px rgba(255, 87, 34, 0.55)`,
               animationDuration: e.duration + 's',
             }}
           />
