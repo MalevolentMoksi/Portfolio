@@ -84,7 +84,7 @@ const pageConfig = {
   '/about': {
     heading: 'À propos du portfolio',
     subheading: 'Stack technique, architecture et choix de conception',
-    backgroundSrc: getAssetPath('assets/images/backgrounds/risk-of-rain-2-launch-update.jpg'),
+    backgroundSrc: getAssetPath('assets/images/backgrounds/ROR2ReturnsSpace.webp'),
     metaTitle: 'À propos | Portfolio - Enzo Morello',
     metaDescription:
       "Architecture et stack technique du portfolio d'Enzo Morello — React, Vite, Framer Motion, CSS sur mesure.",
@@ -92,7 +92,7 @@ const pageConfig = {
   '/credits': {
     heading: 'Crédits',
     subheading: 'Musique, visuels et remerciements',
-    backgroundSrc: getAssetPath('assets/images/backgrounds/risk-of-rain-2-launch-update.jpg'),
+    backgroundSrc: getAssetPath('assets/images/backgrounds/RiskOfRain2SurvivorsOfTheVoid.webp'),
     metaTitle: 'Crédits | Portfolio - Enzo Morello',
     metaDescription:
       "Remerciements et crédits du portfolio d'Enzo Morello — artistes, studios et équipe pédagogique.",
