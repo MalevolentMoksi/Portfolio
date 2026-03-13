@@ -63,7 +63,7 @@ const pageConfig = {
   },
   '/projet-SAE4': {
     heading: "Projet - Création d'une base de données",
-    backgroundSrc: getAssetPath('assets/images/backgrounds/ClairObscurSwords.jpg'),
+    backgroundSrc: getAssetPath('assets/images/backgrounds/Destiny2PyramidStation.webp'),
     metaTitle: "Projet - Création d'une base de données",
     metaDescription: "Portfolio d'Enzo Morello - Projet SAE4",
   },
@@ -76,7 +76,7 @@ const pageConfig = {
   '/projet-SAE3.01': {
     heading: 'Aidémé – Application Web de coordination pour les aidants',
     subheading: 'Une plateforme collaborative pour gérer le suivi des personnes dépendantes',
-    backgroundSrc: getAssetPath('assets/images/backgrounds/pyramids2.webp'),
+    backgroundSrc: getAssetPath('assets/images/backgrounds/Destiny2EuropaPyramid.webp'),
     metaTitle: 'Aidémé – Application Web pour les aidants',
     metaDescription:
       "Portfolio d'Enzo Morello - Projet SAE 3.01 : application full-stack React + PHP",
