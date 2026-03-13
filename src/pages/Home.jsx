@@ -13,7 +13,7 @@ const Home = () => {
           <p>
             Étudiant en 2ème année de <strong>BUT Informatique</strong> à l'IUT2 de Grenoble,
             spécialisé <strong>Développement d'Applications</strong>. Passionné par l'alliance
-            entre logique technique et ergonomie visuelle, j'éspère pouvoir mettre ma curiosité
+            entre logique technique et ergonomie visuelle, j'espère pouvoir mettre ma curiosité
             et ma méthode au service de projets innovants.
           </p>
           <div className="about-badges" role="list" aria-label="Informations clés">
