@@ -27,9 +27,11 @@ Modern student portfolio website (React SPA). **Feb 2026 Architecture**: Single-
 - **`FilterBar.jsx`** - Tag/category filter bar for project listings
 - **`Loading.jsx`** - Full-page loading spinner
 - **`ProjectPagination.jsx`** - Pagination controls for project lists
+#### Ambient Effects (`src/components/ambient/`)
+- Collection of lightweight visual components used as page-level ambient layers. Examples include: `AmbientBoids.jsx`, `DigitalRain.jsx`, `EuropaSnowfall.jsx`, `FloatingGeometry.jsx`, `IndustrialNeons.jsx`, `ElectricalGrid.jsx`, `FooterWalkers.jsx`, and more (17+ components). These components render canvas/SVG layers and respect performance-tier detection to avoid heavy rendering on low-end devices.
 
 ### Pages Directory (`src/pages/*.jsx`)
-8 React components: `Home.jsx`, `Projets.jsx`, `ProjetsPersonnels.jsx`, `ProjetMEGASAE.jsx`, `ProjetSAE12.jsx`, `ProjetSAE3.jsx`, `ProjetSAE4.jsx`, `ProjetSAE56.jsx`
+12 React components: `Home.jsx`, `Projets.jsx`, `ProjetsPersonnels.jsx`, `ProjetMEGASAE.jsx`, `ProjetSAE12.jsx`, `ProjetSAE3.jsx`, `ProjetSAE301.jsx`, `ProjetSAE4.jsx`, `ProjetSAE56.jsx`, `About.jsx`, `Credits.jsx`, `NotFound.jsx`
 
 ### Custom Hooks (`src/hooks/`)
 - **`useDocumentMeta(title, description)`** - Updates `<title>` and `<meta description>` per page (SEO)
@@ -39,10 +41,12 @@ Modern student portfolio website (React SPA). **Feb 2026 Architecture**: Single-
 ### Contexts (`src/contexts/`)
 - **`MoodContext.jsx`** - Provides `{ mood, setMood }` globally; `MoodSwitcher` writes, components can read
 - **`ReadingTimeContext.jsx`** - Provides estimated reading time to page components via `ReadingTimeProvider` (wraps `<Outlet />` in Layout)
+- **`ToastContext.jsx`** - Provides toast notification API (`showToast`, `hideToast`) used by components and legacy modules; toasts are used for UX feedback and lightweight alerts.
 
 ### Utils (`src/utils/`)
 - **`assetPath.js`** - `getAssetPath(path)` helper — prepends correct base URL for asset references
 - **`discoverMusicTracks.js`** - `discoverMusicTracks()` — returns the list of `.m4a` filenames from `public/assets/music/` at build time; used in `Layout.jsx` instead of a hardcoded array
+ - **`performanceTier.js`** - `getPerformanceTier()` returns a performance tier (`low|medium|high`) used to gate heavy ambient effects and particle layers to keep FPS acceptable on low-end devices
 
 ### Legacy JavaScript Modules (`src/scripts/`)
 These coexist with React, initialized via `usePortfolioModules` hook in `Layout.jsx`:
@@ -99,16 +103,18 @@ Four interactive widgets live in `.header--actions` inside `Layout.jsx`:
 3. **`PetButton`** — spawns/recalls the wandering robot; see Pet section below
 4. **`MiniTerminal`** — decorative terminal panel
 
-### Pet Robot (`PetButton.jsx`)
-- **Wandering**: RAF loop, organic steering, cursor magnet/repulsion based on mood
-- **Dragging**: pointer-capture drag; `scared` reaction on first real move (>4 px), `excited` on release; scale grows + spin accumulates when dragged aggressively (`DRAG_FAST_THRESHOLD = 8 px/frame`)
-- **Stats**: `hunger` + `happiness` (0-100), reset to ~50% (±5%) synchronously at construction; decay every 8 s while spawned
+### Pet Subsystem (`src/components/pet/`)
+- The pet moved to its own submodule directory and is implemented as a small subsystem of coordinated components and utilities.
+- Key files: `PetButton.jsx` (entry & HUD), `WanderingPet.jsx` (movement + RAF loop), `RobotFace.jsx` (SVG face with Framer Motion mouth paths), `ThoughtBubbleQueue.jsx`, `petConstants.js`, `petData.jsx`, plus gameplay widgets like `AchievementsPanel.jsx` and `CatchGame.jsx`.
+- **Wandering**: RAF loop, organic steering; cursor magnet/repulsion varies with mood
+- **Dragging**: pointer-capture drag; `scared` reaction when moved >4 px, `excited` on release; aggressive drags apply scale + spin (fast drag threshold ~8 px/frame)
+- **Stats**: `hunger` + `happiness` (0–100), initialized ~50% (±5%), decay every ~8s while spawned
 - **localStorage keys**: `pet-hunger`, `pet-happiness`, `pet-spawned`
-- **Reactions**: temporary expressions (`scared`, `excited`, `woozy`, `dizzy`, `eat`, `petted`, `play`); woozy fires on every spawn
-- **HUD**: click pet (without dragging) → dialog with mood badge, stat bars, Feed/Câliner/Jouer buttons with cooldown countdown
-- **Thought bubbles**: SVG symbols (`heart`, `star`, `note`, `bolt`, `zzz`, `dots`, `exclaim`) float above the robot
-- **Face**: `RobotFace` SVG with per-expression eyes + Framer Motion morphing mouth paths (`MOUTH_PATHS`); pupils follow cursor
-- **Global API**: `window.petReact(reaction)` and `window.getPetStats()` available in console
+- **Reactions**: expressions (`scared`, `excited`, `woozy`, `dizzy`, `eat`, `petted`, `play`) — `woozy` fires on spawn
+- **HUD**: click pet (without dragging) opens dialog with mood badge, stat bars, and action buttons (`Feed`, `Câliner`, `Jouer`) with cooldowns
+- **Thought bubbles**: SVG icons (`heart`, `star`, `note`, `bolt`, `zzz`, `dots`, `exclaim`) float above the robot via `ThoughtBubbleQueue.jsx`
+- **Face**: `RobotFace.jsx` supplies eyes/pupils that follow the cursor and morphing mouth paths; pupils are updated from the parent component
+- **Developer API**: `window.petReact(reaction)` and `window.getPetStats()` available in console for quick interactions and debugging
 
 ### Mood System
 - `MoodContext` provides `{ mood, setMood }` app-wide
@@ -195,15 +201,19 @@ Four interactive widgets live in `.header--actions` inside `Layout.jsx`:
 | File | Purpose |
 |------|---------|
 | [vite.config.js](vite.config.js) | Vite 5 build config, path aliases (`@`, `@styles`, `@hooks`, `@pages`, `@contexts`, `@utils`, `@data`, etc.), React plugin |
-| [src/App.jsx](src/App.jsx) | React Router orchestrator - defines all 8 routes |
+| [src/App.jsx](src/App.jsx) | React Router orchestrator - defines routes and lazy pages |
 | [src/components/Layout.jsx](src/components/Layout.jsx) | Shared header/footer, initializes legacy modules, wraps pages via `<Outlet />` |
-| [src/components/pet/PetButton.jsx](src/components/pet/PetButton.jsx) | Interactive robot pet — wandering, dragging, stats, reactions, HUD |
+| [src/components/pet/PetButton.jsx](src/components/pet/PetButton.jsx) | Entry to the pet subsystem (HUD + spawn control) |
 | [src/components/MoodSwitcher.jsx](src/components/MoodSwitcher.jsx) | Cycles site mood; writes `data-mood` on `<body>` |
 | [src/contexts/MoodContext.jsx](src/contexts/MoodContext.jsx) | Global mood state provider |
+| [src/contexts/ToastContext.jsx](src/contexts/ToastContext.jsx) | Toast API used by UI and legacy modules |
 | [src/contexts/ReadingTimeContext.jsx](src/contexts/ReadingTimeContext.jsx) | Reading time provider (wraps `<Outlet />` in Layout) |
 | [src/utils/discoverMusicTracks.js](src/utils/discoverMusicTracks.js) | Auto-discovers `.m4a` files — no hardcoded track list needed |
+| [src/utils/performanceTier.js](src/utils/performanceTier.js) | Performance tier detection to gate heavy ambient effects |
 | [src/hooks/useDocumentMeta.js](src/hooks/useDocumentMeta.js) | Hook for per-page SEO (title, description) |
 | [src/hooks/usePortfolioModules.js](src/hooks/usePortfolioModules.js) | Hook for lazy-loading legacy JS modules (music, effects, UI) |
+| [src/components/ambient/AmbientBoids.jsx](src/components/ambient/AmbientBoids.jsx) | Example ambient component (see `src/components/ambient/` for more) |
+| [src/components/pet/WanderingPet.jsx](src/components/pet/WanderingPet.jsx) | Pet movement + steering implementation |
 | [src/styles/_variables.css](src/styles/_variables.css) | CSS custom properties (colors, spacing, theme, mood overrides) |
 | [src/styles/main.css](src/styles/main.css) | Central CSS import aggregator |
 | [package.json](package.json) | React 18, React Router 6, Vite 5, Framer Motion dependencies |
