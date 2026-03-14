@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getAllTags } from '@/data/projects.js';
 
 /**
@@ -7,9 +8,10 @@ import { getAllTags } from '@/data/projects.js';
  * Permet de filtrer les projets par tags
  */
 const FilterBar = ({ onFilterChange }) => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedTags, setSelectedTags] = useState([]);
-  const allTags = getAllTags();
+  const allTags = getAllTags(t);
 
   // Initialiser les tags sélectionnés et dépuis l'URL
   useEffect(() => {
@@ -44,16 +46,16 @@ const FilterBar = ({ onFilterChange }) => {
   };
 
   return (
-    <nav className="filter-bar" aria-label="Filtres par technologie">
+    <nav className="filter-bar" aria-label={t('common.filterBar.aria')}>
       <div className="filter-header">
-        <h3>Filtrer par technologie</h3>
+        <h3>{t('common.filterBar.title')}</h3>
         {selectedTags.length > 0 && (
           <button 
             className="btn-clear-filters"
             onClick={handleClearAll}
-            aria-label="Effacer tous les filtres"
+            aria-label={t('common.filterBar.clearAllAria')}
           >
-            ✕ Effacer ({selectedTags.length})
+            {t('common.filterBar.clear', { count: selectedTags.length })}
           </button>
         )}
       </div>
@@ -65,7 +67,7 @@ const FilterBar = ({ onFilterChange }) => {
               type="checkbox"
               checked={selectedTags.includes(tag)}
               onChange={() => handleTagToggle(tag)}
-              aria-label={`Filtrer par ${tag}`}
+              aria-label={t('common.filterBar.filterByTag', { tag })}
             />
             <span className="tag-label">{tag}</span>
           </label>
@@ -75,7 +77,7 @@ const FilterBar = ({ onFilterChange }) => {
       {selectedTags.length > 0 && (
         <div className="filter-active-tags">
           <p className="filter-result-count">
-            Filtres actifs : {selectedTags.length}
+            {t('common.filterBar.activeFilters', { count: selectedTags.length })}
           </p>
           <div className="active-tags-list">
             {selectedTags.map(tag => (
@@ -91,7 +93,7 @@ const FilterBar = ({ onFilterChange }) => {
                     handleTagToggle(tag);
                   }
                 }}
-                aria-label={`Supprimer le filtre ${tag}`}
+                aria-label={t('common.filterBar.removeFilter', { tag })}
               >
                 {tag}
                 <span className="remove-tag">×</span>

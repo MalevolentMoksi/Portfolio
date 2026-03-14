@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { useMood, MOODS } from '../contexts/MoodContext.jsx';
 import { useToast } from '../contexts/ToastContext.jsx';
 import Tooltip from './Tooltip.jsx';
@@ -7,6 +8,7 @@ import Tooltip from './Tooltip.jsx';
 const MOOD_KEYS = Object.keys(MOODS);
 
 const MoodSwitcher = () => {
+  const { t } = useTranslation();
   const { mood, setMood } = useMood();
   const { showToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -76,7 +78,10 @@ const MoodSwitcher = () => {
     // Changer le mood au milieu de la transition (60 ms)
     setTimeout(() => {
       setMood(newMood);
-      showToast(`${MOODS[newMood].emoji}  Ambiance « ${MOODS[newMood].label} » activée`, { type: 'info', duration: 4000 });
+      showToast(t('common.mood.toastActivated', {
+        emoji: MOODS[newMood].emoji,
+        mood: t(`common.mood.names.${newMood}`),
+      }), { type: 'info', duration: 4000 });
     }, 60);
 
     // Retirer l'overlay après la fin de l'animation (200 ms)
@@ -89,15 +94,16 @@ const MoodSwitcher = () => {
   }, [mood, setMood]);
 
   const currentMood = MOODS[mood];
+  const currentMoodLabel = t(`common.mood.names.${mood}`);
 
   return (
     <div className="mood-switcher-wrapper" ref={panelRef}>
       {/* Bouton icône */}
-      <Tooltip text={`Mood : ${currentMood.label}`} position="bottom">
+      <Tooltip text={t('common.mood.tooltip', { mood: currentMoodLabel })} position="bottom">
       <button
         className="header-action-btn mood-btn"
         onClick={() => setIsOpen((prev) => !prev)}
-        aria-label="Changer l'ambiance visuelle"
+        aria-label={t('common.mood.ariaLabel')}
         aria-expanded={isOpen}
       >
         <svg
@@ -148,13 +154,13 @@ const MoodSwitcher = () => {
           ref={panelDivRef}
           className="mood-panel"
           role="radiogroup"
-          aria-label="Choisir une ambiance"
+          aria-label={t('common.mood.chooseAria')}
           style={panelPos ? {
             top: `${panelPos.top}px`,
             right: `${panelPos.right}px`,
           } : {}}
         >
-          <div className="mood-panel-title">Ambiance</div>
+          <div className="mood-panel-title">{t('common.mood.title')}</div>
           {MOOD_KEYS.map((key) => {
             const m = MOODS[key];
             const isActive = key === mood;
@@ -172,7 +178,7 @@ const MoodSwitcher = () => {
                   style={{ background: m.color }}
                 />
                 <span className="mood-label">
-                  <span className="mood-emoji">{m.emoji}</span> {m.label}
+                  <span className="mood-emoji">{m.emoji}</span> {t(`common.mood.names.${key}`)}
                 </span>
                 {isActive && <span className="mood-check" aria-hidden="true">✓</span>}
               </button>

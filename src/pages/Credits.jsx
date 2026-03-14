@@ -1,4 +1,5 @@
 import useDocumentMeta from '@/hooks/useDocumentMeta.js';
+import { useTranslation } from 'react-i18next';
 
 /* ─── Icône musique ────────────────────────────────────── */
 const IconMusic = (
@@ -98,9 +99,10 @@ const VISUAL_CREDITS = [
 
 /* ─── Page Crédits ─────────────────────────────────────── */
 const Credits = () => {
+  const { t } = useTranslation();
   useDocumentMeta(
-    'Crédits | Portfolio',
-    "Remerciements et crédits du portfolio d'Enzo Morello — musique, visuels et formation."
+    t('credits.metaTitle'),
+    t('credits.metaDescription')
   );
 
   return (
@@ -111,17 +113,16 @@ const Credits = () => {
           <span className="credits-section-icon" aria-hidden="true">
             {IconMusic}
           </span>
-          Musique
+          {t('credits.sections.music.title')}
         </h2>
         <p className="credits-intro">
-          Les artistes suivants accompagnent l'expérience sonore du portfolio. Leur travail mérite
-          d'être découvert bien au-delà de ces pages.
+          {t('credits.sections.music.intro')}
         </p>
-        <ol className="credits-music-list" aria-label="Artistes musicaux">
-          {MUSIC_CREDITS.map(({ name, note }) => (
+        <ol className="credits-music-list" aria-label={t('credits.sections.music.aria')}>
+          {MUSIC_CREDITS.map(({ name, note }, index) => (
             <li key={name} className="credits-music-entry">
               <strong className="credits-artist-name">{name}</strong>
-              <p className="credits-artist-note">{note}</p>
+              <p className="credits-artist-note">{t(`credits.musicNotes.${index}`, { defaultValue: note })}</p>
             </li>
           ))}
         </ol>
@@ -133,14 +134,13 @@ const Credits = () => {
           <span className="credits-section-icon" aria-hidden="true">
             {IconImage}
           </span>
-          Visuels &amp; fonds d'écran
+          {t('credits.sections.visuals.title')}
         </h2>
         <p className="credits-intro">
-          Les illustrations utilisées comme arrière-plans appartiennent à leurs créateurs respectifs
-          et sont reproduites ici à titre décoratif non-commercial.
+          {t('credits.sections.visuals.intro')}
         </p>
         <div className="credits-visuals-grid">
-          {VISUAL_CREDITS.map(({ title, studio, publisher, year, note }) => (
+          {VISUAL_CREDITS.map(({ title, studio, publisher, year, note }, index) => (
             <article key={title} className="credits-visual-card">
               <div className="credits-visual-header">
                 <strong className="credits-game-title">{title}</strong>
@@ -148,9 +148,9 @@ const Credits = () => {
               </div>
               <p className="credits-game-studio">
                 © {studio}
-                {publisher ? ` — édité par ${publisher}` : ''}
+                {publisher ? ` - ${t('credits.sections.visuals.publishedBy')} ${publisher}` : ''}
               </p>
-              <p className="credits-visual-note">{note}</p>
+              <p className="credits-visual-note">{t(`credits.visualNotes.${index}`, { defaultValue: note })}</p>
             </article>
           ))}
         </div>
@@ -162,18 +162,14 @@ const Credits = () => {
           <span className="credits-section-icon" aria-hidden="true">
             {IconDiploma}
           </span>
-          Formation &amp; encadrement
+          {t('credits.sections.education.title')}
         </h2>
         <article className="credits-education-card">
           <strong className="credits-edu-name">
-            L'équipe pédagogique de l'IUT2 — Université Grenoble Alpes
+            {t('credits.sections.education.team')}
           </strong>
           <p className="credits-edu-note">
-            Un remerciement sincère aux enseignants et intervenants du département informatique de
-            l'IUT2 de l'UGA pour la qualité de leur encadrement, la rigueur de leur enseignement et
-            leur disponibilité tout au long du cursus BUT Informatique. Les projets présentés dans
-            ce portfolio sont le reflet direct des compétences transmises et des défis proposés au
-            fil des semestres.
+            {t('credits.sections.education.note')}
           </p>
         </article>
       </section>

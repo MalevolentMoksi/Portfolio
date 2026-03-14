@@ -1,10 +1,125 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import ProjectPagination from '@/components/ProjectPagination.jsx';
 import useReadingTimeEstimate from '@/hooks/useReadingTimeEstimate.js';
 
 const ProjetSAE3 = () => {
+  const { i18n } = useTranslation();
   const contentRef = useRef(null);
   useReadingTimeEstimate(contentRef);
+
+  if (i18n.resolvedLanguage === 'en') {
+    return (
+      <>
+        <article className="project-article" ref={contentRef}>
+          <section id="project-detail">
+            <h2>Description</h2>
+            <p>
+              This project focused on setting up a full development workstation step by step: OS selection and
+              installation, system hardening, toolchain deployment (IDE, compilers, version control), and network
+              configuration. The practical work concluded with a synthetic mind map.
+              <br />
+              <br />
+              Completed individually (1st year Computer Science BUT).
+            </p>
+          </section>
+
+          <hr />
+
+          <section id="skills">
+            <h2>Skills</h2>
+            <ul>
+              <li>
+                Identify hardware and software components of a digital system
+                <ul>
+                  <li>Locate and name motherboard elements: CPU, RAM, chipset, buses, I/O ports</li>
+                  <li>Differentiate firmware, OS, drivers, libraries, and applications</li>
+                </ul>
+              </li>
+              <li>
+                Use core features of a multi-user, multi-task system
+                <ul>
+                  <li>Navigate Unix directories with <code>cd</code>, <code>ls</code>, <code>pwd</code>, completion</li>
+                  <li>
+                    Manage processes and permissions with <code>ps</code>, <code>kill</code>, <code>chmod</code>,
+                    <code>chown</code>, and <code>sudo</code>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Install and configure an OS and development tools
+                <ul>
+                  <li>Create a bootable USB (Ventoy) and install Ubuntu 22.04 LTS in VirtualBox</li>
+                  <li>Install JDK 17, GCC, Python 3, Git, VS Code, IntelliJ IDEA, and Node.js</li>
+                  <li>Configure environment variables, shortcuts, and Git integration in the IDE</li>
+                </ul>
+              </li>
+              <li>
+                Configure a workstation in a professional network
+                <ul>
+                  <li>Set up IP/DNS addressing, network access, and APT proxy configuration</li>
+                  <li>Generate SSH keys and clone a GitLab repository</li>
+                  <li>Access shared resources such as printers and file shares</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="techniques">
+            <h2>Technical Skills & Know-How</h2>
+            <ul>
+              <li>Create bootable media (Ventoy, Rufus) and configure UEFI/Secure Boot</li>
+              <li>Disk partitioning and VM / dual-boot installation workflows</li>
+              <li>System updates with <code>apt</code>, <code>snap</code>, and UFW firewall setup</li>
+              <li>IDE setup for Visual Studio Code and IntelliJ IDEA</li>
+              <li>Git / GitLab setup with commit conventions and CI/CD integration</li>
+              <li>Bash automation script for dependency installation and setup backup</li>
+              <li>Mind-map design with XMind and slide support with Canva</li>
+              <li>Validation via compile/run tests on Java, C, and Python projects</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="objectives">
+            <h2>Objectives</h2>
+            <ul>
+              <li>Document and order all workstation setup steps (OS + IDE)</li>
+              <li>Create a clear and structured educational mind map</li>
+              <li>Write a concise guide explaining each command and technical decision</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="group-work">
+            <h2>Collaboration</h2>
+            <p>
+              Although assessed individually, workshop sessions enabled exchange of best practices: peer review of
+              mind maps, support for partitioning, and proxy troubleshooting. These exchanges improved my own guide
+              and helped clarify the execution order.
+            </p>
+          </section>
+
+          <hr />
+
+          <section id="individual-work">
+            <h2>Personal Work</h2>
+            <p>I:</p>
+            <ul>
+              <li>completed full Ubuntu 22.04 setup in VirtualBox and then dual-boot;</li>
+              <li>wrote a Bash script to automate dependency installation (Git, Java, Python, VS Code);</li>
+              <li>produced a consistent, color-coded mind map with clockwise reading logic.</li>
+            </ul>
+          </section>
+        </article>
+
+        <ProjectPagination currentPath="/projet-SAE3" />
+      </>
+    );
+  }
 
   return (
     <>

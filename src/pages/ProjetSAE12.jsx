@@ -1,10 +1,94 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import ProjectPagination from '@/components/ProjectPagination.jsx';
 import useReadingTimeEstimate from '@/hooks/useReadingTimeEstimate.js';
 
 const ProjetSAE12 = () => {
+  const { i18n } = useTranslation();
   const contentRef = useRef(null);
   useReadingTimeEstimate(contentRef);
+
+  if (i18n.resolvedLanguage === 'en') {
+    return (
+      <>
+        <article className="project-article" ref={contentRef}>
+          <section id="project-detail">
+            <h2>Description</h2>
+            <p>
+              This project, named <strong>"Automatic Classification"</strong>, aimed to improve a news dispatch
+              sorting system by creating an automatic lexicon-generation method. Unlike the first stage where
+              lexicons were manually built, we experimented with machine-learning-inspired heuristics to produce
+              more relevant lexicons and improve classification accuracy. Team: Paolo Colombat and Enzo Morello.
+            </p>
+          </section>
+
+          <hr />
+
+          <section id="skills">
+            <h2>Skills</h2>
+            <ul>
+              <li>Data-structure handling in Java (ArrayList, custom objects)</li>
+              <li>Text analysis and string processing</li>
+              <li>File reading and writing</li>
+              <li>Scoring-algorithm design</li>
+              <li>Experimental comparison of AI approaches</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="techniques">
+            <h2>Technical Skills & Know-How</h2>
+            <ul>
+              <li>Using Java for text classification</li>
+              <li>Using IntelliJ as the IDE</li>
+              <li>Applying heuristics to weight lexicons</li>
+              <li>Optimization with sorting and binary search</li>
+              <li>Comparison with a simplified K-NN method</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="objectives">
+            <h2>Objectives</h2>
+            <ul>
+              <li>Automate lexicon generation from categorized dispatches</li>
+              <li>Compute a score for each word based on frequency and specificity</li>
+              <li>Assign weights to words according to relevance</li>
+              <li>Evaluate system performance on test data</li>
+              <li>Compare results with a nearest-neighbors approach</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="group-work">
+            <h2>Teamwork</h2>
+            <p>
+              The project was completed in pairs. We split the work between text-processing/scoring algorithms
+              and code structure/testing/method comparison, then reviewed each milestone together. I focused
+              mostly on the iterative scoring-calibration part, while my teammate invested significant effort
+              in the KNN approach and later transferred that knowledge to me.
+            </p>
+          </section>
+
+          <hr />
+
+          <section id="individual-work">
+            <h2>Individual Contribution</h2>
+            <p>
+              I implemented several core methods such as <code>initDico</code>, <code>calculScores</code>, and
+              <code>poidsPourScore</code>, while documenting algorithmic decisions for scoring and weighting.
+              I also contributed to the English report and oral presentation preparation.
+            </p>
+          </section>
+        </article>
+
+        <ProjectPagination currentPath="/projet-SAE12" />
+      </>
+    );
+  }
 
   return (
     <>

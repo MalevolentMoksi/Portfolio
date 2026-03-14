@@ -1,20 +1,18 @@
 /**
- * Shared Projects Data
- * Contient tous les projets (académiques et personnels) avec leurs tags
+ * Shared projects data (translation keys + static assets)
  */
 
-export const academicProjects = [
+const academicProjectsBase = [
   {
     id: 'sae301',
     path: '/projet-SAE3.01',
-    type: 'Projet SAE',
-    title: '"Aidémé" – Application Web pour les aidants',
-    category: 'SAE 3.01',
-    description:
-      "Conception et développement d'une application Web full-stack (React 19 + PHP 8 + SQLite) permettant aux aidants de coordonner le suivi de personnes dépendantes : contacts, agenda, galerie photo, fichiers et notifications.",
-    teamSize: 'En équipe (Team 08 – IUT2 Info UGA)',
+    typeKey: 'data.projects.academic.sae301.type',
+    titleKey: 'data.projects.academic.sae301.title',
+    categoryKey: 'data.projects.academic.sae301.category',
+    descriptionKey: 'data.projects.academic.sae301.description',
+    teamSizeKey: 'data.projects.academic.sae301.teamSize',
     image: '/assets/images/projects/AidemePresentation.png',
-    tags: ['React', 'PHP', 'SQLite', 'Vite', 'API REST', 'Git'],
+    tagKeys: ['react', 'php', 'sqlite', 'vite', 'apiRest', 'git'],
     technologies: [
       {
         name: 'React',
@@ -38,14 +36,13 @@ export const academicProjects = [
   {
     id: 'megasae',
     path: '/projet-MEGASAE',
-    type: 'Projet',
-    title: "Application d'organisation de banquets",
-    category: 'Projet cardinal',
-    description:
-      "Développement à partir de zéro d'une application qui pourrait planifier des événements dans des salles pour un utilisateur.",
-    teamSize: 'En hexanome (6 personnes)',
+    typeKey: 'data.projects.academic.megasae.type',
+    titleKey: 'data.projects.academic.megasae.title',
+    categoryKey: 'data.projects.academic.megasae.category',
+    descriptionKey: 'data.projects.academic.megasae.description',
+    teamSizeKey: 'data.projects.academic.megasae.teamSize',
     image: '/assets/images/projects/banquets-MEGASAE.jpg',
-    tags: ['Java', 'JavaFX', 'Maven', 'SQL', 'Git'],
+    tagKeys: ['java', 'javafx', 'maven', 'sql', 'git'],
     technologies: [
       { name: 'Java', icon: '/assets/images/logos/JavaAltLogo.svg' },
       { name: 'JavaFX', icon: '/assets/images/logos/JavaFXLogo.svg' },
@@ -65,14 +62,13 @@ export const academicProjects = [
   {
     id: 'sae56',
     path: '/projet-SAE56',
-    type: 'Projet SAE',
-    title: "Recueil de besoins | Découverte de l'environnement économique et écologique",
-    category: 'SAE 5-6',
-    description:
-      "La récolte d'informations sur l'entreprise ESN Sopra Steria afin d'en faire un site a type informatif pour un public défini.",
-    teamSize: 'En trinôme',
+    typeKey: 'data.projects.academic.sae56.type',
+    titleKey: 'data.projects.academic.sae56.title',
+    categoryKey: 'data.projects.academic.sae56.category',
+    descriptionKey: 'data.projects.academic.sae56.description',
+    teamSizeKey: 'data.projects.academic.sae56.teamSize',
     image: '/assets/images/projects/SopraSteriaIllustration.webp',
-    tags: ['HTML', 'CSS', 'JavaScript', 'Figma', 'Git'],
+    tagKeys: ['html', 'css', 'javascript', 'figma', 'git'],
     technologies: [
       { name: 'HTML5', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/html5.svg' },
       { name: 'CSS3', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/css3.svg' },
@@ -87,13 +83,13 @@ export const academicProjects = [
   {
     id: 'sae3',
     path: '/projet-SAE3',
-    type: 'Projet SAE',
-    title: "Installation d'un poste pour le développement",
-    category: 'SAE 3',
-    description: "Installation et schématisation d'un poste Linux Debian.",
-    teamSize: 'En monôme',
+    typeKey: 'data.projects.academic.sae3.type',
+    titleKey: 'data.projects.academic.sae3.title',
+    categoryKey: 'data.projects.academic.sae3.category',
+    descriptionKey: 'data.projects.academic.sae3.description',
+    teamSizeKey: 'data.projects.academic.sae3.teamSize',
     image: '/assets/images/projects/PosteTravailLinux.png',
-    tags: ['Linux', 'Bash', 'Git', 'VirtualBox'],
+    tagKeys: ['linux', 'bash', 'git', 'virtualbox'],
     technologies: [
       { name: 'Linux', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/linux.svg' },
       {
@@ -115,15 +111,14 @@ export const academicProjects = [
   {
     id: 'sae12',
     path: '/projet-SAE12',
-    type: 'Projet SAE',
-    title: "Implémentation d'un besoin client | Comparaison d'approches algorithmiques",
-    category: 'SAE 1.2',
-    description:
-      "Codage, étude et comparaison d'efficacité entre divers algorithmes de comparaisons en Java.",
-    teamSize: 'En binôme',
+    typeKey: 'data.projects.academic.sae12.type',
+    titleKey: 'data.projects.academic.sae12.title',
+    categoryKey: 'data.projects.academic.sae12.category',
+    descriptionKey: 'data.projects.academic.sae12.description',
+    teamSizeKey: 'data.projects.academic.sae12.teamSize',
     image: '/assets/images/projects/algorithm.jpg',
     video: '/assets/videos/LoopingAlgorithmsVideo.mp4',
-    tags: ['Java', 'Algorithmes', 'Git'],
+    tagKeys: ['java', 'algorithms', 'git'],
     technologies: [
       { name: 'Java', icon: '/assets/images/logos/JavaAltLogo.svg' },
       {
@@ -135,13 +130,13 @@ export const academicProjects = [
   {
     id: 'sae4',
     path: '/projet-SAE4',
-    type: 'Projet SAE',
-    title: "Création d'une base de données",
-    category: 'SAE 4',
-    description: "Conception, implémentation et optimisation d'une base de données relationnelle.",
-    teamSize: 'En trinôme',
+    typeKey: 'data.projects.academic.sae4.type',
+    titleKey: 'data.projects.academic.sae4.title',
+    categoryKey: 'data.projects.academic.sae4.category',
+    descriptionKey: 'data.projects.academic.sae4.description',
+    teamSizeKey: 'data.projects.academic.sae4.teamSize',
     image: '/assets/images/projects/DatabaseIllustration.webp',
-    tags: ['SQL', 'PostgreSQL', 'Base de données'],
+    tagKeys: ['sql', 'postgresql', 'database'],
     technologies: [
       {
         name: 'PostgreSQL',
@@ -155,39 +150,63 @@ export const academicProjects = [
   },
 ];
 
-export const personalProjects = [
+const personalProjectsBase = [
   {
     id: 'discord-bot',
-    title: 'Bot Discord "Moksi\'s Bazaar"',
-    description:
-      'Un bot Discord entièrement développé en JavaScript (discord.js), qui offre plusieurs services et jeux réunis sur une même plateforme textuelle.',
-    tags: ['JavaScript', 'Discord', 'Python', 'SQL', 'IA'],
+    titleKey: 'data.projects.personal.discordBot.title',
+    descriptionKey: 'data.projects.personal.discordBot.description',
+    tagKeys: ['javascript', 'discord', 'python', 'sql', 'ai'],
     image: '/assets/images/projects/MoksisBazaarIllustration.png',
     link: 'https://github.com/MalevolentMoksi/Moksi-Bazaar',
   },
   {
     id: 'drawings',
-    title: 'Illustrations & Dessins',
-    description: 'Collection personnelle de dessins et illustrations créés avec divers médiums.',
-    tags: ['Art', 'Dessin', 'Création'],
+    titleKey: 'data.projects.personal.drawings.title',
+    descriptionKey: 'data.projects.personal.drawings.description',
+    tagKeys: ['art', 'drawing', 'creation'],
     image: '/assets/images/drawings/',
   },
   {
     id: 'scratch-games',
-    title: 'Jeux Scratch',
-    description:
-      "Petits jeux développés avec l'environnement Scratch pour apprendre la programmation visuelle.",
-    tags: ['Scratch', 'Jeux', 'Programmation visuelle'],
+    titleKey: 'data.projects.personal.scratchGames.title',
+    descriptionKey: 'data.projects.personal.scratchGames.description',
+    tagKeys: ['scratch', 'games', 'visualProgramming'],
     image: '/assets/images/scratch.png',
   },
 ];
 
+const translate = (t, key, defaultValue) => {
+  if (typeof t !== 'function') return defaultValue;
+  return t(key, { defaultValue });
+};
+
+const resolveTag = (t, key) => translate(t, `data.projects.tags.${key}`, key);
+
+export const getAcademicProjects = (t) =>
+  academicProjectsBase.map((project) => ({
+    ...project,
+    type: translate(t, project.typeKey, project.typeKey),
+    title: translate(t, project.titleKey, project.titleKey),
+    category: translate(t, project.categoryKey, project.categoryKey),
+    description: translate(t, project.descriptionKey, project.descriptionKey),
+    teamSize: translate(t, project.teamSizeKey, project.teamSizeKey),
+    tags: project.tagKeys.map((key) => resolveTag(t, key)),
+  }));
+
+export const getPersonalProjects = (t) =>
+  personalProjectsBase.map((project) => ({
+    ...project,
+    title: translate(t, project.titleKey, project.titleKey),
+    description: translate(t, project.descriptionKey, project.descriptionKey),
+    tags: project.tagKeys.map((key) => resolveTag(t, key)),
+  }));
+
 /**
  * Récupère tous les tags uniques de tous les projets
  */
-export const getAllTags = () => {
-  const academicTags = academicProjects.flatMap((p) => p.tags);
-  const personalTags = personalProjects.flatMap((p) => p.tags);
+export const getAllTags = (t) => {
+  const academicTags = getAcademicProjects(t).flatMap((p) => p.tags);
+  const personalTags = getPersonalProjects(t).flatMap((p) => p.tags);
   const allTags = [...new Set([...academicTags, ...personalTags])];
   return allTags.sort();
 };
@@ -196,6 +215,7 @@ export const getAllTags = () => {
  * Filtre les projets académiques par tags
  */
 export const filterAcademicProjects = (selectedTags) => {
+  const academicProjects = getAcademicProjects();
   if (selectedTags.length === 0) return academicProjects;
   return academicProjects.filter((project) =>
     selectedTags.every((tag) => project.tags.includes(tag))
@@ -206,6 +226,7 @@ export const filterAcademicProjects = (selectedTags) => {
  * Filtre les projets personnels par tags
  */
 export const filterPersonalProjects = (selectedTags) => {
+  const personalProjects = getPersonalProjects();
   if (selectedTags.length === 0) return personalProjects;
   return personalProjects.filter((project) =>
     selectedTags.every((tag) => project.tags.includes(tag))

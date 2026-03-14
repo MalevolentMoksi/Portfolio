@@ -1,10 +1,110 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import ProjectPagination from '@/components/ProjectPagination.jsx';
 import useReadingTimeEstimate from '@/hooks/useReadingTimeEstimate.js';
 
 const ProjetSAE4 = () => {
+  const { i18n } = useTranslation();
   const contentRef = useRef(null);
   useReadingTimeEstimate(contentRef);
+
+  if (i18n.resolvedLanguage === 'en') {
+    return (
+      <>
+        <article className="project-article" ref={contentRef}>
+          <section id="project-detail">
+            <h2>Description</h2>
+            <p>
+              Completed during semester 1 of the Computer Science BUT, this pair project aimed to design and
+              implement a complete database for the SuperBall bowling club. Starting from requirements and an
+              Entity-Association model, we:
+            </p>
+            <ul>
+              <li>derived the relational schema using course translation rules;</li>
+              <li>
+                wrote <code>create.sql</code> to build tables, primary/foreign keys, <code>CHECK</code>,
+                <code>NOT NULL</code>, and uniqueness constraints;
+              </li>
+              <li>
+                wrote <code>test.sql</code> to populate the database and validate integrity with invalid inserts;
+              </li>
+              <li>
+                created SQL queries for six business needs (lane planning, shoe stock, availability, etc.);
+              </li>
+              <li>
+                evolved the schema in stage 3: lane replacement workflow, max-game extension, and critical review.
+              </li>
+            </ul>
+            <p>
+              Result: a robust PostgreSQL database, fully documented (PDF), delivered with create/drop scripts and
+              a test dataset.
+            </p>
+          </section>
+
+          <hr />
+
+          <section id="skills">
+            <h2>Skills Mobilized</h2>
+            <ul>
+              <li>Update and query relational databases (direct SQL or through applications)</li>
+              <li>Visualize data</li>
+              <li>Design relational schemas from requirements</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="objectives">
+            <h2>Learning Objectives</h2>
+            <ul>
+              <li>Apply the full DB design workflow (EA -&gt; relational model -&gt; SQL)</li>
+              <li>Master integrity constraints at the DBMS level</li>
+              <li>Populate and query a database for concrete business needs</li>
+              <li>Learn to evolve an existing schema without breaking data</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="techniques">
+            <h2>Technical Skills & Know-How</h2>
+            <ul>
+              <li>EA / Merise modeling with DB-Diagram.io, exported to PDF</li>
+              <li>PostgreSQL 15, <code>psql</code>, pgAdmin 4, DBeaver</li>
+              <li>Constraints: <strong>CHECK</strong>, composite keys, FK, indexes</li>
+              <li>Advanced SQL: window functions, <code>INTERVAL</code>, materialized views</li>
+              <li>GitLab versioning and packaged deliverables in <code>.zip</code></li>
+              <li>Critical report in LaTeX (<code>bilan.pdf</code>)</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="group-work">
+            <h2>Pair Organization</h2>
+            <p>
+              Task split: my teammate focused on <code>create.sql</code> and <code>drop.sql</code>, while I focused
+              on the relational model, business queries, and project review. We performed weekly code reviews on GitLab.
+            </p>
+          </section>
+
+          <hr />
+
+          <section id="individual-work">
+            <h2>Personal Contributions</h2>
+            <ul>
+              <li>Relational schema design (diagram + justification)</li>
+              <li>Query authoring and optimization from B1.1 to B2 (&lt;= 5 ms)</li>
+              <li>Automated testing and SQL script validation with PostgreSQL</li>
+              <li>5-minute oral presentation (Canva slides)</li>
+            </ul>
+          </section>
+        </article>
+
+        <ProjectPagination currentPath="/projet-SAE4" />
+      </>
+    );
+  }
 
   return (
     <>

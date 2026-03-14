@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip.jsx';
-import { academicProjects, personalProjects, getAllTags } from '@/data/projects.js';
+import { getAcademicProjects, getPersonalProjects, getAllTags } from '@/data/projects.js';
 import { discoverMusicTracks } from '@/utils/discoverMusicTracks.js';
 import SnakeGame from './SnakeGame.jsx';
 
@@ -9,7 +10,7 @@ import SnakeGame from './SnakeGame.jsx';
 
 const ALL_TRACKS = discoverMusicTracks();
 
-const DEV_JOKES = [
+const DEFAULT_DEV_JOKES = [
   "Pourquoi les développeurs détestent la nature ? Parce qu'il y a trop de bugs.",
   "Il y a 10 types de personnes : celles qui comprennent le binaire et les autres.",
   "Un développeur ne va jamais boire un café... il va exécuter un Java.",
@@ -22,12 +23,12 @@ const DEV_JOKES = [
   "Mon code fonctionne et je ne sais pas pourquoi. Mon code ne fonctionne pas et je ne sais pas pourquoi.",
 ];
 
-const SKILLS = [
+const DEFAULT_SKILLS = [
   'JavaScript / React', 'HTML5 / CSS3', 'Python', 'Java',
   'SQL / PostgreSQL', 'Git', 'Node.js', 'Linux',
 ];
 
-const PROJECTS = [
+const DEFAULT_PROJECTS = [
   { name: 'Application de planification de banquets', path: '/projet-MEGASAE' },
   { name: "Implémentation d'un besoin client", path: '/projet-SAE12' },
   { name: "Installation d'un poste pour le développement", path: '/projet-SAE3' },
@@ -35,7 +36,7 @@ const PROJECTS = [
   { name: "Création d'un site institutionnel", path: '/projet-SAE56' },
 ];
 
-const HELP_TEXT = `Commandes disponibles :
+const DEFAULT_HELP_TEXT = `Commandes disponibles :
   help      — afficher cette aide
   about     — à propos de moi
   projects  — lister mes projets
@@ -47,7 +48,7 @@ const HELP_TEXT = `Commandes disponibles :
   snake     — lancer le jeu Snake 🐍
   clear     — effacer le terminal`;
 
-const ABOUT_TEXT = `Enzo Morello / Étudiant en BUT Informatique à l'IUT2 de Grenoble.
+const DEFAULT_ABOUT_TEXT = `Enzo Morello / Étudiant en BUT Informatique à l'IUT2 de Grenoble.
 Passionné par le développement web, les jeux vidéo et la création.
 Parcours Développeur d'applications.`;
 
@@ -63,10 +64,12 @@ const formatElapsed = (ms) => {
   return `${min}m ${sec.toString().padStart(2, '0')}s`;
 };
 
-const calculateStats = () => {
+const calculateStats = (t, skills, locale) => {
+  const academicProjects = getAcademicProjects(t);
+  const personalProjects = getPersonalProjects(t);
   // Portfolio
   const totalProjects = academicProjects.length + personalProjects.length;
-  const uniqueTechs = getAllTags().length;
+  const uniqueTechs = getAllTags(t).length;
 
   // Session
   const sessionStart = parseInt(sessionStorage.getItem('session-start') || Date.now(), 10);
@@ -83,35 +86,51 @@ const calculateStats = () => {
 
   // Robot
   const petStats = window.getPetStats?.();
-  let petStatus = '—';
+  let petStatus = t('common.terminal.stats.none');
   if (petStats) {
-    const labels = { happy: 'Heureux 😊', content: 'Content 😐', sad: 'Triste 😢' };
-    petStatus = `${labels[petStats.mood] || petStats.mood} — bonheur: ${petStats.happiness}%`;
+    const labels = {
+      happy: t('common.terminal.petMood.happy'),
+      content: t('common.terminal.petMood.content'),
+      sad: t('common.terminal.petMood.sad'),
+    };
+    petStatus = `${labels[petStats.mood] || petStats.mood} - ${t('common.terminal.stats.happiness')}: ${petStats.happiness}%`;
   } else if (localStorage.getItem('pet-spawned') === 'false') {
-    petStatus = 'Robot rappelé';
+    petStatus = t('common.terminal.pet.recalled');
   }
 
-  return `Statistiques du portfolio :
+  return `${t('common.terminal.stats.title')}:
 
-  Portfolio :
-    Projets        ${totalProjects} (${academicProjects.length} académiques, ${personalProjects.length} personnels)
-    Compétences    ${SKILLS.length}
-    Technologies   ${uniqueTechs} uniques
+  ${t('common.terminal.stats.portfolio')}:
+    ${t('common.terminal.stats.projects')}       ${totalProjects} (${academicProjects.length} ${t('common.terminal.stats.academic')}, ${personalProjects.length} ${t('common.terminal.stats.personal')})
+    ${t('common.terminal.stats.skills')}   ${skills.length}
+    ${t('common.terminal.stats.technologies')}  ${uniqueTechs}
 
-  Session :
-    Pages visitées  ${pagesVisited}
-    Temps en ligne  ${elapsed}
-    Musique         ${musicStatus}
-    Robot           ${petStatus}`;
+  ${t('common.terminal.stats.session')}:
+    ${t('common.terminal.stats.pagesVisited')} ${pagesVisited}
+    ${t('common.terminal.stats.timeOnline')} ${elapsed}
+    ${t('common.terminal.stats.music')}        ${musicStatus}
+    ${t('common.terminal.stats.robot')}         ${petStatus}`;
 };
 
 /* ── Composant ─────────────────────────────────────── */
 
 const MiniTerminal = () => {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage === 'en' ? 'en-US' : 'fr-FR';
+  const jokesFromI18n = t('common.terminal.jokes', { returnObjects: true });
+  const skillsFromI18n = t('common.terminal.skills', { returnObjects: true });
+  const projectsFromI18n = t('common.terminal.projects', { returnObjects: true });
+
+  const DEV_JOKES = Array.isArray(jokesFromI18n) ? jokesFromI18n : DEFAULT_DEV_JOKES;
+  const SKILLS = Array.isArray(skillsFromI18n) ? skillsFromI18n : DEFAULT_SKILLS;
+  const PROJECTS = Array.isArray(projectsFromI18n) ? projectsFromI18n : DEFAULT_PROJECTS;
+  const HELP_TEXT = t('common.terminal.helpText', { defaultValue: DEFAULT_HELP_TEXT });
+  const ABOUT_TEXT = t('common.terminal.aboutText', { defaultValue: DEFAULT_ABOUT_TEXT });
+
   const [isOpen, setIsOpen] = useState(false);
   const [snakeMode, setSnakeMode] = useState(false);
   const [lines, setLines] = useState([
-    { type: 'system', text: 'Bienvenue ! Tapez "help" pour la liste des commandes.' },
+    { type: 'system', text: t('common.terminal.welcome') },
   ]);
   const [input, setInput] = useState('');
   const [iconState, setIconState] = useState('idle'); // idle | open
@@ -133,6 +152,10 @@ const MiniTerminal = () => {
   }, [isOpen]);
 
   /* ── Scroll auto ── */
+  useEffect(() => {
+    setLines([{ type: 'system', text: t('common.terminal.welcome') }]);
+  }, [t]);
+
   useEffect(() => {
     if (outputRef.current) {
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
@@ -221,18 +244,18 @@ const MiniTerminal = () => {
 
       case 'projects': {
         const list = PROJECTS.map((p, i) => `  ${i + 1}. ${p.name}`).join('\n');
-        newLines.push({ type: 'system', text: `Projets :\n${list}` });
+        newLines.push({ type: 'system', text: `${t('common.terminal.output.projects')}:\n${list}` });
         break;
       }
 
       case 'skills': {
         const list = SKILLS.map((s) => `  • ${s}`).join('\n');
-        newLines.push({ type: 'system', text: `Compétences :\n${list}` });
+        newLines.push({ type: 'system', text: `${t('common.terminal.output.skills')}:\n${list}` });
         break;
       }
 
       case 'stats':
-        newLines.push({ type: 'system', text: calculateStats() });
+        newLines.push({ type: 'system', text: calculateStats(t, SKILLS, locale) });
         break;
 
       case 'joke': {
@@ -242,7 +265,7 @@ const MiniTerminal = () => {
       }
 
       case 'date':
-        newLines.push({ type: 'system', text: new Date().toLocaleString('fr-FR') });
+        newLines.push({ type: 'system', text: new Date().toLocaleString(locale) });
         break;
 
       case 'pet': {
@@ -251,18 +274,22 @@ const MiniTerminal = () => {
           newLines.push({
             type: 'system',
             text: localStorage.getItem('pet-spawned') === 'false'
-              ? '🤖 Robot rappelé. Invoque-le via l\'icône robot dans la barre.'
-              : '🤖 Robot pas encore adopté ! Clique sur l\'icône robot dans la barre.',
+              ? t('common.terminal.pet.recalledHint')
+              : t('common.terminal.pet.notAdoptedHint'),
           });
         } else {
           const bar = (val) => {
             const filled = Math.round(val / 10);
             return '█'.repeat(filled) + '░'.repeat(10 - filled);
           };
-          const labels = { happy: 'Heureux 😊', content: 'Content', sad: 'Triste 😢' };
+          const labels = {
+            happy: t('common.terminal.petMood.happy'),
+            content: t('common.terminal.petMood.content'),
+            sad: t('common.terminal.petMood.sad'),
+          };
           newLines.push({
             type: 'system',
-            text: `🤖 État du robot :\n  Faim    : [${bar(petStats.hunger)}] ${petStats.hunger}%\n  Bonheur : [${bar(petStats.happiness)}] ${petStats.happiness}%\n  Humeur  : ${labels[petStats.mood] || petStats.mood}`,
+            text: `${t('common.terminal.pet.state')}:\n  ${t('common.terminal.pet.hunger')} : [${bar(petStats.hunger)}] ${petStats.hunger}%\n  ${t('common.terminal.pet.happiness')} : [${bar(petStats.happiness)}] ${petStats.happiness}%\n  ${t('common.terminal.pet.mood')} : ${labels[petStats.mood] || petStats.mood}`,
           });
         }
         break;
@@ -281,13 +308,13 @@ const MiniTerminal = () => {
       default:
         newLines.push({
           type: 'error',
-          text: `Commande inconnue : "${trimmed}". Tapez "help" pour voir les commandes.`,
+          text: t('common.terminal.unknownCommand', { command: trimmed }),
         });
     }
 
     setLines((prev) => [...prev, ...newLines]);
     setInput('');
-  }, []);
+  }, [HELP_TEXT, ABOUT_TEXT, DEV_JOKES, PROJECTS, SKILLS, t, locale]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -313,11 +340,11 @@ const MiniTerminal = () => {
   return (
     <div className="mini-terminal-wrapper" ref={panelRef}>
       {/* Bouton icône dans la barre */}
-      <Tooltip text="Terminal" position="bottom">
+      <Tooltip text={t('common.terminal.tooltip')} position="bottom">
       <button
         className="header-action-btn"
         onClick={toggleTerminal}
-        aria-label="Ouvrir le mini-terminal"
+        aria-label={t('common.terminal.openAria')}
         aria-expanded={isOpen}
       >
         <svg
@@ -352,7 +379,7 @@ const MiniTerminal = () => {
           ref={panelDivRef}
           className={`mini-terminal-panel${snakeMode ? ' mini-terminal-panel--snake' : ''}`}
           role="dialog"
-          aria-label="Mini terminal"
+          aria-label={t('common.terminal.dialogAria')}
           style={panelPos ? {
             top: `${panelPos.top}px`,
             ...(panelPos.left !== undefined
@@ -363,7 +390,7 @@ const MiniTerminal = () => {
           <div className="mini-terminal-titlebar">
             <span className="mini-terminal-status">
               <span className="mini-terminal-status-dot" aria-hidden="true" />
-              <span className="mini-terminal-status-label">RUN</span>
+              <span className="mini-terminal-status-label">{t('common.terminal.run')}</span>
             </span>
             <span className="mini-terminal-title">enzo@portfolio:~</span>
             <span className="mini-terminal-session">{sessionTime}</span>
@@ -395,10 +422,10 @@ const MiniTerminal = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Tapez une commande…"
+                  placeholder={t('common.terminal.placeholder')}
                   spellCheck={false}
                   autoComplete="off"
-                  aria-label="Saisie de commande"
+                  aria-label={t('common.terminal.inputAria')}
                 />
               </div>
             </>

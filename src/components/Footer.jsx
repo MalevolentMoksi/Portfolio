@@ -1,7 +1,9 @@
 import { NavLink, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import FooterWidget from './FooterWidget.jsx';
 
 const Footer = ({ diorama }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -32,9 +34,9 @@ const Footer = ({ diorama }) => {
 
       {/* ─── Bande supérieure : micro-navigation + indicateur de thème ─── */}
       <div className="footer-top">
-        <nav className="footer-top-nav" aria-label="Navigation secondaire">
-          <FooterLink to="/about">À propos du portfolio</FooterLink>
-          <FooterLink to="/credits">Crédits</FooterLink>
+        <nav className="footer-top-nav" aria-label={t('common.footer.secondaryNavAria')}>
+          <FooterLink to="/about">{t('common.footer.about')}</FooterLink>
+          <FooterLink to="/credits">{t('common.footer.credits')}</FooterLink>
         </nav>
         <FooterWidget />
       </div>
@@ -47,7 +49,7 @@ const Footer = ({ diorama }) => {
           className="bubble"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Profil GitHub"
+          aria-label={t('common.footer.githubAria')}
         >
           <img
             src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg"
@@ -56,7 +58,7 @@ const Footer = ({ diorama }) => {
             height="22"
           />
         </a>
-        <a href="/#contact" className="bubble" aria-label="Email">
+        <a href="/#contact" className="bubble" aria-label={t('common.footer.emailAria')}>
           <svg
             width="22"
             height="22"
@@ -79,7 +81,7 @@ const Footer = ({ diorama }) => {
           className="bubble"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Profil GitLab"
+          aria-label={t('common.footer.gitlabAria')}
         >
           <img
             src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg"
@@ -90,7 +92,7 @@ const Footer = ({ diorama }) => {
         </a>
       </div>
       <div className="footer-right" id="footer-fun">
-        <span id="footer-clock" aria-label="Horloge" role="timer"></span>
+        <span id="footer-clock" aria-label={t('common.footer.clockAria')} role="timer"></span>
       </div>
     </div>
   </footer>

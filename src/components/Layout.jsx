@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import AccessibilityButton from './AccessibilityButton.jsx';
 import BackToTopButton from './BackToTopButton.jsx';
 import Breadcrumbs from './Breadcrumbs.jsx';
 import Footer from './Footer.jsx';
 import HamburgerMenu from './HamburgerMenu.jsx';
+import LanguageButton from './LanguageButton.jsx';
 import MiniTerminal from './MiniTerminal.jsx';
 import MoodSwitcher from './MoodSwitcher.jsx';
 import { useMood } from '../contexts/MoodContext.jsx';
@@ -22,89 +25,87 @@ const trackFiles = discoverMusicTracks();
 
 const pageConfig = {
   '/': {
-    heading: 'Portfolio de Enzo MORELLO',
-    subheading: 'Étudiant en IUT2',
-    subheadingAlt: "en Parcours Développement d'applications",
+    headingKey: 'pageConfig.home.heading',
+    subheadingKey: 'pageConfig.home.subheading',
+    subheadingAltKey: 'pageConfig.home.subheadingAlt',
     backgroundSrc: getAssetPath('assets/images/backgrounds/risk-of-rain-2-launch-update.jpg'),
-    metaTitle: 'Portfolio - Enzo Morello',
-    metaDescription: "Portfolio d'Enzo Morello, étudiant en BUT Informatique à l'IUT2 de Grenoble",
+    metaTitleKey: 'pageConfig.home.metaTitle',
+    metaDescriptionKey: 'pageConfig.home.metaDescription',
   },
   '/projets': {
-    heading: 'Portfolio - Projets',
-    subheading: 'Projets académiques et professionnels',
+    headingKey: 'pageConfig.projets.heading',
+    subheadingKey: 'pageConfig.projets.subheading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/destiny-2-landshaft-fentezi.webp'),
-    metaTitle: 'Portfolio - Projets Académiques',
-    metaDescription: "Découvrez mes projets académiques réalisés à l'IUT2 de Grenoble",
+    metaTitleKey: 'pageConfig.projets.metaTitle',
+    metaDescriptionKey: 'pageConfig.projets.metaDescription',
   },
   '/projets-personnels': {
-    heading: 'Projets personnels',
-    subheading: 'Créations et explorations créatives',
+    headingKey: 'pageConfig.projetsPersonnels.heading',
+    subheadingKey: 'pageConfig.projetsPersonnels.subheading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/europa_compressed.jpg'),
-    metaTitle: 'Portfolio - Projets personnels',
-    metaDescription: "Portfolio d'Enzo Morello - Projets personnels et créations",
+    metaTitleKey: 'pageConfig.projetsPersonnels.metaTitle',
+    metaDescriptionKey: 'pageConfig.projetsPersonnels.metaDescription',
   },
   '/projet-MEGASAE': {
-    heading: 'Projet cardinal - Application de planification de banquets',
+    headingKey: 'pageConfig.projetMegasae.heading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/beyondlight.webp'),
-    metaTitle: 'Projet cardinal - Application de gestion de banquets',
-    metaDescription: "Portfolio d'Enzo Morello - Projet cardinal",
+    metaTitleKey: 'pageConfig.projetMegasae.metaTitle',
+    metaDescriptionKey: 'pageConfig.projetMegasae.metaDescription',
   },
   '/projet-SAE12': {
-    heading: "Projet Implémentation d'un besoin client | Comparaison d'approches algorithmiques",
+    headingKey: 'pageConfig.projetSae12.heading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/pyramids2.webp'),
-    metaTitle: "Projet Implémentation d'un besoin client",
-    metaDescription: "Portfolio d'Enzo Morello - Projet SAE12",
+    metaTitleKey: 'pageConfig.projetSae12.metaTitle',
+    metaDescriptionKey: 'pageConfig.projetSae12.metaDescription',
   },
   '/projet-SAE3': {
-    heading: "Installation d'un poste pour le développement | Carte mentale & Présentation",
+    headingKey: 'pageConfig.projetSae3.heading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/SpaceStation.webp'),
-    metaTitle: "Installation d'un poste pour le développement",
-    metaDescription: "Portfolio d'Enzo Morello - Projet SAE3",
+    metaTitleKey: 'pageConfig.projetSae3.metaTitle',
+    metaDescriptionKey: 'pageConfig.projetSae3.metaDescription',
   },
   '/projet-SAE4': {
-    heading: "Projet - Création d'une base de données",
+    headingKey: 'pageConfig.projetSae4.heading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/Destiny2PyramidStation.webp'),
-    metaTitle: "Projet - Création d'une base de données",
-    metaDescription: "Portfolio d'Enzo Morello - Projet SAE4",
+    metaTitleKey: 'pageConfig.projetSae4.metaTitle',
+    metaDescriptionKey: 'pageConfig.projetSae4.metaDescription',
   },
   '/projet-SAE56': {
-    heading: "Projet - Création d'un site institutionnel",
+    headingKey: 'pageConfig.projetSae56.heading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/pyramids2.webp'),
-    metaTitle: 'Projet - Création site web institutionnel',
-    metaDescription: "Portfolio d'Enzo Morello - Projet SAE56",
+    metaTitleKey: 'pageConfig.projetSae56.metaTitle',
+    metaDescriptionKey: 'pageConfig.projetSae56.metaDescription',
   },
   '/projet-SAE3.01': {
-    heading: 'Aidémé – Application Web de coordination pour les aidants',
-    subheading: 'Une plateforme collaborative pour gérer le suivi des personnes dépendantes',
+    headingKey: 'pageConfig.projetSae301.heading',
+    subheadingKey: 'pageConfig.projetSae301.subheading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/Destiny2EuropaPyramid.webp'),
-    metaTitle: 'Aidémé – Application Web pour les aidants',
-    metaDescription:
-      "Portfolio d'Enzo Morello - Projet SAE 3.01 : application full-stack React + PHP",
+    metaTitleKey: 'pageConfig.projetSae301.metaTitle',
+    metaDescriptionKey: 'pageConfig.projetSae301.metaDescription',
   },
   '/about': {
-    heading: 'À propos du portfolio',
-    subheading: 'Stack technique, architecture et choix de conception',
+    headingKey: 'pageConfig.about.heading',
+    subheadingKey: 'pageConfig.about.subheading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/ROR2ReturnsSpace.webp'),
-    metaTitle: 'À propos | Portfolio - Enzo Morello',
-    metaDescription:
-      "Architecture et stack technique du portfolio d'Enzo Morello — React, Vite, Framer Motion, CSS sur mesure.",
+    metaTitleKey: 'pageConfig.about.metaTitle',
+    metaDescriptionKey: 'pageConfig.about.metaDescription',
   },
   '/credits': {
-    heading: 'Crédits',
-    subheading: 'Musique, visuels et remerciements',
+    headingKey: 'pageConfig.credits.heading',
+    subheadingKey: 'pageConfig.credits.subheading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/RiskOfRain2SurvivorsOfTheVoid.webp'),
-    metaTitle: 'Crédits | Portfolio - Enzo Morello',
-    metaDescription:
-      "Remerciements et crédits du portfolio d'Enzo Morello — artistes, studios et équipe pédagogique.",
+    metaTitleKey: 'pageConfig.credits.metaTitle',
+    metaDescriptionKey: 'pageConfig.credits.metaDescription',
   },
 };
 
 const Layout = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const config = pageConfig[location.pathname] || pageConfig['/'];
   const { mood } = useMood();
 
-  useDocumentMeta(config.metaTitle, config.metaDescription);
+  useDocumentMeta(t(config.metaTitleKey), t(config.metaDescriptionKey));
   usePortfolioModules(trackFiles);
 
   // Scroll to top when route changes
@@ -148,7 +149,7 @@ const Layout = () => {
   return (
     <>
       <a href="#main" className="skip-to-content">
-        Aller au contenu principal
+        {t('common.header.skipToContent')}
       </a>
       <div id="particles-js" aria-hidden="true"></div>
       <img
@@ -165,25 +166,30 @@ const Layout = () => {
       <header className="header--main">
         {/* Branding Section */}
         <div className="header--branding">
-          <NavLink to="/" className="brand-logo" aria-label="Accueil - Enzo MORELLO">
+          <NavLink to="/" className="brand-logo" aria-label={t('common.header.brandAria')}>
             <span className="logo-icon">EM</span>
             <span className="logo-text">ENZO MORELLO</span>
           </NavLink>
         </div>
 
+        <div className="header--controls" role="toolbar" aria-label={t('common.header.controlsAria')}>
+          <LanguageButton />
+          <AccessibilityButton />
+        </div>
+
         {/* Desktop Navigation */}
-        <nav className="header--nav-desktop" aria-label="Navigation principale">
+        <nav className="header--nav-desktop" aria-label={t('common.nav.primaryAria')}>
           <ul>
             <li>
               <NavLink to="/" end>
-                Accueil
+                {t('common.nav.home')}
               </NavLink>
             </li>
             <li>
-              <NavLink to="/projets">Projets</NavLink>
+              <NavLink to="/projets">{t('common.nav.projects')}</NavLink>
             </li>
             <li>
-              <NavLink to="/projets-personnels">Projets personnels</NavLink>
+              <NavLink to="/projets-personnels">{t('common.nav.personalProjects')}</NavLink>
             </li>
           </ul>
         </nav>
@@ -192,7 +198,7 @@ const Layout = () => {
         <HamburgerMenu />
 
         {/* Actions interactives — slot droit de la barre de navigation */}
-        <div className="header--actions" role="toolbar" aria-label="Actions interactives">
+        <div className="header--actions" role="toolbar" aria-label={t('common.header.actionsAria')}>
           <PetButton />
           <MoodSwitcher />
           <ParticlesButton />
@@ -200,12 +206,12 @@ const Layout = () => {
         </div>
       </header>
 
-      <section className="header--secondary" aria-label="En-tête secondaire de la page">
+      <section className="header--secondary" aria-label={t('common.header.secondaryAria')}>
         <div className="header--hero">
-          <h1 id="main-title">{config.heading}</h1>
-          {config.subheading ? <h3 className="header-subheading">{config.subheading}</h3> : null}
-          {config.subheadingAlt ? (
-            <h4 className="header-subheading-alt">{config.subheadingAlt}</h4>
+          <h1 id="main-title">{t(config.headingKey)}</h1>
+          {config.subheadingKey ? <h3 className="header-subheading">{t(config.subheadingKey)}</h3> : null}
+          {config.subheadingAltKey ? (
+            <h4 className="header-subheading-alt">{t(config.subheadingAltKey)}</h4>
           ) : null}
         </div>
       </section>
@@ -218,7 +224,9 @@ const Layout = () => {
       </main>
 
       <Footer diorama={<FooterDiorama />} />
-      <AmbientEffects />
+      <div className="ambient-layers" aria-hidden="true">
+        <AmbientEffects />
+      </div>
       <BackToTopButton />
     </>
   );

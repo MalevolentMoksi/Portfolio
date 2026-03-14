@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * FooterWidget — Cycles between three states every 4.5 seconds:
@@ -26,6 +27,7 @@ const formatElapsedTime = (ms) => {
  * Session Timer — shows elapsed time
  */
 const SessionTimer = () => {
+  const { t } = useTranslation();
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
@@ -44,7 +46,7 @@ const SessionTimer = () => {
   return (
     <div
       className="footer-widget-state footer-widget-timer"
-      aria-label="Temps passé sur le portfolio"
+      aria-label={t('common.footerWidget.timeOnPortfolio')}
     >
       <span className="footer-widget-icon" aria-hidden="true">
         ⏱
@@ -58,15 +60,16 @@ const SessionTimer = () => {
  * Status Badge — shows build/deployment info
  */
 const StatusBadge = () => {
+  const { t } = useTranslation();
   // Injected at build time via Vite's define config
   const buildDate = typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : 'N/A';
 
   return (
-    <div className="footer-widget-state footer-widget-badge" aria-label="Statut de déploiement">
+    <div className="footer-widget-state footer-widget-badge" aria-label={t('common.footerWidget.deploymentStatus')}>
       <span className="footer-widget-icon" aria-hidden="true">
         ✓
       </span>
-      <span className="footer-widget-text">Dernière Build : {buildDate}</span>
+      <span className="footer-widget-text">{t('common.footerWidget.lastBuild', { buildDate })}</span>
     </div>
   );
 };
@@ -75,8 +78,9 @@ const StatusBadge = () => {
  * Cosmic Satellite — multi-orbit system with satellites and depth effects
  */
 const CosmicSatellite = () => {
+  const { t } = useTranslation();
   return (
-    <div className="footer-widget-state footer-widget-orbit" aria-label="Satellite cosmique">
+    <div className="footer-widget-state footer-widget-orbit" aria-label={t('common.footerWidget.cosmicSatellite')}>
       <svg
         className="footer-widget-orbit-svg"
         viewBox="0 0 40 40"

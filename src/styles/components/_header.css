@@ -1,7 +1,7 @@
 /* ============================================
-  Header — Split
+  Header - Split
   ============================================
-  Header primaire (sticky) : [logo · navigation · liens sociaux]
+  Header primaire (sticky) : [logo - controls - navigation - liens sociaux]
   Header secondaire (non sticky) : hero de page */
 
 header.header--main {
@@ -13,11 +13,20 @@ header.header--main {
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-areas: 'brand nav social';
+  grid-template-columns: auto auto 1fr auto;
+  grid-template-areas: 'brand controls nav social';
   align-items: center;
   column-gap: var(--space-sm);
   padding: 0.8rem var(--space-lg);
+}
+
+/* ---- Header controls (langue + accessibilite) ---- */
+.header--controls {
+  grid-area: controls;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-self: start;
 }
 
 /* ---- Branding ---- */
@@ -89,7 +98,7 @@ header.header--main {
   list-style: none;
   padding: 0;
   margin: 0;
-  width: 100%;
+  width: auto;
 }
 
 .header--nav-desktop ul li a {
@@ -208,7 +217,7 @@ header.header--main {
   filter: drop-shadow(0 2px 10px rgba(var(--color-primary-rgb), 0.35));
 }
 
-/* h3.header-subheading — sous-titre principal */
+/* h3.header-subheading - sous-titre principal */
 .header--secondary .header--hero h3.header-subheading {
   font-size: 0.9rem;
   margin-top: 0;
@@ -220,7 +229,7 @@ header.header--main {
   opacity: 0.9;
 }
 
-/* h4.header-subheading-alt — mention complémentaire */
+/* h4.header-subheading-alt - mention complementaire */
 .header--secondary .header--hero h4.header-subheading-alt {
   font-size: 0.82rem;
   margin-top: 0;
@@ -231,7 +240,7 @@ header.header--main {
   opacity: 0.72;
 }
 
-/* Compatibilité : anciens sélecteurs h2/h3 (inutilisés mais conservés) */
+/* Compatibilite : anciens selecteurs h2/h3 (inutilises mais conserves) */
 .header--secondary .header--hero h2.header-subheading {
   font-size: 0.9rem;
   margin-top: 0;
@@ -262,6 +271,7 @@ header.header--main {
 .header--actions {
   grid-area: social;
   align-self: center;
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -277,23 +287,81 @@ header.header--main .hamburger-toggle {
 
 /* ---- Affichage nav desktop ---- */
 @media (min-width: 769px) {
-  .header--nav-desktop {
+  header.header--main {
+    position: sticky;
     display: flex;
     align-items: center;
-    justify-content: center;
-    align-self: stretch;
+    justify-content: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .header--branding,
+  .header--controls {
+    flex: 0 0 auto;
+  }
+
+  .header--controls {
+    margin-left: 0.25rem;
+  }
+
+  .header--actions {
+    margin-left: auto;
+    flex: 0 0 auto;
+  }
+
+  .header--nav-desktop {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: max-content;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .header--nav-desktop ul {
+    margin: 0;
+    width: max-content;
+    pointer-events: auto;
+  }
+
+  .header--branding,
+  .header--controls,
+  .header--actions {
+    position: relative;
+    z-index: 2;
   }
 }
 
 /* =============================================
    RESPONSIVE
    ============================================= */
-/* ---- Tablet ≤ 768px ---- */
+/* ---- Tablet <= 768px ---- */
 @media (max-width: 768px) {
   header.header--main {
-    grid-template-columns: auto 1fr;
-    grid-template-areas: 'brand social';
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-areas: 'brand controls . burger';
     padding: 0.6rem var(--space-md);
+  }
+
+  /* Show controls (language + accessibility) but hide other actions (pet, mood, particles, terminal) */
+  .header--controls {
+    grid-area: controls;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: 0;
+  }
+
+  .header--actions {
+    display: none;
+  }
+
+  /* Hamburger occupies the burger slot */
+  header.header--main .hamburger-toggle {
+    grid-area: burger;
   }
 
   .header--secondary {
@@ -336,7 +404,7 @@ header.header--main .hamburger-toggle {
   }
 }
 
-/* ---- Mobile ≤ 480px ---- */
+/* ---- Mobile <= 480px ---- */
 @media (max-width: 480px) {
   header.header--main {
     padding: 0.5rem var(--space-sm);

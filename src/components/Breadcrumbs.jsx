@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useReadingTime } from '@/contexts/ReadingTimeContext.jsx';
 
 /**
@@ -6,25 +7,26 @@ import { useReadingTime } from '@/contexts/ReadingTimeContext.jsx';
  * Affiche le fil d'Ariane pour la navigation hiérarchique avec connaissance de la structure du site
  */
 const Breadcrumbs = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const { readingTime } = useReadingTime();
   const pathnames = location.pathname.split('/').filter((x) => x);
 
   // Mapping des chemins vers des labels lisibles
   const pathLabels = {
-    'projets': 'Projets',
-    'projets-personnels': 'Projets personnels',
-    'projet-MEGASAE': 'Application de planification de banquets',
-    'projet-SAE12': "Implémentation d'un besoin client",
-    'projet-SAE3': "Installation d'un poste pour le développement",
-    'projet-SAE4': "Création d'une base de données",
-    'projet-SAE56': "Création d'un site institutionnel",
-    'projet-SAE3.01': "Application Web pour les aidants",
+    'projets': t('common.breadcrumbs.labels.projets'),
+    'projets-personnels': t('common.breadcrumbs.labels.projetsPersonnels'),
+    'projet-MEGASAE': t('common.breadcrumbs.labels.projetMegasae'),
+    'projet-SAE12': t('common.breadcrumbs.labels.projetSae12'),
+    'projet-SAE3': t('common.breadcrumbs.labels.projetSae3'),
+    'projet-SAE4': t('common.breadcrumbs.labels.projetSae4'),
+    'projet-SAE56': t('common.breadcrumbs.labels.projetSae56'),
+    'projet-SAE3.01': t('common.breadcrumbs.labels.projetSae301'),
   };
 
   // Génère le fil d'Ariane en respectant la hiérarchie du site
   const generateBreadcrumbTrail = () => {
-    const trail = [{ label: 'Accueil', path: '/', isCurrent: false }];
+    const trail = [{ label: t('common.nav.home'), path: '/', isCurrent: false }];
 
     if (pathnames.length === 0) {
       return trail;
@@ -35,29 +37,29 @@ const Breadcrumbs = () => {
     // Si c'est une page de projet (projet-MEGASAE, projet-SAE12, etc.)
     // → Accueil › Projets › ProjetXXXX
     if (firstSegment.startsWith('projet-')) {
-      trail.push({ label: 'Projets', path: '/projets', isCurrent: false });
+      trail.push({ label: t('common.nav.projects'), path: '/projets', isCurrent: false });
       const label = pathLabels[firstSegment] || firstSegment;
       trail.push({ label, path: `/${firstSegment}`, isCurrent: true });
     }
     // Si c'est la page Projets
     // → Accueil › Projets
     else if (firstSegment === 'projets') {
-      trail.push({ label: 'Projets', path: '/projets', isCurrent: true });
+      trail.push({ label: t('common.nav.projects'), path: '/projets', isCurrent: true });
     }
     // Si c'est la page Projets personnels
     // → Accueil › Projets personnels
     else if (firstSegment === 'projets-personnels') {
-      trail.push({ label: 'Projets personnels', path: '/projets-personnels', isCurrent: true });
+      trail.push({ label: t('common.nav.personalProjects'), path: '/projets-personnels', isCurrent: true });
     }
     // Si c'est la page À propos
     // → Accueil › À propos
     else if (firstSegment === 'about') {
-      trail.push({ label: 'À propos', path: '/about', isCurrent: true });
+      trail.push({ label: t('common.footer.about'), path: '/about', isCurrent: true });
     }
     // Si c'est la page Crédits
     // → Accueil › Crédits
     else if (firstSegment === 'credits') {
-      trail.push({ label: 'Crédits', path: '/credits', isCurrent: true });
+      trail.push({ label: t('common.footer.credits'), path: '/credits', isCurrent: true });
     }
 
     return trail;
@@ -69,7 +71,7 @@ const Breadcrumbs = () => {
   if (pathnames.length === 0) return null;
 
   return (
-    <nav className="breadcrumbs" aria-label="Fil d'Ariane">
+    <nav className="breadcrumbs" aria-label={t('common.breadcrumbs.aria')}>
       <ol>
         {breadcrumbTrail.map((crumb, index) => (
           <li key={crumb.path}>
@@ -86,7 +88,7 @@ const Breadcrumbs = () => {
       </ol>
       {readingTime ? (
         <span className="reading-time" aria-live="polite">
-          {readingTime} min read
+          {t('common.breadcrumbs.minRead', { count: readingTime })}
         </span>
       ) : null}
     </nav>

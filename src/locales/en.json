@@ -1,0 +1,738 @@
+{
+  "common": {
+    "videoNotSupported": "Your browser does not support the video tag.",
+    "nav": {
+      "primaryAria": "Main navigation",
+      "home": "Home",
+      "projects": "Projects",
+      "personalProjects": "Personal projects"
+    },
+    "header": {
+      "skipToContent": "Skip to main content",
+      "brandAria": "Home - Enzo MORELLO",
+      "controlsAria": "Language and accessibility controls",
+      "actionsAria": "Interactive actions",
+      "secondaryAria": "Secondary page header"
+    },
+    "language": {
+      "tooltip": "Language",
+      "ariaLabel": "Change site language",
+      "choose": "Choose language",
+      "title": "Language",
+      "names": {
+        "fr": "Français",
+        "en": "English"
+      }
+    },
+    "accessibility": {
+      "tooltip": "Accessibility",
+      "ariaLabel": "Open accessibility options",
+      "title": "Accessibility",
+      "options": {
+        "noMotion": "Disable animations & visual effects",
+        "highContrast": "High contrast",
+        "fontSize": "Font size",
+        "dyslexia": "Dyslexia-friendly font"
+      },
+      "fontSize": {
+        "normal": "Normal",
+        "lg": "Large",
+        "xl": "XL"
+      }
+    },
+    "mobileNav": {
+      "toggleAria": "Toggle navigation menu",
+      "aria": "Mobile navigation"
+    },
+    "mood": {
+      "tooltip": "Mood: {{mood}}",
+      "ariaLabel": "Change visual mood",
+      "chooseAria": "Choose a mood",
+      "title": "Mood",
+      "toastActivated": "{{emoji}}  \"{{mood}}\" mood enabled",
+      "names": {
+        "default": "Default",
+        "hacker": "Terminal",
+        "vaporwave": "Vaporwave",
+        "europa": "Europa",
+        "industrial": "Industrial"
+      }
+    },
+    "particles": {
+      "ariaLabel": "Particle effect: {{effect}}",
+      "clickToTrigger": "Click to trigger",
+      "loading": "Loading {{progress}}%",
+      "effects": {
+        "explode": {
+          "label": "Explosion",
+          "toast": "Explosion - particles launched!"
+        },
+        "attract": {
+          "label": "Attraction",
+          "toast": "Attraction - convergence in progress..."
+        },
+        "storm": {
+          "label": "Storm",
+          "toast": "Storm - maximum turbulence!"
+        },
+        "gravity": {
+          "label": "Gravity",
+          "toast": "Gravity - particles are falling!"
+        }
+      }
+    },
+    "breadcrumbs": {
+      "aria": "Breadcrumb",
+      "minRead": "{{count}} min read",
+      "labels": {
+        "projets": "Projects",
+        "projetsPersonnels": "Personal projects",
+        "projetMegasae": "Banquet planning app",
+        "projetSae12": "Client need implementation",
+        "projetSae3": "Development workstation setup",
+        "projetSae4": "Database creation",
+        "projetSae56": "Institutional website creation",
+        "projetSae301": "Web app for caregivers"
+      }
+    },
+    "filterBar": {
+      "aria": "Technology filters",
+      "title": "Filter by technology",
+      "clearAllAria": "Clear all filters",
+      "clear": "✕ Clear ({{count}})",
+      "filterByTag": "Filter by {{tag}}",
+      "activeFilters": "Active filters: {{count}}",
+      "removeFilter": "Remove filter {{tag}}"
+    },
+    "pagination": {
+      "navAria": "Project navigation",
+      "previous": "Previous project",
+      "next": "Next project",
+      "allProjects": "All projects",
+      "previousAria": "Previous project: {{title}}",
+      "nextAria": "Next project: {{title}}",
+      "allProjectsAria": "Back to project list",
+      "projectTitles": {
+        "sae301": "SAE 3.01 - Web app for caregivers",
+        "megasae": "MEGASAE - Banquet management app",
+        "sae56": "SAE 5-6 - Institutional website",
+        "sae3": "SAE 3 - Dev workstation setup",
+        "sae12": "SAE 1.2 - Client need implementation",
+        "sae4": "SAE 4 - Database creation"
+      }
+    },
+    "footer": {
+      "secondaryNavAria": "Secondary navigation",
+      "about": "About the portfolio",
+      "credits": "Credits",
+      "githubAria": "GitHub profile",
+      "emailAria": "Email",
+      "gitlabAria": "GitLab profile",
+      "clockAria": "Clock"
+    },
+    "footerWidget": {
+      "timeOnPortfolio": "Time spent on portfolio",
+      "deploymentStatus": "Deployment status",
+      "lastBuild": "Last build: {{buildDate}}",
+      "cosmicSatellite": "Cosmic satellite"
+    },
+    "toast": {
+      "close": "Close notification",
+      "region": "Notifications",
+      "debug": {
+        "success": "Operation completed successfully!",
+        "error": "Unable to load resource.",
+        "info": "Mood: Vaporwave enabled.",
+        "warning": "Warning: irreversible action."
+      }
+    },
+    "contactForm": {
+      "labels": {
+        "name": "Name *",
+        "email": "Email *",
+        "message": "Message *"
+      },
+      "placeholders": {
+        "name": "Your name",
+        "email": "your.email@example.com",
+        "message": "Your message..."
+      },
+      "submitting": "Sending...",
+      "submit": "Send",
+      "status": {
+        "success": "✓ Message sent successfully! Thank you for your message.",
+        "error": "✗ An error occurred. Please try again."
+      },
+      "toast": {
+        "success": "Message sent successfully!",
+        "sendError": "Error while sending. Please try again.",
+        "networkError": "Network error. Check your connection."
+      },
+      "validation": {
+        "nameRequired": "Name is required",
+        "nameTooLong": "Name must not exceed {{max}} characters",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email",
+        "messageRequired": "Message is required",
+        "messageTooShort": "Message must contain at least 10 characters",
+        "messageTooLong": "Message must not exceed {{max}} characters",
+        "rateLimit": "Please wait a few seconds before submitting the form."
+      }
+    },
+    "terminal": {
+      "tooltip": "Terminal",
+      "openAria": "Open mini terminal",
+      "dialogAria": "Mini terminal",
+      "run": "RUN",
+      "placeholder": "Type a command...",
+      "inputAria": "Command input",
+      "welcome": "Welcome! Type \"help\" for command list.",
+      "helpText": "Available commands:\n  help      - show this help\n  about     - about me\n  projects  - list my projects\n  skills    - technical skills\n  stats     - portfolio & session stats\n  joke      - a dev joke\n  date      - current date and time\n  pet       - robot status\n  snake     - launch Snake game\n  clear     - clear terminal",
+      "aboutText": "Enzo Morello / Computer Science student at IUT2 Grenoble.\nPassionate about web development, video games, and creation.\nApplication Development track.",
+      "output": {
+        "projects": "Projects",
+        "skills": "Skills"
+      },
+      "projects": [
+        { "name": "Banquet planning app", "path": "/projet-MEGASAE" },
+        { "name": "Client need implementation", "path": "/projet-SAE12" },
+        { "name": "Development workstation setup", "path": "/projet-SAE3" },
+        { "name": "Database creation", "path": "/projet-SAE4" },
+        { "name": "Institutional website creation", "path": "/projet-SAE56" }
+      ],
+      "skills": [
+        "JavaScript / React",
+        "HTML5 / CSS3",
+        "Python",
+        "Java",
+        "SQL / PostgreSQL",
+        "Git",
+        "Node.js",
+        "Linux"
+      ],
+      "jokes": [
+        "Why do developers hate nature? Too many bugs.",
+        "There are 10 kinds of people: those who understand binary and those who don't.",
+        "A developer doesn't drink coffee... they execute Java.",
+        "!false - funny because it's true.",
+        "How many programmers to change a light bulb? None, it's a hardware problem.",
+        "['hip','hip'] - hip hip array!",
+        "An SQL query walks into a bar, sees two tables, and asks: can I join?",
+        "Wi-Fi went down for 5 minutes, I had to talk to my family. They seem nice.",
+        "Rule #1 of code: if it works, don't touch it.",
+        "My code works and I don't know why. My code doesn't work and I don't know why."
+      ],
+      "stats": {
+        "title": "Portfolio stats",
+        "portfolio": "Portfolio",
+        "projects": "Projects",
+        "academic": "academic",
+        "personal": "personal",
+        "skills": "Skills",
+        "technologies": "Technologies",
+        "session": "Session",
+        "pagesVisited": "Pages visited",
+        "timeOnline": "Time online",
+        "music": "Music",
+        "robot": "Robot",
+        "none": "-",
+        "happiness": "happiness"
+      },
+      "petMood": {
+        "happy": "Happy",
+        "content": "Content",
+        "sad": "Sad"
+      },
+      "pet": {
+        "recalled": "Robot recalled",
+        "recalledHint": "Robot recalled. Summon it from the robot icon in the header.",
+        "notAdoptedHint": "Robot not adopted yet! Click the robot icon in the header.",
+        "state": "Robot status",
+        "hunger": "Hunger",
+        "happiness": "Happiness",
+        "mood": "Mood"
+      },
+      "unknownCommand": "Unknown command: \"{{command}}\". Type \"help\" for available commands."
+    },
+    "pet": {
+      "defaultName": "My Robot",
+      "tooltip": {
+        "summon": "Summon robot",
+        "recall": "Recall robot"
+      },
+      "toast": {
+        "summoned": "Robot summoned!",
+        "recalled": "Robot recalled",
+        "renamed": "Robot renamed: {{name}}"
+      },
+      "onboarding": [
+        "Hi! I'm your robot companion!",
+        "I'll wander around the page!",
+        "Click me to view my stats,",
+        "feed me and play with me"
+      ],
+      "moodTextPool": {
+        "happy": ["My circuits are purring...", "I computed pi to 37 decimals!", "The world looks great from here.", "Energy level: optimal!", "I could explore forever.", "Everything works perfectly."],
+        "content": ["Processing...", "Standby mode: disabled.", "Environment scan: nominal.", "Awaiting instructions.", "01001000 01101001"],
+        "sad": ["My batteries are draining...", "A hug, maybe?", "You forgot me..."],
+        "scared": ["Alarm! Alarm!", "What is that?!"],
+        "excited": ["Woohoo! Overdrive enabled!", "Turbo mode!", "Maximum energy!"],
+        "dizzy": ["Everything spins... recalibrating.", "Error: vertigo_overflow."],
+        "woozy": ["Teleportation... successful... I think.", "Systems stabilizing...", "Gyroscope calibration required."],
+        "eat": ["Yum! Energy restored.", "Delicious! +25% battery."],
+        "petted": ["Petting sequence received. Happiness ++", "Warmth detected. Nice."],
+        "play": ["Game mode enabled!", "Ha! I won!", "Well played!"],
+        "sleep": ["Zzz...", "Sleep mode enabled...", "Dream analysis in progress...", "Processing today's memories..."],
+        "catch": ["Catch!", "Your turn!", "Too easy!", "There you go!"]
+      },
+      "achievements": {
+        "title": "Achievements - {{count}}/{{total}}",
+        "locked": "Locked",
+        "hint": "Hint",
+        "items": {
+          "wallBounce": { "label": "First bounce", "desc": "The robot bounced off a wall", "hint": "Let the robot walk near page edges" },
+          "petAction": { "label": "First cuddle", "desc": "Petted for the first time", "hint": "Use the Pet button in robot HUD" },
+          "footerSit": { "label": "Footer rest", "desc": "Robot sat on the footer", "hint": "Let the robot wander near the bottom" },
+          "thrive": { "label": "Thriving", "desc": "Reached happy state", "hint": "Keep both hunger and happiness above 60" },
+          "particles": { "label": "Sensory", "desc": "Robot noticed particles", "hint": "Enable particles while robot is walking" },
+          "throw": { "label": "Thrown!", "desc": "Launched the robot with momentum", "hint": "Drag fast and release" },
+          "catchGame": { "label": "Baseball", "desc": "Played catch game", "hint": "Start a game using Play button in HUD" },
+          "sleep": { "label": "Good night", "desc": "Robot fell asleep", "hint": "Leave robot idle for 30 seconds" },
+          "combo": { "label": "Combo x3", "desc": "Chained 3 interactions in 7s", "hint": "Do 3 different actions in under 7s" },
+          "rename": { "label": "Renamed", "desc": "Gave robot a new name", "hint": "Change robot name in HUD field" },
+          "neglect": { "label": "Stubborn", "desc": "Stayed sad for too long", "hint": "Leave the robot sad without interacting" }
+        }
+      }
+    }
+  },
+  "pageConfig": {
+    "home": {
+      "heading": "Enzo MORELLO Portfolio",
+      "subheading": "IUT2 student",
+      "subheadingAlt": "Application Development track",
+      "metaTitle": "Portfolio - Enzo Morello",
+      "metaDescription": "Enzo Morello's portfolio, Computer Science student at IUT2 Grenoble"
+    },
+    "projets": {
+      "heading": "Portfolio - Projects",
+      "subheading": "Academic and professional projects",
+      "metaTitle": "Portfolio - Academic Projects",
+      "metaDescription": "Discover my academic projects at IUT2 Grenoble"
+    },
+    "projetsPersonnels": {
+      "heading": "Personal projects",
+      "subheading": "Creative work and explorations",
+      "metaTitle": "Portfolio - Personal Projects",
+      "metaDescription": "Enzo Morello Portfolio - Personal projects and creations"
+    },
+    "projetMegasae": {
+      "heading": "Flagship project - Banquet planning application",
+      "metaTitle": "Flagship project - Banquet management application",
+      "metaDescription": "Enzo Morello Portfolio - Flagship project"
+    },
+    "projetSae12": {
+      "heading": "Client need implementation project | Algorithmic approaches comparison",
+      "metaTitle": "Client need implementation project",
+      "metaDescription": "Enzo Morello Portfolio - SAE12 project"
+    },
+    "projetSae3": {
+      "heading": "Development workstation setup | Mind map & presentation",
+      "metaTitle": "Development workstation setup",
+      "metaDescription": "Enzo Morello Portfolio - SAE3 project"
+    },
+    "projetSae4": {
+      "heading": "Project - Database creation",
+      "metaTitle": "Project - Database creation",
+      "metaDescription": "Enzo Morello Portfolio - SAE4 project"
+    },
+    "projetSae56": {
+      "heading": "Project - Institutional website creation",
+      "metaTitle": "Project - Institutional website creation",
+      "metaDescription": "Enzo Morello Portfolio - SAE56 project"
+    },
+    "projetSae301": {
+      "heading": "Aideme - Caregiver coordination web application",
+      "subheading": "A collaborative platform to manage dependent person follow-up",
+      "metaTitle": "Aideme - Web application for caregivers",
+      "metaDescription": "Enzo Morello Portfolio - SAE 3.01 project: React + PHP full-stack app"
+    },
+    "about": {
+      "heading": "About this portfolio",
+      "subheading": "Tech stack, architecture, and design choices",
+      "metaTitle": "About | Portfolio - Enzo Morello",
+      "metaDescription": "Technical architecture and stack of Enzo Morello portfolio - React, Vite, Framer Motion, custom CSS."
+    },
+    "credits": {
+      "heading": "Credits",
+      "subheading": "Music, visuals, and thanks",
+      "metaTitle": "Credits | Portfolio - Enzo Morello",
+      "metaDescription": "Acknowledgements and credits for Enzo Morello portfolio - artists, studios, and teaching team."
+    }
+  },
+  "home": {
+    "metaTitle": "Home | Portfolio",
+    "metaDescription": "Enzo Morello - Computer Science student at IUT2 Grenoble",
+    "about": {
+      "title": "About me",
+      "descriptionPrefix": "Second-year",
+      "program": "Computer Science BUT",
+      "descriptionMid": "student at IUT2 Grenoble, specializing in",
+      "specialization": "Application Development",
+      "descriptionSuffix": "Passionate about combining technical logic and visual ergonomics, I aim to contribute my curiosity and method to innovative projects.",
+      "badgesAria": "Key information",
+      "year": "2nd year",
+      "school": "IUT2 Grenoble"
+    },
+    "skills": {
+      "title": "Skills",
+      "intro": "Build, design, optimize and administer in:",
+      "cards": {
+        "web": { "title": "Web development" },
+        "backend": { "title": "System & back-end development" },
+        "tools": { "title": "Tools & environment" }
+      }
+    },
+    "timeline": {
+      "title": "My journey",
+      "aria": "Academic timeline",
+      "items": [
+        {
+          "year": "2024 - present",
+          "title": "Computer Science BUT - Application Development",
+          "place": "IUT2 Grenoble, Grenoble",
+          "desc": "Training in software development, algorithms, databases and networks."
+        },
+        {
+          "year": "June 2024",
+          "title": "General Baccalaureate - Honors",
+          "place": "Lycée Les Iscles, Manosque",
+          "desc": "Specialties: Mathematics and Engineering Sciences."
+        }
+      ]
+    },
+    "hobbies": {
+      "title": "Interests",
+      "items": {
+        "art": "Traditional & digital art",
+        "games": "Video games",
+        "music": "Music discovery",
+        "cinema": "Cinematography"
+      }
+    },
+    "contact": {
+      "title": "Contact",
+      "gitlabLabel": "GitLab profile:",
+      "linkedinLabel": "LinkedIn profile:",
+      "gitlabAria": "GitLab profile (opens in a new window)",
+      "linkedinAria": "LinkedIn profile (opens in a new window)"
+    }
+  },
+  "projets": {
+    "metaTitle": "Projects | Portfolio",
+    "metaDescription": "My academic and professional projects",
+    "title": "My Projects",
+    "learnMore": "Learn more",
+    "learnMoreAria": "Learn more about {{title}}",
+    "technologies": "Technologies used",
+    "previewAria": "Project preview: {{title}}"
+  },
+  "projetsPersonnels": {
+    "metaTitle": "Personal Projects | Portfolio",
+    "metaDescription": "My personal projects and illustrations",
+    "presentation": {
+      "title": "Presentation",
+      "description": "This page showcases various personal projects and illustrations. They reflect my interest in programming, design, and creativity.",
+      "notice": "PS: This page contains videos that play on mouse hover!"
+    },
+    "discord": {
+      "title": "Discord Bot",
+      "iconAlt": "Moksi's Bazaar Discord bot icon",
+      "technologiesAria": "Technologies used for the Discord bot",
+      "intro": "is a complete Discord bot developed in JavaScript/Node.js (discord.js v14), combining casino games, social features, and conversational AI. It provides:",
+      "features": {
+        "games": "15+ casino mini-games: blackjack, roulette, slots, craps, high/low, progressive slots, PvP duels, gacha, and even Tetris.",
+        "economy": "Persistent virtual currency with auto-seeding ($10k), server leaderboards, and transaction history.",
+        "ai": "Integrated with OpenRouter (DeepSeek), real-time image analysis, adaptive personality based on user attitude (hostile ↔ friendly).",
+        "relations": "Sentiment tracking, attitude levels (friendly, neutral, annoyed), and per-user conversation memory.",
+        "infrastructure": "Hosted on Railway with Docker, persistent PostgreSQL database with 8 optimized tables."
+      },
+      "skillsLabel": "Skills acquired",
+      "skills": {
+        "architecture": "Software architecture",
+        "async": "Asynchronous programming",
+        "state": "Complex state management",
+        "api": "API optimization"
+      },
+      "github": "View source on GitHub",
+      "githubAria": "View Discord bot source code on GitHub (opens in new window)",
+      "demosTitle": "Demos",
+      "demosAria": "Discord bot video demonstrations",
+      "captions": {
+        "blackjack": "Blackjack game",
+        "roulette": "Roulette game",
+        "currency": "Funds & Ranking",
+        "slots": "Slot machine game"
+      },
+      "architectureSummary": "Architecture & technical operation",
+      "sections": {
+        "infrastructure": "Infrastructure & deployment",
+        "database": "Database schema",
+        "software": "Software architecture",
+        "flow": "Command execution flow"
+      },
+      "dashboardCaption": "Railway dashboard: environment variables, PostgreSQL metrics, and application logs"
+    },
+    "drawings": {
+      "title": "Personal drawings",
+      "description1": "Since January 2025, I started digital and traditional drawing. Here are some of my illustrations, made with pencils (2H to 6B) or digitally.",
+      "description2": "I explore different styles and techniques, but it remains primarily a hobby.",
+      "captions": {
+        "ada1": "Destiny 2 ADA-1 - Pencil portrait",
+        "power": "Chainsaw Man Power - Digital illustration",
+        "ramattra": "Overwatch 2 Ramattra - Pencil illustration",
+        "commission": "Commission - Digital illustration",
+        "goatLamb": "Cult of the Lamb Goat & Lamb - Pencil illustration",
+        "elsie": "Destiny 2 Exo Stranger - Digital illustration"
+      }
+    },
+    "scratch": {
+      "title": "Games made in Scratch",
+      "description": "In 5th grade, my teacher introduced me to Scratch. I spent a lot of personal time making games until 2020. Scratch makes programming playful through visual blocks. I built several games - rough around the edges, but some are still playable today.",
+      "skillsLabel": "Skills:",
+      "skills": "Algorithmic logic, interface design, animations, variable and sprite management",
+      "techniquesLabel": "Techniques:",
+      "techniques": "Advanced Scratch usage, script optimization, adaptation to user feedback",
+      "profile": "View my Scratch profile",
+      "captions": {
+        "stickman": "Stickman Adventure gameplay",
+        "rpg": "RPG 1.2v gameplay"
+      }
+    }
+  },
+  "about": {
+    "metaTitle": "About | Portfolio",
+    "metaDescription": "Technical architecture and stack of Enzo Morello portfolio - React, Vite, Framer Motion, custom CSS.",
+    "sections": {
+      "stack": {
+        "title": "Tech stack",
+        "intro": "Technologies selected for this portfolio - lightweight, modern, and focused."
+      },
+      "architecture": {
+        "title": "Architecture",
+        "intro": "React SPA with legacy JavaScript modules coexisting for effects and music."
+      },
+      "themes": {
+        "title": "Theme system",
+        "introPrefix": "Five visual moods driven by CSS custom properties on",
+        "availableAria": "Available themes",
+        "note": "Accent, background, text colors and icon filters adapt automatically using the same CSS variables - no JavaScript needed for rendering."
+      },
+      "ambient": {
+        "title": "Effects & ambiance",
+        "intro": "Non-blocking decorative layer: effects load in the background and gracefully disable if target DOM is missing."
+      },
+      "stats": {
+        "title": "By the numbers"
+      }
+    },
+    "stack": {
+      "react": { "role": "UI library", "desc": "Functional components, hooks, route-based lazy loading and Suspense for code splitting." },
+      "vite": { "role": "Build tool", "desc": "Ultra-fast bundler with HMR, path aliases (@/, @styles/, @components/...), and production optimization." },
+      "router": { "role": "SPA navigation", "desc": "BrowserRouter with shared Layout via <Outlet />, active NavLinks, and client-side navigation." },
+      "framerMotion": { "role": "Animations", "desc": "SVG path morphing for the mascot robot, enter/exit transitions, and spring effects." },
+      "css": { "role": "Theme system", "desc": "25+ isolated CSS modules, centralized custom properties in _variables.css, zero !important, PostCSS + Autoprefixer." },
+      "githubPages": { "role": "Deployment", "desc": "Optimized Vite build auto-deployed via gh-pages, served as static SPA on GitHub domain." }
+    },
+    "arch": {
+      "routing": {
+        "label": "Routing",
+        "items": [
+          "BrowserRouter -> Layout.jsx (shared shell) -> <Outlet />",
+          "All pages are lazy-loaded (route-level code splitting)",
+          "pageConfig in Layout.jsx: background, title and meta by route"
+        ]
+      },
+      "components": {
+        "label": "Components",
+        "items": [
+          "~30 isolated React components in src/components/",
+          "Ambient layer: 13 decorative effects in components/ambient/",
+          "Component-scoped CSS to avoid cascade pollution"
+        ]
+      },
+      "globalState": {
+        "label": "Global state",
+        "items": [
+          "MoodContext - active mood persisted in localStorage",
+          "ReadingTimeContext - reading estimate provided to pages",
+          "ToastContext - lightweight non-blocking notifications"
+        ]
+      },
+      "customHooks": {
+        "label": "Custom hooks",
+        "items": [
+          "useDocumentMeta(title, desc) - page SEO (title + meta)",
+          "usePortfolioModules(tracks) - lazy init of legacy modules",
+          "useReadingTimeEstimate() - estimated reading time"
+        ]
+      },
+      "legacyScripts": {
+        "label": "Legacy scripts",
+        "items": [
+          "music-player.js - persistent audio player, 1 write/s localStorage throttle",
+          "effects.js - particles.js, parallax, mouse tracking",
+          "ui-enhancements.js - typing animation, clock, video hover",
+          "lightbox.js - gallery zoom for .zoomable images"
+        ]
+      }
+    },
+    "ambient": {
+      "footerDiorama": { "name": "FooterDiorama", "desc": "8 animated SVG structures (relay antenna, radar, lighthouse, tower, Tesla coil...) randomly placed above the footer on each route change." },
+      "ambientEffects": { "name": "AmbientEffects", "desc": "Mood-driven weather effects: Europa frost, industrial neons and steam, silhouettes, drones, embers, power surges." },
+      "pet": { "name": "Robot mascot", "desc": "Interactive companion: RAF wandering, pointer-capture drag, hunger/happiness stats, SVG thought bubbles, and Framer Motion face morphing." },
+      "music": { "name": "Music player", "desc": "Persistent playback across routes, auto-discovery of .m4a tracks in /assets/music/, and localStorage state (track, position, pause)." }
+    },
+    "stats": {
+      "pages": "Pages",
+      "reactComponents": "React components",
+      "visualThemes": "Visual themes",
+      "cssModules": "CSS modules",
+      "legacyScripts": "Legacy scripts",
+      "pet": "Robot mascot"
+    }
+  },
+  "credits": {
+    "metaTitle": "Credits | Portfolio",
+    "metaDescription": "Acknowledgements and credits for Enzo Morello portfolio - music, visuals and education.",
+    "sections": {
+      "music": {
+        "title": "Music",
+        "intro": "The following artists shape the portfolio's soundscape. Their work deserves to be discovered far beyond these pages.",
+        "aria": "Music artists"
+      },
+      "visuals": {
+        "title": "Visuals & wallpapers",
+        "intro": "Background visuals belong to their respective creators and are used here for non-commercial decorative purposes.",
+        "publishedBy": "published by"
+      },
+      "education": {
+        "title": "Education & supervision",
+        "team": "Teaching team of IUT2 - Université Grenoble Alpes",
+        "note": "Sincere thanks to teachers and contributors of the IUT2 computer science department for their support, rigor, and availability throughout the BUT Computer Science program. The projects in this portfolio directly reflect the skills and challenges provided across semesters."
+      }
+    },
+    "musicNotes": [
+      "Vaporwave and future funk pioneer, with golden nostalgic atmospheres.",
+      "Lo-fi and experimental compositions with soft introspective textures.",
+      "Electronic music with ambient and melodic tones.",
+      "Composer of the Risk of Rain and Risk of Rain 2 soundtracks, blending progressive post-rock and electronic music.",
+      "Atmospheric compositions with lo-fi dreamlike tones.",
+      "Meditative cinematic ambient music for deep listening."
+    ],
+    "visualNotes": [
+      "Wallpapers sourced from official game visuals.",
+      "Wallpapers sourced from official visuals, including the Beyond Light expansion (Europa)."
+    ]
+  },
+  "notFound": {
+    "metaTitle": "404 - Page not found",
+    "metaDescription": "This page does not exist.",
+    "title": "Page not found",
+    "description": "The page you're looking for does not exist, was moved, or simply drifted away into interstellar space.",
+    "homeButton": "← Back to home",
+    "snakeButton": "🐍 Stay a bit longer"
+  },
+  "data": {
+    "projects": {
+      "tags": {
+        "react": "React",
+        "php": "PHP",
+        "sqlite": "SQLite",
+        "vite": "Vite",
+        "apiRest": "REST API",
+        "git": "Git",
+        "java": "Java",
+        "javafx": "JavaFX",
+        "maven": "Maven",
+        "sql": "SQL",
+        "html": "HTML",
+        "css": "CSS",
+        "javascript": "JavaScript",
+        "figma": "Figma",
+        "linux": "Linux",
+        "bash": "Bash",
+        "virtualbox": "VirtualBox",
+        "algorithms": "Algorithms",
+        "postgresql": "PostgreSQL",
+        "database": "Database",
+        "discord": "Discord",
+        "python": "Python",
+        "ai": "AI",
+        "art": "Art",
+        "drawing": "Drawing",
+        "creation": "Creation",
+        "scratch": "Scratch",
+        "games": "Games",
+        "visualProgramming": "Visual programming"
+      },
+      "academic": {
+        "sae301": {
+          "type": "SAE Project",
+          "title": "\"Aideme\" - Web application for caregivers",
+          "category": "SAE 3.01",
+          "description": "Design and development of a full-stack web application (React 19 + PHP 8 + SQLite) enabling caregivers to coordinate dependent person follow-up: contacts, calendar, photo gallery, files and notifications.",
+          "teamSize": "Team project (Team 08 - IUT2 CS UGA)"
+        },
+        "megasae": {
+          "type": "Project",
+          "title": "Banquet planning application",
+          "category": "Flagship project",
+          "description": "Greenfield development of an application to plan events in venues for users.",
+          "teamSize": "Hexanome team (6 people)"
+        },
+        "sae56": {
+          "type": "SAE Project",
+          "title": "Requirements gathering | Economic and ecological environment discovery",
+          "category": "SAE 5-6",
+          "description": "Collecting information about ESN company Sopra Steria and turning it into an informative website for a defined audience.",
+          "teamSize": "Team of three"
+        },
+        "sae3": {
+          "type": "SAE Project",
+          "title": "Development workstation setup",
+          "category": "SAE 3",
+          "description": "Installation and diagramming of a Debian Linux workstation.",
+          "teamSize": "Solo"
+        },
+        "sae12": {
+          "type": "SAE Project",
+          "title": "Client need implementation | Algorithmic approaches comparison",
+          "category": "SAE 1.2",
+          "description": "Coding, studying and comparing efficiency between several comparison algorithms in Java.",
+          "teamSize": "Pair project"
+        },
+        "sae4": {
+          "type": "SAE Project",
+          "title": "Database creation",
+          "category": "SAE 4",
+          "description": "Design, implementation and optimization of a relational database.",
+          "teamSize": "Team of three"
+        }
+      },
+      "personal": {
+        "discordBot": {
+          "title": "Discord bot \"Moksi's Bazaar\"",
+          "description": "A fully JavaScript (discord.js) Discord bot offering several services and games in a single text-based platform."
+        },
+        "drawings": {
+          "title": "Illustrations & Drawings",
+          "description": "Personal collection of drawings and illustrations made with various media."
+        },
+        "scratchGames": {
+          "title": "Scratch Games",
+          "description": "Small games made with Scratch to learn visual programming."
+        }
+      }
+    }
+  }
+}

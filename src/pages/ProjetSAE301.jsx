@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ProjectPagination from '@/components/ProjectPagination.jsx';
 import useReadingTimeEstimate from '@/hooks/useReadingTimeEstimate.js';
 import '@styles/components/_aideme-logo.css';
 
 const ProjetSAE301 = () => {
+  const { i18n } = useTranslation();
   const contentRef  = useRef(null);
   const rotationRef = useRef(0);
   const comboRef    = useRef(0);
@@ -43,6 +45,195 @@ const ProjetSAE301 = () => {
       });
     }, 1500);
   };
+
+  if (i18n.resolvedLanguage === 'en') {
+    return (
+      <>
+        <article className="project-article" ref={contentRef}>
+          <div className="aideme-logo-hero">
+            <div
+              className="aideme-logo-wrapper"
+              onClick={triggerInteraction}
+              aria-hidden="true"
+              tabIndex={-1}
+            >
+              <div className="aideme-logo-container" style={transformStyle}>
+                <div className={`aideme-logo-inner ${isCelebrating ? 'anim-celebrate' : comboRef.current > 0 ? '' : 'anim-A'}`}>
+                  <img src="/assets/images/projects/Logo_Aideme_Mains.png" alt="" className="aideme-logo-part hands" />
+                  <img src="/assets/images/projects/Logo_Aideme_Coeur.png" alt="" className="aideme-logo-part heart" />
+                </div>
+              </div>
+            </div>
+
+            <p className="aideme-logo-title">Aideme</p>
+            <p className="aideme-logo-tagline">Caring for those who care</p>
+          </div>
+
+          <hr />
+
+          <section id="project-detail">
+            <h2>Project Context</h2>
+            <p>
+              In France, more than 9 million informal caregivers support dependent relatives and face heavy mental
+              load. Aideme was created to make this invisible work visible through a collaborative platform.
+            </p>
+            <p>
+              The application allows multiple caregivers to coordinate follow-up around one person: shared agenda,
+              contact management, secure documents, notifications, and moderated photo memories.
+            </p>
+            <p>
+              Technical stack: React 19 (Vite), PHP 8 API layer, SQLite database with DAO architecture. Team project
+              delivered in second-year BUT Computer Science (Team 08, IUT2 Grenoble).
+            </p>
+          </section>
+
+          <hr />
+
+          <section id="features">
+            <h2>Main Features</h2>
+            <ul>
+              <li>Account creation and authentication (session-based).</li>
+              <li>Dependent-profile management with role transfer and caregiver invitations.</li>
+              <li>Contact CRUD linked to each dependent profile.</li>
+              <li>Calendar with monthly/weekly views and mobile-friendly interface.</li>
+              <li>Photo gallery with approval workflow by responsible caregiver.</li>
+              <li>Hierarchical file vault with per-user access controls.</li>
+              <li>In-app notifications and persistent accessibility preferences.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="design">
+            <h2>Visual Identity & Accessibility</h2>
+            <p>
+              The name <em>Aideme</em> combines helping and caring. The logo uses open hand shapes converging toward a
+              heart to express support without medical stereotypes.
+            </p>
+            <ul>
+              <li><strong>Color system:</strong> trust-focused emerald, warm terracotta, calm neutrals.</li>
+              <li><strong>Accessibility:</strong> high-contrast mode, large text, dyslexia-friendly mode, dark theme.</li>
+              <li><strong>Responsive UX:</strong> dedicated mobile agenda and adaptive navigation.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="techniques">
+            <h2>Technical Architecture & Security</h2>
+            <ul>
+              <li>React + React Router with modular front-end components.</li>
+              <li>PHP MVC backend with REST controllers.</li>
+              <li>SQLite via PDO/DAO, designed for PostgreSQL migration.</li>
+              <li>Strict session handling and role-based access control.</li>
+              <li>Fine-grained file permissions and moderated media workflow.</li>
+              <li>GDPR-oriented approach (privacy by design/default).</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="skills">
+            <h2>Skills Mobilized</h2>
+            <ul>
+              <li>Build accessible and modular UI with React.</li>
+              <li>Integrate and consume REST APIs in a full-stack flow.</li>
+              <li>Model relational databases and implement DAO patterns.</li>
+              <li>Coordinate teamwork with GitLab workflows and code reviews.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="objectives">
+            <h2>Objectives</h2>
+            <ul>
+              <li>Reduce caregiver mental load through centralized coordination.</li>
+              <li>Provide a collaborative and accessible caregiving tool.</li>
+              <li>Apply full-stack engineering in realistic constraints.</li>
+              <li>Respect sensitive-data handling requirements.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="group-work">
+            <h2>Team Organization</h2>
+            <p>
+              Team Aimedia iterated across several project phases and improved delivery speed by moving from split
+              front/back work to a feature-based workflow with shared ownership.
+            </p>
+          </section>
+
+          <hr />
+
+          <section id="testing">
+            <h2>User Testing & Validation</h2>
+            <p>
+              The product was tested with users from multiple profiles (family caregivers, healthcare workers,
+              non-technical users) through guided scenarios and usability questionnaires.
+            </p>
+            <ul>
+              <li>Think-aloud sessions on key journeys.</li>
+              <li>SUS-based usability measurements.</li>
+              <li>Interface improvements from collected feedback.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="individual-work">
+            <h2>Personal Contributions</h2>
+            <ul>
+              <li>Need analysis, persona creation, and requirements framing.</li>
+              <li>UX structure and wireframes for major user flows.</li>
+              <li>Large share of front-end implementation and accessibility modes.</li>
+              <li>Front/back integration work: API calls, sessions, and error handling.</li>
+              <li>Participation in user testing preparation and analysis.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="perspectives">
+            <h2>Retrospective & Roadmap</h2>
+            <ul>
+              <li>Introduce automated tests earlier in the lifecycle.</li>
+              <li>Adopt feature-based organization from day one.</li>
+              <li>Add staging and stronger deployment simulation earlier.</li>
+              <li>Future roadmap: PostgreSQL migration, smarter file search, offline PWA support.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="preview">
+            <h2>Application Preview</h2>
+            <div className="aideme-preview">
+              <div className="aideme-preview-item--desktop">
+                <img
+                  src="/assets/images/projects/AidemeApplication.png"
+                  alt="Aideme main interface - desktop view"
+                  className="zoomable"
+                />
+                <span className="aideme-preview-caption">Desktop view - light theme</span>
+              </div>
+              <div className="aideme-preview-item--mobile">
+                <img
+                  src="/assets/images/projects/AidemeAppMobileDarkmode.png"
+                  alt="Aideme interface - mobile dark mode"
+                  className="zoomable"
+                />
+                <span className="aideme-preview-caption">Mobile view - dark theme</span>
+              </div>
+            </div>
+          </section>
+        </article>
+
+        <ProjectPagination currentPath="/projet-SAE3.01" />
+      </>
+    );
+  }
 
   return (
     <>

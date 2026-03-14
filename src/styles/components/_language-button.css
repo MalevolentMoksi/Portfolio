@@ -1,0 +1,59 @@
+/* ============================================
+   Language Button
+   ============================================ */
+
+.language-switcher-wrapper {
+  position: relative;
+}
+
+.language-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.28);
+  background: linear-gradient(145deg, rgba(12, 12, 12, 0.9), rgba(24, 24, 24, 0.8));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.language-segmented__btn {
+  min-width: 2.2rem;
+  height: 1.95rem;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.language-segmented__btn:hover,
+.language-segmented__btn:focus-visible {
+  color: var(--color-accent-light);
+  background: rgba(var(--color-primary-rgb), 0.18);
+  border-color: rgba(var(--color-primary-rgb), 0.45);
+  transform: translateY(-1px);
+}
+
+.language-segmented__btn--active {
+  color: var(--color-secondary);
+  background: linear-gradient(145deg, var(--color-primary), var(--color-accent-pale));
+  border-color: rgba(var(--color-primary-rgb), 0.85);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.35);
+}
+
+.language-segmented__btn--active:hover,
+.language-segmented__btn--active:focus-visible {
+  background: linear-gradient(150deg, var(--color-primary), var(--color-accent-pale));
+  transform: none;
+}

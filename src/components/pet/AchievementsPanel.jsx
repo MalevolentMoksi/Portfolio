@@ -1,6 +1,7 @@
 /* ══════════════════════════════════════════════
    Panneau de succès — grille de tuiles
    ══════════════════════════════════════════════ */
+import { useTranslation } from 'react-i18next';
 import { ACHIEVEMENTS } from './petConstants.js';
 
 /* Icônes SVG par ID de succès (viewBox 0 0 16 16) */
@@ -92,6 +93,7 @@ const LockIcon = () => (
 );
 
 const AchievementsPanel = ({ unlocked = [] }) => {
+  const { t } = useTranslation();
   const total = ACHIEVEMENTS.length;
   const count = unlocked.length;
 
@@ -99,32 +101,35 @@ const AchievementsPanel = ({ unlocked = [] }) => {
     <div className="pet-achievements">
       <div className="pet-achievements-header">
         <span aria-hidden="true">🏆</span>
-        <span>Succès — {count}/{total}</span>
+        <span>{t('common.pet.achievements.title', { count, total })}</span>
       </div>
       <div className="pet-achievements-grid" role="list">
         {ACHIEVEMENTS.map((ach) => {
           const isUnlocked = unlocked.includes(ach.id);
+          const label = t(`common.pet.achievements.items.${ach.key}.label`, { defaultValue: ach.label });
+          const desc = t(`common.pet.achievements.items.${ach.key}.desc`, { defaultValue: ach.desc });
+          const hint = t(`common.pet.achievements.items.${ach.key}.hint`, { defaultValue: ach.hint });
           return (
             <div
               key={ach.id}
               className={`pet-ach-tile${isUnlocked ? ' pet-ach-tile--unlocked' : ''}`}
-              aria-label={isUnlocked ? ach.label : 'Verrouillé'}
+              aria-label={isUnlocked ? label : t('common.pet.achievements.locked')}
               role="listitem"
               tabIndex={0}
             >
               <div className="pet-ach-icon">
                 {isUnlocked ? (ACHIEVEMENT_ICONS[ach.id] || null) : <LockIcon />}
               </div>
-              <span className="pet-ach-label">{isUnlocked ? ach.label : '???'}</span>
+              <span className="pet-ach-label">{isUnlocked ? label : '???'}</span>
               {isUnlocked ? (
                 <div className="pet-ach-tooltip" role="tooltip">
-                  <strong className="pet-ach-tooltip-title">{ach.label}</strong>
-                  <span className="pet-ach-tooltip-desc">{ach.desc}</span>
+                  <strong className="pet-ach-tooltip-title">{label}</strong>
+                  <span className="pet-ach-tooltip-desc">{desc}</span>
                 </div>
               ) : ach.hint && (
                 <div className="pet-ach-tooltip pet-ach-tooltip--hint" role="tooltip">
-                  <span className="pet-ach-tooltip-hint-label">Indice</span>
-                  <span className="pet-ach-tooltip-desc">{ach.hint}</span>
+                  <span className="pet-ach-tooltip-hint-label">{t('common.pet.achievements.hint')}</span>
+                  <span className="pet-ach-tooltip-desc">{hint}</span>
                 </div>
               )}
             </div>

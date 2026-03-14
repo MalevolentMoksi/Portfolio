@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '@/contexts/ToastContext.jsx';
 import '@styles/components/_contact-form.css';
 
@@ -9,6 +10,7 @@ const MAX_EMAIL_LENGTH = 254;
 const MAX_MESSAGE_LENGTH = 2000;
 
 const ContactForm = () => {
+  const { t } = useTranslation();
   const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
@@ -45,23 +47,23 @@ const ContactForm = () => {
 
   const validateForm = (data) => {
     const newErrors = {};
-    if (!data.name) newErrors.name = 'Le nom est requis';
+    if (!data.name) newErrors.name = t('common.contactForm.validation.nameRequired');
     else if (data.name.length > MAX_NAME_LENGTH) {
-      newErrors.name = `Le nom ne doit pas dépasser ${MAX_NAME_LENGTH} caractères`;
+      newErrors.name = t('common.contactForm.validation.nameTooLong', { max: MAX_NAME_LENGTH });
     }
 
-    if (!data.email) newErrors.email = 'L\'email est requis';
+    if (!data.email) newErrors.email = t('common.contactForm.validation.emailRequired');
     else if (data.email.length > MAX_EMAIL_LENGTH) {
-      newErrors.email = 'Veuillez entrer un email valide';
+      newErrors.email = t('common.contactForm.validation.emailInvalid');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      newErrors.email = 'Veuillez entrer un email valide';
+      newErrors.email = t('common.contactForm.validation.emailInvalid');
     }
 
-    if (!data.message) newErrors.message = 'Le message est requis';
+    if (!data.message) newErrors.message = t('common.contactForm.validation.messageRequired');
     else if (data.message.length < 10)
-      newErrors.message = 'Le message doit contenir au moins 10 caractères';
+      newErrors.message = t('common.contactForm.validation.messageTooShort');
     else if (data.message.length > MAX_MESSAGE_LENGTH) {
-      newErrors.message = `Le message ne doit pas dépasser ${MAX_MESSAGE_LENGTH} caractères`;
+      newErrors.message = t('common.contactForm.validation.messageTooLong', { max: MAX_MESSAGE_LENGTH });
     }
 
     return newErrors;
@@ -84,7 +86,7 @@ const ContactForm = () => {
     }
 
     if (Date.now() - mountTimestampRef.current < MIN_SUBMIT_DELAY_MS) {
-      setGlobalError('Veuillez patienter quelques secondes avant d\'envoyer le formulaire.');
+      setGlobalError(t('common.contactForm.validation.rateLimit'));
       return;
     }
 
@@ -118,16 +120,16 @@ const ContactForm = () => {
         setFormData({ name: '', email: '', message: '', website: '' });
         mountTimestampRef.current = Date.now();
         clearStatusLater();
-        showToast('Message envoyé avec succès !', { type: 'success' });
+        showToast(t('common.contactForm.toast.success'), { type: 'success' });
       } else {
         setSubmitStatus('error');
         clearStatusLater();
-        showToast('Erreur lors de l\'envoi. Veuillez réessayer.', { type: 'error' });
+        showToast(t('common.contactForm.toast.sendError'), { type: 'error' });
       }
     } catch {
       setSubmitStatus('error');
       clearStatusLater();
-      showToast('Erreur réseau. Vérifiez votre connexion.', { type: 'error' });
+      showToast(t('common.contactForm.toast.networkError'), { type: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -149,14 +151,14 @@ const ContactForm = () => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="contact-name">Nom *</label>
+        <label htmlFor="contact-name">{t('common.contactForm.labels.name')}</label>
         <input
           id="contact-name"
           type="text"
           name="name"
           value={formData.name}
           onChange={handleChange}
-          placeholder="Votre nom"
+          placeholder={t('common.contactForm.placeholders.name')}
           disabled={isSubmitting}
           maxLength={MAX_NAME_LENGTH}
           autoComplete="name"
@@ -168,14 +170,14 @@ const ContactForm = () => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="contact-email">Email *</label>
+        <label htmlFor="contact-email">{t('common.contactForm.labels.email')}</label>
         <input
           id="contact-email"
           type="email"
           name="email"
           value={formData.email}
           onChange={handleChange}
-          placeholder="votre.email@exemple.com"
+          placeholder={t('common.contactForm.placeholders.email')}
           disabled={isSubmitting}
           maxLength={MAX_EMAIL_LENGTH}
           autoComplete="email"
@@ -187,13 +189,13 @@ const ContactForm = () => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="contact-message">Message *</label>
+        <label htmlFor="contact-message">{t('common.contactForm.labels.message')}</label>
         <textarea
           id="contact-message"
           name="message"
           value={formData.message}
           onChange={handleChange}
-          placeholder="Votre message..."
+          placeholder={t('common.contactForm.placeholders.message')}
           rows="5"
           disabled={isSubmitting}
           maxLength={MAX_MESSAGE_LENGTH}
@@ -216,17 +218,17 @@ const ContactForm = () => {
         className="submit-btn"
         aria-busy={isSubmitting}
       >
-        {isSubmitting ? 'Envoi en cours...' : 'Envoyer'}
+        {isSubmitting ? t('common.contactForm.submitting') : t('common.contactForm.submit')}
       </button>
 
       {submitStatus === 'success' && (
         <div className="status-message success" role="alert">
-          ✓ Message envoyé avec succès! Merci de votre message.
+          {t('common.contactForm.status.success')}
         </div>
       )}
       {submitStatus === 'error' && (
         <div className="status-message error" role="alert">
-          ✗ Une erreur s\'est produite. Veuillez réessayer.
+          {t('common.contactForm.status.error')}
         </div>
       )}
     </form>

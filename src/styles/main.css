@@ -35,6 +35,9 @@
 @import './components/_mood-echo.css';
 @import './components/_about.css';
 @import './components/_credits.css';
+@import './components/_language-button.css';
+@import './components/_accessibility-button.css';
+@import './components/_accessibility-overrides.css';
 
 /* Ambient decorative layers */
 @import './components/_ambient.css';

@@ -1,0 +1,171 @@
+/* ============================================
+   Accessibility Button
+   ============================================ */
+
+.accessibility-wrapper {
+  position: relative;
+}
+
+.accessibility-panel {
+  position: fixed;
+  width: min(340px, 92vw);
+  background: linear-gradient(165deg, rgba(9, 9, 9, 0.97), rgba(20, 20, 20, 0.94));
+  border: 1px solid rgba(var(--color-primary-rgb), 0.34);
+  border-radius: 14px;
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.62),
+    0 0 0 1px rgba(var(--color-primary-rgb), 0.08);
+  padding: 0.85rem;
+  z-index: var(--z-lightbox);
+  animation: a11y-panel-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+@keyframes a11y-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.accessibility-panel-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.72);
+  padding: 0.2rem 0.2rem 0.65rem;
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.2);
+}
+
+.a11y-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.84rem;
+  color: var(--color-text);
+  padding: 0.5rem 0.25rem;
+  border-radius: 10px;
+  transition: background var(--transition-fast);
+}
+
+.a11y-toggle:hover {
+  background: rgba(var(--color-primary-rgb), 0.08);
+}
+
+.a11y-toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.a11y-toggle__switch {
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.28);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  position: relative;
+  flex-shrink: 0;
+
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.a11y-toggle__switch::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ececec;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  transition:
+    transform var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.a11y-toggle__label {
+  line-height: 1.3;
+}
+
+.a11y-toggle__input:checked + .a11y-toggle__switch {
+  background: rgba(var(--color-primary-rgb), 0.38);
+  border-color: rgba(var(--color-primary-rgb), 0.8);
+  box-shadow: 0 0 0 1px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.a11y-toggle__input:checked + .a11y-toggle__switch::after {
+  transform: translateX(16px);
+  background: var(--color-accent-light);
+}
+
+.a11y-toggle__input:focus-visible + .a11y-toggle__switch {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.a11y-font-size {
+  margin: 0.45rem 0 0.2rem;
+  padding: 0.5rem;
+  border-radius: 10px;
+  background: rgba(var(--color-primary-rgb), 0.07);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.15);
+}
+
+.a11y-font-size__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 0.45rem;
+}
+
+.a11y-font-size__controls {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.a11y-font-btn {
+  flex: 1;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+  background: rgba(var(--color-primary-rgb), 0.08);
+  color: var(--color-text);
+  border-radius: 9px;
+  padding: 0.4rem 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.a11y-font-btn:hover,
+.a11y-font-btn:focus-visible {
+  background: rgba(var(--color-primary-rgb), 0.18);
+  border-color: rgba(var(--color-primary-rgb), 0.6);
+  transform: translateY(-1px);
+}
+
+.a11y-font-btn--active {
+  background: linear-gradient(150deg, var(--color-primary), var(--color-accent-pale));
+  border-color: rgba(var(--color-primary-rgb), 0.9);
+  color: var(--color-secondary);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.35);
+}

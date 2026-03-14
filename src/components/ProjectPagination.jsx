@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 /**
  * ProjectPagination Component
@@ -6,15 +7,16 @@ import { Link } from 'react-router-dom';
  */
 
 const projects = [
-  { path: '/projet-SAE3.01', title: 'SAE 3.01 - Application Web pour les aidants' },
-  { path: '/projet-MEGASAE', title: 'MEGASAE - Application de banquets' },
-  { path: '/projet-SAE56', title: 'SAE 5-6 - Site web institutionnel' },
-  { path: '/projet-SAE3', title: 'SAE 3 - Installation poste développement' },
-  { path: '/projet-SAE12', title: 'SAE 1.2 - Implémentation besoin client' },
-  { path: '/projet-SAE4', title: 'SAE 4 - Création base de données' },
+  { path: '/projet-SAE3.01', titleKey: 'common.pagination.projectTitles.sae301' },
+  { path: '/projet-MEGASAE', titleKey: 'common.pagination.projectTitles.megasae' },
+  { path: '/projet-SAE56', titleKey: 'common.pagination.projectTitles.sae56' },
+  { path: '/projet-SAE3', titleKey: 'common.pagination.projectTitles.sae3' },
+  { path: '/projet-SAE12', titleKey: 'common.pagination.projectTitles.sae12' },
+  { path: '/projet-SAE4', titleKey: 'common.pagination.projectTitles.sae4' },
 ];
 
 const ProjectPagination = ({ currentPath }) => {
+  const { t } = useTranslation();
   const currentIndex = projects.findIndex(p => p.path === currentPath);
   
   if (currentIndex === -1) return null;
@@ -24,38 +26,40 @@ const ProjectPagination = ({ currentPath }) => {
   
   const prevProject = projects[prevIndex];
   const nextProject = projects[nextIndex];
+  const prevTitle = t(prevProject.titleKey);
+  const nextTitle = t(nextProject.titleKey);
 
   return (
-    <nav className="project-pagination" aria-label="Navigation entre projets">
+    <nav className="project-pagination" aria-label={t('common.pagination.navAria')}>
       <Link 
         to={prevProject.path} 
         className="project-pagination-link prev"
-        aria-label={`Projet précédent : ${prevProject.title}`}
+        aria-label={t('common.pagination.previousAria', { title: prevTitle })}
       >
         <span className="pagination-arrow" aria-hidden="true">←</span>
         <div className="pagination-content">
-          <span className="pagination-label">Projet précédent</span>
-          <span className="pagination-title">{prevProject.title}</span>
+          <span className="pagination-label">{t('common.pagination.previous')}</span>
+          <span className="pagination-title">{prevTitle}</span>
         </div>
       </Link>
       
       <Link 
         to="/projets" 
         className="project-pagination-link back-to-list"
-        aria-label="Retour à la liste des projets"
+        aria-label={t('common.pagination.allProjectsAria')}
       >
         <span className="pagination-icon" aria-hidden="true">◉</span>
-        <span>Tous les projets</span>
+        <span>{t('common.pagination.allProjects')}</span>
       </Link>
       
       <Link 
         to={nextProject.path} 
         className="project-pagination-link next"
-        aria-label={`Projet suivant : ${nextProject.title}`}
+        aria-label={t('common.pagination.nextAria', { title: nextTitle })}
       >
         <div className="pagination-content">
-          <span className="pagination-label">Projet suivant</span>
-          <span className="pagination-title">{nextProject.title}</span>
+          <span className="pagination-label">{t('common.pagination.next')}</span>
+          <span className="pagination-title">{nextTitle}</span>
         </div>
         <span className="pagination-arrow" aria-hidden="true">→</span>
       </Link>

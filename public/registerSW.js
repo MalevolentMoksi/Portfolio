@@ -3,7 +3,13 @@
  * Deferred to avoid render blocking
  */
 
-if ('serviceWorker' in navigator) {
+const isSecureOrigin =
+  window.isSecureContext ||
+  window.location.protocol === 'https:' ||
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1';
+
+if ('serviceWorker' in navigator && isSecureOrigin) {
   // Register SW after page loads
   window.addEventListener('load', () => {
     navigator.serviceWorker
@@ -12,7 +18,9 @@ if ('serviceWorker' in navigator) {
         console.log('Service Worker registered:', registration);
       })
       .catch((error) => {
-        console.warn('Service Worker registration failed:', error);
+        if (error?.name !== 'SecurityError') {
+          console.warn('Service Worker registration failed:', error);
+        }
       });
   });
 }

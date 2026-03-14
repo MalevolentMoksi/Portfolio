@@ -1,9 +1,11 @@
 import useDocumentMeta from '@/hooks/useDocumentMeta.js';
+import { useTranslation } from 'react-i18next';
 import { MOODS } from '@/contexts/MoodContext.jsx';
 
 /* ─── Données de la stack technique ─────────────────────── */
 const STACK = [
   {
+    id: 'react',
     name: 'React 18',
     role: 'Librairie UI',
     desc: 'Composants fonctionnels, hooks, lazy-loading des pages par route et Suspense pour le code-splitting.',
@@ -26,6 +28,7 @@ const STACK = [
     ),
   },
   {
+    id: 'vite',
     name: 'Vite 5',
     role: 'Outil de build',
     desc: 'Bundler ultra-rapide avec HMR, path aliases (@/, @styles/, @components/…) et optimisation de production.',
@@ -45,6 +48,7 @@ const STACK = [
     ),
   },
   {
+    id: 'router',
     name: 'React Router v6',
     role: 'Navigation SPA',
     desc: 'BrowserRouter avec Layout partagé via <Outlet />, NavLink actifs et navigation côté client sans rechargement.',
@@ -67,6 +71,7 @@ const STACK = [
     ),
   },
   {
+    id: 'framerMotion',
     name: 'Framer Motion v12',
     role: 'Animations',
     desc: 'Morphing de chemins SVG pour le robot mascotte, transitions de montée/sortie et effets de ressort.',
@@ -88,6 +93,7 @@ const STACK = [
     ),
   },
   {
+    id: 'css',
     name: 'CSS sur mesure',
     role: 'Système de thèmes',
     desc: '25+ modules CSS isolés, propriétés personnalisées centralisées dans _variables.css, zéro !important, PostCSS + Autoprefixer.',
@@ -107,6 +113,7 @@ const STACK = [
     ),
   },
   {
+    id: 'githubPages',
     name: 'GitHub Pages',
     role: 'Déploiement',
     desc: 'Build Vite optimisé déployé automatiquement via gh-pages, servi comme SPA statique sur le domaine GitHub.',
@@ -132,6 +139,7 @@ const STACK = [
 /* ─── Données d'architecture ────────────────────────────── */
 const ARCH = [
   {
+    id: 'routing',
     label: 'Routing',
     items: [
       'BrowserRouter → Layout.jsx (shell partagé) → <Outlet />',
@@ -140,6 +148,7 @@ const ARCH = [
     ],
   },
   {
+    id: 'components',
     label: 'Composants',
     items: [
       '~30 composants React isolés dans src/components/',
@@ -148,6 +157,7 @@ const ARCH = [
     ],
   },
   {
+    id: 'globalState',
     label: 'État global',
     items: [
       'MoodContext — thème actif, écriture dans localStorage',
@@ -156,6 +166,7 @@ const ARCH = [
     ],
   },
   {
+    id: 'customHooks',
     label: 'Hooks personnalisés',
     items: [
       'useDocumentMeta(title, desc) — SEO par page (title + meta)',
@@ -164,6 +175,7 @@ const ARCH = [
     ],
   },
   {
+    id: 'legacyScripts',
     label: 'Scripts legacy',
     items: [
       'music-player.js — lecteur audio persistant, throttle localStorage à 1 éc/s',
@@ -180,6 +192,7 @@ const MOOD_ORDER = ['default', 'hacker', 'vaporwave', 'europa', 'industrial'];
 /* ─── Effets ambiants ───────────────────────────────────── */
 const AMBIENT = [
   {
+    id: 'footerDiorama',
     name: 'FooterDiorama',
     desc: '8 structures SVG animées (antenne relais, radar, phare, tour, bobine Tesla…) placées aléatoirement au-dessus du footer à chaque navigation.',
     icon: (
@@ -197,6 +210,7 @@ const AMBIENT = [
     ),
   },
   {
+    id: 'ambientEffects',
     name: 'AmbientEffects',
     desc: 'Effets météo liés au mood : givre Europa, néons et vapeurs Industriels, silhouettes, drones, braises, ondes de puissance.',
     icon: (
@@ -215,6 +229,7 @@ const AMBIENT = [
     ),
   },
   {
+    id: 'pet',
     name: 'Robot mascotte',
     desc: 'Compagnon interactif : déambulation par RAF, drag par capture de pointeur, stats faim/bonheur, bulles de pensée SVG et morphing de visage Framer Motion.',
     icon: (
@@ -236,6 +251,7 @@ const AMBIENT = [
     ),
   },
   {
+    id: 'music',
     name: 'Lecteur musical',
     desc: 'Lecture persistante entre les routes, découverte automatique des pistes .m4a dans /assets/music/, état sérialisé dans localStorage (track, position, pause).',
     icon: (
@@ -258,31 +274,32 @@ const AMBIENT = [
 
 /* ─── Statistiques ──────────────────────────────────────── */
 const STATS = [
-  { value: '10', label: 'Pages' },
-  { value: '30+', label: 'Composants React' },
-  { value: '5', label: 'Thèmes visuels' },
-  { value: '25+', label: 'Modules CSS' },
-  { value: '4', label: 'Scripts legacy' },
-  { value: '1', label: 'Robot mascotte' },
+  { value: '10', id: 'pages', label: 'Pages' },
+  { value: '30+', id: 'reactComponents', label: 'Composants React' },
+  { value: '5', id: 'visualThemes', label: 'Thèmes visuels' },
+  { value: '25+', id: 'cssModules', label: 'Modules CSS' },
+  { value: '4', id: 'legacyScripts', label: 'Scripts legacy' },
+  { value: '1', id: 'pet', label: 'Robot mascotte' },
 ];
 
 /* ─── Page About ────────────────────────────────────────── */
 const About = () => {
+  const { t } = useTranslation();
   useDocumentMeta(
-    'À propos | Portfolio',
-    "Architecture et stack technique du portfolio d'Enzo Morello — React, Vite, Framer Motion, CSS sur mesure."
+    t('about.metaTitle'),
+    t('about.metaDescription')
   );
 
   return (
     <>
       {/* === Stack technique === */}
       <section id="about-stack" aria-labelledby="about-stack-title">
-        <h2 id="about-stack-title">Stack technique</h2>
+        <h2 id="about-stack-title">{t('about.sections.stack.title')}</h2>
         <p className="about-intro">
-          Technologies choisies pour ce portfolio — légères, modernes, sans dépendances superflues.
+          {t('about.sections.stack.intro')}
         </p>
         <div className="about-stack-grid" role="list">
-          {STACK.map(({ name, role, desc, color, icon }) => (
+          {STACK.map(({ id, name, role, desc, color, icon }) => (
             <article
               key={name}
               className="about-tech-card"
@@ -294,8 +311,8 @@ const About = () => {
               </span>
               <div className="about-tech-body">
                 <strong className="about-tech-name">{name}</strong>
-                <span className="about-tech-role">{role}</span>
-                <p className="about-tech-desc">{desc}</p>
+                <span className="about-tech-role">{t(`about.stack.${id}.role`, { defaultValue: role })}</span>
+                <p className="about-tech-desc">{t(`about.stack.${id}.desc`, { defaultValue: desc })}</p>
               </div>
             </article>
           ))}
@@ -304,19 +321,18 @@ const About = () => {
 
       {/* === Architecture === */}
       <section id="about-architecture" aria-labelledby="about-arch-title">
-        <h2 id="about-arch-title">Architecture</h2>
+        <h2 id="about-arch-title">{t('about.sections.architecture.title')}</h2>
         <p className="about-intro">
-          Application React SPA (Single Page Application) avec modules JavaScript legacy coexistant
-          pour les effets et la musique.
+          {t('about.sections.architecture.intro')}
         </p>
         <dl className="about-arch-list">
-          {ARCH.map(({ label, items }) => (
+          {ARCH.map(({ id, label, items }) => (
             <div key={label} className="about-arch-entry">
-              <dt className="about-arch-term">{label}</dt>
+              <dt className="about-arch-term">{t(`about.arch.${id}.label`, { defaultValue: label })}</dt>
               <dd className="about-arch-detail">
                 <ul>
-                  {items.map((item) => (
-                    <li key={item}>{item}</li>
+                  {items.map((item, index) => (
+                    <li key={item}>{t(`about.arch.${id}.items.${index}`, { defaultValue: item })}</li>
                   ))}
                 </ul>
               </dd>
@@ -327,12 +343,12 @@ const About = () => {
 
       {/* === Système de thèmes === */}
       <section id="about-themes" aria-labelledby="about-themes-title">
-        <h2 id="about-themes-title">Système de thèmes</h2>
+        <h2 id="about-themes-title">{t('about.sections.themes.title')}</h2>
         <p className="about-intro">
-          Cinq ambiances visuelles pilotées par des propriétés CSS personnalisées sur{' '}
+          {t('about.sections.themes.introPrefix')}{' '}
           <code>body[data-mood]</code>. Le thème est persisté dans <code>localStorage</code>.
         </p>
-        <div className="about-mood-palette" role="list" aria-label="Thèmes disponibles">
+        <div className="about-mood-palette" role="list" aria-label={t('about.sections.themes.availableAria')}>
           {MOOD_ORDER.map((key) => {
             const m = MOODS[key];
             return (
@@ -343,34 +359,31 @@ const About = () => {
                 style={{ '--mood-color': m.color, '--mood-rgb': m.rgb }}
               >
                 <span className="about-mood-circle" aria-hidden="true" />
-                <span className="about-mood-name">{m.label}</span>
+                <span className="about-mood-name">{t(`common.mood.names.${key}`, { defaultValue: m.label })}</span>
               </div>
             );
           })}
         </div>
         <p className="about-theme-note">
-          Les couleurs d'accentuation, de fond, de texte et les filtres d'icônes s'adaptent
-          automatiquement à chaque thème via les mêmes variables CSS — aucun JavaScript nécessaire
-          pour le rendu.
+          {t('about.sections.themes.note')}
         </p>
       </section>
 
       {/* === Effets & ambiance === */}
       <section id="about-ambient" aria-labelledby="about-ambient-title">
-        <h2 id="about-ambient-title">Effets &amp; ambiance</h2>
+        <h2 id="about-ambient-title">{t('about.sections.ambient.title')}</h2>
         <p className="about-intro">
-          Couche décorative non-bloquante : les effets se chargent en arrière-plan et se retirent
-          gracieusement si le DOM cible est absent.
+          {t('about.sections.ambient.intro')}
         </p>
         <div className="about-ambient-grid" role="list">
-          {AMBIENT.map(({ name, desc, icon }) => (
+          {AMBIENT.map(({ id, name, desc, icon }) => (
             <article key={name} className="about-ambient-card" role="listitem">
               <span className="about-ambient-icon" aria-hidden="true">
                 {icon}
               </span>
               <div>
-                <strong className="about-ambient-name">{name}</strong>
-                <p className="about-ambient-desc">{desc}</p>
+                <strong className="about-ambient-name">{t(`about.ambient.${id}.name`, { defaultValue: name })}</strong>
+                <p className="about-ambient-desc">{t(`about.ambient.${id}.desc`, { defaultValue: desc })}</p>
               </div>
             </article>
           ))}
@@ -379,14 +392,14 @@ const About = () => {
 
       {/* === En chiffres === */}
       <section id="about-stats" aria-labelledby="about-stats-title">
-        <h2 id="about-stats-title">En chiffres</h2>
+        <h2 id="about-stats-title">{t('about.sections.stats.title')}</h2>
         <div className="about-stats-grid" role="list">
-          {STATS.map(({ value, label }) => (
+          {STATS.map(({ value, id, label }) => (
             <div key={label} className="about-stat" role="listitem">
-              <span className="about-stat-value" aria-label={`${value} ${label}`}>
+              <span className="about-stat-value" aria-label={`${value} ${t(`about.stats.${id}`, { defaultValue: label })}`}>
                 {value}
               </span>
-              <span className="about-stat-label">{label}</span>
+              <span className="about-stat-label">{t(`about.stats.${id}`, { defaultValue: label })}</span>
             </div>
           ))}
         </div>

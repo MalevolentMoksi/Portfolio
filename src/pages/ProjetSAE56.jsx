@@ -1,10 +1,167 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import ProjectPagination from '@/components/ProjectPagination.jsx';
 import useReadingTimeEstimate from '@/hooks/useReadingTimeEstimate.js';
 
 const ProjetSAE56 = () => {
+  const { i18n } = useTranslation();
   const contentRef = useRef(null);
   useReadingTimeEstimate(contentRef);
+
+  if (i18n.resolvedLanguage === 'en') {
+    return (
+      <>
+        <article className="project-article" ref={contentRef}>
+          <section id="project-overview">
+            <h2>Project Context</h2>
+            <p>
+              Each team (3 to 4 students) selected a digital-services company (Capgemini, Sopra Steria, Atos, etc.)
+              and created an institutional website for a non-technical audience (middle-school students), presenting
+              the company activity, organization, values, and digital/ecological transition in an accessible way.
+            </p>
+            <p>The objective was to produce a website that respected both:</p>
+            <ul>
+              <li>
+                <strong>Form</strong>: consistent mockup, sober visual identity, eco-aware choices, and standards compliance.
+              </li>
+              <li>
+                <strong>Content</strong>: factual accuracy and clear vulgarization for non-specialists.
+              </li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="skills">
+            <h2>Skills Mobilized</h2>
+            <h3>Responsibility, Sustainability, Project Management</h3>
+            <ul>
+              <li>Understand client and end-user needs</li>
+              <li>Set up project-management tools</li>
+              <li>Identify actors and phases in a development lifecycle</li>
+            </ul>
+
+            <h3>Professional Integration, Teamwork</h3>
+            <ul>
+              <li>Understand the digital ecosystem</li>
+              <li>Discover required aptitudes across IT sectors</li>
+              <li>Identify roles and responsibilities in multidisciplinary teams</li>
+              <li>Develop interpersonal collaboration skills</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="organization">
+            <h2>Project Organization</h2>
+            <p>
+              The project was split into three phases: <strong>requirements gathering</strong>,
+              <strong>mockup design</strong>, then <strong>website implementation</strong>. Each phase lasted
+              around 2 to 3 weeks with intermediate deliverables and feedback.
+            </p>
+            <ul>
+              <li>
+                <strong>Phase 1 - Requirements gathering (September to October)</strong>
+                <ul>
+                  <li>Research sessions, information collection, and a two-column synthesis document.</li>
+                  <li>Final deliverable: Word + PDF file.</li>
+                </ul>
+              </li>
+              <li>
+                <strong>Phase 2 - Mockup design (November)</strong>
+                <ul>
+                  <li>Work sessions focused on site architecture and UX/UI.</li>
+                  <li>Intermediate mockup submission with instructor feedback and iteration.</li>
+                </ul>
+              </li>
+              <li>
+                <strong>Phase 3 - Implementation (December to January)</strong>
+                <ul>
+                  <li>Supervised coding sessions in HTML/CSS/JS.</li>
+                  <li>Final testing, delivery, and group oral presentation.</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="objectives">
+            <h2>Detailed Objectives</h2>
+            <ul>
+              <li>
+                <strong>Collect and synthesize</strong> key company information using vocabulary adapted to younger audiences.
+              </li>
+              <li>
+                <strong>Vulgarize</strong> non-technical content into accessible explanations.
+              </li>
+              <li>
+                <strong>Design an ergonomic mockup</strong> aligned with accessibility, eco-design, and responsive constraints.
+              </li>
+              <li>
+                <strong>Develop the website</strong> with lightweight code and media optimization best practices.
+              </li>
+              <li>
+                <strong>Collaborate effectively</strong> through planning, documentation, and coordinated contribution.
+              </li>
+              <li>
+                <strong>Present the process orally</strong>: design decisions, implementation, feedback, and retrospective.
+              </li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="techniques">
+            <h2>Technical Skills & Know-How</h2>
+            <ul>
+              <li><strong>Prototyping:</strong> Figma, Adobe XD, Balsamiq, or Canva.</li>
+              <li><strong>Front-end:</strong> HTML5, CSS3 (responsive grids, flexbox), JavaScript basics, WCAG practices.</li>
+              <li><strong>Version control:</strong> Git and GitLab (repo setup, branching, merge requests, issue tracking).</li>
+              <li><strong>Eco-design:</strong> image compression, CSS/JS minification, controlled webfont usage, lazy loading.</li>
+              <li><strong>Technical writing:</strong> sourced bibliography, glossary, and annotated mockups/screenshots.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="group-work">
+            <h2>Teamwork</h2>
+            <p>Each team member contributed to:</p>
+            <ul>
+              <li><strong>Planning</strong> and role distribution (research, writing, mockup, integration).</li>
+              <li><strong>Collaborative writing</strong> of the company synthesis documentation.</li>
+              <li><strong>Iterative mockup design</strong> based on teacher feedback.</li>
+              <li><strong>Shared development</strong> with CSS/navigation/HTML consistency and responsive validation.</li>
+              <li><strong>GitLab workflow</strong> with dedicated branches and final merge review.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="individual-work">
+            <h2>Individual Work</h2>
+            <ul>
+              <li>
+                <strong>Research work:</strong> each student investigated a specific angle (ecology, legal structure, competition, etc.).
+              </li>
+              <li>
+                <strong>Glossary writing:</strong> management, GDPR, digital transition, and eco-design terms for non-specialists.
+              </li>
+              <li>
+                <strong>Testing and validation:</strong> accessibility, contrast, and mobile compatibility checks before final integration.
+              </li>
+              <li>
+                <strong>Oral preparation:</strong> each student prepared a dedicated pitch segment.
+              </li>
+            </ul>
+          </section>
+        </article>
+
+        <ProjectPagination currentPath="/projet-SAE56" />
+      </>
+    );
+  }
 
   return (
     <>

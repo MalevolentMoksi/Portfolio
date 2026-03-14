@@ -1,10 +1,167 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import ProjectPagination from '@/components/ProjectPagination.jsx';
 import useReadingTimeEstimate from '@/hooks/useReadingTimeEstimate.js';
 
 const ProjetMEGASAE = () => {
+  const { i18n } = useTranslation();
   const contentRef = useRef(null);
   useReadingTimeEstimate(contentRef);
+
+  if (i18n.resolvedLanguage === 'en') {
+    return (
+      <>
+        <article className="project-article" ref={contentRef}>
+          <section id="overview">
+            <h2>Context & Description</h2>
+            <p>
+              This expanded second-year project consisted of <strong>designing, developing, and documenting</strong>
+              a JavaFX application enabling banquet organizers to manage events, menus, guests, seating plans, and
+              scheduling. The app runs offline (thick-client architecture) and follows a complete MVC model.
+              Work was delivered by a team of six (group 18) over one full semester, with institutional GitLab,
+              milestones, and final oral defense.
+            </p>
+          </section>
+
+          <hr />
+
+          <section id="skills">
+            <h2>Skills Mobilized</h2>
+
+            <h3>Develop basic software applications</h3>
+            <ul>
+              <li>Implement straightforward designs</li>
+              <li>Build and structure simple software solutions</li>
+              <li>Run tests and evaluate outcomes</li>
+              <li>Develop user interfaces</li>
+            </ul>
+
+            <h3>Understand and build algorithms</h3>
+            <ul>
+              <li>Analyze problems methodically</li>
+              <li>Compare algorithmic approaches on classical problems</li>
+              <li>Experiment with compilation and low-level representations</li>
+              <li>Apply mathematical tools to implementation problems</li>
+            </ul>
+
+            <h3>Install and configure a workstation</h3>
+            <ul>
+              <li>Identify hardware/software components of a system</li>
+              <li>Use core multitasking-system features</li>
+              <li>Install an OS and development tools</li>
+              <li>Configure a workstation in a company network context</li>
+            </ul>
+
+            <h3>Design and implement a database</h3>
+            <ul>
+              <li>Update and query relational databases</li>
+              <li>Visualize and interpret data</li>
+              <li>Design a schema from business requirements</li>
+            </ul>
+
+            <h3>Work in a professional environment</h3>
+            <ul>
+              <li>Understand the digital ecosystem</li>
+              <li>Identify role expectations across IT sectors</li>
+              <li>Understand roles in multidisciplinary teams</li>
+              <li>Develop interpersonal teamwork skills</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="objectives">
+            <h2>Main Objectives</h2>
+            <ul>
+              <li>
+                Produce a complete UML analysis/design package: use cases, class and sequence diagrams, UI mockups,
+                and ensure consistency between models and code.
+              </li>
+              <li>
+                Deliver a JavaFX application respecting MVC architecture and good practices (Observer pattern, DAO,
+                JUnit tests).
+              </li>
+              <li>Manage project planning, risks, RACI/Gantt, and document decision rationale.</li>
+              <li>Present a functional demo and an 8-minute final pitch.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="techniques">
+            <h2>Technical Skills & Know-How</h2>
+            <ul>
+              <li><strong>Language/stack:</strong> Java 17, JavaFX 21, Maven, JUnit 5.</li>
+              <li><strong>Modeling:</strong> UML with Visual Paradigm (use cases, classes, sequences, objects).</li>
+              <li><strong>Persistence:</strong> Embedded SQLite with generic DAO and DDL/DML seed scripts.</li>
+              <li><strong>Tooling:</strong> GitLab, Discord/Drive collaboration, Draw.io/Figma wireframing.</li>
+              <li><strong>Quality:</strong> ~80% test coverage, SonarLint, Google Java Style conventions.</li>
+              <li><strong>Project management:</strong> Gantt, RACI, and risk-mitigation planning.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="organization">
+            <h2>Organization & Roles</h2>
+            <p>Project team 18 - 6 members:</p>
+            <ul>
+              <li><strong>Project lead</strong>: Maceo Guicherd-Callin</li>
+              <li><strong>UI leads</strong>: Noam Bruchet-Johanon &amp; Enzo Morello</li>
+              <li><strong>Technical leads</strong>: Jérémie Fauvet-Messat &amp; Simon Krumb</li>
+              <li><strong>Communication lead</strong>: Paolo Colombat</li>
+            </ul>
+            <p>
+              Deliverables from March to June: framing file, UML model, UI prototype, functional iterations,
+              and final demo on June 20.
+            </p>
+          </section>
+
+          <hr />
+
+          <section id="group-work">
+            <h2>Team Process</h2>
+            <ul>
+              <li>Weekly Kanban flow via GitLab issues and cross code reviews.</li>
+              <li>Daily 15-minute standups and Discord channels for recap/risk tracking.</li>
+              <li>Branching model: stable <code>main</code>, <code>dev</code>, and feature branches.</li>
+              <li>Iterative wireframes validated by the UI pair and integrated in JavaFX (<code>FXML</code>).</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="individual-work">
+            <h2>Individual Contributions</h2>
+            <ul>
+              <li>
+                <strong>Enzo</strong>: JavaFX views (menus, drag-and-drop seating plan) and dark-theme CSS integration.
+              </li>
+              <li><strong>Jérémie &amp; Simon</strong>: DAO layer and business logic (allergy management, PDF invites).</li>
+              <li><strong>Noam</strong>: UX mockups, accessibility guidelines, user tests.</li>
+              <li><strong>Paolo</strong>: risk tracking, Markdown/LaTeX documentation, final pitch.</li>
+              <li><strong>Maceo</strong>: planning, milestone sync, technical arbitration.</li>
+            </ul>
+          </section>
+
+          <hr />
+
+          <section id="conclusion">
+            <h2>Outcome & Retrospective</h2>
+            <p>
+              Version 1.0 was delivered with banquet creation/import, guest management, dynamic menus adapted to
+              dietary constraints, PDF invitation generation, and full JSON export. The project reached 92% of user
+              stories, 81% test coverage, and was successfully presented at the final defense (18/20). Main
+              challenges were module synchronization and schedule pressure; a weekly risk review notably reduced
+              potential delays.
+            </p>
+          </section>
+        </article>
+
+        <ProjectPagination currentPath="/projet-MEGASAE" />
+      </>
+    );
+  }
 
   return (
     <>

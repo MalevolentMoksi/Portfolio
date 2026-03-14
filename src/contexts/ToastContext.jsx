@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 /* ── Icônes SVG par type ──────────────────────────── */
 const TOAST_ICONS = {
@@ -39,6 +40,7 @@ export const useToast = () => useContext(ToastContext);
 
 /* ── Toast item ──────────────────────────────────── */
 const ToastItem = ({ toast, onDismiss }) => {
+  const { t } = useTranslation();
   const [exiting, setExiting] = useState(false);
   const timerRef = useRef(null);
 
@@ -82,7 +84,7 @@ const ToastItem = ({ toast, onDismiss }) => {
       <button
         className="toast-close"
         onClick={dismiss}
-        aria-label="Fermer la notification"
+        aria-label={t('common.toast.close')}
       >
         ×
       </button>
@@ -92,10 +94,11 @@ const ToastItem = ({ toast, onDismiss }) => {
 
 /* ── Container (portal → body) ───────────────────── */
 const ToastContainer = ({ toasts, onDismiss }) => {
+  const { t } = useTranslation();
   if (toasts.length === 0) return null;
 
   return createPortal(
-    <div className="toast-container" aria-label="Notifications" role="region">
+    <div className="toast-container" aria-label={t('common.toast.region')} role="region">
       {toasts.map((t) => (
         <ToastItem key={t.id} toast={t} onDismiss={onDismiss} />
       ))}
@@ -106,6 +109,7 @@ const ToastContainer = ({ toasts, onDismiss }) => {
 
 /* ── Provider ────────────────────────────────────── */
 export const ToastProvider = ({ children }) => {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState([]);
   const idRef = useRef(0);
 
@@ -124,16 +128,16 @@ export const ToastProvider = ({ children }) => {
     window.showToast = showToast;
     // Fonctions de test console — testToast.success() etc.
     window.testToast = {
-      success: () => showToast('Opération réussie avec succès !', { type: 'success' }),
-      error:   () => showToast('Impossible de charger la ressource.', { type: 'error' }),
-      info:    () => showToast('Ambiance : Vaporwave activée.', { type: 'info' }),
-      warning: () => showToast('Attention : action irréversible.', { type: 'warning' }),
+      success: () => showToast(t('common.toast.debug.success'), { type: 'success' }),
+      error:   () => showToast(t('common.toast.debug.error'), { type: 'error' }),
+      info:    () => showToast(t('common.toast.debug.info'), { type: 'info' }),
+      warning: () => showToast(t('common.toast.debug.warning'), { type: 'warning' }),
     };
     return () => {
       delete window.showToast;
       delete window.testToast;
     };
-  }, [showToast]);
+  }, [showToast, t]);
 
   return (
     <ToastContext.Provider value={{ showToast, dismissToast }}>

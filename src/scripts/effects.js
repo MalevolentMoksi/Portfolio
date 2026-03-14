@@ -297,7 +297,15 @@ class VisualEffects {
       mouseY = y * depth;
 
       // Relancer le RAF s'il s'est arrêté après convergence
-      if (!this._parallaxRunning && this.background) {
+      // BUT: ne pas relancer si a11y--no-motion est actif (animation réduite)
+      const isNoMotion = document.body?.classList.contains('a11y--no-motion');
+      if (isNoMotion && this._parallaxRafId) {
+        cancelAnimationFrame(this._parallaxRafId);
+        this._parallaxRafId = null;
+        this._parallaxRunning = false;
+        return;
+      }
+      if (!this._parallaxRunning && this.background && !isNoMotion) {
         this._parallaxRunning = true;
         this._parallaxRafId = requestAnimationFrame(updateParallax);
       }
@@ -324,6 +332,13 @@ class VisualEffects {
     const SETTLE_THRESHOLD = 0.05;
 
     const updateParallax = () => {
+      // Check if no-motion is active — stop parallax immediately
+      if (document.body?.classList.contains('a11y--no-motion')) {
+        this._parallaxRafId = null;
+        this._parallaxRunning = false;
+        return;
+      }
+
       posX += (mouseX - posX) * friction;
       posY += (mouseY - posY) * friction;
       this.background.style.transform = `scale(1.15) translate(${posX}px, ${posY}px)`;

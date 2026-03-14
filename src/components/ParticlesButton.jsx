@@ -1,7 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip.jsx';
 import { useToast } from '../contexts/ToastContext.jsx';
 import { getPerformanceTier } from '../utils/performanceTier.js';
+import { useAccessibility } from '@/contexts/AccessibilityContext.jsx';
 
 /* ── Configuration des effets ─────────────────────── */
 const EFFECT_ICONS = {
@@ -46,10 +48,10 @@ const EFFECT_ICONS = {
 };
 
 const EFFECTS = [
-  { key: 'explode',  label: 'Explosion',   duration: 1800, toast: 'Explosion — particules projetées !' },
-  { key: 'attract',  label: 'Attraction',  duration: 3000, toast: 'Attraction — convergence en cours\u2026' },
-  { key: 'storm',    label: 'Temp\u00eate',     duration: 3000, toast: 'Temp\u00eate — turbulences maximales !' },
-  { key: 'gravity',  label: 'Gravit\u00e9',     duration: 3000, toast: 'Gravit\u00e9 — les particules chutent !' },
+  { key: 'explode',  duration: 1800 },
+  { key: 'attract',  duration: 3000 },
+  { key: 'storm',    duration: 3000 },
+  { key: 'gravity',  duration: 3000 },
 ];
 
 /* ── Helpers : accès sécurisé à pJS ── */
@@ -372,7 +374,10 @@ const effects = {
 /* ── Composant ─────────────────────────────────────── */
 
 const ParticlesButton = () => {
+  const { t } = useTranslation();
   const { showToast } = useToast();
+  const { settings: a11ySettings } = useAccessibility();
+  const noMotion = a11ySettings.noMotion;
   const [effectIndex, setEffectIndex] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [activeEffectKey, setActiveEffectKey] = useState(null);
@@ -384,6 +389,12 @@ const ParticlesButton = () => {
   const effectSignalRef = useRef(null);
   const smoothRestoreHandleRef = useRef(null);
 
+  const localizedEffects = EFFECTS.map((effect) => ({
+    ...effect,
+    label: t(`common.particles.effects.${effect.key}.label`),
+    toast: t(`common.particles.effects.${effect.key}.toast`),
+  }));
+
   const triggerEffect = useCallback(() => {
     if (cooldownRef.current) return;
 
@@ -391,7 +402,7 @@ const ParticlesButton = () => {
     smoothRestoreHandleRef.current?.cancel();
     smoothRestoreHandleRef.current = null;
 
-    const effect = EFFECTS[effectIndex];
+    const effect = localizedEffects[effectIndex];
 
     // Créer un signal pour cet effet — permet de l'annuler depuis cleanup
     const signal = { cancelled: false, _unmounted: false };
@@ -441,7 +452,7 @@ const ParticlesButton = () => {
         setEffectIndex((i) => (i + 1) % EFFECTS.length);
       }
     }, 100);
-  }, [effectIndex]);
+  }, [effectIndex, localizedEffects, showToast]);
 
   // Cleanup complet au démontage : annuler RAF leaks + intervals
   useEffect(() => {
@@ -464,7 +475,7 @@ const ParticlesButton = () => {
     };
   }, []);
 
-  const currentEffect = EFFECTS[effectIndex];
+  const currentEffect = localizedEffects[effectIndex];
   const progressRingPerimeter = 4 * (39 - 2 * 10.5) + 2 * Math.PI * 10.5; // périmètre rect 39×39 rx=10.5
   const progressOffset = progressRingPerimeter * (1 - progress / 100);
 
@@ -475,12 +486,12 @@ const ParticlesButton = () => {
   else if (progress > 25) progressClass = 'progress-25';
 
   return (
-    <Tooltip text={currentEffect.label} desc={isActive ? `Chargement ${Math.ceil(progress)}%` : 'Cliquer pour déclencher'} position="bottom">
+    <Tooltip text={currentEffect.label} desc={isActive ? t('common.particles.loading', { progress: Math.ceil(progress) }) : t('common.particles.clickToTrigger')} position="bottom">
     <button
       className={`header-action-btn particles-btn ${isActive ? 'particles-btn--active' : ''}`}
       onClick={triggerEffect}
-      aria-label={`Effet particules : ${currentEffect.label}`}
-      disabled={isActive}
+      aria-label={t('common.particles.ariaLabel', { effect: currentEffect.label })}
+      disabled={isActive || noMotion}
     >
       {/* Cooldown Progress Ring */}
       {isActive && (

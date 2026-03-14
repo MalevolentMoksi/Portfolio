@@ -43,6 +43,9 @@ class UIEnhancements {
     }
     element.dataset.typed = 'false';
     element.dataset.typedText = fullText;
+    // Pin layout height before clearing to prevent scroll-anchor adjustments
+    const measuredH = element.getBoundingClientRect().height;
+    if (measuredH > 0) element.style.minHeight = measuredH + 'px';
     element.textContent = '';
     element.classList.add('typing');
 
@@ -54,6 +57,7 @@ class UIEnhancements {
         this._typingTimeout = setTimeout(typeLetter, 50);
       } else {
         this._typingTimeout = null;
+        element.style.minHeight = '';
         element.classList.remove('typing');
         element.dataset.typed = 'true';
       }

@@ -1,0 +1,105 @@
+/* ============================================
+   Accessibility Overrides
+   ============================================ */
+
+body.a11y--no-motion *,
+body.a11y--no-motion *::before,
+body.a11y--no-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+body.a11y--high-contrast {
+  --color-bg: #000000;
+  --color-secondary: #000000;
+  --color-secondary-rgb: 0, 0, 0;
+  --color-text: #ffffff;
+  --color-primary: #ffff00;
+  --color-primary-rgb: 255, 255, 0;
+  --color-accent-light: #ffffff;
+  --color-accent-pale: #ffff66;
+}
+
+body.a11y--high-contrast * {
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+body.a11y--high-contrast a,
+body.a11y--high-contrast button {
+  outline-color: var(--color-primary);
+
+  /* ── High Contrast : MoodSwitcher ──────────────────────────────────
+   Les couleurs du MoodSwitcher proviennent en partie d'attributs SVG
+   inline (fill=) et de styles inline (background: m.color), qui ne
+   sont pas affectés par les variables CSS body-level. On les force.
+*/
+  body.a11y--high-contrast .mood-orb {
+    fill: var(--color-primary) !important;
+    stroke: var(--color-primary) !important;
+  }
+  body.a11y--high-contrast .mood-dot {
+    fill: var(--color-primary) !important;
+  }
+  body.a11y--high-contrast .mood-swatch {
+    background: var(--color-primary) !important;
+  }
+  body.a11y--high-contrast .mood-emoji {
+    color: currentColor !important;
+  }
+  body.a11y--high-contrast .mood-check {
+    color: var(--color-primary) !important;
+  }
+  body.a11y--high-contrast .mood-option--active,
+  body.a11y--high-contrast .mood-option:hover {
+    border-color: var(--color-primary) !important;
+    background: rgba(255, 255, 0, 0.1) !important;
+  }
+  body.a11y--high-contrast .mood-panel-title {
+    /* Valeur codée en dur dans _mood-switcher.css, pas une variable */
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* ── High Contrast : liens ─────────────────────────────────────────
+   Certains liens utilisent des couleurs hors var(--color-primary) ;
+   on garantit la couleur de contraste élevé partout.
+*/
+  body.a11y--high-contrast a {
+    color: var(--color-primary) !important;
+  }
+}
+
+body.a11y--dyslexia,
+body.a11y--dyslexia * {
+  font-family: Verdana, Tahoma, sans-serif !important;
+  letter-spacing: 0.04em;
+  word-spacing: 0.08em;
+  line-height: 1.75;
+}
+
+body.a11y--reduce-effects::before,
+body.a11y--reduce-effects::after {
+  display: none !important;
+}
+
+body.a11y--reduce-effects #particles-js,
+body.a11y--reduce-effects .ambient-layers,
+body.a11y--reduce-effects .footer-diorama,
+body.a11y--reduce-effects .mood-vhs-overlay,
+body.a11y--reduce-effects [class*='ambient-'] canvas,
+body.a11y--reduce-effects [class*='ambient-'] svg {
+  display: none !important;
+}
+
+body.a11y--reduce-effects .header--secondary,
+body.a11y--reduce-effects .project,
+body.a11y--reduce-effects .footer-widget,
+body.a11y--reduce-effects .mini-terminal-panel,
+body.a11y--reduce-effects .mood-panel,
+body.a11y--reduce-effects .language-panel,
+body.a11y--reduce-effects .accessibility-panel {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}

@@ -1,0 +1,738 @@
+{
+  "common": {
+    "videoNotSupported": "Votre navigateur ne supporte pas la balise video.",
+    "nav": {
+      "primaryAria": "Navigation principale",
+      "home": "Accueil",
+      "projects": "Projets",
+      "personalProjects": "Projets personnels"
+    },
+    "header": {
+      "skipToContent": "Aller au contenu principal",
+      "brandAria": "Accueil - Enzo MORELLO",
+      "controlsAria": "Contrôles langue et accessibilité",
+      "actionsAria": "Actions interactives",
+      "secondaryAria": "En-tête secondaire de la page"
+    },
+    "language": {
+      "tooltip": "Langue",
+      "ariaLabel": "Changer la langue du site",
+      "choose": "Choisir la langue",
+      "title": "Langue",
+      "names": {
+        "fr": "Français",
+        "en": "English"
+      }
+    },
+    "accessibility": {
+      "tooltip": "Accessibilité",
+      "ariaLabel": "Ouvrir les options d'accessibilité",
+      "title": "Accessibilité",
+      "options": {
+        "noMotion": "Désactiver animations & effets visuels",
+        "highContrast": "Contraste élevé",
+        "fontSize": "Taille de police",
+        "dyslexia": "Police adaptée dyslexie"
+      },
+      "fontSize": {
+        "normal": "Normal",
+        "lg": "Grand",
+        "xl": "XL"
+      }
+    },
+    "mobileNav": {
+      "toggleAria": "Basculer le menu de navigation",
+      "aria": "Navigation mobile"
+    },
+    "mood": {
+      "tooltip": "Mood : {{mood}}",
+      "ariaLabel": "Changer l'ambiance visuelle",
+      "chooseAria": "Choisir une ambiance",
+      "title": "Ambiance",
+      "toastActivated": "{{emoji}}  Ambiance « {{mood}} » activée",
+      "names": {
+        "default": "Default",
+        "hacker": "Terminal",
+        "vaporwave": "Vaporwave",
+        "europa": "Europa",
+        "industrial": "Industriel"
+      }
+    },
+    "particles": {
+      "ariaLabel": "Effet particules : {{effect}}",
+      "clickToTrigger": "Cliquer pour déclencher",
+      "loading": "Chargement {{progress}}%",
+      "effects": {
+        "explode": {
+          "label": "Explosion",
+          "toast": "Explosion - particules projetées !"
+        },
+        "attract": {
+          "label": "Attraction",
+          "toast": "Attraction - convergence en cours..."
+        },
+        "storm": {
+          "label": "Tempête",
+          "toast": "Tempête - turbulences maximales !"
+        },
+        "gravity": {
+          "label": "Gravité",
+          "toast": "Gravité - les particules chutent !"
+        }
+      }
+    },
+    "breadcrumbs": {
+      "aria": "Fil d'Ariane",
+      "minRead": "{{count}} min de lecture",
+      "labels": {
+        "projets": "Projets",
+        "projetsPersonnels": "Projets personnels",
+        "projetMegasae": "Application de planification de banquets",
+        "projetSae12": "Implémentation d'un besoin client",
+        "projetSae3": "Installation d'un poste pour le développement",
+        "projetSae4": "Création d'une base de données",
+        "projetSae56": "Création d'un site institutionnel",
+        "projetSae301": "Application Web pour les aidants"
+      }
+    },
+    "filterBar": {
+      "aria": "Filtres par technologie",
+      "title": "Filtrer par technologie",
+      "clearAllAria": "Effacer tous les filtres",
+      "clear": "✕ Effacer ({{count}})",
+      "filterByTag": "Filtrer par {{tag}}",
+      "activeFilters": "Filtres actifs : {{count}}",
+      "removeFilter": "Supprimer le filtre {{tag}}"
+    },
+    "pagination": {
+      "navAria": "Navigation entre projets",
+      "previous": "Projet précédent",
+      "next": "Projet suivant",
+      "allProjects": "Tous les projets",
+      "previousAria": "Projet précédent : {{title}}",
+      "nextAria": "Projet suivant : {{title}}",
+      "allProjectsAria": "Retour à la liste des projets",
+      "projectTitles": {
+        "sae301": "SAE 3.01 - Application Web pour les aidants",
+        "megasae": "MEGASAE - Application de banquets",
+        "sae56": "SAE 5-6 - Site web institutionnel",
+        "sae3": "SAE 3 - Installation poste développement",
+        "sae12": "SAE 1.2 - Implémentation besoin client",
+        "sae4": "SAE 4 - Création base de données"
+      }
+    },
+    "footer": {
+      "secondaryNavAria": "Navigation secondaire",
+      "about": "À propos du portfolio",
+      "credits": "Crédits",
+      "githubAria": "Profil GitHub",
+      "emailAria": "Email",
+      "gitlabAria": "Profil GitLab",
+      "clockAria": "Horloge"
+    },
+    "footerWidget": {
+      "timeOnPortfolio": "Temps passé sur le portfolio",
+      "deploymentStatus": "Statut de déploiement",
+      "lastBuild": "Dernière build : {{buildDate}}",
+      "cosmicSatellite": "Satellite cosmique"
+    },
+    "toast": {
+      "close": "Fermer la notification",
+      "region": "Notifications",
+      "debug": {
+        "success": "Opération réussie avec succès !",
+        "error": "Impossible de charger la ressource.",
+        "info": "Ambiance : Vaporwave activée.",
+        "warning": "Attention : action irréversible."
+      }
+    },
+    "contactForm": {
+      "labels": {
+        "name": "Nom *",
+        "email": "Email *",
+        "message": "Message *"
+      },
+      "placeholders": {
+        "name": "Votre nom",
+        "email": "votre.email@exemple.com",
+        "message": "Votre message..."
+      },
+      "submitting": "Envoi en cours...",
+      "submit": "Envoyer",
+      "status": {
+        "success": "✓ Message envoyé avec succès! Merci de votre message.",
+        "error": "✗ Une erreur s'est produite. Veuillez réessayer."
+      },
+      "toast": {
+        "success": "Message envoyé avec succès !",
+        "sendError": "Erreur lors de l'envoi. Veuillez réessayer.",
+        "networkError": "Erreur réseau. Vérifiez votre connexion."
+      },
+      "validation": {
+        "nameRequired": "Le nom est requis",
+        "nameTooLong": "Le nom ne doit pas dépasser {{max}} caractères",
+        "emailRequired": "L'email est requis",
+        "emailInvalid": "Veuillez entrer un email valide",
+        "messageRequired": "Le message est requis",
+        "messageTooShort": "Le message doit contenir au moins 10 caractères",
+        "messageTooLong": "Le message ne doit pas dépasser {{max}} caractères",
+        "rateLimit": "Veuillez patienter quelques secondes avant d'envoyer le formulaire."
+      }
+    },
+    "terminal": {
+      "tooltip": "Terminal",
+      "openAria": "Ouvrir le mini-terminal",
+      "dialogAria": "Mini terminal",
+      "run": "RUN",
+      "placeholder": "Tapez une commande...",
+      "inputAria": "Saisie de commande",
+      "welcome": "Bienvenue ! Tapez \"help\" pour la liste des commandes.",
+      "helpText": "Commandes disponibles :\n  help      - afficher cette aide\n  about     - à propos de moi\n  projects  - lister mes projets\n  skills    - compétences techniques\n  stats     - statistiques portfolio & session\n  joke      - une blague de dev\n  date      - date et heure actuelles\n  pet       - état du robot\n  snake     - lancer le jeu Snake\n  clear     - effacer le terminal",
+      "aboutText": "Enzo Morello / Étudiant en BUT Informatique à l'IUT2 de Grenoble.\nPassionné par le développement web, les jeux vidéo et la création.\nParcours Développement d'applications.",
+      "output": {
+        "projects": "Projets",
+        "skills": "Compétences"
+      },
+      "projects": [
+        { "name": "Application de planification de banquets", "path": "/projet-MEGASAE" },
+        { "name": "Implémentation d'un besoin client", "path": "/projet-SAE12" },
+        { "name": "Installation d'un poste pour le développement", "path": "/projet-SAE3" },
+        { "name": "Création d'une base de données", "path": "/projet-SAE4" },
+        { "name": "Création d'un site institutionnel", "path": "/projet-SAE56" }
+      ],
+      "skills": [
+        "JavaScript / React",
+        "HTML5 / CSS3",
+        "Python",
+        "Java",
+        "SQL / PostgreSQL",
+        "Git",
+        "Node.js",
+        "Linux"
+      ],
+      "jokes": [
+        "Pourquoi les développeurs détestent la nature ? Parce qu'il y a trop de bugs.",
+        "Il y a 10 types de personnes : celles qui comprennent le binaire et les autres.",
+        "Un développeur ne va jamais boire un café... il va exécuter un Java.",
+        "!false - c'est drôle parce que c'est true.",
+        "Combien de programmeurs faut-il pour changer une ampoule ? Aucun, c'est un problème hardware.",
+        "['hip','hip'] - hip hip array !",
+        "Un SQL query entre dans un bar, voit deux tables et demande : Je peux joindre ?",
+        "Le Wi-Fi est tombé pendant 5 minutes, j'ai dû parler à ma famille. Ils ont l'air sympa.",
+        "La première règle du code : ça marche ? On ne touche plus.",
+        "Mon code fonctionne et je ne sais pas pourquoi. Mon code ne fonctionne pas et je ne sais pas pourquoi."
+      ],
+      "stats": {
+        "title": "Statistiques du portfolio",
+        "portfolio": "Portfolio",
+        "projects": "Projets",
+        "academic": "académiques",
+        "personal": "personnels",
+        "skills": "Compétences",
+        "technologies": "Technologies",
+        "session": "Session",
+        "pagesVisited": "Pages visitées",
+        "timeOnline": "Temps en ligne",
+        "music": "Musique",
+        "robot": "Robot",
+        "none": "-",
+        "happiness": "bonheur"
+      },
+      "petMood": {
+        "happy": "Heureux",
+        "content": "Content",
+        "sad": "Triste"
+      },
+      "pet": {
+        "recalled": "Robot rappelé",
+        "recalledHint": "Robot rappelé. Invoque-le via l'icône robot dans la barre.",
+        "notAdoptedHint": "Robot pas encore adopté ! Clique sur l'icône robot dans la barre.",
+        "state": "État du robot",
+        "hunger": "Faim",
+        "happiness": "Bonheur",
+        "mood": "Humeur"
+      },
+      "unknownCommand": "Commande inconnue : \"{{command}}\". Tapez \"help\" pour voir les commandes."
+    },
+    "pet": {
+      "defaultName": "Mon Robot",
+      "tooltip": {
+        "summon": "Invoquer le robot",
+        "recall": "Rappeler le robot"
+      },
+      "toast": {
+        "summoned": "Robot invoqué !",
+        "recalled": "Robot rappelé",
+        "renamed": "Robot renommé : {{name}}"
+      },
+      "onboarding": [
+        "Salut ! Je suis ton robot compagnon !",
+        "Je vais me balader un peu partout sur la page !",
+        "Tu peux cliquer sur moi pour voir mes stats,",
+        "me nourrir et jouer avec moi"
+      ],
+      "moodTextPool": {
+        "happy": ["Mes circuits ronronnent...", "J'ai calculé pi à 37 décimales !", "Le monde est beau vu d'ici.", "Niveau d'énergie : optimal !", "Je pourrais explorer indéfiniment.", "Tout fonctionne parfaitement."],
+        "content": ["Traitement en cours...", "Mode veille : désactivé.", "Scan de l'environnement : nominal.", "En attente d'instructions.", "01001000 01101001"],
+        "sad": ["Mes batteries se vident...", "Un câlin, peut-être ?", "Tu m'as oublié..."],
+        "scared": ["Alarme ! Alarme !", "Qu'est-ce que c'est ?!"],
+        "excited": ["Woohoo ! Overdrive activé !", "Turbo mode !", "Énergie maximale !"],
+        "dizzy": ["Tout tourne... recalibrage.", "Erreur : vertigo_overflow."],
+        "woozy": ["Téléportation... réussie... je crois.", "Systèmes en cours de stabilisation...", "Calibration gyroscopique requise."],
+        "eat": ["Miam ! Énergie restaurée.", "Délicieux ! +25% batterie."],
+        "petted": ["Séquence câlin reçue. Bonheur ++", "Chaleur détectée. Agréable."],
+        "play": ["Mode jeu activé !", "Ha ! J'ai gagné !", "Bien joué !"],
+        "sleep": ["Zzz...", "Mode veille activé...", "Analyse des rêves en cours...", "Traitement des souvenirs de la journée..."],
+        "catch": ["Attrape !", "À toi !", "Trop facile !", "Et hop !"]
+      },
+      "achievements": {
+        "title": "Succès - {{count}}/{{total}}",
+        "locked": "Verrouillé",
+        "hint": "Indice",
+        "items": {
+          "wallBounce": { "label": "Premier rebond", "desc": "Le robot a rebondi contre un mur", "hint": "Laisse le robot se promener près des bords de la page" },
+          "petAction": { "label": "Câlin reçu", "desc": "Câliné pour la première fois", "hint": "Utilise le bouton Câliner dans le HUD du robot" },
+          "footerSit": { "label": "Repos sur footer", "desc": "Le robot s'est posé sur le pied de page", "hint": "Laisse le robot errer librement jusqu'en bas de la page" },
+          "thrive": { "label": "Florissant", "desc": "Atteint l'état heureux", "hint": "Garde la faim et le bonheur tous les deux au-dessus de 60" },
+          "particles": { "label": "Sensoriel", "desc": "Le robot a repéré les particules", "hint": "Active les particules pendant que le robot se balade" },
+          "throw": { "label": "Lancé !", "desc": "Lancé le robot avec élan", "hint": "Fais glisser le robot très rapidement puis relâche-le" },
+          "catchGame": { "label": "Baseball", "desc": "Joué au jeu d'attrape", "hint": "Lance une partie via le bouton Jouer dans le HUD du robot" },
+          "sleep": { "label": "Bonne nuit", "desc": "Le robot s'est endormi", "hint": "Laisse le robot tranquille sans interagir pendant 30 secondes" },
+          "combo": { "label": "Combo x3", "desc": "Enchaîné 3 interactions en 7 s", "hint": "Effectue 3 actions différentes sur le robot en moins de 7 s" },
+          "rename": { "label": "Rebaptisé", "desc": "Donné un nouveau nom au robot", "hint": "Change le nom du robot depuis le champ en haut du HUD" },
+          "neglect": { "label": "Têtu", "desc": "Resté triste trop longtemps", "hint": "Laisse le robot dans un état triste sans t'en occuper" }
+        }
+      }
+    }
+  },
+  "pageConfig": {
+    "home": {
+      "heading": "Portfolio de Enzo MORELLO",
+      "subheading": "Étudiant en IUT2",
+      "subheadingAlt": "en Parcours Développement d'applications",
+      "metaTitle": "Portfolio - Enzo Morello",
+      "metaDescription": "Portfolio d'Enzo Morello, étudiant en BUT Informatique à l'IUT2 de Grenoble"
+    },
+    "projets": {
+      "heading": "Portfolio - Projets",
+      "subheading": "Projets académiques et professionnels",
+      "metaTitle": "Portfolio - Projets Académiques",
+      "metaDescription": "Découvrez mes projets académiques réalisés à l'IUT2 de Grenoble"
+    },
+    "projetsPersonnels": {
+      "heading": "Projets personnels",
+      "subheading": "Créations et explorations créatives",
+      "metaTitle": "Portfolio - Projets personnels",
+      "metaDescription": "Portfolio d'Enzo Morello - Projets personnels et créations"
+    },
+    "projetMegasae": {
+      "heading": "Projet cardinal - Application de planification de banquets",
+      "metaTitle": "Projet cardinal - Application de gestion de banquets",
+      "metaDescription": "Portfolio d'Enzo Morello - Projet cardinal"
+    },
+    "projetSae12": {
+      "heading": "Projet Implémentation d'un besoin client | Comparaison d'approches algorithmiques",
+      "metaTitle": "Projet Implémentation d'un besoin client",
+      "metaDescription": "Portfolio d'Enzo Morello - Projet SAE12"
+    },
+    "projetSae3": {
+      "heading": "Installation d'un poste pour le développement | Carte mentale & Présentation",
+      "metaTitle": "Installation d'un poste pour le développement",
+      "metaDescription": "Portfolio d'Enzo Morello - Projet SAE3"
+    },
+    "projetSae4": {
+      "heading": "Projet - Création d'une base de données",
+      "metaTitle": "Projet - Création d'une base de données",
+      "metaDescription": "Portfolio d'Enzo Morello - Projet SAE4"
+    },
+    "projetSae56": {
+      "heading": "Projet - Création d'un site institutionnel",
+      "metaTitle": "Projet - Création site web institutionnel",
+      "metaDescription": "Portfolio d'Enzo Morello - Projet SAE56"
+    },
+    "projetSae301": {
+      "heading": "Aidémé - Application Web de coordination pour les aidants",
+      "subheading": "Une plateforme collaborative pour gérer le suivi des personnes dépendantes",
+      "metaTitle": "Aidémé - Application Web pour les aidants",
+      "metaDescription": "Portfolio d'Enzo Morello - Projet SAE 3.01 : application full-stack React + PHP"
+    },
+    "about": {
+      "heading": "À propos du portfolio",
+      "subheading": "Stack technique, architecture et choix de conception",
+      "metaTitle": "À propos | Portfolio - Enzo Morello",
+      "metaDescription": "Architecture et stack technique du portfolio d'Enzo Morello - React, Vite, Framer Motion, CSS sur mesure."
+    },
+    "credits": {
+      "heading": "Crédits",
+      "subheading": "Musique, visuels et remerciements",
+      "metaTitle": "Crédits | Portfolio - Enzo Morello",
+      "metaDescription": "Remerciements et crédits du portfolio d'Enzo Morello - artistes, studios et équipe pédagogique."
+    }
+  },
+  "home": {
+    "metaTitle": "Accueil | Portfolio",
+    "metaDescription": "Enzo Morello - Étudiant en BUT Informatique à l'IUT2 de Grenoble",
+    "about": {
+      "title": "À propos de moi",
+      "descriptionPrefix": "Étudiant en 2ème année de",
+      "program": "BUT Informatique",
+      "descriptionMid": "à l'IUT2 de Grenoble, spécialisé en",
+      "specialization": "Développement d'Applications",
+      "descriptionSuffix": "Passionné par l'alliance entre logique technique et ergonomie visuelle, j'espère pouvoir mettre ma curiosité et ma méthode au service de projets innovants.",
+      "badgesAria": "Informations clés",
+      "year": "2ème année",
+      "school": "IUT2 de Grenoble"
+    },
+    "skills": {
+      "title": "Compétences",
+      "intro": "Réaliser, Concevoir, Optimiser et Administrer en :",
+      "cards": {
+        "web": { "title": "Développement Web" },
+        "backend": { "title": "Développement Système & Back-end" },
+        "tools": { "title": "Outils & Environnement" }
+      }
+    },
+    "timeline": {
+      "title": "Mon parcours",
+      "aria": "Parcours scolaire",
+      "items": [
+        {
+          "year": "2024 - présent",
+          "title": "BUT Informatique - Développement d'Applications",
+          "place": "IUT2 de Grenoble, Grenoble",
+          "desc": "Formation en développement logiciel, algorithmique, bases de données et réseaux."
+        },
+        {
+          "year": "Juin 2024",
+          "title": "Baccalauréat Général - Mention Bien",
+          "place": "Lycée Les Iscles, Manosque",
+          "desc": "Spécialités : Mathématiques et Sciences de l'Ingénieur."
+        }
+      ]
+    },
+    "hobbies": {
+      "title": "Centres d'intérêt",
+      "items": {
+        "art": "Art traditionnel & digital",
+        "games": "Jeux-Vidéo",
+        "music": "Découverte de musique",
+        "cinema": "Cinématographie"
+      }
+    },
+    "contact": {
+      "title": "Contact",
+      "gitlabLabel": "Profil Gitlab :",
+      "linkedinLabel": "Profil LinkedIn :",
+      "gitlabAria": "Profil GitLab (ouvre dans une nouvelle fenêtre)",
+      "linkedinAria": "Profil LinkedIn (ouvre dans une nouvelle fenêtre)"
+    }
+  },
+  "projets": {
+    "metaTitle": "Projets | Portfolio",
+    "metaDescription": "Mes projets scolaires et professionnels",
+    "title": "Mes Projets",
+    "learnMore": "En savoir plus",
+    "learnMoreAria": "En savoir plus sur {{title}}",
+    "technologies": "Technologies utilisées",
+    "previewAria": "Aperçu du projet : {{title}}"
+  },
+  "projetsPersonnels": {
+    "metaTitle": "Projets Personnels | Portfolio",
+    "metaDescription": "Mes projets personnels et illustrations",
+    "presentation": {
+      "title": "Présentation",
+      "description": "Sur cette page seront présentés divers projets personnels et illustrations. Ils reflètent mon intérêt pour la programmation, le design et la créativité.",
+      "notice": "PS : Cette page contient des videos qui se jouent au survol de la souris !"
+    },
+    "discord": {
+      "title": "Bot Discord",
+      "iconAlt": "Icône du Bot Discord Moksi's Bazaar",
+      "technologiesAria": "Technologies utilisées pour le bot Discord",
+      "intro": "est un bot Discord complet développé en JavaScript/Node.js (discord.js v14), combinant casino, features sociales et IA conversationnelle. Le bot offre :",
+      "features": {
+        "games": "Blackjack (vs dealer), roulette, machine à sous, craps, high/low, slots progressifs, duels PvP, gacha, et même Tetris.",
+        "economy": "Monnaie virtuelle avec auto-seeding ($10k), classements par serveur et historique de transactions.",
+        "ai": "Intégrée à OpenRouter (DeepSeek), analyse d'images en temps réel, personnalité adaptative selon l'attitude de l'utilisateur (hostile ↔ friendly).",
+        "relations": "Suivi des sentiments, niveaux d'attitude (friendly, neutral, annoyed) et mémoire des conversations par utilisateur.",
+        "infrastructure": "Hébergée sur Railway via Docker, base PostgreSQL persistante avec 8 tables optimisées."
+      },
+      "skillsLabel": "Compétences acquises",
+      "skills": {
+        "architecture": "Architecture logicielle",
+        "async": "Programmation asynchrone",
+        "state": "Gestion d'états complexes",
+        "api": "Optimisation API"
+      },
+      "github": "Voir le code sur GitHub",
+      "githubAria": "Voir le code du Bot Discord sur GitHub (ouvre dans une nouvelle fenêtre)",
+      "demosTitle": "Démonstrations",
+      "demosAria": "Démonstrations vidéo du bot Discord",
+      "captions": {
+        "blackjack": "Jeu de Blackjack",
+        "roulette": "Jeu de Roulette",
+        "currency": "Fonds & Classement",
+        "slots": "Jeu de Machine à Sous"
+      },
+      "architectureSummary": "Architecture & Fonctionnement Technique",
+      "sections": {
+        "infrastructure": "Infrastructure & Déploiement",
+        "database": "Schéma de Base de Données",
+        "software": "Architecture Logicielle",
+        "flow": "Flux d'Exécution d'une Commande"
+      },
+      "dashboardCaption": "Dashboard Railway : suivi des variables d'environnement, métriques PostgreSQL, & logs applicatifs"
+    },
+    "drawings": {
+      "title": "Dessins personnels",
+      "description1": "Depuis Janvier 2025, je me suis lancé dans le dessin numérique et traditionnel. Voici quelques-unes de mes illustrations, réalisées au crayon (2H à 6B) ou numériquement.",
+      "description2": "J'explore différents styles et techniques, mais cela reste avant tout un hobby pour moi.",
+      "captions": {
+        "ada1": "ADA-1 de Destiny 2 - Portrait au crayon",
+        "power": "Power de Chainsaw Man - Illustrations numérique",
+        "ramattra": "Ramattra de Overwatch 2 - Illustration au crayon",
+        "commission": "Commission - Illustration numerique",
+        "goatLamb": "Goat & Lamb de Cult of the Lamb - Illustration au crayon",
+        "elsie": "Exo Stranger de Destiny 2 - Illustration numerique"
+      }
+    },
+    "scratch": {
+      "title": "Jeux réalisés sur Scratch",
+      "description": "En CM2, j'ai été introduit au logiciel en ligne Scratch par mon professeur. Cela a consommé une bonne partie de mon temps personnel que j'ai passé à faire des jeux jusqu'en 2020. Le programme permet de programmer de manière ludique, avec des blocs de code visuels. J'ai fabriqué plusieurs jeux avec le programme, tous plutôt rugueux mais certains sont encore jouables aujourd'hui.",
+      "skillsLabel": "Compétences :",
+      "skills": "Logique algorithmique, design d'interfaces, animations, gestion de variables et de sprites",
+      "techniquesLabel": "Techniques :",
+      "techniques": "Utilisation avancée de Scratch, optimisation des scripts, adaptation aux feedbacks utilisateurs",
+      "profile": "Voir mon profil Scratch",
+      "captions": {
+        "stickman": "Démonstration du jeu Stickman Adventure",
+        "rpg": "Démonstration du jeu RPG 1.2v"
+      }
+    }
+  },
+  "about": {
+    "metaTitle": "À propos | Portfolio",
+    "metaDescription": "Architecture et stack technique du portfolio d'Enzo Morello - React, Vite, Framer Motion, CSS sur mesure.",
+    "sections": {
+      "stack": {
+        "title": "Stack technique",
+        "intro": "Technologies choisies pour ce portfolio - légères, modernes, sans dépendances superflues."
+      },
+      "architecture": {
+        "title": "Architecture",
+        "intro": "Application React SPA (Single Page Application) avec modules JavaScript legacy coexistant pour les effets et la musique."
+      },
+      "themes": {
+        "title": "Système de thèmes",
+        "introPrefix": "Cinq ambiances visuelles pilotées par des propriétés CSS personnalisées sur",
+        "availableAria": "Thèmes disponibles",
+        "note": "Les couleurs d'accentuation, de fond, de texte et les filtres d'icônes s'adaptent automatiquement à chaque thème via les mêmes variables CSS - aucun JavaScript nécessaire pour le rendu."
+      },
+      "ambient": {
+        "title": "Effets & ambiance",
+        "intro": "Couche décorative non-bloquante : les effets se chargent en arrière-plan et se retirent gracieusement si le DOM cible est absent."
+      },
+      "stats": {
+        "title": "En chiffres"
+      }
+    },
+    "stack": {
+      "react": { "role": "Librairie UI", "desc": "Composants fonctionnels, hooks, lazy-loading des pages par route et Suspense pour le code-splitting." },
+      "vite": { "role": "Outil de build", "desc": "Bundler ultra-rapide avec HMR, path aliases (@/, @styles/, @components/...) et optimisation de production." },
+      "router": { "role": "Navigation SPA", "desc": "BrowserRouter avec Layout partagé via <Outlet />, NavLink actifs et navigation côté client sans rechargement." },
+      "framerMotion": { "role": "Animations", "desc": "Morphing de chemins SVG pour le robot mascotte, transitions de montée/sortie et effets de ressort." },
+      "css": { "role": "Système de thèmes", "desc": "25+ modules CSS isolés, propriétés personnalisées centralisées dans _variables.css, zéro !important, PostCSS + Autoprefixer." },
+      "githubPages": { "role": "Déploiement", "desc": "Build Vite optimisé déployé automatiquement via gh-pages, servi comme SPA statique sur le domaine GitHub." }
+    },
+    "arch": {
+      "routing": {
+        "label": "Routing",
+        "items": [
+          "BrowserRouter -> Layout.jsx (shell partagé) -> <Outlet />",
+          "Toutes les pages sont lazy-loadées (code splitting par route)",
+          "pageConfig dans Layout.jsx : fond, titre et méta par chemin"
+        ]
+      },
+      "components": {
+        "label": "Composants",
+        "items": [
+          "~30 composants React isolés dans src/components/",
+          "Couche ambiante : 13 effets décoratifs dans components/ambient/",
+          "CSS scopé par composant, pas de pollution de cascade"
+        ]
+      },
+      "globalState": {
+        "label": "État global",
+        "items": [
+          "MoodContext - thème actif, écriture dans localStorage",
+          "ReadingTimeContext - estimation de lecture fournie aux pages",
+          "ToastContext - notifications légères non-bloquantes"
+        ]
+      },
+      "customHooks": {
+        "label": "Hooks personnalisés",
+        "items": [
+          "useDocumentMeta(title, desc) - SEO par page (title + meta)",
+          "usePortfolioModules(tracks) - init lazy des modules legacy",
+          "useReadingTimeEstimate() - durée de lecture estimée"
+        ]
+      },
+      "legacyScripts": {
+        "label": "Scripts legacy",
+        "items": [
+          "music-player.js - lecteur audio persistant, throttle localStorage à 1 éc/s",
+          "effects.js - particles.js, parallaxe, suivi souris",
+          "ui-enhancements.js - animation de frappe, horloge, hover vidéo",
+          "lightbox.js - zoom galerie sur les images .zoomable"
+        ]
+      }
+    },
+    "ambient": {
+      "footerDiorama": { "name": "FooterDiorama", "desc": "8 structures SVG animées (antenne relais, radar, phare, tour, bobine Tesla...) placées aléatoirement au-dessus du footer à chaque navigation." },
+      "ambientEffects": { "name": "AmbientEffects", "desc": "Effets météo liés au mood : givre Europa, néons et vapeurs Industriels, silhouettes, drones, braises, ondes de puissance." },
+      "pet": { "name": "Robot mascotte", "desc": "Compagnon interactif : déambulation par RAF, drag par capture de pointeur, stats faim/bonheur, bulles de pensée SVG et morphing de visage Framer Motion." },
+      "music": { "name": "Lecteur musical", "desc": "Lecture persistante entre les routes, découverte automatique des pistes .m4a dans /assets/music/, état sérialisé dans localStorage (track, position, pause)." }
+    },
+    "stats": {
+      "pages": "Pages",
+      "reactComponents": "Composants React",
+      "visualThemes": "Thèmes visuels",
+      "cssModules": "Modules CSS",
+      "legacyScripts": "Scripts legacy",
+      "pet": "Robot mascotte"
+    }
+  },
+  "credits": {
+    "metaTitle": "Crédits | Portfolio",
+    "metaDescription": "Remerciements et crédits du portfolio d'Enzo Morello - musique, visuels et formation.",
+    "sections": {
+      "music": {
+        "title": "Musique",
+        "intro": "Les artistes suivants accompagnent l'expérience sonore du portfolio. Leur travail mérite d'être découvert bien au-delà de ces pages.",
+        "aria": "Artistes musicaux"
+      },
+      "visuals": {
+        "title": "Visuels & fonds d'écran",
+        "intro": "Les illustrations utilisées comme arrière-plans appartiennent à leurs créateurs respectifs et sont reproduites ici à titre décoratif non-commercial.",
+        "publishedBy": "édité par"
+      },
+      "education": {
+        "title": "Formation & encadrement",
+        "team": "L'équipe pédagogique de l'IUT2 - Université Grenoble Alpes",
+        "note": "Un remerciement sincère aux enseignants et intervenants du département informatique de l'IUT2 de l'UGA pour la qualité de leur encadrement, la rigueur de leur enseignement et leur disponibilité tout au long du cursus BUT Informatique. Les projets présentés dans ce portfolio sont le reflet direct des compétences transmises et des défis proposés au fil des semestres."
+      }
+    },
+    "musicNotes": [
+      "Pionnière du vaporwave et du future funk, atmosphères dorées et nostalgiques.",
+      "Compositions lo-fi et expérimentales aux textures douces et introspectives.",
+      "Musique électronique aux sonorités ambiantes et mélodiques.",
+      "Compositeur de la bande originale de Risk of Rain & Risk of Rain 2, post-rock progressif et électronique.",
+      "Compositions atmosphériques aux teintes lo-fi et dreamlike.",
+      "Ambient méditatif et cinématographique pour une écoute en profondeur."
+    ],
+    "visualNotes": [
+      "Fonds d'écran tirés des visuels officiels du jeu.",
+      "Fonds d'écran tirés des visuels officiels, dont l'extension Beyond Light (Europa)."
+    ]
+  },
+  "notFound": {
+    "metaTitle": "404 - Page introuvable",
+    "metaDescription": "Cette page n'existe pas.",
+    "title": "Page introuvable",
+    "description": "La page que vous cherchez n'existe pas, a été déplacée, ou vous a simplement échappé dans le vide interstellaire.",
+    "homeButton": "← Retour à l'accueil",
+    "snakeButton": "🐍 Rester un peu plus longtemps"
+  },
+  "data": {
+    "projects": {
+      "tags": {
+        "react": "React",
+        "php": "PHP",
+        "sqlite": "SQLite",
+        "vite": "Vite",
+        "apiRest": "API REST",
+        "git": "Git",
+        "java": "Java",
+        "javafx": "JavaFX",
+        "maven": "Maven",
+        "sql": "SQL",
+        "html": "HTML",
+        "css": "CSS",
+        "javascript": "JavaScript",
+        "figma": "Figma",
+        "linux": "Linux",
+        "bash": "Bash",
+        "virtualbox": "VirtualBox",
+        "algorithms": "Algorithmes",
+        "postgresql": "PostgreSQL",
+        "database": "Base de données",
+        "discord": "Discord",
+        "python": "Python",
+        "ai": "IA",
+        "art": "Art",
+        "drawing": "Dessin",
+        "creation": "Création",
+        "scratch": "Scratch",
+        "games": "Jeux",
+        "visualProgramming": "Programmation visuelle"
+      },
+      "academic": {
+        "sae301": {
+          "type": "Projet SAE",
+          "title": "\"Aidémé\" - Application Web pour les aidants",
+          "category": "SAE 3.01",
+          "description": "Conception et développement d'une application Web full-stack (React 19 + PHP 8 + SQLite) permettant aux aidants de coordonner le suivi de personnes dépendantes : contacts, agenda, galerie photo, fichiers et notifications.",
+          "teamSize": "En équipe (Team 08 - IUT2 Info UGA)"
+        },
+        "megasae": {
+          "type": "Projet",
+          "title": "Application d'organisation de banquets",
+          "category": "Projet cardinal",
+          "description": "Développement à partir de zéro d'une application qui pourrait planifier des événements dans des salles pour un utilisateur.",
+          "teamSize": "En hexanome (6 personnes)"
+        },
+        "sae56": {
+          "type": "Projet SAE",
+          "title": "Recueil de besoins | Découverte de l'environnement économique et écologique",
+          "category": "SAE 5-6",
+          "description": "La récolte d'informations sur l'entreprise ESN Sopra Steria afin d'en faire un site a type informatif pour un public défini.",
+          "teamSize": "En trinôme"
+        },
+        "sae3": {
+          "type": "Projet SAE",
+          "title": "Installation d'un poste pour le développement",
+          "category": "SAE 3",
+          "description": "Installation et schématisation d'un poste Linux Debian.",
+          "teamSize": "En monôme"
+        },
+        "sae12": {
+          "type": "Projet SAE",
+          "title": "Implémentation d'un besoin client | Comparaison d'approches algorithmiques",
+          "category": "SAE 1.2",
+          "description": "Codage, étude et comparaison d'efficacité entre divers algorithmes de comparaisons en Java.",
+          "teamSize": "En binôme"
+        },
+        "sae4": {
+          "type": "Projet SAE",
+          "title": "Création d'une base de données",
+          "category": "SAE 4",
+          "description": "Conception, implémentation et optimisation d'une base de données relationnelle.",
+          "teamSize": "En trinôme"
+        }
+      },
+      "personal": {
+        "discordBot": {
+          "title": "Bot Discord \"Moksi's Bazaar\"",
+          "description": "Un bot Discord entièrement développé en JavaScript (discord.js), qui offre plusieurs services et jeux réunis sur une même plateforme textuelle."
+        },
+        "drawings": {
+          "title": "Illustrations & Dessins",
+          "description": "Collection personnelle de dessins et illustrations créés avec divers médiums."
+        },
+        "scratchGames": {
+          "title": "Jeux Scratch",
+          "description": "Petits jeux développés avec l'environnement Scratch pour apprendre la programmation visuelle."
+        }
+      }
+    }
+  }
+}

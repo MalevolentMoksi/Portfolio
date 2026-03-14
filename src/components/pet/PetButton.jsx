@@ -1,9 +1,11 @@
 /* ─────────────────────────────────────────────────
    Composant principal — bouton header + logique d'état
    ───────────────────────────────────────────────── */
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMood } from '../../contexts/MoodContext.jsx';
 import { useToast } from '../../contexts/ToastContext.jsx';
+import { useAccessibility } from '../../contexts/AccessibilityContext.jsx';
 import Tooltip from '../Tooltip.jsx';
 import {
   LS, DECAY_MS, REACTION_MS, COOLDOWNS, SLEEP_IDLE_MS, ACHIEVEMENTS,
@@ -14,8 +16,18 @@ import WanderingPet from './WanderingPet.jsx';
 import { normalizeThought } from './ThoughtBubbleQueue.jsx';
 
 const PetButton = () => {
+  const { t, i18n } = useTranslation();
   const { mood } = useMood();
   const { showToast } = useToast();
+  const { settings: a11ySettings } = useAccessibility();
+  const noMotion = a11ySettings.noMotion;
+  const moodTextPool = useMemo(() => {
+    const fromStore = i18n.getResource(i18n.resolvedLanguage, 'translation', 'common.pet.moodTextPool');
+    if (fromStore && typeof fromStore === 'object' && !Array.isArray(fromStore)) {
+      return fromStore;
+    }
+    return MOOD_TEXT_POOL;
+  }, [i18n, i18n.resolvedLanguage]);
   const [isSpawned, setIsSpawned] = useState(() => localStorage.getItem(LS.spawned) === 'true');
   const [stats, setStats] = useState(() => {
     // Réinitialise à ~50% à chaque chargement de page (synchrone, évite le délai d'un useEffect)
@@ -26,7 +38,7 @@ const PetButton = () => {
   // Timestamp (ms) when each cooldown expires; 0 = not cooling
   const [cdEnds, setCdEnds] = useState({ feed: 0, pet: 0, play: 0 });
   // Pet name — persisted
-  const [petName, setPetName] = useState(() => localStorage.getItem(LS.name) || 'Mon Robot');
+  const [petName, setPetName] = useState(() => localStorage.getItem(LS.name) || t('common.pet.defaultName'));
   // Cycling food icon index — persisted
   const [feedIconIndex, setFeedIconIndex] = useState(() => {
     const v = parseInt(localStorage.getItem(LS.feedIndex), 10);
@@ -50,7 +62,7 @@ const PetButton = () => {
   const thoughtTimersRef = useRef({});
   // HUD thought line — varies per expression
   const [hudThought, setHudThought] = useState(() => {
-    return pickRandom(MOOD_TEXT_POOL[getMood(50, 50)] ?? MOOD_TEXT_POOL.content);
+    return pickRandom(moodTextPool[getMood(50, 50)] ?? moodTextPool.content);
   });
   // Sleep after long idle
   const [isSleeping, setIsSleeping] = useState(false);
@@ -104,14 +116,23 @@ const PetButton = () => {
   // Migration: remove stale pet-renderer key (SVG is now the only renderer)
   useEffect(() => { localStorage.removeItem('pet-renderer'); }, []);
 
+  // Auto-despawn if noMotion is enabled (accessibility: disable animations)
+  useEffect(() => {
+    if (noMotion && isSpawned) {
+      setIsSpawned(false);
+      localStorage.setItem(LS.spawned, 'false');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noMotion]);
+
   /* ── Réactions temporaires ── */
   const triggerReaction = useCallback((r) => {
     clearTimeout(reactionTimer.current);
     setReaction(r);
     setFaceCombo(pickRandom(FACE_COMBOS[r] ?? FACE_COMBOS.content));
-    setHudThought(pickRandom(MOOD_TEXT_POOL[r] ?? MOOD_TEXT_POOL.content));
+    setHudThought(pickRandom(moodTextPool[r] ?? moodTextPool.content));
     reactionTimer.current = setTimeout(() => setReaction(null), REACTION_MS);
-  }, []);
+  }, [moodTextPool]);
 
   // On every spawn: woozy landing. On first spawn only: also boost stats to happy.
   useEffect(() => {
@@ -134,10 +155,10 @@ const PetButton = () => {
     onboardingRanRef.current = true;
 
     const steps = [
-      { delay: 1200, thought: { type: 'text', content: 'Salut ! Je suis ton robot compagnon !', duration: 5000 } },
-      { delay: 6300, thought: { type: 'text', content: 'Je vais me balader un peu partout sur la page !', duration: 5000 } },
-      { delay: 11400, thought: { type: 'text', content: 'Tu peux cliquer sur moi pour voir mes stats,', duration: 5000 } },
-      { delay: 16500, thought: { type: 'text', content: 'me nourrir et jouer avec moi 💛', duration: 5000 } },
+      { delay: 1200, thought: { type: 'text', content: t('common.pet.onboarding.0'), duration: 5000 } },
+      { delay: 6300, thought: { type: 'text', content: t('common.pet.onboarding.1'), duration: 5000 } },
+      { delay: 11400, thought: { type: 'text', content: t('common.pet.onboarding.2'), duration: 5000 } },
+      { delay: 16500, thought: { type: 'text', content: t('common.pet.onboarding.3'), duration: 5000 } },
     ];
     const timers = steps.map(({ delay, thought }) =>
       setTimeout(() => handleThought(thought), delay)
@@ -160,20 +181,20 @@ const PetButton = () => {
   useEffect(() => {
     if (isSleeping) {
       setFaceCombo(pickRandom(FACE_COMBOS.sleep ?? FACE_COMBOS.content));
-      setHudThought(pickRandom(MOOD_TEXT_POOL.sleep ?? MOOD_TEXT_POOL.content));
+      setHudThought(pickRandom(moodTextPool.sleep ?? moodTextPool.content));
     }
   // When waking up, triggerReaction('woozy') is called which resets the combo
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSleeping]);
+  }, [isSleeping, moodTextPool]);
 
   // When reaction clears, reset combo to base mood
   useEffect(() => {
     if (reaction === null) {
       setFaceCombo(pickRandom(FACE_COMBOS[petMood] ?? FACE_COMBOS.content));
-      setHudThought(pickRandom(MOOD_TEXT_POOL[petMood] ?? MOOD_TEXT_POOL.content));
+      setHudThought(pickRandom(moodTextPool[petMood] ?? moodTextPool.content));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reaction, petMood]);
+  }, [reaction, petMood, moodTextPool]);
 
   /* ── Dégradation en session (ralentie si thriving) + freeze pendant catch ── */
   // Approche probabiliste : évite les décimales (pas de multiplicateur flottant)
@@ -418,13 +439,13 @@ const PetButton = () => {
 
   /* ── Rename callback ── */
   const handleRename = useCallback((newName) => {
-    const trimmed = newName.trim().slice(0, 18) || 'Mon Robot';
+    const trimmed = newName.trim().slice(0, 18) || t('common.pet.defaultName');
     setPetName(trimmed);
-    if (trimmed !== 'Mon Robot') {
+    if (trimmed !== t('common.pet.defaultName')) {
       unlockAchievement('rename');
-      showToast(`Robot renommé : ${trimmed}`, { type: 'success', duration: 2500 });
+      showToast(t('common.pet.toast.renamed', { name: trimmed }), { type: 'success', duration: 2500 });
     }
-  }, [unlockAchievement, showToast]);
+  }, [unlockAchievement, showToast, t]);
 
   /* ── Toggle spawn (recharge les stats si elles étaient basses) ── */
   const toggleSpawn = useCallback(() => {
@@ -436,12 +457,12 @@ const PetButton = () => {
         hunger: s.hunger < 10 ? 50 : Math.round(s.hunger),
         happiness: s.happiness < 10 ? 50 : Math.round(s.happiness),
       }));
-      showToast('Robot invoqué !', { type: 'info', duration: 2500 });
+      showToast(t('common.pet.toast.summoned'), { type: 'info', duration: 2500 });
     } else {
-      showToast('Robot rappelé', { type: 'info', duration: 2000 });
+      showToast(t('common.pet.toast.recalled'), { type: 'info', duration: 2000 });
     }
     setIsSpawned(next);
-  }, [isSpawned, showToast]);
+  }, [isSpawned, showToast, t]);
 
 
   // Achievement unlocks driven by state changes in PetButton
@@ -460,14 +481,15 @@ const PetButton = () => {
     <>
       {/* Bouton header */}
       {/* Bouton header — toggle switch animé avec robot */}
-      <Tooltip text={isSpawned ? 'Rappeler le robot' : 'Invoquer le robot'} position="bottom">
+      <Tooltip text={isSpawned ? t('common.pet.tooltip.recall') : t('common.pet.tooltip.summon')} position="bottom">
       <button
         className={`header-action-btn pet-toggle${isSpawned ? ' pet-toggle--on' : ''}${needsAttention ? ' pet-toggle--attention' : ''}`}
         onClick={toggleSpawn}
         tabIndex={0}
-        aria-label={isSpawned ? 'Rappeler le robot' : 'Invoquer le robot'}
+        aria-label={isSpawned ? t('common.pet.tooltip.recall') : t('common.pet.tooltip.summon')}
         role="switch"
         aria-checked={isSpawned}
+        disabled={noMotion}
       >
         <span className="pet-toggle-track">
           <span className="pet-toggle-thumb">

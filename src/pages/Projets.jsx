@@ -1,18 +1,22 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import useDocumentMeta from '@/hooks/useDocumentMeta.js';
-import { academicProjects } from '@/data/projects.js';
+import { getAcademicProjects } from '@/data/projects.js';
 import { getAssetPath } from '@/utils/assetPath.js';
 import Tooltip from '@/components/Tooltip.jsx';
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const Projets = () => {
-  useDocumentMeta('Projets | Portfolio', 'Mes projets scolaires et professionnels');
+  const { t } = useTranslation();
+  const academicProjects = getAcademicProjects(t);
+
+  useDocumentMeta(t('projets.metaTitle'), t('projets.metaDescription'));
 
   return (
     <section id="project-list" aria-labelledby="projects-title">
       <h2 id="projects-title">
-        <em>Mes Projets</em>
+        <em>{t('projets.title')}</em>
       </h2>
 
       <div className="projects-grid">
@@ -29,14 +33,14 @@ const Projets = () => {
                   muted
                   loop
                   playsInline
-                  aria-label={`Aperçu du projet : ${project.title}`}
+                  aria-label={t('projets.previewAria', { title: project.title })}
                   width="800"
                   height="450"
                 />
               ) : (
                 <img
                   src={getAssetPath(project.image)}
-                  alt={`Aperçu du projet : ${project.title}`}
+                  alt={t('projets.previewAria', { title: project.title })}
                   loading="lazy"
                   width="800"
                   height="450"
@@ -47,7 +51,7 @@ const Projets = () => {
               </p>
 
               {project.technologies && project.technologies.length > 0 && (
-                <div className="project-tech" role="list" aria-label="Technologies utilisées">
+                <div className="project-tech" role="list" aria-label={t('projets.technologies')}>
                   {project.technologies.map((tech) => (
                     <div key={tech.name} role="listitem">
                       <Tooltip text={tech.name}>
@@ -65,7 +69,7 @@ const Projets = () => {
                 </div>
               )}
 
-              <Link to={project.path} className="btn" aria-label={`En savoir plus sur ${project.title}`}>En savoir plus</Link>
+              <Link to={project.path} className="btn" aria-label={t('projets.learnMoreAria', { title: project.title })}>{t('projets.learnMore')}</Link>
             </article>
 
             {index < academicProjects.length - 1 && <hr aria-hidden="true" />}

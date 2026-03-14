@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import SnakeGame from '@/components/SnakeGame.jsx';
 import useDocumentMeta from '@/hooks/useDocumentMeta.js';
 
@@ -8,7 +9,8 @@ const GLITCH_CHARS = '!@#$%^&*()_+-=[]{}|;:,.<>?/~`0123456789';
 const TARGET_TEXT = '404';
 
 const NotFound = () => {
-  useDocumentMeta('404 — Page introuvable', 'Cette page n\'existe pas.');
+  const { t } = useTranslation();
+  useDocumentMeta(t('notFound.metaTitle'), t('notFound.metaDescription'));
 
   const [showSnake, setShowSnake] = useState(false);
   const [glitchText, setGlitchText] = useState(TARGET_TEXT);
@@ -49,16 +51,15 @@ const NotFound = () => {
           {glitchText}
         </h1>
 
-        <p className="not-found__title">Page introuvable</p>
+        <p className="not-found__title">{t('notFound.title')}</p>
         <p className="not-found__description">
-          La page que vous cherchez n'existe pas, a été déplacée, ou vous a
-          simplement échappé dans le vide interstellaire.
+          {t('notFound.description')}
         </p>
 
         {/* Actions */}
         <div className="not-found__actions">
           <Link to="/" className="btn not-found__btn-home">
-            ← Retour à l'accueil
+            {t('notFound.homeButton')}
           </Link>
           {!showSnake && (
             <button
@@ -66,7 +67,7 @@ const NotFound = () => {
               className="btn btn--secondary not-found__btn-snake"
               onClick={() => setShowSnake(true)}
             >
-              🐍 Rester un peu plus longtemps
+              {t('notFound.snakeButton')}
             </button>
           )}
         </div>

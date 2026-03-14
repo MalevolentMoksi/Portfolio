@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext.jsx';
 import { getPerformanceTier } from '@/utils/performanceTier.js';
@@ -21,15 +20,11 @@ const ElectricalGrid = () => {
   const showGrid = tier === 'high' || tier === 'mid' || tier === 'low';
   if (!showGrid) return null;
 
-  const arcStyleSeed = useMemo(
-    () =>
-      ARC_PATHS.map((_, index) => ({
-        // Slower cadence so electrical arcs appear less often.
-        animationDelay: `${(index * 1.6).toFixed(2)}s`,
-        animationDuration: `${(6.8 + index * 1.1).toFixed(2)}s`,
-      })),
-    [],
-  );
+  const arcStyleSeed = ARC_PATHS.map((_, index) => ({
+    // Slower cadence so electrical arcs appear less often.
+    animationDelay: `${(index * 1.6).toFixed(2)}s`,
+    animationDuration: `${(6.8 + index * 1.1).toFixed(2)}s`,
+  }));
 
   return createPortal(
     <div

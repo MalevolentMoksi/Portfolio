@@ -1,4 +1,5 @@
 import useDocumentMeta from '@/hooks/useDocumentMeta.js';
+import { useTranslation } from 'react-i18next';
 import { getAssetPath } from '@/utils/assetPath.js';
 import Tooltip from '@/components/Tooltip.jsx';
 
@@ -34,32 +35,32 @@ const discordBotTechnologies = [
 ];
 
 const ProjetsPersonnels = () => {
-  useDocumentMeta('Projets Personnels | Portfolio', 'Mes projets personnels et illustrations');
+  const { t } = useTranslation();
+  useDocumentMeta(t('projetsPersonnels.metaTitle'), t('projetsPersonnels.metaDescription'));
 
   return (
     <>
     <section id="presentation" aria-labelledby="personal-projects-title">
-      <h2 id="personal-projects-title">Présentation</h2>
+      <h2 id="personal-projects-title">{t('projetsPersonnels.presentation.title')}</h2>
       <p>
-        Sur cette page sera présenté divers projets personnels et illustrations. Ils reflètent mon intérêt pour la programmation, le
-        design et la créativité.
+        {t('projetsPersonnels.presentation.description')}
       </p>
       <p>
-        <strong>PS : Cette page contient des videos qui se jouent au survol de la souris !</strong>
+        <strong>{t('projetsPersonnels.presentation.notice')}</strong>
       </p>
     </section>
 
     <section aria-labelledby="discord-bot-title">
       <article className="project">
-        <h2 id="discord-bot-title">Bot Discord <i>"Moksi's Bazaar"</i></h2>
+        <h2 id="discord-bot-title">{t('projetsPersonnels.discord.title')} <i>"Moksi's Bazaar"</i></h2>
         <img
             src={getAssetPath('assets/images/projects/MoksisBazaarIllustration.png')}
           loading="lazy"
-          alt="Icone du Bot Discord Moksi's Bazaar"
+          alt={t('projetsPersonnels.discord.iconAlt')}
           className="bot-icon"
         />
 
-                <div className="project-tech" role="list" aria-label="Technologies utilisées pour le bot Discord">
+                <div className="project-tech" role="list" aria-label={t('projetsPersonnels.discord.technologiesAria')}>
           {discordBotTechnologies.map((tech) => (
             <div key={tech.name} role="listitem">
               <Tooltip text={tech.name}>
@@ -77,8 +78,7 @@ const ProjetsPersonnels = () => {
         </div>
 
         <p>
-          <strong>Moksi's Bazaar</strong> est un bot Discord complet développé en <strong>JavaScript/Node.js</strong> (discord.js v14),
-          combinant casino, features sociales et IA conversationnelle. Le bot offre :
+          <strong>Moksi's Bazaar</strong> {t('projetsPersonnels.discord.intro')}
         </p>
 
 
@@ -94,7 +94,7 @@ const ProjetsPersonnels = () => {
             </svg>
             <div>
               <strong>15+ mini-jeux de casino</strong>
-              <p>Blackjack (vs dealer), roulette, machine à sous, craps, high/low, slots progressifs, duels PvP, gacha, et même Tetris.</p>
+              <p>{t('projetsPersonnels.discord.features.games')}</p>
             </div>
           </div>
           <div className="bot-feature-card">
@@ -104,7 +104,7 @@ const ProjetsPersonnels = () => {
             </svg>
             <div>
               <strong>Économie persistante</strong>
-              <p>Monnaie virtuelle avec auto-seeding ($10k), classements par serveur et historique de transactions.</p>
+              <p>{t('projetsPersonnels.discord.features.economy')}</p>
             </div>
           </div>
           <div className="bot-feature-card">
@@ -115,7 +115,7 @@ const ProjetsPersonnels = () => {
             </svg>
             <div>
               <strong>IA conversationnelle</strong>
-              <p>Intégrée à OpenRouter (DeepSeek), analyse d'images en temps réel, personnalité adaptative selon l'attitude de l'utilisateur (hostile ↔ friendly).</p>
+              <p>{t('projetsPersonnels.discord.features.ai')}</p>
             </div>
           </div>
           <div className="bot-feature-card">
@@ -127,7 +127,7 @@ const ProjetsPersonnels = () => {
             </svg>
             <div>
               <strong>Système de relations</strong>
-              <p>Suivi des sentiments, niveaux d'attitude (friendly, neutral, annoyed) et mémoire des conversations par utilisateur.</p>
+              <p>{t('projetsPersonnels.discord.features.relations')}</p>
             </div>
           </div>
           <div className="bot-feature-card">
@@ -140,18 +140,18 @@ const ProjetsPersonnels = () => {
             </svg>
             <div>
               <strong>Infrastructure 24/7</strong>
-              <p>Hébergée sur Railway via Docker, base PostgreSQL persistante avec 8 tables optimisées.</p>
+              <p>{t('projetsPersonnels.discord.features.infrastructure')}</p>
             </div>
           </div>
         </div>
 
         <div className="bot-skills-section">
-          <p className="bot-skills-label">Compétences acquises</p>
+          <p className="bot-skills-label">{t('projetsPersonnels.discord.skillsLabel')}</p>
           <div className="bot-skills-tags">
-            <span className="bot-skill-tag">Architecture logicielle</span>
-            <span className="bot-skill-tag">Programmation asynchrone</span>
-            <span className="bot-skill-tag">Gestion d'états complexes</span>
-            <span className="bot-skill-tag">Optimisation API</span>
+            <span className="bot-skill-tag">{t('projetsPersonnels.discord.skills.architecture')}</span>
+            <span className="bot-skill-tag">{t('projetsPersonnels.discord.skills.async')}</span>
+            <span className="bot-skill-tag">{t('projetsPersonnels.discord.skills.state')}</span>
+            <span className="bot-skill-tag">{t('projetsPersonnels.discord.skills.api')}</span>
           </div>
         </div>
         <a
@@ -159,80 +159,80 @@ const ProjetsPersonnels = () => {
           className="btn"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Voir le code du Bot Discord sur GitHub (ouvre dans une nouvelle fenetre)"
+          aria-label={t('projetsPersonnels.discord.githubAria')}
         >
-          Voir le code sur GitHub
+          {t('projetsPersonnels.discord.github')}
         </a>
 
-        <h4 className="video-gallery-title">Démonstrations</h4>
-        <div className="video-gallery" role="region" aria-label="Démonstrations vidéo du bot Discord">
+        <h4 className="video-gallery-title">{t('projetsPersonnels.discord.demosTitle')}</h4>
+        <div className="video-gallery" role="region" aria-label={t('projetsPersonnels.discord.demosAria')}>
 
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Demonstration du jeu de Blackjack">
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label={t('projetsPersonnels.discord.captions.blackjack')}>
                   <source src={getAssetPath('assets/videos/blackjack.mp4')} type="video/mp4" />
-                Votre navigateur ne supporte pas la balise video.
+                {t('common.videoNotSupported')}
               </video>
             </div>
             <div className="progress-container" aria-hidden="true">
               <div className="progress"></div>
             </div>
-            <p className="caption">Jeu de Blackjack</p>
+            <p className="caption">{t('projetsPersonnels.discord.captions.blackjack')}</p>
           </div>
 
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Demonstration du jeu de Roulette">
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label={t('projetsPersonnels.discord.captions.roulette')}>
                   <source src={getAssetPath('assets/videos/roulette.mp4')} type="video/mp4" />
-                Votre navigateur ne supporte pas la balise video.
+                {t('common.videoNotSupported')}
               </video>
             </div>
             <div className="progress-container" aria-hidden="true">
               <div className="progress"></div>
             </div>
-            <p className="caption">Jeu de Roulette</p>
+            <p className="caption">{t('projetsPersonnels.discord.captions.roulette')}</p>
           </div>
 
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Demonstration des fonds et classements">
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label={t('projetsPersonnels.discord.captions.currency')}>
                   <source src={getAssetPath('assets/videos/currency.mp4')} type="video/mp4" />
-                Votre navigateur ne supporte pas la balise video.
+                {t('common.videoNotSupported')}
               </video>
             </div>
             <div className="progress-container">
               <div className="progress"></div>
             </div>
-            <p className="caption">Fonds &amp; Classement</p>
+            <p className="caption">{t('projetsPersonnels.discord.captions.currency')}</p>
           </div>
 
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Démonstration du jeu de Machine à Sous">
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label={t('projetsPersonnels.discord.captions.slots')}>
                   <source src={getAssetPath('assets/videos/slots.mp4')} type="video/mp4" />
-                Votre navigateur ne supporte pas la balise video.
+                {t('common.videoNotSupported')}
               </video>
             </div>
             <div className="progress-container">
               <div className="progress"></div>
             </div>
-            <p className="caption">Jeu de Machine à Sous</p>
+            <p className="caption">{t('projetsPersonnels.discord.captions.slots')}</p>
           </div>
         </div>
 
         <details className="bot-fonctionnement">
           <summary>
-            Architecture &amp; Fonctionnement Technique
+            {t('projetsPersonnels.discord.architectureSummary')}
           </summary>
 
           <div className="bot-details-content">
-            <h4 className="bot-section-heading">Infrastructure &amp; Déploiement</h4>
+            <h4 className="bot-section-heading">{t('projetsPersonnels.discord.sections.infrastructure')}</h4>
             <p>
               Le bot est déployé sur <strong>Railway</strong> via Docker (Node 22-slim), assurant une disponibilité 24/7. 
               Une base de données <strong>PostgreSQL</strong> (intégrée à Railway) persiste l'ensemble des données utilisateur.
             </p>
 
-            <h4 className="bot-section-heading">Schéma de Base de Données</h4>
+            <h4 className="bot-section-heading">{t('projetsPersonnels.discord.sections.database')}</h4>
             <p>PostgreSQL contient <strong>8 tables structurées</strong> :</p>
             <table className="bot-schema-table">
               <thead>
@@ -253,7 +253,7 @@ const ProjetsPersonnels = () => {
               </tbody>
             </table>
 
-            <h4 className="bot-section-heading">Architecture Logicielle</h4>
+            <h4 className="bot-section-heading">{t('projetsPersonnels.discord.sections.software')}</h4>
             <ul className="bot-compact-list">
               <li><strong>Slash Commands (discord.js v14)</strong> : 20+ commandes auto-registerées par serveur (pas de délai global)</li>
               <li><strong>Button Collectors</strong> : jeux multi-tours (blackjack, roulette) avec interface interactive</li>
@@ -262,7 +262,7 @@ const ProjetsPersonnels = () => {
               <li><strong>Sentiment Tracking</strong> : système d'adaptation de personnalité basé sur historique de conversation</li>
             </ul>
 
-            <h4 className="bot-section-heading">Flux d'Exécution d'une Commande</h4>
+            <h4 className="bot-section-heading">{t('projetsPersonnels.discord.sections.flow')}</h4>
             <ol className="bot-flow">
               <li>
                 <span className="bot-flow-step">1</span>
@@ -294,7 +294,7 @@ const ProjetsPersonnels = () => {
                 className="bot-dashboard-image"
               />
               <figcaption className="bot-dashboard-caption">
-                Dashboard Railway : suivi des variables d'environnement, métriques PostgreSQL, &amp; logs applicatifs
+                {t('projetsPersonnels.discord.dashboardCaption')}
               </figcaption>
             </div>
           </div>
@@ -306,14 +306,13 @@ const ProjetsPersonnels = () => {
 
     <section>
       <article className="project">
-        <h2>Dessins personnels</h2>
+        <h2>{t('projetsPersonnels.drawings.title')}</h2>
 
         <div className="drawings-intro">
           <p>
-            Depuis Janvier 2025, je me suis lancé dans le dessin numérique et traditionnel. Voici
-            quelques-unes de mes illustrations, réalisées au crayon (2H à 6B) ou numériquement.
+            {t('projetsPersonnels.drawings.description1')}
           </p>
-          <p>J'explore différents styles et techniques, mais cela reste avant tout un hobby pour moi.</p>
+          <p>{t('projetsPersonnels.drawings.description2')}</p>
         </div>
 
         <div className="drawings-grid">
@@ -326,7 +325,7 @@ const ProjetsPersonnels = () => {
               loading="lazy"
               alt="ADA-1 de Destiny 2 au crayon"
             />
-            <p>ADA-1 de Destiny 2 - Portrait au crayon</p>
+            <p>{t('projetsPersonnels.drawings.captions.ada1')}</p>
           </div>
 
           <div className="drawing-item">
@@ -338,7 +337,7 @@ const ProjetsPersonnels = () => {
               loading="lazy"
               alt="Illustration numérique"
             />
-            <p>Power de Chainsaw Man - Illustrations numérique</p>
+            <p>{t('projetsPersonnels.drawings.captions.power')}</p>
           </div>
 
           <div className="drawing-item">
@@ -350,7 +349,7 @@ const ProjetsPersonnels = () => {
               loading="lazy"
               alt="Illustration au crayon"
             />
-            <p>Ramattra de Overwatch 2 - Illustration au crayon</p>
+            <p>{t('projetsPersonnels.drawings.captions.ramattra')}</p>
           </div>
 
           <div className="drawing-item">
@@ -362,7 +361,7 @@ const ProjetsPersonnels = () => {
               loading="lazy"
               alt="Illustration numerique"
             />
-            <p>Commission - Illustration numerique</p>
+            <p>{t('projetsPersonnels.drawings.captions.commission')}</p>
           </div>
 
           <div className="drawing-item">
@@ -374,7 +373,7 @@ const ProjetsPersonnels = () => {
               loading="lazy"
               alt="Dessin au stylo"
             />
-            <p>Goat &amp; Lamb de Cult of the Lamb - Illustration au crayon</p>
+            <p>{t('projetsPersonnels.drawings.captions.goatLamb')}</p>
           </div>
 
           <div className="drawing-item">
@@ -386,7 +385,7 @@ const ProjetsPersonnels = () => {
               loading="lazy"
               alt="Illustration numerique"
             />
-            <p>Exo Stranger de Destiny 2 - Illustration numerique</p>
+            <p>{t('projetsPersonnels.drawings.captions.elsie')}</p>
           </div>
         </div>
       </article>
@@ -397,38 +396,31 @@ const ProjetsPersonnels = () => {
     <section>
       <article className="project">
         <div className="title-with-logo">
-          <h2>Jeux réalisés sur Scratch</h2>
+          <h2>{t('projetsPersonnels.scratch.title')}</h2>
             <img src={getAssetPath('assets/images/logos/ScratchLogo.png')} width="800" height="450" loading="lazy" alt="Logo Scratch" />
         </div>
 
         <p>
-          En <strong>CM2</strong>, j'ai été introduit au logiciel en ligne Scratch par mon professeur. Cela a
-          consommé une bonne partie de mon temps personnel que j'ai passé à faire des jeux jusqu'en
-          2020. <br />
-          Le programme permet de programmer de manière ludique, avec des blocs de code visuels. J'ai
-          fabriqué plusieurs jeux avec le programme, tous plutôt rugueux mais certains sont encore
-          jouables aujourd'hui.
+          {t('projetsPersonnels.scratch.description')}
         </p>
         <ul>
           <li>
-            <strong>Compétences :</strong> Logique algorithmique, design d'interfaces, animations,
-            gestion de variables et de sprites
+            <strong>{t('projetsPersonnels.scratch.skillsLabel')}</strong> {t('projetsPersonnels.scratch.skills')}
           </li>
           <li>
-            <strong>Techniques :</strong> Utilisation avancée de Scratch, optimisation des scripts,
-            adaptation aux feedbacks utilisateurs
+            <strong>{t('projetsPersonnels.scratch.techniquesLabel')}</strong> {t('projetsPersonnels.scratch.techniques')}
           </li>
         </ul>
         <a href="https://scratch.mit.edu/users/Sup3rSh00t3r/" className="btn" target="_blank" rel="noopener noreferrer">
-          Voir mon profil Scratch
+          {t('projetsPersonnels.scratch.profile')}
         </a>
 
         <div className="video-gallery video-gallery-spaced">
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Démonstration du jeu Stickman Adventure">
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label={t('projetsPersonnels.scratch.captions.stickman')}>
                   <source src={getAssetPath('assets/videos/stickman.mp4')} type="video/mp4" />
-                Votre navigateur ne supporte pas la balise video.
+                {t('common.videoNotSupported')}
               </video>
             </div>
             <div className="progress-container">
@@ -441,9 +433,9 @@ const ProjetsPersonnels = () => {
 
           <div className="video-item">
             <div className="video-wrapper">
-              <video className="hover-play" preload="metadata" muted loop playsInline aria-label="Démonstration du jeu RPG 1.2v">
+              <video className="hover-play" preload="metadata" muted loop playsInline aria-label={t('projetsPersonnels.scratch.captions.rpg')}>
                   <source src={getAssetPath('assets/videos/RPG.mp4')} type="video/mp4" />
-                Votre navigateur ne supporte pas la balise video.
+                {t('common.videoNotSupported')}
               </video>
             </div>
             <div className="progress-container">

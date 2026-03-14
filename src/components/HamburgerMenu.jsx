@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '@styles/components/_hamburger-menu.css';
 
 const HamburgerMenu = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navRef = useRef(null);
@@ -66,7 +68,7 @@ const HamburgerMenu = () => {
       <button
         type="button"
         ref={toggleRef}
-        aria-label="Basculer le menu de navigation"
+        aria-label={t('common.mobileNav.toggleAria')}
         aria-expanded={isOpen}
         aria-controls="mobile-navigation"
         className={`hamburger-toggle ${isOpen ? 'active' : ''}`}
@@ -87,7 +89,7 @@ const HamburgerMenu = () => {
         id="mobile-navigation"
         ref={navRef}
         className={`hamburger-nav ${isOpen ? 'open' : ''}`}
-        aria-label="Navigation mobile"
+        aria-label={t('common.mobileNav.aria')}
       >
         <ul>
           <li>
@@ -96,7 +98,7 @@ const HamburgerMenu = () => {
               end
               onClick={closeMenu}
             >
-              Accueil
+              {t('common.nav.home')}
             </NavLink>
           </li>
           <li>
@@ -104,7 +106,7 @@ const HamburgerMenu = () => {
               to="/projets"
               onClick={closeMenu}
             >
-              Projets
+              {t('common.nav.projects')}
             </NavLink>
           </li>
           <li>
@@ -112,7 +114,7 @@ const HamburgerMenu = () => {
               to="/projets-personnels"
               onClick={closeMenu}
             >
-              Projets personnels
+              {t('common.nav.personalProjects')}
             </NavLink>
           </li>
         </ul>
