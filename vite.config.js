@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',           // SW silently self-updates on new deploy
-      injectRegister: 'auto',               // auto-injects <script> into index.html
+      injectRegister: false,                // Disable auto-injection; we'll manually add defer
       workbox: {
         // Precache limit: only small assets (JS, CSS, small images, fonts)
         // Large audio and images are cached at runtime when accessed

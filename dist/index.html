@@ -15,8 +15,16 @@
     <!-- Preconnect aux domaines CDN pour éliminer le coût DNS+TCP+TLS au premier accès -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
+    <!-- Google Fonts — loaded in HTML to parallelize with CSS parsing (not blocking) -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+    />
 
     <!-- Font Awesome — chargement non-bloquant (media swap trick) -->
     <link
@@ -38,11 +46,11 @@
       name="description"
       content="Portfolio d'Enzo Morello, étudiant en BUT Informatique à l'IUT2 de Grenoble"
     />
-    <script type="module" crossorigin src="/assets/index-K95lsEXZ.js"></script>
+    <script type="module" crossorigin src="/assets/index-BwJtPxl1.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-klDO_2i7.js">
     <link rel="modulepreload" crossorigin href="/assets/framer-EwPduGCt.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-CMELssVU.css">
-  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+    <link rel="stylesheet" crossorigin href="/assets/index-2-Hbz2in.css">
+  <link rel="manifest" href="/manifest.webmanifest"></head>
   <body>
     <div id="root"></div>
     <div id="ambient-root"></div>
@@ -53,6 +61,9 @@
       src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"
       defer
     ></script>
+
+    <!-- Service Worker registration — deferred to avoid render blocking -->
+    <script defer src="/registerSW.js"></script>
 
     <!-- Main application script -->
   </body>

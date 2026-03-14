@@ -2,7 +2,7 @@
    Main Stylesheet - Imports all modules
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+/* Google Fonts is now loaded in index.html for better parallelization */
 
 /* Core styles */
 @import './_variables.css';
