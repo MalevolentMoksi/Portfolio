@@ -12,14 +12,29 @@ export default defineConfig({
       registerType: 'autoUpdate',           // SW silently self-updates on new deploy
       injectRegister: 'auto',               // auto-injects <script> into index.html
       workbox: {
+        // Precache limit: only small assets (JS, CSS, small images, fonts)
+        // Large audio and images are cached at runtime when accessed
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB
         globPatterns: [
-          '**/*.{js,css,html,ico,png,svg,woff,woff2,webp,jpg,jpeg,mp3,ogg,m4a}'
+          // Include build artifacts + small static assets
+          '**/*.{js,css,html,ico,svg,woff,woff2}',
+          // Include small images (webp optimized)
+          'assets/images/**/*.webp',
+        ],
+        globIgnores: [
+          // Exclude unused and large image folders from precache
+          '**/assets/images/_unused/**',
+          '**/assets/images/drawings/**',
+          '**/assets/images/projects/**',
+          // Exclude music (cached at runtime)
+          '**/assets/music/**',
+          '**/assets/**/*.{mp3,m4a,ogg}',
         ],
         // Don't cache the SPA shell routes as navigation — only assets
         navigateFallback: null,
         runtimeCaching: [
           {
-            // Google Fonts stylesheet
+            // Google Fonts stylesheet (external, cache-first)
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'StaleWhileRevalidate',
             options: {
@@ -29,7 +44,7 @@ export default defineConfig({
             },
           },
           {
-            // Google Fonts font files (gstatic)
+            // Google Fonts font files (gstatic, cache indefinitely)
             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
@@ -37,6 +52,45 @@ export default defineConfig({
               expiration: {
                 maxEntries: 30,
                 maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Music files (cache on first play, keep for session)
+            urlPattern: /\/assets\/music\/.*\.(mp3|m4a|ogg)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'portfolio-music',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: { statuses: [0, 200, 206] }, // 206 = partial content (streaming)
+            },
+          },
+          {
+            // Large images (cache on first view)
+            urlPattern: /\/assets\/images\/(?:drawings|projects|_unused)\/.*\.(jpg|jpeg|png|webp)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'portfolio-images-large',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 60, // 60 days
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Background images (cache on first view)
+            urlPattern: /\/assets\/images\/backgrounds\/.*\.(jpg|jpeg|png|webp)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'portfolio-images-bg',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 90, // 90 days
               },
               cacheableResponse: { statuses: [0, 200] },
             },
