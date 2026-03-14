@@ -4,10 +4,8 @@ Tâches requiert Recherches A faire :
 - Improve pet visibility
 
 Tâches simples :
-Disable Tooltips for MoodSwitcher
 
 Tâches moyennes (besoin expertise IA) :
-Revoir logique musique player (metadata ne s'affiche pas toujours)
 
 Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
 Transition complète en TypeScript
