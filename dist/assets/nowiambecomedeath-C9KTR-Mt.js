@@ -1,0 +1,1 @@
+var a="/assets/nowiambecomedeath-BlzDn8U9.mp3";export{a as default};

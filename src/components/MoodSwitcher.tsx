@@ -1,0 +1,238 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
+import { useMood, MOODS } from '../contexts/MoodContext';
+import Tooltip from './Tooltip';
+import type { MoodKey } from '@/types';
+
+const MOOD_KEYS = Object.keys(MOODS) as MoodKey[];
+
+const MoodSwitcher = () => {
+  const { t } = useTranslation();
+  const { mood, setMood } = useMood();
+  const [isOpen, setIsOpen] = useState(false);
+  const [spinKey, setSpinKey] = useState(0);
+  const panelRef = useRef<any>(null);
+  const panelDivRef = useRef<any>(null);
+  const [panelPos, setPanelPos] = useState<any>(null);
+
+  /* ── Fermer au clic extérieur ── */
+  useEffect(() => {
+    if (!isOpen) return;
+    const handle = (e: any) => {
+      if (
+        panelRef.current &&
+        !panelRef.current.contains(e.target) &&
+        !(panelDivRef.current && panelDivRef.current.contains(e.target))
+      ) {
+        setIsOpen(false);
+      }
+    };
+    const id = setTimeout(() => document.addEventListener('mousedown', handle), 0);
+    return () => {
+      clearTimeout(id);
+      document.removeEventListener('mousedown', handle);
+    };
+  }, [isOpen]);
+
+  /* ── Fermer avec Escape ── */
+  useEffect(() => {
+    if (!isOpen) return;
+    const handle = (e: any) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', handle);
+    return () => document.removeEventListener('keydown', handle);
+  }, [isOpen]);
+  /* —— Position du panneau (portal → coordonnées viewport) —— */
+  useEffect(() => {
+    if (!isOpen || !panelRef.current) return;
+    const rect = panelRef.current.getBoundingClientRect();
+    setPanelPos({ top: rect.bottom + 12, right: window.innerWidth - rect.right });
+  }, [isOpen]);
+  /* ── Changer de mood avec animation VHS ── */
+  const handleMoodChange = useCallback(
+    (newMood: MoodKey) => {
+      if (newMood === mood) return;
+
+      // Overlay VHS flash + scanline
+      const overlay = document.createElement('div');
+      overlay.className = 'mood-vhs-overlay';
+      // Couleur du flash = couleur du mood entrant
+      overlay.style.setProperty('--vhs-color', MOODS[newMood].color);
+      document.body.appendChild(overlay);
+
+      // Bandes glitch horizontales aléatoires (4–6 strips)
+      const stripCount = 4 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < stripCount; i++) {
+        const strip = document.createElement('div');
+        strip.className = 'vhs-strip';
+        const topPct = Math.random() * 88;
+        const heightPct = 3 + Math.random() * 18;
+        const offsetX = (Math.random() - 0.5) * 90; // −45px à +45px
+        const delay = Math.round(Math.random() * 80);
+        strip.style.cssText = [
+          `top: ${topPct.toFixed(1)}%`,
+          `height: ${heightPct.toFixed(1)}%`,
+          `transform: translateX(${offsetX.toFixed(0)}px)`,
+          `background: ${MOODS[newMood].color}`,
+          `animation-delay: ${delay}ms`,
+        ].join('; ');
+        overlay.appendChild(strip);
+      }
+
+      // Changer le mood au milieu de la transition (60 ms)
+      setTimeout(() => {
+        setMood(newMood);
+        // Toast disabled for mood switching
+      }, 60);
+
+      // Retirer l'overlay après la fin de l'animation (200 ms)
+      setTimeout(() => {
+        overlay.remove();
+      }, 200);
+
+      // Incrémenter spinKey : React remonte le SVG et l'animation rejoue depuis 0%
+      setSpinKey((k) => k + 1);
+    },
+    [mood, setMood]
+  );
+
+  const currentMood = MOODS[mood];
+  const currentMoodLabel = t(`common.mood.names.${mood}`);
+
+  return (
+    <div className="mood-switcher-wrapper" ref={panelRef}>
+      {/* Bouton icône */}
+      <Tooltip text={t('common.mood.tooltip', { mood: currentMoodLabel })} position="bottom">
+        <button
+          className="header-action-btn mood-btn"
+          onClick={() => setIsOpen((prev) => !prev)}
+          aria-label={t('common.mood.ariaLabel')}
+          aria-expanded={isOpen}
+        >
+          <svg
+            key={spinKey}
+            className={`mood-icon${spinKey > 0 ? ' mood-icon--spin' : ''}`}
+            viewBox="0 0 24 24"
+            width="17"
+            height="17"
+            aria-hidden="true"
+          >
+            {/* Orbe central — couleur = mood actif */}
+            <circle
+              className="mood-orb"
+              cx="12"
+              cy="12"
+              r="5"
+              fill={currentMood.color}
+              stroke={currentMood.color}
+              strokeWidth="0.5"
+              strokeOpacity="0.6"
+            />
+            {/* 5 satellites orbitaux — pentagone régulier (r=9.5, centre 12,12) */}
+            <circle
+              className="mood-dot mood-dot--1"
+              cx="12"
+              cy="2.5"
+              r="1.5"
+              fill={MOODS.default.color}
+              opacity={mood === 'default' ? 1 : 0.35}
+            />
+            <circle
+              className="mood-dot mood-dot--2"
+              cx="21.0"
+              cy="6.1"
+              r="1.5"
+              fill={MOODS.hacker.color}
+              opacity={mood === 'hacker' ? 1 : 0.35}
+            />
+            <circle
+              className="mood-dot mood-dot--3"
+              cx="17.6"
+              cy="19.7"
+              r="1.5"
+              fill={MOODS.vaporwave.color}
+              opacity={mood === 'vaporwave' ? 1 : 0.35}
+            />
+            <circle
+              className="mood-dot mood-dot--4"
+              cx="6.4"
+              cy="19.7"
+              r="1.5"
+              fill={MOODS.europa.color}
+              opacity={mood === 'europa' ? 1 : 0.35}
+            />
+            <circle
+              className="mood-dot mood-dot--5"
+              cx="3.0"
+              cy="6.1"
+              r="1.5"
+              fill={MOODS.industrial.color}
+              opacity={mood === 'industrial' ? 1 : 0.35}
+            />
+            {/* Orbite ring */}
+            <circle
+              cx="12"
+              cy="12"
+              r="9.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="0.5"
+              strokeDasharray="3 3"
+              opacity="0.25"
+            />
+          </svg>
+        </button>
+      </Tooltip>
+
+      {/* Panneau de sélection */}
+      {isOpen &&
+        createPortal(
+          <div
+            ref={panelDivRef}
+            className="mood-panel"
+            role="radiogroup"
+            aria-label={t('common.mood.chooseAria')}
+            style={
+              panelPos
+                ? {
+                    top: `${panelPos.top}px`,
+                    right: `${panelPos.right}px`,
+                  }
+                : {}
+            }
+          >
+            <div className="mood-panel-title">{t('common.mood.title')}</div>
+            {MOOD_KEYS.map((key: MoodKey) => {
+              const m = MOODS[key];
+              const isActive = key === mood;
+              return (
+                <button
+                  key={key}
+                  className={`mood-option ${isActive ? 'mood-option--active' : ''}`}
+                  onClick={() => handleMoodChange(key)}
+                  role="radio"
+                  aria-checked={isActive}
+                  style={{ '--mood-color': m.color }}
+                >
+                  <span className="mood-swatch" style={{ background: m.color }} />
+                  <span className="mood-label">
+                    <span className="mood-emoji">{m.emoji}</span> {t(`common.mood.names.${key}`)}
+                  </span>
+                  {isActive && (
+                    <span className="mood-check" aria-hidden="true">
+                      ✓
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>,
+          document.body
+        )}
+    </div>
+  );
+};
+
+export default MoodSwitcher;
