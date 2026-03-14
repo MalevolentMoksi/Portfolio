@@ -5,7 +5,8 @@ import { getAcademicProjects } from '@/data/projects.js';
 import { getAssetPath } from '@/utils/assetPath.js';
 import Tooltip from '@/components/Tooltip.jsx';
 
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const prefersReducedMotion =
+  window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
 
 const Projets = () => {
   const { t } = useTranslation();

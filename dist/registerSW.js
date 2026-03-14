@@ -9,11 +9,18 @@ const isSecureOrigin =
   window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1';
 
+const currentScript = document.currentScript;
+const registerScriptUrl = currentScript?.src
+  ? new URL(currentScript.src, window.location.href)
+  : new URL('registerSW.js', window.location.href);
+const basePath = registerScriptUrl.pathname.replace(/registerSW\.js$/, '');
+const swUrl = `${basePath}sw.js`;
+
 if ('serviceWorker' in navigator && isSecureOrigin) {
   // Register SW after page loads
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/sw.js', { scope: '/' })
+      .register(swUrl, { scope: basePath })
       .then((registration) => {
         console.log('Service Worker registered:', registration);
       })

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Tooltip from './Tooltip.jsx';
+import { safeLocalGet, safeLocalSet } from '@/utils/safeStorage.js';
 
 /* ── Constantes ─────────────────────────────────────── */
 const CELL = 13;       // px par cellule
@@ -40,7 +41,7 @@ const SnakeGame = ({ onClose }) => {
 
   const [ui, setUi] = useState({
     score:     0,
-    hs:        parseInt(localStorage.getItem(LS_KEY) || '0', 10),
+    hs:        parseInt(safeLocalGet(LS_KEY) || '0', 10),
     status:    'countdown', // 'countdown' | 'playing' | 'paused' | 'gameover'
     countdown: 3,
   });
@@ -95,7 +96,11 @@ const SnakeGame = ({ onClose }) => {
       const y = seg.y * CELL + pad;
       const s = CELL - pad * 2;
       ctx.beginPath();
-      ctx.roundRect(x, y, s, s, r);
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(x, y, s, s, r);
+      } else {
+        ctx.rect(x, y, s, s);
+      }
       ctx.fill();
       if (i === 0) ctx.restore();
     });
@@ -124,9 +129,9 @@ const SnakeGame = ({ onClose }) => {
     cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
     const g = gRef.current;
-    const prev = parseInt(localStorage.getItem(LS_KEY) || '0', 10);
+    const prev = parseInt(safeLocalGet(LS_KEY) || '0', 10);
     const hs = Math.max(prev, g.score);
-    if (hs > prev) localStorage.setItem(LS_KEY, hs);
+    if (hs > prev) safeLocalSet(LS_KEY, hs);
     g.status = 'gameover';
     setUi((u) => ({ ...u, status: 'gameover', hs }));
     draw(); // dernier frame
@@ -196,7 +201,7 @@ const SnakeGame = ({ onClose }) => {
   const startGame = () => {
     cancelAnimationFrame(rafRef.current);
     clearTimeout(cdRef.current);
-    const hs = parseInt(localStorage.getItem(LS_KEY) || '0', 10);
+    const hs = parseInt(safeLocalGet(LS_KEY) || '0', 10);
     gRef.current = {
       snake:    [{ x: 10, y: 10 }],
       dir:      { dx: 1, dy: 0 },

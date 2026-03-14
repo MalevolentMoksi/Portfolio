@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { safeLocalGet, safeLocalSet } from '@/utils/safeStorage.js';
 
 const STORAGE_KEY = 'portfolio-a11y-settings';
 
@@ -19,7 +20,7 @@ const AccessibilityContext = createContext({
 
 const readSettings = () => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = safeLocalGet(STORAGE_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw);
     const safeFont = FONT_SIZES.has(parsed.fontSize) ? parsed.fontSize : 'normal';
@@ -82,11 +83,7 @@ export const AccessibilityProvider = ({ children }) => {
 
   useEffect(() => {
     applyBodyClasses(settings);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    } catch {
-      // Ignore storage quota errors
-    }
+    safeLocalSet(STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
 
   useEffect(() => {

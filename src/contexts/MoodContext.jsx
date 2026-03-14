@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { safeLocalGet, safeLocalSet } from '@/utils/safeStorage.js';
 
 /* ── Configuration des moods ─────────────────────── */
 export const MOODS = {
@@ -24,12 +25,8 @@ export const useMood = () => useContext(MoodContext);
 
 export const MoodProvider = ({ children }) => {
   const [mood, setMoodState] = useState(() => {
-    try {
-      const saved = localStorage.getItem('portfolio-mood');
-      return saved && MOODS[saved] ? saved : 'default';
-    } catch {
-      return 'default';
-    }
+    const saved = safeLocalGet('portfolio-mood');
+    return saved && MOODS[saved] ? saved : 'default';
   });
 
   /* ── Appliquer le mood au DOM ── */
@@ -58,7 +55,7 @@ export const MoodProvider = ({ children }) => {
   const setMood = useCallback((newMood) => {
     if (!MOODS[newMood]) return;
     setMoodState(newMood);
-    try { localStorage.setItem('portfolio-mood', newMood); } catch { /* quota */ }
+    safeLocalSet('portfolio-mood', newMood);
     applyMood(newMood);
   }, [applyMood]);
 
@@ -66,7 +63,7 @@ export const MoodProvider = ({ children }) => {
     setMoodState((prev) => {
       const idx = MOOD_ORDER.indexOf(prev);
       const next = MOOD_ORDER[(idx + 1) % MOOD_ORDER.length];
-      try { localStorage.setItem('portfolio-mood', next); } catch { /* quota */ }
+      safeLocalSet('portfolio-mood', next);
       applyMood(next);
       return next;
     });

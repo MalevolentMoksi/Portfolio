@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip.jsx';
 import { getAcademicProjects, getPersonalProjects, getAllTags } from '@/data/projects.js';
 import { discoverMusicTracks } from '@/utils/discoverMusicTracks.js';
+import { safeLocalGet, safeSessionGet } from '@/utils/safeStorage.js';
 import SnakeGame from './SnakeGame.jsx';
 
 /* ── Données statiques ─────────────────────────────── */
@@ -72,14 +73,19 @@ const calculateStats = (t, skills, locale) => {
   const uniqueTechs = getAllTags(t).length;
 
   // Session
-  const sessionStart = parseInt(sessionStorage.getItem('session-start') || Date.now(), 10);
+  const sessionStart = parseInt(safeSessionGet('session-start') || Date.now(), 10);
   const elapsed = formatElapsed(Date.now() - sessionStart);
-  const sessionPages = JSON.parse(sessionStorage.getItem('session-pages') || '[]');
+  let sessionPages = [];
+  try {
+    sessionPages = JSON.parse(safeSessionGet('session-pages') || '[]');
+  } catch {
+    sessionPages = [];
+  }
   const pagesVisited = sessionPages.length;
 
   // Musique
-  const trackIndex = parseInt(localStorage.getItem('music-currentTrack') || '0', 10);
-  const isPaused = localStorage.getItem('music-isPaused') === 'true';
+  const trackIndex = parseInt(safeLocalGet('music-currentTrack') || '0', 10);
+  const isPaused = safeLocalGet('music-isPaused') === 'true';
   const rawName = ALL_TRACKS[trackIndex] ?? `piste-${trackIndex + 1}`;
   const trackName = rawName.replace(/\.[^.]+$/, '');
   const musicStatus = `${trackName} (${isPaused ? '⏸' : '▶'} ${trackIndex + 1}/${ALL_TRACKS.length})`;
@@ -94,7 +100,7 @@ const calculateStats = (t, skills, locale) => {
       sad: t('common.terminal.petMood.sad'),
     };
     petStatus = `${labels[petStats.mood] || petStats.mood} - ${t('common.terminal.stats.happiness')}: ${petStats.happiness}%`;
-  } else if (localStorage.getItem('pet-spawned') === 'false') {
+  } else if (safeLocalGet('pet-spawned') === 'false') {
     petStatus = t('common.terminal.pet.recalled');
   }
 
@@ -144,7 +150,7 @@ const MiniTerminal = () => {
   /* ── Timer session (titlebar) ── */
   useEffect(() => {
     if (!isOpen) return;
-    const sessionStart = parseInt(sessionStorage.getItem('session-start') || Date.now(), 10);
+    const sessionStart = parseInt(safeSessionGet('session-start') || Date.now(), 10);
     const update = () => setSessionTime(formatElapsed(Date.now() - sessionStart));
     update();
     const id = setInterval(update, 1000);
@@ -273,7 +279,7 @@ const MiniTerminal = () => {
         if (!petStats) {
           newLines.push({
             type: 'system',
-            text: localStorage.getItem('pet-spawned') === 'false'
+            text: safeLocalGet('pet-spawned') === 'false'
               ? t('common.terminal.pet.recalledHint')
               : t('common.terminal.pet.notAdoptedHint'),
           });

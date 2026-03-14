@@ -2,6 +2,14 @@
    Pet Robot — constantes, clés localStorage, utilitaires
    ══════════════════════════════════════════════ */
 
+import {
+  safeLocalGet,
+  safeLocalSet,
+  safeLocalRemove,
+  safeLocalGetJSON,
+  safeLocalSetJSON,
+} from '@/utils/safeStorage.js';
+
 /* ── Timing ── */
 export const DECAY_MS = 8000;
 export const REACTION_MS = 2000;
@@ -127,8 +135,14 @@ export const ACHIEVEMENTS = [
 /* ── Utilitaires ── */
 export const clamp = (v, min = 0, max = 100) => Math.max(min, Math.min(max, v));
 
+export const localGet = (key) => safeLocalGet(key);
+export const localSet = (key, value) => safeLocalSet(key, value);
+export const localRemove = (key) => safeLocalRemove(key);
+export const localGetJSON = (key, fallback = null) => safeLocalGetJSON(key, fallback);
+export const localSetJSON = (key, value) => safeLocalSetJSON(key, value);
+
 export const readLS = (key, fallback) => {
-  const v = localStorage.getItem(key);
+  const v = localGet(key);
   return v !== null ? clamp(Math.round(Number(v))) : fallback;
 };
 

@@ -11,6 +11,7 @@ import {
   CATCH_BOT_HOLD_MIN, CATCH_BOT_HOLD_RANGE, CATCH_BOT_THROW_SPREAD,
 } from './petConstants.js';
 import { byTier } from '@utils/performanceTier.js';
+import { safeLocalGet, safeLocalSet } from '@utils/safeStorage.js';
 
 const BALL_R        = CATCH_BALL_SIZE / 2;
 const PLAYER_CATCH  = 85;           // zone de recatch joueur — plus généreuse
@@ -74,7 +75,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
   /* ── Best score persistence ── */
   const LS_BEST = 'catch-best-rallies';
   const [bestScore, setBestScore] = useState(() =>
-    parseInt(localStorage.getItem(LS_BEST) || '0', 10)
+    parseInt(safeLocalGet(LS_BEST) || '0', 10)
   );
   const bestRef = useRef(bestScore);
 
@@ -83,7 +84,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
     if (rallies > bestRef.current) {
       bestRef.current = rallies;
       setBestScore(rallies);
-      localStorage.setItem(LS_BEST, String(rallies));
+      safeLocalSet(LS_BEST, String(rallies));
     }
   }, [rallies]);
 

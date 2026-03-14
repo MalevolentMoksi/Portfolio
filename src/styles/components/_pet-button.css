@@ -1474,6 +1474,7 @@ body[data-catching='true'] .pet-thought--reaction {
   inset: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   overflow: visible;
   pointer-events: none;
   z-index: calc(var(--z-lightbox) + 5);

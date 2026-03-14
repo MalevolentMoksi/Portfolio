@@ -197,7 +197,7 @@ const Home = () => {
             <li>
               {t('home.contact.linkedinLabel')}{' '}
               <a
-                href="http://www.linkedin.com/in/enzo-morello-28a364392"
+                href="https://www.linkedin.com/in/enzo-morello-28a364392"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={t('home.contact.linkedinAria')}

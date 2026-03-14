@@ -5,6 +5,7 @@
 
 import { getAssetPath } from '../utils/assetPath.js';
 import { isLowTier } from '../utils/performanceTier.js';
+import { safeLocalGet, safeLocalSet } from '../utils/safeStorage.js';
 
 class MusicPlayer {
   constructor(trackFiles) {
@@ -64,30 +65,30 @@ class MusicPlayer {
 
   loadState() {
     // Load saved track index
-    const savedIndex = parseInt(localStorage.getItem(this.STORAGE_KEYS.TRACK_INDEX), 10);
+    const savedIndex = parseInt(safeLocalGet(this.STORAGE_KEYS.TRACK_INDEX), 10);
     if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < this.trackFiles.length) {
       this.currentTrackIndex = savedIndex;
     }
 
     // Load saved time
-    const savedTime = parseFloat(localStorage.getItem(this.STORAGE_KEYS.CURRENT_TIME));
+    const savedTime = parseFloat(safeLocalGet(this.STORAGE_KEYS.CURRENT_TIME));
     this.savedTime = !isNaN(savedTime) && savedTime >= 0 ? savedTime : 0;
 
     // Load paused state
     // Première visite (clé absente) => lecteur arrêté par défaut (pas d'autoplay).
-    const savedPausedState = localStorage.getItem(this.STORAGE_KEYS.IS_PAUSED);
+    const savedPausedState = safeLocalGet(this.STORAGE_KEYS.IS_PAUSED);
     this.isPaused = savedPausedState === null ? true : savedPausedState === 'true';
 
     // Load volume state
-    const savedVolume = parseFloat(localStorage.getItem(this.STORAGE_KEYS.VOLUME));
+    const savedVolume = parseFloat(safeLocalGet(this.STORAGE_KEYS.VOLUME));
     this.savedVolume =
       !isNaN(savedVolume) && savedVolume >= 0 && savedVolume <= 1 ? savedVolume : 0.7;
 
     // Load muted state
-    this.isMuted = localStorage.getItem(this.STORAGE_KEYS.MUTED) === 'true';
+    this.isMuted = safeLocalGet(this.STORAGE_KEYS.MUTED) === 'true';
 
     // Load retracted state — caché par défaut à la première visite
-    const savedRetracted = localStorage.getItem(this.STORAGE_KEYS.RETRACTED);
+    const savedRetracted = safeLocalGet(this.STORAGE_KEYS.RETRACTED);
     this.isRetracted = savedRetracted === null ? true : savedRetracted === 'true';
   }
 
@@ -178,7 +179,7 @@ class MusicPlayer {
   toggleMute() {
     this.isMuted = !this.isMuted;
     this.audio.muted = this.isMuted;
-    localStorage.setItem(this.STORAGE_KEYS.MUTED, this.isMuted.toString());
+    safeLocalSet(this.STORAGE_KEYS.MUTED, this.isMuted.toString());
     this.updateVolumeButton();
   }
 
@@ -186,7 +187,7 @@ class MusicPlayer {
     const volume = Math.max(0, Math.min(1, parseFloat(value)));
     this.audio.volume = volume;
     this.savedVolume = volume;
-    localStorage.setItem(this.STORAGE_KEYS.VOLUME, volume.toString());
+    safeLocalSet(this.STORAGE_KEYS.VOLUME, volume.toString());
 
     // Auto-unmute if volume > 0
     if (volume > 0 && this.isMuted) {
@@ -221,7 +222,7 @@ class MusicPlayer {
   onTimeUpdate() {
     const now = Date.now();
     if (!this.lastSaveTime || now - this.lastSaveTime > 1000) {
-      localStorage.setItem(this.STORAGE_KEYS.CURRENT_TIME, this.audio.currentTime.toString());
+      safeLocalSet(this.STORAGE_KEYS.CURRENT_TIME, this.audio.currentTime.toString());
       this.lastSaveTime = now;
     }
     this.updateProgressBar();
@@ -229,14 +230,14 @@ class MusicPlayer {
 
   onPause() {
     this.isPaused = true;
-    localStorage.setItem(this.STORAGE_KEYS.IS_PAUSED, 'true');
+    safeLocalSet(this.STORAGE_KEYS.IS_PAUSED, 'true');
     this.updatePlayPauseButton();
     this.stopVisualizer();
   }
 
   onPlay() {
     this.isPaused = false;
-    localStorage.setItem(this.STORAGE_KEYS.IS_PAUSED, 'false');
+    safeLocalSet(this.STORAGE_KEYS.IS_PAUSED, 'false');
     this.updatePlayPauseButton();
     this.startVisualizer();
   }
@@ -577,15 +578,15 @@ class MusicPlayer {
         });
     } else {
       this.isPaused = true;
-      localStorage.setItem(this.STORAGE_KEYS.IS_PAUSED, 'true');
+      safeLocalSet(this.STORAGE_KEYS.IS_PAUSED, 'true');
       this.audio.pause();
     }
   }
 
   nextTrack() {
     this.currentTrackIndex = (this.currentTrackIndex + 1) % this.trackFiles.length;
-    localStorage.setItem(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
-    localStorage.setItem(this.STORAGE_KEYS.CURRENT_TIME, '0');
+    safeLocalSet(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
+    safeLocalSet(this.STORAGE_KEYS.CURRENT_TIME, '0');
 
     this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
     this.updateTrackInfo();
@@ -657,7 +658,8 @@ class MusicPlayer {
     if (this.visualizer.initialized) return;
     if (!this.elements.visualizerCanvas) return;
 
-    this.visualizer.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.visualizer.reducedMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
     this.visualizer.ctx = this.elements.visualizerCanvas.getContext('2d');
     this.visualizer.initialized = true;
 
@@ -928,8 +930,8 @@ class MusicPlayer {
     if (trackIndex < 0 || trackIndex >= this.trackFiles.length) return;
 
     this.currentTrackIndex = trackIndex;
-    localStorage.setItem(this.STORAGE_KEYS.TRACK_INDEX, trackIndex.toString());
-    localStorage.setItem(this.STORAGE_KEYS.CURRENT_TIME, '0');
+    safeLocalSet(this.STORAGE_KEYS.TRACK_INDEX, trackIndex.toString());
+    safeLocalSet(this.STORAGE_KEYS.CURRENT_TIME, '0');
     this.savedTime = 0; // Reset saved time so onLoadedMetadata doesn't restore old time
 
     this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
@@ -979,7 +981,7 @@ class MusicPlayer {
     this.elements.peekBtn.classList.add('visible');
     this.elements.retractBtn.setAttribute('aria-label', 'Afficher le lecteur');
     this.elements.retractBtn.querySelector('i').className = 'fa-solid fa-chevron-right';
-    localStorage.setItem(this.STORAGE_KEYS.RETRACTED, 'true');
+    safeLocalSet(this.STORAGE_KEYS.RETRACTED, 'true');
     // Close queue if open while retracting
     if (this.isQueueOpen) this.closeQueue();
   }
@@ -990,16 +992,16 @@ class MusicPlayer {
     this.elements.peekBtn.classList.remove('visible');
     this.elements.retractBtn.setAttribute('aria-label', 'R\u00e9duire le lecteur');
     this.elements.retractBtn.querySelector('i').className = 'fa-solid fa-chevron-left';
-    localStorage.setItem(this.STORAGE_KEYS.RETRACTED, 'false');
+    safeLocalSet(this.STORAGE_KEYS.RETRACTED, 'false');
   }
 
   saveState() {
-    localStorage.setItem(this.STORAGE_KEYS.CURRENT_TIME, this.audio.currentTime.toString());
-    localStorage.setItem(this.STORAGE_KEYS.IS_PAUSED, this.audio.paused.toString());
-    localStorage.setItem(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
-    localStorage.setItem(this.STORAGE_KEYS.VOLUME, this.audio.volume.toString());
-    localStorage.setItem(this.STORAGE_KEYS.MUTED, this.isMuted.toString());
-    localStorage.setItem(this.STORAGE_KEYS.RETRACTED, this.isRetracted.toString());
+    safeLocalSet(this.STORAGE_KEYS.CURRENT_TIME, this.audio.currentTime.toString());
+    safeLocalSet(this.STORAGE_KEYS.IS_PAUSED, this.audio.paused.toString());
+    safeLocalSet(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
+    safeLocalSet(this.STORAGE_KEYS.VOLUME, this.audio.volume.toString());
+    safeLocalSet(this.STORAGE_KEYS.MUTED, this.isMuted.toString());
+    safeLocalSet(this.STORAGE_KEYS.RETRACTED, this.isRetracted.toString());
   }
 
   formatTitle(filename) {

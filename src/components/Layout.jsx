@@ -17,6 +17,7 @@ import usePortfolioModules from '../hooks/usePortfolioModules.js';
 import { getAssetPath } from '../utils/assetPath.js';
 import { discoverMusicTracks } from '../utils/discoverMusicTracks.js';
 import { getPerformanceTier } from '../utils/performanceTier.js';
+import { safeSessionGet, safeSessionSet } from '../utils/safeStorage.js';
 import { ReadingTimeProvider } from '../contexts/ReadingTimeContext.jsx';
 import AmbientEffects from './ambient/AmbientEffects.jsx';
 import FooterDiorama from './ambient/FooterDiorama.jsx';
@@ -118,17 +119,23 @@ const Layout = () => {
 
   // Initialisation du suivi de session (timestamp de début)
   useEffect(() => {
-    if (!sessionStorage.getItem('session-start')) {
-      sessionStorage.setItem('session-start', Date.now().toString());
+    if (!safeSessionGet('session-start')) {
+      safeSessionSet('session-start', Date.now().toString());
     }
   }, []);
 
   // Suivi des pages visitées dans la session courante
   useEffect(() => {
-    const pages = JSON.parse(sessionStorage.getItem('session-pages') || '[]');
+    const rawPages = safeSessionGet('session-pages') || '[]';
+    let pages = [];
+    try {
+      pages = JSON.parse(rawPages);
+    } catch {
+      pages = [];
+    }
     if (!pages.includes(location.pathname)) {
       pages.push(location.pathname);
-      sessionStorage.setItem('session-pages', JSON.stringify(pages));
+      safeSessionSet('session-pages', JSON.stringify(pages));
     }
   }, [location.pathname]);
 

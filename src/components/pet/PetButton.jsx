@@ -10,6 +10,7 @@ import Tooltip from '../Tooltip.jsx';
 import {
   LS, DECAY_MS, REACTION_MS, COOLDOWNS, SLEEP_IDLE_MS, ACHIEVEMENTS,
   clamp, readLS, getMood, pickRandom,
+  localGet, localSet, localRemove, localGetJSON, localSetJSON,
 } from './petConstants.js';
 import { MOOD_TEXT_POOL, FACE_COMBOS, THOUGHT_POOLS, FOOD_ICONS } from './petData.jsx';
 import WanderingPet from './WanderingPet.jsx';
@@ -28,7 +29,7 @@ const PetButton = () => {
     }
     return MOOD_TEXT_POOL;
   }, [i18n, i18n.resolvedLanguage]);
-  const [isSpawned, setIsSpawned] = useState(() => localStorage.getItem(LS.spawned) === 'true');
+  const [isSpawned, setIsSpawned] = useState(() => localGet(LS.spawned) === 'true');
   const [stats, setStats] = useState(() => {
     // Réinitialise à ~50% à chaque chargement de page (synchrone, évite le délai d'un useEffect)
     const neutral = () => Math.round(50 + (Math.random() - 0.5) * 10);
@@ -38,17 +39,14 @@ const PetButton = () => {
   // Timestamp (ms) when each cooldown expires; 0 = not cooling
   const [cdEnds, setCdEnds] = useState({ feed: 0, pet: 0, play: 0 });
   // Pet name — persisted
-  const [petName, setPetName] = useState(() => localStorage.getItem(LS.name) || t('common.pet.defaultName'));
+  const [petName, setPetName] = useState(() => localGet(LS.name) || t('common.pet.defaultName'));
   // Cycling food icon index — persisted
   const [feedIconIndex, setFeedIconIndex] = useState(() => {
-    const v = parseInt(localStorage.getItem(LS.feedIndex), 10);
+    const v = parseInt(localGet(LS.feedIndex), 10);
     return Number.isFinite(v) ? v % FOOD_ICONS.length : 0;
   });
   // Achievements — persisted set of unlocked IDs
-  const [achievements, setAchievements] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(LS.achievements)) || []; }
-    catch { return []; }
-  });
+  const [achievements, setAchievements] = useState(() => localGetJSON(LS.achievements, []));
   // Catch game active flag
   const [isCatching, setIsCatching] = useState(false);
   const isCatchingRef = useRef(false);
@@ -100,27 +98,27 @@ const PetButton = () => {
 
   /* ── Persistance ── */
   useEffect(() => {
-    localStorage.setItem(LS.hunger, String(stats.hunger));
-    localStorage.setItem(LS.happiness, String(stats.happiness));
+    localSet(LS.hunger, String(stats.hunger));
+    localSet(LS.happiness, String(stats.happiness));
   }, [stats]);
 
   useEffect(() => {
-    localStorage.setItem(LS.spawned, String(isSpawned));
+    localSet(LS.spawned, String(isSpawned));
   }, [isSpawned]);
 
-  useEffect(() => { localStorage.setItem(LS.name, petName); }, [petName]);
-  useEffect(() => { localStorage.setItem(LS.feedIndex, String(feedIconIndex)); }, [feedIconIndex]);
-  useEffect(() => { localStorage.setItem(LS.achievements, JSON.stringify(achievements)); }, [achievements]);
+  useEffect(() => { localSet(LS.name, petName); }, [petName]);
+  useEffect(() => { localSet(LS.feedIndex, String(feedIconIndex)); }, [feedIconIndex]);
+  useEffect(() => { localSetJSON(LS.achievements, achievements); }, [achievements]);
   useEffect(() => { isCatchingRef.current = isCatching; }, [isCatching]);
 
   // Migration: remove stale pet-renderer key (SVG is now the only renderer)
-  useEffect(() => { localStorage.removeItem('pet-renderer'); }, []);
+  useEffect(() => { localRemove('pet-renderer'); }, []);
 
   // Auto-despawn if noMotion is enabled (accessibility: disable animations)
   useEffect(() => {
     if (noMotion && isSpawned) {
       setIsSpawned(false);
-      localStorage.setItem(LS.spawned, 'false');
+      localSet(LS.spawned, 'false');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noMotion]);
@@ -151,7 +149,7 @@ const PetButton = () => {
   const onboardingRanRef = useRef(false);
   useEffect(() => {
     if (!isSpawned || onboardingRanRef.current) return;
-    if (localStorage.getItem(LS.onboarded)) return;
+    if (localGet(LS.onboarded)) return;
     onboardingRanRef.current = true;
 
     const steps = [
@@ -165,7 +163,7 @@ const PetButton = () => {
     );
     // Marquer comme terminé après la dernière bulle
     timers.push(setTimeout(() => {
-      localStorage.setItem(LS.onboarded, '1');
+      localSet(LS.onboarded, '1');
     }, 16000));
     return () => timers.forEach(clearTimeout);
   // handleThought is stable (useCallback with [])
@@ -330,11 +328,11 @@ const PetButton = () => {
   /* ── API globale ── */
   useEffect(() => {
     window.petReact = (r) => {
-      if (localStorage.getItem(LS.spawned) === 'false') return;
+      if (localGet(LS.spawned) === 'false') return;
       triggerReaction(r);
     };
     window.getPetStats = () => {
-      if (localStorage.getItem(LS.spawned) === 'false') return null;
+      if (localGet(LS.spawned) === 'false') return null;
       return {
         hunger: readLS(LS.hunger, 80),
         happiness: readLS(LS.happiness, 80),
