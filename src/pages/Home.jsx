@@ -1,10 +1,666 @@
+import { useState } from 'react';
 import useDocumentMeta from '@/hooks/useDocumentMeta.js';
 import { useTranslation } from 'react-i18next';
 import ContactForm from '@/components/ContactForm.jsx';
 
+const SKILLS_LAYOUT_MODE = 'cards'; // 'cards' | 'tabs' | 'tree' | 'radar' | 'carousel' | 'petals'
+const DEFAULT_SKILL_TAB = 'web';
+const DEFAULT_EXPANDED_SKILL_NODES = [
+  'web',
+  'web-javascript',
+  'web-react',
+  'web-php',
+  'backend',
+  'backend-c-family',
+  'backend-sql',
+  'tools',
+  'tools-linux',
+  'testing',
+  'testing-javascript',
+  'testing-java',
+  'testing-cpp',
+];
+
+const formatSkillCount = (count) => String(count).padStart(2, '0');
+
+const getActiveSkillCategory = (categories, activeTab) =>
+  categories.find((category) => category.id === activeTab) ?? categories[0];
+
+const SkillCategoryIcon = ({ categoryId, className = 'bot-feature-icon' }) => {
+  switch (categoryId) {
+    case 'web':
+      return (
+        <svg
+          className={className}
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="16 18 22 12 16 6" />
+          <polyline points="8 6 2 12 8 18" />
+        </svg>
+      );
+    case 'backend':
+      return (
+        <svg
+          className={className}
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <path d="M9 9h.01M15 9h.01M9 15h6" />
+        </svg>
+      );
+    case 'tools':
+      return (
+        <svg
+          className={className}
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <path d="M8 21h8M12 17v4" />
+          <polyline points="7 10 10 13 17 6" strokeWidth="2" />
+        </svg>
+      );
+    case 'testing':
+      return (
+        <svg
+          className={className}
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
+const SkillTagList = ({ skills, className = 'bot-skills-tags' }) => (
+  <div className={className}>
+    {skills.map((skill) => (
+      <span key={skill} className="bot-skill-tag">
+        {skill}
+      </span>
+    ))}
+  </div>
+);
+
+const SkillCategoryCard = ({ category }) => (
+  <div className="bot-feature-card skills-category-card" role="listitem">
+    <SkillCategoryIcon categoryId={category.id} />
+    <div>
+      <div className="skills-card-heading">
+        <strong>{category.title}</strong>
+        <span className="skills-card-count">{formatSkillCount(category.skills.length)}</span>
+      </div>
+      <SkillTagList skills={category.skills} />
+    </div>
+  </div>
+);
+
+const SkillsCards = ({ categories }) => (
+  <div className="skills-showcase skills-showcase--cards">
+    <div className="skills-cards" role="list">
+      {categories.map((category) => (
+        <SkillCategoryCard key={category.id} category={category} />
+      ))}
+    </div>
+  </div>
+);
+
+const SkillsTabs = ({ categories, activeTab, onTabChange, label }) => {
+  const activeCategory = getActiveSkillCategory(categories, activeTab);
+
+  const handleTabKeyDown = (event, currentIndex) => {
+    const lastIndex = categories.length - 1;
+
+    if (!['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.key === 'Home') {
+      onTabChange(categories[0].id);
+      return;
+    }
+
+    if (event.key === 'End') {
+      onTabChange(categories[lastIndex].id);
+      return;
+    }
+
+    const direction = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1;
+    const nextIndex = (currentIndex + direction + categories.length) % categories.length;
+    onTabChange(categories[nextIndex].id);
+  };
+
+  return (
+    <div className="skills-showcase skills-showcase--tabs">
+      <div className="skills-tabs" role="tablist" aria-label={label}>
+        {categories.map((category, index) => (
+          <button
+            key={category.id}
+            type="button"
+            role="tab"
+            id={`skills-tab-${category.id}`}
+            className="skills-tab-button"
+            aria-selected={activeCategory.id === category.id}
+            aria-controls={`skills-panel-${category.id}`}
+            tabIndex={activeCategory.id === category.id ? 0 : -1}
+            onClick={() => onTabChange(category.id)}
+            onKeyDown={(event) => handleTabKeyDown(event, index)}
+          >
+            <SkillCategoryIcon categoryId={category.id} className="skills-tab-icon" />
+            <span className="skills-tab-label">{category.title}</span>
+            <span className="skills-tab-count">{formatSkillCount(category.skills.length)}</span>
+          </button>
+        ))}
+      </div>
+
+      <section
+        key={activeCategory.id}
+        id={`skills-panel-${activeCategory.id}`}
+        className="skills-tab-panel"
+        role="tabpanel"
+        aria-labelledby={`skills-tab-${activeCategory.id}`}
+      >
+        <div className="skills-tab-panel-header">
+          <div className="skills-tab-panel-icon-shell">
+            <SkillCategoryIcon categoryId={activeCategory.id} className="skills-tab-panel-icon" />
+          </div>
+          <div className="skills-tab-panel-title-group">
+            <strong>{activeCategory.title}</strong>
+            <span className="skills-tab-panel-count">{formatSkillCount(activeCategory.skills.length)}</span>
+          </div>
+        </div>
+
+        <div className="skills-tab-meter" aria-hidden="true">
+          {activeCategory.skills.map((skill, index) => (
+            <span key={skill} className="skills-tab-meter-bar" style={{ '--skill-index': index }} />
+          ))}
+        </div>
+
+        <SkillTagList skills={activeCategory.skills} className="bot-skills-tags skills-tab-tags" />
+      </section>
+    </div>
+  );
+};
+
+const SkillsRadar = ({ categories, activeTab, onTabChange }) => {
+  const activeCategory = getActiveSkillCategory(categories, activeTab);
+  const chartSize = 320;
+  const center = chartSize / 2;
+  const radius = 112;
+  const maxSkills = Math.max(...categories.map((category) => category.skills.length));
+
+  const getPoint = (index, valueRatio) => {
+    const angleInRadians = ((index / categories.length) * Math.PI * 2) - Math.PI / 2;
+    const pointRadius = radius * valueRatio;
+
+    return {
+      x: center + Math.cos(angleInRadians) * pointRadius,
+      y: center + Math.sin(angleInRadians) * pointRadius,
+    };
+  };
+
+  const radarPoints = categories
+    .map((category, index) => {
+      const { x, y } = getPoint(index, category.skills.length / maxSkills);
+      return `${x},${y}`;
+    })
+    .join(' ');
+
+  return (
+    <div className="skills-showcase skills-showcase--radar">
+      <div className="skills-radar-layout">
+        <div className="skills-radar-panel">
+          <svg
+            className="skills-radar-chart"
+            viewBox={`0 0 ${chartSize} ${chartSize}`}
+            role="img"
+            aria-label={activeCategory.title}
+          >
+            {[0.25, 0.5, 0.75, 1].map((level) => (
+              <polygon
+                key={level}
+                className="skills-radar-grid"
+                points={categories
+                  .map((_, index) => {
+                    const { x, y } = getPoint(index, level);
+                    return `${x},${y}`;
+                  })
+                  .join(' ')}
+              />
+            ))}
+
+            {categories.map((category, index) => {
+              const edgePoint = getPoint(index, 1);
+              const valuePoint = getPoint(index, category.skills.length / maxSkills);
+              const isActive = category.id === activeCategory.id;
+
+              return (
+                <g key={category.id}>
+                  <line
+                    className="skills-radar-axis"
+                    x1={center}
+                    y1={center}
+                    x2={edgePoint.x}
+                    y2={edgePoint.y}
+                  />
+                  <circle
+                    className={`skills-radar-dot ${isActive ? 'is-active' : ''}`}
+                    cx={valuePoint.x}
+                    cy={valuePoint.y}
+                    r={isActive ? 7 : 5}
+                  />
+                </g>
+              );
+            })}
+
+            <polygon className="skills-radar-area" points={radarPoints} />
+          </svg>
+        </div>
+
+        <div className="skills-radar-sidebar">
+          <div className="skills-radar-legend" role="list">
+            {categories.map((category) => {
+              const isActive = category.id === activeCategory.id;
+
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={`skills-radar-legend-item ${isActive ? 'is-active' : ''}`}
+                  onClick={() => onTabChange(category.id)}
+                >
+                  <SkillCategoryIcon categoryId={category.id} className="skills-radar-legend-icon" />
+                  <span className="skills-radar-legend-copy">
+                    <strong>{category.title}</strong>
+                    <span>{formatSkillCount(category.skills.length)}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <article className="skills-radar-detail">
+            <div className="skills-radar-detail-head">
+              <div className="skills-radar-detail-icon-shell">
+                <SkillCategoryIcon categoryId={activeCategory.id} className="skills-radar-detail-icon" />
+              </div>
+              <div className="skills-radar-detail-title-group">
+                <strong>{activeCategory.title}</strong>
+                <span className="skills-radar-detail-count">{formatSkillCount(activeCategory.skills.length)}</span>
+              </div>
+            </div>
+            <SkillTagList skills={activeCategory.skills} className="bot-skills-tags skills-radar-tags" />
+          </article>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SkillsCarousel = ({ categories, activeTab, onTabChange }) => {
+  const activeIndex = categories.findIndex((category) => category.id === activeTab);
+  const resolvedActiveIndex = activeIndex >= 0 ? activeIndex : 0;
+  const activeCategory = categories[resolvedActiveIndex];
+  const previousIndex = (resolvedActiveIndex - 1 + categories.length) % categories.length;
+  const nextIndex = (resolvedActiveIndex + 1) % categories.length;
+
+  return (
+    <div className="skills-showcase skills-showcase--carousel">
+      <div className="skills-carousel-stage">
+        <button
+          type="button"
+          className="skills-carousel-arrow"
+          aria-label={categories[previousIndex].title}
+          onClick={() => onTabChange(categories[previousIndex].id)}
+        >
+          <span aria-hidden="true">&#8249;</span>
+        </button>
+
+        <article key={activeCategory.id} className="skills-carousel-card">
+          <div className="skills-carousel-card-header">
+            <div className="skills-carousel-icon-shell">
+              <SkillCategoryIcon categoryId={activeCategory.id} className="skills-carousel-icon" />
+            </div>
+            <div className="skills-carousel-title-group">
+              <strong>{activeCategory.title}</strong>
+              <span className="skills-carousel-count">{formatSkillCount(activeCategory.skills.length)}</span>
+            </div>
+          </div>
+
+          <SkillTagList skills={activeCategory.skills} className="bot-skills-tags skills-carousel-tags" />
+        </article>
+
+        <button
+          type="button"
+          className="skills-carousel-arrow"
+          aria-label={categories[nextIndex].title}
+          onClick={() => onTabChange(categories[nextIndex].id)}
+        >
+          <span aria-hidden="true">&#8250;</span>
+        </button>
+      </div>
+
+      <div className="skills-carousel-nav" role="tablist" aria-label="Skills carousel navigation">
+        {categories.map((category) => (
+          <button
+            key={category.id}
+            type="button"
+            role="tab"
+            className={`skills-carousel-chip ${category.id === activeCategory.id ? 'is-active' : ''}`}
+            aria-selected={category.id === activeCategory.id}
+            onClick={() => onTabChange(category.id)}
+          >
+            <SkillCategoryIcon categoryId={category.id} className="skills-carousel-chip-icon" />
+            <span className="skills-carousel-chip-label">{category.title}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const SkillsPetals = ({ categories, activeTab, onTabChange }) => {
+  const activeCategory = getActiveSkillCategory(categories, activeTab);
+
+  return (
+    <div className="skills-showcase skills-showcase--petals">
+      <div className="skills-petals-layout">
+        <div className="skills-petals-orbit">
+          <div className="skills-petals-hub">
+            <span className="skills-petals-kicker">{formatSkillCount(activeCategory.skills.length)}</span>
+            <strong>{activeCategory.title}</strong>
+          </div>
+
+          {categories.map((category, index) => (
+            <button
+              key={category.id}
+              type="button"
+              className={`skills-petal-button ${category.id === activeCategory.id ? 'is-active' : ''}`}
+              style={{ '--petal-angle': `${-90 + index * 90}deg` }}
+              onClick={() => onTabChange(category.id)}
+            >
+              <SkillCategoryIcon categoryId={category.id} className="skills-petal-icon" />
+              <span className="skills-petal-label">{category.title}</span>
+              <span className="skills-petal-count">{formatSkillCount(category.skills.length)}</span>
+            </button>
+          ))}
+        </div>
+
+        <article className="skills-petals-detail">
+          <div className="skills-petals-detail-header">
+            <div className="skills-petals-detail-icon-shell">
+              <SkillCategoryIcon categoryId={activeCategory.id} className="skills-petals-detail-icon" />
+            </div>
+            <div className="skills-petals-detail-title-group">
+              <strong>{activeCategory.title}</strong>
+              <span className="skills-petals-detail-count">{formatSkillCount(activeCategory.skills.length)}</span>
+            </div>
+          </div>
+
+          <SkillTagList skills={activeCategory.skills} className="bot-skills-tags skills-petals-tags" />
+        </article>
+      </div>
+    </div>
+  );
+};
+
+const SkillTreeNode = ({ node, expandedNodeIds, onToggle }) => {
+  const hasChildren = Boolean(node.children?.length);
+  const isExpanded = expandedNodeIds.includes(node.id);
+
+  return (
+    <div className={`skills-tree-node ${hasChildren ? 'is-branch' : 'is-leaf'} ${isExpanded ? 'is-open' : ''}`}>
+      {hasChildren ? (
+        <button
+          type="button"
+          className="skills-tree-node-trigger"
+          aria-expanded={isExpanded}
+          onClick={() => onToggle(node.id)}
+        >
+          <span className="skills-tree-node-chevron" aria-hidden="true" />
+          {node.iconCategoryId ? (
+            <SkillCategoryIcon categoryId={node.iconCategoryId} className="skills-tree-node-icon" />
+          ) : (
+            <span className="skills-tree-node-pip" aria-hidden="true" />
+          )}
+          <span className="skills-tree-node-label">{node.label}</span>
+          <span className="skills-tree-node-count">{String(node.children.length).padStart(2, '0')}</span>
+        </button>
+      ) : (
+        <div className="skills-tree-node-leaf">
+          <span className="skills-tree-node-pip" aria-hidden="true" />
+          <span className="skills-tree-node-label">{node.label}</span>
+        </div>
+      )}
+
+      {hasChildren ? (
+        <div className="skills-tree-children">
+          <div className="skills-tree-children-inner">
+            {node.children.map((childNode) => (
+              <SkillTreeNode
+                key={childNode.id}
+                node={childNode}
+                expandedNodeIds={expandedNodeIds}
+                onToggle={onToggle}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
+const SkillsTree = ({ categories, expandedNodeIds, onToggle }) => (
+  <div className="skills-showcase skills-showcase--tree">
+    <div className="skills-tree-grid" role="list">
+      {categories.map((category) => (
+        <article key={category.id} className="skills-tree-cluster" role="listitem">
+          <SkillTreeNode
+            node={{
+              id: category.id,
+              label: category.title,
+              iconCategoryId: category.id,
+              children: category.tree,
+            }}
+            expandedNodeIds={expandedNodeIds}
+            onToggle={onToggle}
+          />
+        </article>
+      ))}
+    </div>
+  </div>
+);
+
 const Home = () => {
   const { t } = useTranslation();
+  const [activeSkillTab, setActiveSkillTab] = useState(DEFAULT_SKILL_TAB);
+  const [expandedSkillNodes, setExpandedSkillNodes] = useState(DEFAULT_EXPANDED_SKILL_NODES);
   useDocumentMeta(t('home.metaTitle'), t('home.metaDescription'));
+
+  const skillCategories = [
+    {
+      id: 'web',
+      title: t('home.skills.cards.web.title'),
+      skills: ['HTML / CSS', 'JavaScript', 'PHP', 'Symfony', 'React', 'Vite'],
+      tree: [
+        { id: 'web-html-css', label: 'HTML / CSS' },
+        {
+          id: 'web-javascript',
+          label: 'JavaScript',
+          children: [
+            {
+              id: 'web-react',
+              label: 'React',
+              children: [
+                { id: 'web-jsx', label: 'JSX' },
+                { id: 'web-hooks', label: 'Hooks' },
+              ],
+            },
+            { id: 'web-vite', label: 'Vite' },
+          ],
+        },
+        {
+          id: 'web-php',
+          label: 'PHP',
+          children: [{ id: 'web-symfony', label: 'Symfony' }],
+        },
+      ],
+    },
+    {
+      id: 'backend',
+      title: t('home.skills.cards.backend.title'),
+      skills: ['Java', 'Python', 'C', 'C++', 'SQLite', 'PostgreSQL'],
+      tree: [
+        { id: 'backend-java', label: 'Java' },
+        { id: 'backend-python', label: 'Python' },
+        {
+          id: 'backend-c-family',
+          label: 'C / C++',
+          children: [
+            { id: 'backend-c', label: 'C' },
+            { id: 'backend-cpp', label: 'C++' },
+          ],
+        },
+        {
+          id: 'backend-sql',
+          label: 'SQL',
+          children: [{ id: 'backend-postgresql', label: 'PostgreSQL' }],
+        },
+      ],
+    },
+    {
+      id: 'tools',
+      title: t('home.skills.cards.tools.title'),
+      skills: ['Git', 'Linux', 'Bash', 'JavaFX', 'Docker', 'VS Code', 'IntelliJ IDEA', 'PHPStorm', 'Android Studio'],
+      tree: [
+        { id: 'tools-git', label: 'Git' },
+        {
+          id: 'tools-linux',
+          label: 'Linux',
+          children: [
+            { id: 'tools-bash', label: 'Bash' },
+            { id: 'tools-docker', label: 'Docker' },
+          ],
+        },
+        { id: 'tools-javafx', label: 'JavaFX' },
+        { id: 'tools-vscode', label: 'VS Code' },
+        { id: 'tools-intellij', label: 'IntelliJ IDEA' },
+        { id: 'tools-phpstorm', label: 'PHPStorm' },
+        { id: 'tools-android-studio', label: 'Android Studio' },
+      ],
+    },
+    {
+      id: 'testing',
+      title: t('home.skills.cards.testing.title'),
+      skills: ['Mocha', 'Cypress', 'JUnit', 'GTest'],
+      tree: [
+        {
+          id: 'testing-javascript',
+          label: 'JavaScript',
+          children: [
+            { id: 'testing-mocha', label: 'Mocha' },
+            { id: 'testing-cypress', label: 'Cypress' },
+          ],
+        },
+        {
+          id: 'testing-java',
+          label: 'Java',
+          children: [{ id: 'testing-junit', label: 'JUnit' }],
+        },
+        {
+          id: 'testing-cpp',
+          label: 'C++',
+          children: [{ id: 'testing-gtest', label: 'GTest' }],
+        },
+      ],
+    },
+  ];
+
+  const toggleSkillNode = (nodeId) => {
+    setExpandedSkillNodes((currentNodeIds) =>
+      currentNodeIds.includes(nodeId)
+        ? currentNodeIds.filter((currentNodeId) => currentNodeId !== nodeId)
+        : [...currentNodeIds, nodeId],
+    );
+  };
+
+  const renderSkillsLayout = () => {
+    switch (SKILLS_LAYOUT_MODE) {
+      case 'radar':
+        return (
+          <SkillsRadar
+            categories={skillCategories}
+            activeTab={activeSkillTab}
+            onTabChange={setActiveSkillTab}
+          />
+        );
+      case 'carousel':
+        return (
+          <SkillsCarousel
+            categories={skillCategories}
+            activeTab={activeSkillTab}
+            onTabChange={setActiveSkillTab}
+          />
+        );
+      case 'petals':
+        return (
+          <SkillsPetals
+            categories={skillCategories}
+            activeTab={activeSkillTab}
+            onTabChange={setActiveSkillTab}
+          />
+        );
+      case 'tabs':
+        return (
+          <SkillsTabs
+            categories={skillCategories}
+            activeTab={activeSkillTab}
+            onTabChange={setActiveSkillTab}
+            label={t('home.skills.title')}
+          />
+        );
+      case 'tree':
+        return (
+          <SkillsTree
+            categories={skillCategories}
+            expandedNodeIds={expandedSkillNodes}
+            onToggle={toggleSkillNode}
+          />
+        );
+      case 'cards':
+      default:
+        return <SkillsCards categories={skillCategories} />;
+    }
+  };
 
   return (
     <>
@@ -86,118 +742,7 @@ const Home = () => {
       <section id="skills" aria-labelledby="skills-title">
         <h2 id="skills-title">{t('home.skills.title')}</h2>
         <p className="skills-intro">{t('home.skills.intro')}</p>
-        <div className="skills-cards" role="list">
-          <div className="bot-feature-card" role="listitem">
-            <svg
-              className="bot-feature-icon"
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="16 18 22 12 16 6" />
-              <polyline points="8 6 2 12 8 18" />
-            </svg>
-            <div>
-              <strong>{t('home.skills.cards.web.title')}</strong>
-              <div className="bot-skills-tags">
-                <span className="bot-skill-tag">HTML / CSS</span>
-                <span className="bot-skill-tag">JavaScript</span>
-                <span className="bot-skill-tag">PHP</span>
-                <span className="bot-skill-tag">Symfony</span>
-                <span className="bot-skill-tag">Vite</span>
-                <span className="bot-skill-tag">React</span>
-                <span className="bot-skill-tag">Vite</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bot-feature-card" role="listitem">
-            <svg
-              className="bot-feature-icon"
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M9 9h.01M15 9h.01M9 15h6" />
-            </svg>
-            <div>
-              <strong>{t('home.skills.cards.backend.title')}</strong>
-              <div className="bot-skills-tags">
-                <span className="bot-skill-tag">Java</span>
-                <span className="bot-skill-tag">Python</span>
-                <span className="bot-skill-tag">C</span>
-                <span className="bot-skill-tag">C++</span>
-                <span className="bot-skill-tag">SQL</span>
-                <span className="bot-skill-tag">PostgreSQL</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bot-feature-card" role="listitem">
-            <svg
-              className="bot-feature-icon"
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <path d="M8 21h8M12 17v4" />
-              <polyline points="7 10 10 13 17 6" strokeWidth="2" />
-            </svg>
-            <div>
-              <strong>{t('home.skills.cards.tools.title')}</strong>
-              <div className="bot-skills-tags">
-                <span className="bot-skill-tag">Git</span>
-                <span className="bot-skill-tag">Linux</span>
-                <span className="bot-skill-tag">Bash</span>
-                <span className="bot-skill-tag">JavaFX</span>
-                <span className="bot-skill-tag">Docker</span>
-                <span className="bot-skill-tag">VS Code</span>
-                <span className="bot-skill-tag">IntelliJ IDEA</span>
-                <span className="bot-skill-tag">PHPStorm</span>
-                <span className="bot-skill-tag">Android Studio</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bot-feature-card" role="listitem">
-            <svg
-              className="bot-feature-icon"
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-              <polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-            <div>
-              <strong>{t('home.skills.cards.testing.title')}</strong>
-              <div className="bot-skills-tags">
-                <span className="bot-skill-tag">Mocha</span>
-                <span className="bot-skill-tag">Cypress</span>
-                <span className="bot-skill-tag">JUnit</span>
-                <span className="bot-skill-tag">GTest</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {renderSkillsLayout()}
       </section>
 
       {/* === Parcours === */}
