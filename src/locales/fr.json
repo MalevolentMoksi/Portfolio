@@ -131,6 +131,12 @@
       "clockAria": "Horloge"
     },
     "footerWidget": {
+      "widgetLabel": "Widget d'informations du pied de page",
+      "stateSelector": "Sélecteur d'état du widget",
+      "showTimer": "Afficher le temps passé sur le portfolio",
+      "showBadge": "Afficher le statut de déploiement",
+      "showOrbit": "Afficher le satellite cosmique",
+      "spinOrbit": "Faire tourner le satellite",
       "timeOnPortfolio": "Temps passé sur le portfolio",
       "deploymentStatus": "Statut de déploiement",
       "lastBuild": "Dernière build : {{buildDate}}",
