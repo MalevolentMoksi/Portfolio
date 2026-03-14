@@ -1,263 +1,168 @@
-# 🏗️ Architecture - Guide Développeur
+# Architecture - Guide Developpeur
+
+Document de reference technique du portfolio.
+Etat verifie sur le code source le 2026-03-15.
 
 ## Vue d'ensemble
 
-**Portfolio** est une Single Page Application (SPA) React avec routing côté client. La migration de **Vite multi-page HTML → React SPA** est complète.
+Le projet est une SPA React en TypeScript avec:
+- routage React Router v6
+- pages lazy-load via Suspense
+- modules legacy TypeScript (musique, effets, lightbox, UI)
+- i18n FR/EN
+- contexte accessibilite persistant
+- couche ambient adaptee au mood et au tier de performance
+- PWA via vite-plugin-pwa
 
-```
-App.jsx (Orchestrateur de routes)
-├── Layout (Wrapper commun: header, footer)
-│   ├── Home (Accueil / index)
-│   ├── Projets (Liste projets académiques)
-│   ├── ProjetsPersonnels (Galerie personnelle)
-│   └── ProjetXXX (Pages détail: MEGASAE, SAE12, SAE3, SAE4, SAE56)
-```
+Schema global:
 
----
-
-## 📦 Architecture des Fichiers
-
-### Point d'Entrée
-```
-src/index.html          ← Template unique pour la SPA
-src/main.jsx            ← Initialisation React/Vite
-```
-
-### Routage & Pages
-- **src/App.jsx** - Définition des routes (React Router v6)
-- **src/pages/*.jsx** - 8 pages (Home, Projets, ProjetXXX, ProjetsPersonnels)
-
-### Composants Réutilisables
-```
-src/components/
-├── Layout.jsx           ← Structure globale (outlet pour pages)
-├── BackToTopButton.jsx  ← Bouton remontée
-└── Footer.jsx           ← Pied de page
+```text
+src/main.tsx
+  -> providers globaux (Accessibility, Mood, Toast)
+  -> App.tsx
+      -> BrowserRouter + Suspense
+      -> Layout.tsx (shell partage)
+          -> Outlet (pages)
+          -> modules legacy via usePortfolioModules()
 ```
 
-### Hooks Personnalisés
-```
-src/hooks/
-├── useDocumentMeta.js        ← Gère `<title>`, `<meta description>`
-└── usePortfolioModules.js    ← Loaders pour particles.js, musique player, etc.
-```
+## Core App
 
-### Styling
-```
-src/styles/
-├── main.css                 ← Import central (regroupe tout)
-├── _variables.css           ← CSS custom props (couleurs, spacing)
-├── _base.css, _layout.css, _typography.css
-├── _effects.css             ← Animations, transitions
-└── components/              ← Modulaires par composant
-    ├── _header.css
-    ├── _footer.css
-    ├── _buttons.css
-    ├── _music-player.css
-    ├── _projects.css
-    └── _personal-projects.css
-```
+### Points d'entree
+- src/index.html: template SPA, chargement des scripts CDN (particles.js, jsmediatags), registerSW
+- src/main.tsx: bootstrap React + providers
+- src/App.tsx: declaration des routes lazy
+- src/components/Layout.tsx: header/nav/actions, hero par route, ambient layers, footer
 
-### Assets
-```
-public/assets/
-├── images/              ← Projets, screenshots, favicon
-├── music/               ← deepstone.m4a, browser.m4a, wildriver.m4a
-└── videos/              ← Vidéos de démo
-```
+### Routes actuelles
+- /
+- /projets
+- /projets-personnels
+- /projet-MEGASAE
+- /projet-SAE12
+- /projet-SAE3
+- /projet-SAE4
+- /projet-SAE56
+- /projet-SAE3.01
+- /about
+- /credits
+- * (NotFound)
 
----
+## Structure Source
 
-## 🚀 Points Clés d'Implémentation
-
-### 1. Routage (React Router v6)
-```jsx
-// App.jsx
-<BrowserRouter>
-  <Routes>
-    <Route element={<Layout />}>
-      <Route index element={<Home />} />
-      <Route path="projets" element={<Projets />} />
-      <Route path="projet-MEGASAE" element={<ProjetMEGASAE />} />
-      {/* ... autres routes */}
-    </Route>
-  </Routes>
-</BrowserRouter>
+```text
+src/
+  components/           # 43 composants TSX (inclut ambient + pet)
+    ambient/            # 18 composants
+    pet/                # sous-systeme robot
+  contexts/             # Accessibility, Mood, ReadingTime, Toast
+  data/
+  hooks/                # useDocumentMeta, usePortfolioModules, useReadingTimeEstimate
+  locales/              # fr.json, en.json
+  pages/                # 12 pages routables
+  scripts/              # music-player.ts, effects.ts, ui-enhancements.ts, lightbox.ts
+  styles/               # 35 fichiers CSS (6 core + 29 component)
+  types/
+  utils/                # assetPath, discoverMusicTracks, performanceTier, safeStorage
 ```
 
-**Chemins :**
-- `/` → Accueil
-- `/projets` → Liste projets académiques
-- `/projets-personnels` → Galerie personnelle
-- `/projet-MEGASAE`, `/projet-SAE12`, etc. → Détails projet
+## Contextes et Etat Global
 
-### 2. Layout Global (Outlet Pattern)
-```jsx
-// Layout.jsx
-<>
-  <header>Navigation</header>
-  <main>
-    <Outlet />  {/* Chaque page s'injecte ici */}
-  </main>
-  <footer>Footer</footer>
-</>
-```
+- MoodContext.tsx
+  - moods: default, hacker, vaporwave, europa, industrial
+  - persistance localStorage: portfolio-mood
+  - applique body[data-mood="..."]
 
-### 3. Meta Tags Dynamiques
-```jsx
-// Dans chaque page:
-useDocumentMeta({
-  title: "Page Title",
-  description: "Page description pour SEO"
-});
-```
+- AccessibilityContext.tsx
+  - noMotion, highContrast, fontSize, dyslexiaFont
+  - persistance localStorage
+  - applique classes body a11y
 
-### 4. Intégration Modules Legacy
-```jsx
-// usePortfolioModules.js
-// Lance les libs externes (particles.js, lecteur musique, etc.)
-// Compatible avec React (effet au montage du Layout)
-```
+- ToastContext.tsx
+  - API React + pont global window.showToast pour scripts legacy
 
----
+- ReadingTimeContext.tsx
+  - expose estimation de lecture aux pages
 
-## 🎨 Styling
+## Modules Legacy et Bridge React
 
-### Variables CSS Centralisées
-```css
-/* src/styles/_variables.css */
-:root {
-  --primary-color: #d4af37;      /* Or */
-  --bg-color: #1a1a1a;            /* Noir */
-  --text-color: #ffffff;
-  --spacing-unit: 1rem;
-}
-```
+usePortfolioModules.ts gere l'initialisation progressive:
+- music-player.ts: instance singleton
+- effects.ts: instance singleton
+- ui-enhancements.ts: singleton + reinit par changement de route
+- lightbox.ts: instancie si elements .zoomable presents
 
-### Mise à Jour des Styles
-1. **Global** → Modifier `_variables.css`
-2. **Par page** → Créer une classe/id dans `components/_page-name.css`
-3. **Import CSS** → Automatique dans React (tous les fichiers CSS importés)
+Timing:
+- init differee via requestAnimationFrame x2 + attente document/window ready
+- suivi de performance (startFpsMonitor) lance une fois
 
----
+## Systeme Visuel
 
-## 🛠️ Commandes de Développement
+### Mood + Ambiance
+- Mood applique sur body[data-mood]
+- AmbientEffects.tsx orchestre plusieurs sous-couches (neons, neige, boids, etc.)
+- FooterDiorama.tsx affiche 2 ou 3 mini-dioramas tires aleatoirement d'un pool de 10
 
-```bash
-npm run dev      # Dev server: localhost:3000 (HMR actif)
-npm run build    # Production: dist/ minifiée
-npm run preview  # Test la build de production localement
-```
+### Performance Tier
+performanceTier.ts:
+- tiers: high | mid | low
+- detection sync (hardwareConcurrency + prefers-reduced-motion)
+- cache sessionStorage
+- monitoring FPS passif pouvant degrader le tier
 
----
+## Musique
 
-## 🔄 Flux de Navigation
+music-player.ts:
+- tracks auto-decouvertes via discoverMusicTracks.ts (.m4a et .mp3)
+- persistance localStorage:
+  - music-currentTrack
+  - music-currentTime
+  - music-isPaused
+  - music-volume
+  - music-muted
+  - music-retracted
+- premiere visite: lecteur en pause par defaut
+- throttle sauvegarde currentTime: ~1 ecriture/sec
+- metadata ID3 via jsmediatags (CDN)
 
-```
-Utilisateur clique sur lien
-    ↓
-React Router capture l'URL
-    ↓
-Route match → Composant Page chargé
-    ↓
-useDocumentMeta met à jour <title>, <meta tags>
-    ↓
-usePortfolioModules initialise effects (si premier chargement)
-    ↓
-Layout + Page + Footer s'affichent
-```
+## i18n
 
----
+i18n.ts:
+- i18next + react-i18next + language detector
+- langues supportees: fr, en
+- fallback: fr
+- detection: localStorage -> navigator -> htmlTag
 
-## 📝 Ajouter une Nouvelle Page
+## Build et Toolchain
 
-### Étape 1: Créer le composant
-```jsx
-// src/pages/MonProjet.jsx
-import { useEffect } from 'react';
-import useDocumentMeta from '../hooks/useDocumentMeta';
+- Vite 8 (vite.config.ts)
+- TypeScript strict (tsconfig.json)
+- React plugin + VitePWA
+- root: src
+- publicDir: ../public
+- outDir: ../dist
+- server dev: 3000
+- preview: 8080
 
-export default function MonProjet() {
-  useDocumentMeta({
-    title: "Mon Projet",
-    description: "Description du projet"
-  });
+Scripts utiles:
+- npm run dev
+- npm run typecheck
+- npm run build
+- npm run preview
 
-  return (
-    <article>
-      <h1>Titre du Projet</h1>
-      <p>Contenu...</p>
-    </article>
-  );
-}
-```
+## Ajouter une Page
 
-### Étape 2: Ajouter la route
-```jsx
-// App.jsx
-<Route path="mon-projet" element={<MonProjet />} />
-```
+1. Creer src/pages/NouvellePage.tsx
+2. Ajouter import lazy + route dans src/App.tsx
+3. Ajouter les entrees de traduction fr/en si necessaire
+4. Appeler useDocumentMeta(titre, description)
+5. Verifier l'affichage dans Layout (hero, breadcrumbs, etc.)
 
-### Étape 3: Ajouter le lien dans le nav
-```jsx
-// Dans navigations (Header ou autre)
-<a href="/mon-projet">Mon Projet</a>
-```
+## Checklist de Validation
 
-### Étape 4: Ajouter un CSS (optionnel)
-```css
-/* src/styles/components/_mon-projet.css */
-article { /* styles */ }
-
-/* Puis importer dans main.css */
-@import "./components/_mon-projet.css";
-```
-
----
-
-## 🎵 Lecteur Musique Persistent
-
-Le hook `usePortfolioModules` initialise les anciens modules JS (music-player.js, etc.) lors du montage du Layout. **Ces modules fonctionnent en parallèle de React** (pour la persistance localStorage, etc.).
-
-### Ajouter une piste
-1. Placer le fichier `.m4a` dans `public/assets/music/`
-2. Modifier les données du lecteur (selon implémentation dans `scripts/music-player.js`)
-
----
-
-## 🌟 Technos Stack
-
-- **Frontend** : React 18.2 + React Router 6.22
-- **Build** : Vite 5.0
-- **CSS** : CSS Modules / Classique (non-scoped)
-- **Librairies externes**:
-  - `particles.js` - Fond animé
-  - `jsmediatags` - Lecture des tags ID3 (musique)
-
----
-
-## 📋 Checklist Avant Commit
-
-- [ ] `npm run build` passe sans erreur
-- [ ] `npm run preview` fonctionne
-- [ ] Nouveaux Meta tags ajoutés si nouvelle page
-- [ ] Tests des liens de nav
-- [ ] CSS respecte les variables centralisées
-- [ ] Pas de console errors/warnings
-
----
-
-## ❓ FAQ
-
-**Q: Où sont les anciens fichiers Vite?**
-A: Archivés dans `_archive/`. Voir [_archive/README.md](_archive/README.md).
-
-**Q: Comment faire du CSS-in-JS?**
-A: Actuellement, on utilise CSS classique. Possibilité d'ajouter `styled-components` ou `emotion` à l'avenir.
-
-**Q: Comment tester les metas dynamiques?**
-A: Ouvrir DevTools → `<head>` → vérifier que `<title>` et `<meta description>` changent lors de navigation.
-
-**Q: Où sont les assets?**
-A: `public/assets/` (images, musique, vidéos). Toujours avec chemin absolu `/assets/...`.
-
+- npm run typecheck
+- npm run build
+- verifier routes et lazy loading
+- verifier mode no-motion + contrast + font-size
+- verifier traduction FR/EN
+- verifier persistance mood et player musique

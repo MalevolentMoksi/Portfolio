@@ -518,7 +518,7 @@
   },
   "about": {
     "metaTitle": "About | Portfolio",
-    "metaDescription": "Technical architecture and stack of Enzo Morello portfolio - React, Vite, Framer Motion, custom CSS.",
+    "metaDescription": "Technical architecture and stack of Enzo Morello portfolio - React, Vite 8, TypeScript, Framer Motion, and custom CSS.",
     "sections": {
       "stack": {
         "title": "Tech stack",
@@ -526,7 +526,7 @@
       },
       "architecture": {
         "title": "Architecture",
-        "intro": "React SPA with legacy JavaScript modules coexisting for effects and music."
+        "intro": "TypeScript React SPA with legacy TypeScript modules for music, visual effects, and DOM interactions."
       },
       "themes": {
         "title": "Theme system",
@@ -544,26 +544,26 @@
     },
     "stack": {
       "react": { "role": "UI library", "desc": "Functional components, hooks, route-based lazy loading and Suspense for code splitting." },
-      "vite": { "role": "Build tool", "desc": "Ultra-fast bundler with HMR, path aliases (@/, @styles/, @components/...), and production optimization." },
+      "vite": { "role": "Build tool", "desc": "Ultra-fast build with HMR, TypeScript aliases, optimized bundling, and PWA integration via vite-plugin-pwa." },
       "router": { "role": "SPA navigation", "desc": "BrowserRouter with shared Layout via <Outlet />, active NavLinks, and client-side navigation." },
       "framerMotion": { "role": "Animations", "desc": "SVG path morphing for the mascot robot, enter/exit transitions, and spring effects." },
-      "css": { "role": "Theme system", "desc": "25+ isolated CSS modules, centralized custom properties in _variables.css, zero !important, PostCSS + Autoprefixer." },
-      "githubPages": { "role": "Deployment", "desc": "Optimized Vite build auto-deployed via GitHub Actions, served as a static SPA on GitHub Pages." }
+      "css": { "role": "Theme system", "desc": "35 isolated CSS modules, centralized custom properties in _variables.css, zero !important, PostCSS + Autoprefixer." },
+      "githubPages": { "role": "Deployment", "desc": "Vite build deployed via GitHub Actions (typecheck + build + 404 fallback). Netlify/Vercel configs are included for alternate deployment." }
     },
     "arch": {
       "routing": {
         "label": "Routing",
         "items": [
-          "BrowserRouter -> Layout.jsx (shared shell) -> <Outlet />",
+          "BrowserRouter -> Layout.tsx (shared shell) -> <Outlet />",
           "All pages are lazy-loaded (route-level code splitting)",
-          "pageConfig in Layout.jsx: background, title and meta by route"
+          "pageConfig in Layout.tsx: background, title and meta by route"
         ]
       },
       "components": {
         "label": "Components",
         "items": [
-          "~30 isolated React components in src/components/",
-          "Ambient layer: 13 decorative effects in components/ambient/",
+          "43 TypeScript React components in src/components/ (including ambient and pet)",
+          "Ambient layer: 18 decorative components in components/ambient/",
           "Component-scoped CSS to avoid cascade pollution"
         ]
       },
@@ -572,7 +572,8 @@
         "items": [
           "MoodContext - active mood persisted in localStorage",
           "ReadingTimeContext - reading estimate provided to pages",
-          "ToastContext - lightweight non-blocking notifications"
+          "ToastContext - lightweight non-blocking notifications",
+          "AccessibilityContext - persisted a11y options (contrast, typography, no-motion)"
         ]
       },
       "customHooks": {
@@ -586,18 +587,18 @@
       "legacyScripts": {
         "label": "Legacy scripts",
         "items": [
-          "music-player.js - persistent audio player, 1 write/s localStorage throttle",
-          "effects.js - particles.js, parallax, mouse tracking",
-          "ui-enhancements.js - typing animation, clock, video hover",
-          "lightbox.js - gallery zoom for .zoomable images"
+          "music-player.ts - persistent audio player, ~1 write/s localStorage throttle",
+          "effects.ts - particles.js, parallax, and performance-tier adaptation",
+          "ui-enhancements.ts - typing, footer clock, video hover, back-to-top",
+          "lightbox.ts - gallery zoom with keyboard navigation for .zoomable images"
         ]
       }
     },
     "ambient": {
-      "footerDiorama": { "name": "FooterDiorama", "desc": "8 animated SVG structures (relay antenna, radar, lighthouse, tower, Tesla coil...) randomly placed above the footer on each route change." },
-      "ambientEffects": { "name": "AmbientEffects", "desc": "Mood-driven weather effects: Europa frost, industrial neons and steam, silhouettes, drones, embers, power surges." },
-      "pet": { "name": "Robot mascot", "desc": "Interactive companion: RAF wandering, pointer-capture drag, hunger/happiness stats, SVG thought bubbles, and Framer Motion face morphing." },
-      "music": { "name": "Music player", "desc": "Persistent playback across routes, auto-discovery of .m4a tracks in /assets/music/, and localStorage state (track, position, pause)." }
+      "footerDiorama": { "name": "FooterDiorama", "desc": "Pool of 10 mini SVG dioramas; 2 or 3 are randomly rendered above the footer on each route change." },
+      "ambientEffects": { "name": "AmbientEffects", "desc": "Ambient orchestrator driven by mood, accessibility settings, and performance tier (Europa frost, industrial neons, embers, drones, etc.)." },
+      "pet": { "name": "Robot mascot", "desc": "Interactive companion: RAF wandering, pointer-capture drag, hunger/happiness stats, achievements, catch mini-game, SVG thought bubbles, and Framer Motion face morphing." },
+      "music": { "name": "Music player", "desc": "Persistent playback across routes, auto-discovery of .m4a/.mp3 tracks in /assets/music/, and serialized state (track, position, pause, volume, mute)." }
     },
     "stats": {
       "pages": "Pages",

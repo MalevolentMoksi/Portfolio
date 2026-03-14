@@ -1,122 +1,121 @@
-# Pet System — Full Behavior & Expression Audit
+# Pet System - Behavioral Audit
 
-> Generated 2026-03-01
+Audit verifie sur le code source au 2026-03-15.
+Scope: src/components/pet/*.tsx + petConstants.ts + petData.tsx.
 
----
+## 1) Etats d'expression
 
-## 1. Expression States
+Le rendu de visage provient de:
+- mood de base derive de hunger/happiness
+- reaction temporaire (triggerReaction)
+- etat sommeil (persistant)
 
-The pet has **3 base moods** (derived from stats) and **9 temporary reactions** (override mood for 2 s):
+### Moods de base (getMood)
+- happy: hunger > 60 et happiness > 60
+- content: hunger > 30 et happiness > 30
+- sad: sinon
 
-| Expression | Type | Eyes | Mouth | CSS class | Thought pool |
-|---|---|---|---|---|---|
-| **happy** | base mood | `happy-closed` / `happy-open` | narrow smile | — | heart, star, note, bolt |
-| **content** | base mood | `default` (blink) | flat line | — | note, dots |
-| **sad** | base mood | `sad` / `angry` / `tired` | narrow frown | — | dots, zzz |
-| **excited** | reaction | `happy-closed` | wide smile | `--antenna-spin` | star, bolt |
-| **eat** | reaction | `default` (blink) | wide-open arc | `--bounce` | heart |
-| **petted** | reaction | `happy-closed` | narrow smile + blush | `--bounce` | heart, star |
-| **play** | reaction | `happy-open` | wide smile | `--bounce`, `--antenna-spin` | star, bolt |
-| **scared** | reaction | dilated pupils | pursed gasp | `--shake` | exclaim |
-| **woozy** | reaction | X~X crossed | wavy ~~ | `--woozy` | zzz, dots |
-| **dizzy** | reaction | X~X crossed | shallow frown | — | zzz |
-| **sleep** | reaction | `tired` (half-lid) | flat line | `--sleep` | zzz |
+### Reactions temporaires (REACTION_MS = 2000)
+Reactions observees dans les triggers:
+- woozy
+- dizzy
+- excited
+- scared
+- eat
+- petted
+- play
+- happy/content/sad (pulses idle)
 
-Base mood thresholds (`getMood`):
-- **happy**: hunger > 60 AND happiness > 60
-- **content**: hunger > 30 AND happiness > 30
-- **sad**: either ≤ 30
+Le mode sleep n'est pas une reaction de 2s: c'est un etat persistant active via isSleeping.
 
----
+## 2) Timings et reglages critiques
 
-## 2. Trigger Hierarchy
+Depuis petConstants.ts:
+- DECAY_MS: 8000 ms
+- REACTION_MS: 2000 ms
+- SLEEP_IDLE_MS: 30000 ms
+- COOLDOWNS: feed 2000 ms, pet 2000 ms, play 3000 ms
+- DRAG_FAST_THRESHOLD: 8 px/frame
 
-### A. Spawn / Despawn
-| Trigger | Reaction | Notes |
-|---|---|---|
-| First spawn ever | stats → 80/80, then `woozy` | via `setTimeout(…, 0)` |
-| Subsequent spawn | stats bumped if < 10, then `woozy` | same path |
-| Despawn | AnimatePresence exit | spin-out animation |
+## 3) Persistance localStorage
 
-### B. Stat Decay (every 8 s while spawned)
-- hunger −2, happiness −1
-- If *thriving* (both > 85): 80% chance to skip tick (≈5× slower decay)
+Cles pet principales:
+- pet-hunger
+- pet-happiness
+- pet-spawned
+- pet-name
+- pet-feedIndex
+- pet-achievements
+- pet-onboarded
 
-### C. HUD Interactions
-| Action | Stat change | Reaction | Cooldown |
-|---|---|---|---|
-| Feed | hunger +25 | `eat` | 2 s |
-| Pet | happiness +20 | `petted` | 2 s |
-| Play | hunger +10, happiness +10 | `play` | 3 s |
-| **Combo** (3 in 7 s) | happiness +8 | `excited` after `REACTION_MS - 100` ms | — |
+Migration:
+- suppression de la cle stale pet-renderer
 
-### D. Proximity Behaviors (RAF loop, checked every 2 frames)
-| Condition | Reaction/Thought | Cooldown (frames) |
-|---|---|---|
-| Cursor within 130 px for 90+ frames, not sad | `excited` | 300 |
-| Cursor jumps 80+ px closer in one frame, within 160 px | `scared` | 180 |
-| Speed > 82% of max, not sad | `excited` | 240 |
-| Sad + cursor within 120 px for 30+ frames | `exclaim` thought | 360 |
+## 4) Logique de vie
 
-### E. Drag
-| Stage | Reaction |
-|---|---|
-| First real move (> 4 px) | `scared` |
-| Fast drag (> 8 px/frame) | visual stretch + rotation (no reaction) |
-| Release with throw (speed > 1.5) | `excited` |
-| Release gentle | — |
+### Spawn
+- etat spawned persiste
+- au premier spawn: stats forcees a 80/80
+- a chaque spawn: reaction woozy
+- noMotion (accessibility) force despawn
 
-### F. Scroll
-| Condition | Reaction | Cooldown |
-|---|---|---|
-| 3+ direction reversals in 1500 ms | `dizzy` + zzz thought | 8 s |
-| Scroll idle 2.5–10 s → rest on footer/main edge | zzz thought on arrival | auto-cancel 10 s |
+### Decay
+Tick toutes les 8s:
+- mode normal: hunger diminue plus vite que happiness
+- mode thriving (hunger >85 et happiness >85): decay fortement ralenti (skip probabiliste)
+- pendant catch game: hunger figee, happiness augmente doucement
 
-### G. Wall Bounce
-| Condition | Reaction | Cooldown |
-|---|---|---|
-| Bounce speed > 1.8 px/frame | `dizzy` | 120 frames |
+### Sleep
+- inactivite > 30s -> isSleeping = true
+- activite utilisateur (mousemove/keydown/pointerdown) -> wake + woozy
 
-### H. Hover-to-Pet (1500 ms sustained hover)
-| Condition | Reaction | Cooldown |
-|---|---|---|
-| Not dragging, not sleeping, cooldown expired | `petted` + happiness +5 + 3× heart cascade | 360 frames |
+### Combo
+- 3 interactions en 7s -> bonus happiness +8 + reaction excited
 
-### I. Idle Micro-reactions (every 13–33 s)
-- Only fires if `reaction === null` and pet is **not sleeping**
-- Picks from mood-appropriate pool: happy→[happy, excited], content→[content], sad→[sad]
-- 40% chance to also emit a matching thought bubble
+## 5) Mouvements et comportements
 
-### J. Neglect Escalation
-- If mood has been continuously sad for 28 s → `dizzy`
-- Uses a ref-based sad-entry timestamp so stat decay does not reset the timer
+WanderingPet.tsx:
+- boucle RAF avec physique frame-rate independent (dt)
+- magnet/repulsion selon mood
+- wall bounce avec restitution
+- drag pointer-capture + throw momentum
+- resting mode apres idle de scroll
+- hover sustain 1.5s -> petted + +5 happiness + cascade de thoughts
+- focus/accessibilite HUD: role=dialog, escape, focus trap
 
-### K. Sleep / Wake
-| Event | Reaction |
-|---|---|
-| 60 s no mouse/key/pointer → sleep | sets `isSleeping` (persistent, not a timed reaction) |
-| Any activity while sleeping | clear sleep → `woozy` |
+## 6) Mini-jeu Catch
 
-Expression while sleeping is derived directly from `isSleeping` flag, not from `triggerReaction('sleep')`, so it persists until explicitly cleared.
+- activation via action HUD catch
+- bot seek/interception de balle
+- onBotCatchSuccess: happiness +1 a +10
+- unlock achievement catch-game
 
-### L. Site Mood Switch
-- Triggers `excited` + 900 ms spin flourish on MoodSwitcher cycle
+## 7) Achievements (etat current)
 
-### M. External APIs
-| API | Effect |
-|---|---|
-| `window.petReact(r)` | triggers any reaction |
-| `window.petGravity(ms)` | pulls pet downward |
-| `window.petAttract(x, y, ms)` | attracts to point + excited |
+Achievements supportes (petConstants.ts):
+- wall-bounce
+- pet-action
+- footer-sit
+- thrive
+- particles
+- throw
+- catch-game
+- sleep
+- combo
+- rename
+- neglect
 
----
+## 8) APIs debug exposees sur window
 
-## 3. Bugs
----
+- petReact(reaction)
+- getPetStats()
+- petGravity(durationMs)
+- petAttract(x, y, durationMs)
 
----
+## 9) Observations
 
-### Minor Issues (documented, not auto-fixed)
-
-- **Scared fires on every drag** with no cross-session cooldown. Could feel unnatural after repeated drags but is arguably intentional.
-- **Wake-from-sleep woozy overwrites first interaction**. The `mousemove` → wake → `woozy` path fires before any HUD button reaction, causing a brief woozy flash before the intended expression.
+Aucune incoherence structurelle detectee dans l'architecture pet actuelle.
+Le comportement est coherent avec:
+- accessibilite (despawn no-motion)
+- persistence localStorage
+- mode interactif etatful (HUD, cooldowns, achievements, catch)

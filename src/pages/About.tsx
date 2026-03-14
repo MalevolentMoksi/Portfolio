@@ -30,9 +30,9 @@ const STACK = [
   },
   {
     id: 'vite',
-    name: 'Vite 5',
+    name: 'Vite 8',
     role: 'Outil de build',
-    desc: 'Bundler ultra-rapide avec HMR, path aliases (@/, @styles/, @components/…) et optimisation de production.',
+    desc: 'Build ultra-rapide avec HMR, aliases TypeScript, bundling optimise et integration PWA via vite-plugin-pwa.',
     color: '#646CFF',
     icon: (
       <svg
@@ -97,7 +97,7 @@ const STACK = [
     id: 'css',
     name: 'CSS sur mesure',
     role: 'Système de thèmes',
-    desc: '25+ modules CSS isolés, propriétés personnalisées centralisées dans _variables.css, zéro !important, PostCSS + Autoprefixer.',
+    desc: '35 modules CSS isoles, proprietes personnalisees centralisees dans _variables.css, zero !important, PostCSS + Autoprefixer.',
     color: '#2965F1',
     icon: (
       <svg
@@ -115,9 +115,9 @@ const STACK = [
   },
   {
     id: 'githubPages',
-    name: 'GitHub Pages',
+    name: 'GitHub Pages + CI',
     role: 'Déploiement',
-    desc: 'Build Vite optimisé déployé automatiquement via GitHub Actions, servi comme SPA statique sur le domaine GitHub.',
+    desc: 'Build Vite deploye via GitHub Actions (typecheck + build + fallback 404). Configs Netlify/Vercel presentes pour un deploiement alternatif.',
     color: '#6E7681',
     icon: (
       <svg
@@ -143,17 +143,17 @@ const ARCH = [
     id: 'routing',
     label: 'Routing',
     items: [
-      'BrowserRouter → Layout.jsx (shell partagé) → <Outlet />',
+      'BrowserRouter → Layout.tsx (shell partagé) → <Outlet />',
       'Toutes les pages sont lazy-loadées (code splitting par route)',
-      'pageConfig dans Layout.jsx : fond, titre et méta par chemin',
+      'pageConfig dans Layout.tsx : fond, titre et meta par chemin',
     ],
   },
   {
     id: 'components',
     label: 'Composants',
     items: [
-      '~30 composants React isolés dans src/components/',
-      'Couche ambiante : 13 effets décoratifs dans components/ambient/',
+      '43 composants React TypeScript dans src/components/ (dont ambient et pet)',
+      'Couche ambiante : 18 composants decoratifs dans components/ambient/',
       'CSS scopé par composant, pas de pollution de cascade',
     ],
   },
@@ -164,6 +164,7 @@ const ARCH = [
       'MoodContext — thème actif, écriture dans localStorage',
       'ReadingTimeContext — estimation de lecture fournie aux pages',
       'ToastContext — notifications légères non-bloquantes',
+      'AccessibilityContext — options a11y (contraste, typo, no-motion) persistees',
     ],
   },
   {
@@ -179,10 +180,10 @@ const ARCH = [
     id: 'legacyScripts',
     label: 'Scripts legacy',
     items: [
-      'music-player.js — lecteur audio persistant, throttle localStorage à 1 éc/s',
-      'effects.js — particles.js, parallaxe, suivi souris',
-      'ui-enhancements.js — animation de frappe, horloge, hover vidéo',
-      'lightbox.js — zoom galerie sur les images .zoomable',
+      'music-player.ts — lecteur audio persistant, throttle localStorage a ~1 ecriture/s',
+      'effects.ts — particles.js, parallaxe, adaptation au tier de performance',
+      'ui-enhancements.ts — typing, horloge footer, hover video, back-to-top',
+      'lightbox.ts — zoom galerie avec navigation clavier sur les images .zoomable',
     ],
   },
 ];
@@ -195,7 +196,7 @@ const AMBIENT = [
   {
     id: 'footerDiorama',
     name: 'FooterDiorama',
-    desc: '8 structures SVG animées (antenne relais, radar, phare, tour, bobine Tesla…) placées aléatoirement au-dessus du footer à chaque navigation.',
+    desc: 'Pool de 10 mini-dioramas SVG; 2 ou 3 sont affiches aleatoirement au-dessus du footer a chaque changement de route.',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -213,7 +214,7 @@ const AMBIENT = [
   {
     id: 'ambientEffects',
     name: 'AmbientEffects',
-    desc: 'Effets météo liés au mood : givre Europa, néons et vapeurs Industriels, silhouettes, drones, braises, ondes de puissance.',
+    desc: 'Orchestrateur d effets ambiants selon mood, accessibilite et tier de performance (givre Europa, neons industriels, braises, drones, etc.).',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -232,7 +233,7 @@ const AMBIENT = [
   {
     id: 'pet',
     name: 'Robot mascotte',
-    desc: 'Compagnon interactif : déambulation par RAF, drag par capture de pointeur, stats faim/bonheur, bulles de pensée SVG et morphing de visage Framer Motion.',
+    desc: 'Compagnon interactif: deambulation RAF, drag pointer-capture, stats faim/bonheur, achievements, mini-jeu de catch, bulles SVG et visage Framer Motion.',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -254,7 +255,7 @@ const AMBIENT = [
   {
     id: 'music',
     name: 'Lecteur musical',
-    desc: 'Lecture persistante entre les routes, découverte automatique des pistes .m4a dans /assets/music/, état sérialisé dans localStorage (track, position, pause).',
+    desc: 'Lecture persistante entre routes, decouverte auto des pistes .m4a/.mp3 dans /assets/music/, etat serialize (track, position, pause, volume, mute).',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -275,10 +276,10 @@ const AMBIENT = [
 
 /* ─── Statistiques ──────────────────────────────────────── */
 const STATS = [
-  { value: '10', id: 'pages', label: 'Pages' },
-  { value: '30+', id: 'reactComponents', label: 'Composants React' },
+  { value: '12', id: 'pages', label: 'Pages' },
+  { value: '43', id: 'reactComponents', label: 'Composants React' },
   { value: '5', id: 'visualThemes', label: 'Thèmes visuels' },
-  { value: '25+', id: 'cssModules', label: 'Modules CSS' },
+  { value: '35', id: 'cssModules', label: 'Modules CSS' },
   { value: '4', id: 'legacyScripts', label: 'Scripts legacy' },
   { value: '1', id: 'pet', label: 'Robot mascotte' },
 ];
