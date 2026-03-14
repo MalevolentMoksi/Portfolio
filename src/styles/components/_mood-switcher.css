@@ -165,7 +165,8 @@
    ================================================================ */
 
 /* ── DEFAULT (or) ── */
-/* ::before : vignette radiale dorée qui respire doucement */
+/* ::before : atmosphère de bord — vignette sombre + reflets stellaires aux coins
+   supérieurs + nappe bleue nuit en bas. Aucun teinté jaune au centre. */
 body[data-mood='default']::before {
   content: '';
   position: fixed;
@@ -173,13 +174,15 @@ body[data-mood='default']::before {
   pointer-events: none;
   z-index: 9997;
   background:
-    radial-gradient(ellipse at 14% 24%, rgba(255, 225, 126, 0.14) 0%, transparent 42%),
-    radial-gradient(ellipse at 84% 72%, rgba(212, 175, 55, 0.12) 0%, transparent 46%),
-    radial-gradient(ellipse at 50% 50%, transparent 34%, rgba(0, 0, 0, 0.55) 100%);
-  animation: gold-vignette-breathe 6s ease-in-out infinite;
+    radial-gradient(ellipse at 3% 4%, rgba(212, 175, 55, 0.05) 0%, transparent 26%),
+    radial-gradient(ellipse at 97% 3%, rgba(180, 148, 38, 0.03) 0%, transparent 22%),
+    radial-gradient(ellipse at 50% 108%, rgba(20, 40, 110, 0.06) 0%, transparent 44%),
+    radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(3, 6, 15, 0.28) 100%);
+  animation: default-vignette-breathe 10s ease-in-out infinite;
 }
 
-/* ::after : grain cinéma — tramage croisé doré très subtil */
+/* ::after : poussière d'étoiles éparse — deux couches de points décalés
+   très légers en mix-blend screen. Remplace le grain doré uniforme. */
 body[data-mood='default']::after {
   content: '';
   position: fixed;
@@ -187,33 +190,24 @@ body[data-mood='default']::after {
   pointer-events: none;
   z-index: 9997;
   background-image:
-    repeating-linear-gradient(
-      0deg,
-      transparent 0px,
-      transparent 3px,
-      rgba(212, 175, 55, 0.014) 3px,
-      rgba(212, 175, 55, 0.014) 4px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent 0px,
-      transparent 3px,
-      rgba(212, 175, 55, 0.008) 3px,
-      rgba(212, 175, 55, 0.008) 4px
-    );
+    radial-gradient(circle, rgba(240, 230, 160, 0.1) 1px, transparent 1px),
+    radial-gradient(circle, rgba(180, 200, 255, 0.07) 1px, transparent 1px);
+  background-size:
+    97px 89px,
+    151px 127px;
+  background-position:
+    0 0,
+    48px 53px;
   mix-blend-mode: screen;
-  /* animation: gold-grain supprimée — background-position shifts ne sont pas
-     compositables : chaque étape force un repaint full-screen sans bénéfice
-     visuel perceptible. Le grain statique est identique à l'œil. */
 }
 
-@keyframes gold-vignette-breathe {
+@keyframes default-vignette-breathe {
   0%,
   100% {
-    opacity: 0.5;
+    opacity: 0.35;
   }
   50% {
-    opacity: 0.78;
+    opacity: 0.5;
   }
 }
 
