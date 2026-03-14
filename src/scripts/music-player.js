@@ -92,7 +92,8 @@ class MusicPlayer {
   }
 
   setupAudio() {
-    this.audio.preload = 'metadata';
+    // Don't preload: music is optional, only load when user interacts with player
+    this.audio.preload = 'none';
     this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
     this.audio.muted = true; // Start muted for autoplay policy
     this.audio.volume = this.savedVolume;
