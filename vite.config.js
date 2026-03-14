@@ -57,17 +57,12 @@ export default defineConfig({
             },
           },
           {
-            // Music files (cache on first play, keep for session)
-            urlPattern: /\/assets\/music\/.*\.(mp3|m4a|ogg)$/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'portfolio-music',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-              },
-              cacheableResponse: { statuses: [0, 200, 206] }, // 206 = partial content (streaming)
-            },
+            // Music files — NetworkOnly: browser audio uses byte-range requests (206 Partial
+            // Content) which CacheFirst can't handle after storing a 200 response. The
+            // browser's native HTTP cache manages audio streaming correctly on its own.
+            // Pattern is broad (/assets/*.mp3) to also cover Vite-hashed filenames.
+            urlPattern: /\/assets\/.*\.(mp3|m4a|ogg)$/i,
+            handler: 'NetworkOnly',
           },
           {
             // Large images (cache on first view)
