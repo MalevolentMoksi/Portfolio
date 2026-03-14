@@ -228,7 +228,9 @@ const Layout = () => {
 
       <section className="header--secondary" aria-label={t('common.header.secondaryAria')}>
         <div className="header--hero">
-          <h1 id="main-title">{t(config.headingKey)}</h1>
+          <h1 id="main-title" data-typing-text={t(config.headingKey)}>
+            {t(config.headingKey)}
+          </h1>
           {config.subheadingKey ? (
             <h3 className="header-subheading">{t(config.subheadingKey)}</h3>
           ) : null}

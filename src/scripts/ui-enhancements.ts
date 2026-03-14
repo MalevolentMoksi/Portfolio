@@ -5,6 +5,7 @@
 
 class UIEnhancements {
   private _typingTimeout: ReturnType<typeof setTimeout> | null = null;
+  private _typingRunId = 0;
   private _glitchInterval: ReturnType<typeof setInterval> | null = null;
   private _clockInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -26,48 +27,79 @@ class UIEnhancements {
     this.initVideoHover();
   }
 
-  private initTypingEffect(): void {
-    const element = document.getElementById('main-title');
-    if (!element) return;
-
-    // Annuler toute animation en cours avant d'en démarrer une nouvelle,
-    // pour éviter que deux chaînes de setTimeout tournent en parallèle.
+  cancelTypingEffect(): void {
+    this._typingRunId += 1;
     if (this._typingTimeout) {
       clearTimeout(this._typingTimeout);
       this._typingTimeout = null;
     }
 
-    // Toujours lire le texte courant défini par React; ne pas réutiliser
-    // dataset.originalText qui peut contenir le texte d'une page précédente.
-    const currentText = (element.textContent ?? '').trim();
-    const fullText = currentText || element.dataset.originalText || '';
-    element.dataset.originalText = fullText;
-    if (element.dataset.typedText === fullText && element.dataset.typed === 'true') {
-      return;
-    }
+    const element = document.getElementById('main-title');
+    if (!element) return;
+    element.style.minHeight = '';
+    element.classList.remove('typing');
     element.dataset.typed = 'false';
-    element.dataset.typedText = fullText;
-    // Pin layout height before clearing to prevent scroll-anchor adjustments
-    const measuredH = element.getBoundingClientRect().height;
-    if (measuredH > 0) element.style.minHeight = measuredH + 'px';
-    element.textContent = '';
-    element.classList.add('typing');
+  }
 
-    let i = 0;
-    const typeLetter = (): void => {
-      if (i <= fullText.length) {
-        element.textContent = fullText.slice(0, i);
-        i++;
-        this._typingTimeout = setTimeout(typeLetter, 50);
-      } else {
-        this._typingTimeout = null;
-        element.style.minHeight = '';
-        element.classList.remove('typing');
-        element.dataset.typed = 'true';
+  private initTypingEffect(): void {
+    // Annuler toute animation en cours avant d'en démarrer une nouvelle,
+    // pour éviter que deux chaînes de setTimeout tournent en parallèle.
+    this.cancelTypingEffect();
+    const runId = this._typingRunId;
+
+    const startTyping = (attempt = 0): void => {
+      if (runId !== this._typingRunId) return;
+
+      const element = document.getElementById('main-title');
+      if (!element) return;
+
+      // Le titre peut être vide pendant un bref instant lors d'un changement
+      // de route rapide: réessayer plutôt que de reprendre un ancien texte.
+      const fullText = (element.dataset.typingText ?? element.textContent ?? '').trim();
+      if (!fullText) {
+        if (attempt < 10) {
+          this._typingTimeout = setTimeout(() => {
+            startTyping(attempt + 1);
+          }, 25);
+        }
+        return;
       }
+
+      element.dataset.originalText = fullText;
+      if (element.dataset.typedText === fullText && element.dataset.typed === 'true') {
+        return;
+      }
+      element.dataset.typed = 'false';
+      element.dataset.typedText = fullText;
+      // Pin layout height before clearing to prevent scroll-anchor adjustments
+      const measuredH = element.getBoundingClientRect().height;
+      if (measuredH > 0) element.style.minHeight = measuredH + 'px';
+      element.textContent = '';
+      element.classList.add('typing');
+
+      let i = 0;
+      const typeLetter = (): void => {
+        // Ignore callbacks from older runs if route changed mid-animation.
+        if (runId !== this._typingRunId || !element.isConnected) {
+          return;
+        }
+
+        if (i <= fullText.length) {
+          element.textContent = fullText.slice(0, i);
+          i++;
+          this._typingTimeout = setTimeout(typeLetter, 50);
+        } else {
+          this._typingTimeout = null;
+          element.style.minHeight = '';
+          element.classList.remove('typing');
+          element.dataset.typed = 'true';
+        }
+      };
+
+      typeLetter();
     };
 
-    typeLetter();
+    startTyping();
   }
 
   private initEmailGlitch(): void {
@@ -198,7 +230,7 @@ class UIEnhancements {
   destroy(): void {
     if (this._glitchInterval) clearInterval(this._glitchInterval);
     if (this._clockInterval) clearInterval(this._clockInterval);
-    if (this._typingTimeout) clearTimeout(this._typingTimeout);
+    this.cancelTypingEffect();
   }
 }
 

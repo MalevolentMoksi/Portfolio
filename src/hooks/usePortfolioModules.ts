@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import MusicPlayer from '../scripts/music-player';
 import VisualEffects from '../scripts/effects';
@@ -61,18 +61,24 @@ const usePortfolioModules = (trackFiles: string[]): void => {
     });
   }, [trackFiles]);
 
-  useEffect(() => {
-    return scheduleWhenPageReady(() => {
-      if (!uiEnhancementsInstance) {
-        uiEnhancementsInstance = new UIEnhancements();
-      } else {
-        uiEnhancementsInstance.reinit();
-      }
+  useLayoutEffect(() => {
+    // Annuler immédiatement toute frappe en cours lors d'un changement de route,
+    // pour éviter les écritures tardives sur le titre de la nouvelle page.
+    uiEnhancementsInstance?.cancelTypingEffect();
 
-      if (document.querySelector('.zoomable')) {
-        new Lightbox();
-      }
-    });
+    if (!uiEnhancementsInstance) {
+      uiEnhancementsInstance = new UIEnhancements();
+    } else {
+      uiEnhancementsInstance.reinit();
+    }
+
+    if (document.querySelector('.zoomable')) {
+      new Lightbox();
+    }
+
+    return () => {
+      uiEnhancementsInstance?.cancelTypingEffect();
+    };
   }, [location.pathname]);
 };
 
