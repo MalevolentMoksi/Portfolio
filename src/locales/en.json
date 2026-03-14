@@ -389,7 +389,8 @@
       "cards": {
         "web": { "title": "Web development" },
         "backend": { "title": "System & back-end development" },
-        "tools": { "title": "Tools & environment" }
+        "tools": { "title": "Tools & environment" },
+        "testing": { "title": "Testing & QA" }
       }
     },
     "timeline": {

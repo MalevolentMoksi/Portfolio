@@ -383,13 +383,14 @@
       "year": "2ème année",
       "school": "IUT2 de Grenoble"
     },
-    "skills": {
+      "skills": {
       "title": "Compétences",
       "intro": "Réaliser, Concevoir, Optimiser et Administrer en :",
       "cards": {
         "web": { "title": "Développement Web" },
         "backend": { "title": "Développement Système & Back-end" },
-        "tools": { "title": "Outils & Environnement" }
+        "tools": { "title": "Outils & Environnement" },
+        "testing": { "title": "Tests & Assurance Qualité" }
       }
     },
     "timeline": {
