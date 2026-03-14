@@ -92,8 +92,9 @@ class MusicPlayer {
   }
 
   setupAudio() {
-    // Don't preload: music is optional, only load when user interacts with player
-    this.audio.preload = 'none';
+    // Preload only metadata (~50KB): loads duration & format headers needed by jsmediatags
+    // for ID3 tag extraction. Does NOT load the 2.9 MB audio data until play.
+    this.audio.preload = 'metadata';
     this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
     this.audio.muted = true; // Start muted for autoplay policy
     this.audio.volume = this.savedVolume;
