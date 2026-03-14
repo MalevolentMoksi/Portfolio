@@ -404,28 +404,51 @@ Génère le dossier `dist/` avec :
 1. **Configurer le repo GitHub** :
    - Settings → Pages → Source: GitHub Actions
 
-2. **Créer `.github/workflows/deploy.yml`** :
+2. **Utiliser `.github/workflows/deploy-pages.yml`** :
 ```yaml
-name: Deploy to GitHub Pages
+name: Deploy GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22.12.0
+          cache: npm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm run build
-      - uses: peaceiris/actions-gh-pages@v3
+      - run: cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
 ```
 
 3. **Pousser sur main** → déploiement automatique

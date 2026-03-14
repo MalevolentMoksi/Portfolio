@@ -548,7 +548,7 @@
       "router": { "role": "SPA navigation", "desc": "BrowserRouter with shared Layout via <Outlet />, active NavLinks, and client-side navigation." },
       "framerMotion": { "role": "Animations", "desc": "SVG path morphing for the mascot robot, enter/exit transitions, and spring effects." },
       "css": { "role": "Theme system", "desc": "25+ isolated CSS modules, centralized custom properties in _variables.css, zero !important, PostCSS + Autoprefixer." },
-      "githubPages": { "role": "Deployment", "desc": "Optimized Vite build auto-deployed via gh-pages, served as static SPA on GitHub domain." }
+      "githubPages": { "role": "Deployment", "desc": "Optimized Vite build auto-deployed via GitHub Actions, served as a static SPA on GitHub Pages." }
     },
     "arch": {
       "routing": {

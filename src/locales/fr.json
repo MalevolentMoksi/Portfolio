@@ -548,7 +548,7 @@
       "router": { "role": "Navigation SPA", "desc": "BrowserRouter avec Layout partagé via <Outlet />, NavLink actifs et navigation côté client sans rechargement." },
       "framerMotion": { "role": "Animations", "desc": "Morphing de chemins SVG pour le robot mascotte, transitions de montée/sortie et effets de ressort." },
       "css": { "role": "Système de thèmes", "desc": "25+ modules CSS isolés, propriétés personnalisées centralisées dans _variables.css, zéro !important, PostCSS + Autoprefixer." },
-      "githubPages": { "role": "Déploiement", "desc": "Build Vite optimisé déployé automatiquement via gh-pages, servi comme SPA statique sur le domaine GitHub." }
+      "githubPages": { "role": "Déploiement", "desc": "Build Vite optimisé déployé automatiquement via GitHub Actions, servi comme SPA statique sur le domaine GitHub." }
     },
     "arch": {
       "routing": {

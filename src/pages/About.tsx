@@ -117,7 +117,7 @@ const STACK = [
     id: 'githubPages',
     name: 'GitHub Pages',
     role: 'Déploiement',
-    desc: 'Build Vite optimisé déployé automatiquement via gh-pages, servi comme SPA statique sur le domaine GitHub.',
+    desc: 'Build Vite optimisé déployé automatiquement via GitHub Actions, servi comme SPA statique sur le domaine GitHub.',
     color: '#6E7681',
     icon: (
       <svg
