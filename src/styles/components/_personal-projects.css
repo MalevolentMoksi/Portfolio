@@ -76,9 +76,11 @@
 
 .progress {
   height: 100%;
+  width: 100%;
   background: linear-gradient(90deg, var(--color-primary), #f0bf4f);
-  width: 0%;
-  transition: width 100ms linear;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 100ms linear;
 }
 
 .caption {

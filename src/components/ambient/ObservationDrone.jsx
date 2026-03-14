@@ -89,20 +89,8 @@ const DroneSVG = () => (
     />
 
     {/* Œil central lumineux */}
-    <circle
-      className="obs-drone-eye"
-      cx="24"
-      cy="24"
-      r="6"
-      fill="url(#obs-eye-glow)"
-    />
-    <circle
-      cx="24"
-      cy="24"
-      r="2.5"
-      fill="currentColor"
-      opacity="0.95"
-    />
+    <circle className="obs-drone-eye" cx="24" cy="24" r="6" fill="url(#obs-eye-glow)" />
+    <circle cx="24" cy="24" r="2.5" fill="currentColor" opacity="0.95" />
 
     {/* Ailettes — 3 nubs aux sommets alternés */}
     <polygon points="18,4 16,0 20,0" fill="currentColor" opacity="0.5" />
@@ -113,23 +101,14 @@ const DroneSVG = () => (
 
 /* ─── Cône de scan (triangle pointant vers l'intérieur) ─── */
 const ScanCone = () => (
-  <svg
-    className="obs-drone-cone"
-    viewBox="0 0 80 48"
-    width="80"
-    height="48"
-    aria-hidden="true"
-  >
+  <svg className="obs-drone-cone" viewBox="0 0 80 48" width="80" height="48" aria-hidden="true">
     <defs>
       <linearGradient id="obs-cone-grad" x1="0%" y1="50%" x2="100%" y2="50%">
         <stop offset="0%" stopColor="currentColor" stopOpacity="0.22" />
         <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
       </linearGradient>
     </defs>
-    <polygon
-      points="0,10 80,0 80,48 0,38"
-      fill="url(#obs-cone-grad)"
-    />
+    <polygon points="0,10 80,0 80,48 0,38" fill="url(#obs-cone-grad)" />
     {/* Lignes de scan horizontales */}
     <line x1="4" y1="18" x2="60" y2="14" stroke="currentColor" strokeWidth="0.4" opacity="0.15" />
     <line x1="4" y1="24" x2="70" y2="24" stroke="currentColor" strokeWidth="0.5" opacity="0.2" />
@@ -176,7 +155,10 @@ const ObservationDrone = () => {
       updateMainRect();
       const rect = mainRectRef.current;
       const vw = window.innerWidth;
-      if (!rect) { scheduleNext(); return; }
+      if (!rect) {
+        scheduleNext();
+        return;
+      }
 
       // Garde mobile — marge trop petite
       const marginLeft = rect.left;
@@ -187,7 +169,10 @@ const ObservationDrone = () => {
       }
 
       const el = containerRef.current;
-      if (!el) { scheduleNext(); return; }
+      if (!el) {
+        scheduleNext();
+        return;
+      }
 
       // Choisir le côté (préférer le plus large, aléatoire si les deux ok)
       let side;
@@ -200,24 +185,26 @@ const ObservationDrone = () => {
 
       // Positions X
       const offScreenX = side === 'right' ? vw + 80 : -80 - DRONE_SIZE;
-      const visibleX = side === 'right'
-        ? rect.right + DRONE_OFFSET
-        : rect.left - DRONE_OFFSET - DRONE_SIZE;
+      const visibleX =
+        side === 'right' ? rect.right + DRONE_OFFSET : rect.left - DRONE_OFFSET - DRONE_SIZE;
 
       // Orientation du cône
       const coneEl = el.querySelector('.obs-drone-cone');
       if (coneEl) {
-        coneEl.style.transform = side === 'right'
-          ? 'scaleX(1)'       // cône pointe vers la droite
-          : 'scaleX(-1)';     // cône pointe vers la gauche
+        coneEl.style.transform =
+          side === 'right'
+            ? 'scaleX(1)' // cône pointe vers la droite
+            : 'scaleX(-1)'; // cône pointe vers la gauche
         // Positionner le cône à la droite ou gauche du drone
         coneEl.style.left = side === 'right' ? `${DRONE_SIZE - 4}px` : 'auto';
         coneEl.style.right = side === 'left' ? `${DRONE_SIZE - 4}px` : 'auto';
       }
 
       // Phase 1 : position initiale hors-écran
+      // translateX drives all horizontal movement so the transition runs on the
+      // GPU compositor (transform is compositable; left would trigger layout).
       el.style.top = `${topY}px`;
-      el.style.left = `${offScreenX}px`;
+      el.style.transform = `translateX(${offScreenX}px)`;
       el.style.opacity = '0';
       el.classList.add('obs-drone--active');
 
@@ -225,7 +212,7 @@ const ObservationDrone = () => {
       requestAnimationFrame(() => {
         if (!activeRef.current) return;
         el.style.opacity = '1';
-        el.style.left = `${visibleX}px`;
+        el.style.transform = `translateX(${visibleX}px)`;
 
         // Phase 3 : flottement + scan après l'arrivée (1.8s transition)
         phaseTimerRef.current = setTimeout(() => {
@@ -241,7 +228,7 @@ const ObservationDrone = () => {
             // Phase 5 : retraite hors-écran
             requestAnimationFrame(() => {
               if (!activeRef.current) return;
-              el.style.left = `${offScreenX}px`;
+              el.style.transform = `translateX(${offScreenX}px)`;
               el.style.opacity = '0';
 
               // Nettoyage post-retraite
@@ -277,15 +264,11 @@ const ObservationDrone = () => {
   if (tier === 'low') return null;
 
   return createPortal(
-    <div
-      ref={containerRef}
-      className="obs-drone"
-      aria-hidden="true"
-    >
+    <div ref={containerRef} className="obs-drone" aria-hidden="true">
       <DroneSVG />
       <ScanCone />
     </div>,
-    document.getElementById('ambient-root') || document.body,
+    document.getElementById('ambient-root') || document.body
   );
 };
 

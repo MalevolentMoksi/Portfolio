@@ -448,7 +448,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
               </svg>
               <div className="catch-game-stat-track">
                 <div className={`catch-game-stat-fill${stats.hunger < 30 ? ' catch-game-stat-fill--critical' : ''}`}
-                  style={{ width: `${stats.hunger}%` }} />
+                  style={{ transform: `scaleX(${stats.hunger / 100})` }} />
               </div>
               <span className="catch-game-stat-value">{stats.hunger}%</span>
             </div>
@@ -458,7 +458,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }) => 
               </svg>
               <div className="catch-game-stat-track">
                 <div className={`catch-game-stat-fill${stats.happiness < 30 ? ' catch-game-stat-fill--critical' : ''}`}
-                  style={{ width: `${stats.happiness}%` }} />
+                  style={{ transform: `scaleX(${stats.happiness / 100})` }} />
               </div>
               <span className="catch-game-stat-value">{stats.happiness}%</span>
             </div>

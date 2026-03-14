@@ -191,9 +191,11 @@
 
 .video-item .progress {
   height: 100%;
+  width: 100%;
   background: var(--color-primary);
-  width: 0%;
-  transition: width 0.1s linear;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.1s linear;
 }
 
 /* No projects message (when filtering returns no results) */

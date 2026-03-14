@@ -275,14 +275,16 @@
 
 .progress {
   height: 100%;
+  width: 100%;
   background: linear-gradient(
     90deg,
     var(--color-primary) 0%,
     var(--color-primary) 85%,
     rgba(var(--color-primary-rgb), 0.8) 100%
   );
-  width: 0%;
-  transition: width 0.1s linear;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.1s linear;
   border-radius: 3px;
   box-shadow:
     0 0 10px rgba(var(--color-primary-rgb), 0.6),

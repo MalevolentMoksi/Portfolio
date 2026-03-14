@@ -1817,13 +1817,14 @@ body[data-mood='europa'] .footer-horizon {
 
 .obs-drone {
   position: fixed;
+  left: 0; /* fixed anchor — transform: translateX handles all horizontal movement */
   z-index: var(--z-ambient, 2);
   pointer-events: none;
   opacity: 0;
   color: var(--color-primary);
-  will-change: transform, opacity, left;
+  will-change: transform, opacity;
   transition:
-    left 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     opacity 1.4s ease;
 }
 

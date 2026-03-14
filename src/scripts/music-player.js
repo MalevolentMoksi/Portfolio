@@ -640,7 +640,7 @@ class MusicPlayer {
     if (!this.elements.progressBar) return;
     if (!this.audio.duration || this.audio.duration === Infinity) return;
     const percent = (this.audio.currentTime / this.audio.duration) * 100;
-    this.elements.progressBar.style.width = `${percent}%`;
+    this.elements.progressBar.style.transform = `scaleX(${percent / 100})`;
 
     // Update time display
     if (this.elements.currentTime) {
