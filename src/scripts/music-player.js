@@ -9,7 +9,7 @@ import { safeLocalGet, safeLocalSet } from '../utils/safeStorage.js';
 
 class MusicPlayer {
   constructor(trackFiles) {
-    this.trackFiles = trackFiles;
+    this.trackFiles = Array.isArray(trackFiles) ? trackFiles : [];
     this.currentTrackIndex = 0;
     this.audio = new Audio();
     this.isPaused = false;
@@ -18,6 +18,9 @@ class MusicPlayer {
     this.savedVolume = 0.7; // Default volume
     this.isQueueOpen = false; // Track queue menu state
     this.isRetracted = false; // Track retract/collapse state
+    this.metadataRetryTimer = null;
+    this.metadataRetryCount = 0;
+    this.metadataLoaded = false;
 
     // Storage keys
     this.STORAGE_KEYS = {
@@ -30,7 +33,7 @@ class MusicPlayer {
     };
 
     // Track metadata cache
-    this.trackMeta = trackFiles.map((filename) => this.createFallbackMeta(filename));
+    this.trackMeta = this.trackFiles.map((filename) => this.createFallbackMeta(filename));
 
     // DOM elements (initialized after render)
     this.elements = {};
@@ -51,6 +54,16 @@ class MusicPlayer {
     };
 
     this.init();
+  }
+
+  parseStoredBoolean(value, fallbackValue) {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return fallbackValue;
+  }
+
+  isStoredBoolean(value) {
+    return value === 'true' || value === 'false';
   }
 
   init() {
@@ -77,7 +90,10 @@ class MusicPlayer {
     // Load paused state
     // Première visite (clé absente) => lecteur arrêté par défaut (pas d'autoplay).
     const savedPausedState = safeLocalGet(this.STORAGE_KEYS.IS_PAUSED);
-    this.isPaused = savedPausedState === null ? true : savedPausedState === 'true';
+    this.isPaused = this.parseStoredBoolean(savedPausedState, true);
+    if (!this.isStoredBoolean(savedPausedState)) {
+      safeLocalSet(this.STORAGE_KEYS.IS_PAUSED, this.isPaused.toString());
+    }
 
     // Load volume state
     const savedVolume = parseFloat(safeLocalGet(this.STORAGE_KEYS.VOLUME));
@@ -85,14 +101,26 @@ class MusicPlayer {
       !isNaN(savedVolume) && savedVolume >= 0 && savedVolume <= 1 ? savedVolume : 0.7;
 
     // Load muted state
-    this.isMuted = safeLocalGet(this.STORAGE_KEYS.MUTED) === 'true';
+    const savedMutedState = safeLocalGet(this.STORAGE_KEYS.MUTED);
+    this.isMuted = this.parseStoredBoolean(savedMutedState, false);
+    if (!this.isStoredBoolean(savedMutedState)) {
+      safeLocalSet(this.STORAGE_KEYS.MUTED, this.isMuted.toString());
+    }
 
     // Load retracted state — caché par défaut à la première visite
     const savedRetracted = safeLocalGet(this.STORAGE_KEYS.RETRACTED);
-    this.isRetracted = savedRetracted === null ? true : savedRetracted === 'true';
+    this.isRetracted = this.parseStoredBoolean(savedRetracted, true);
+    if (!this.isStoredBoolean(savedRetracted)) {
+      safeLocalSet(this.STORAGE_KEYS.RETRACTED, this.isRetracted.toString());
+    }
   }
 
   setupAudio() {
+    if (!this.trackFiles.length) {
+      this.isPaused = true;
+      return;
+    }
+
     // Preload only metadata (~50KB): loads duration & format headers needed by jsmediatags
     // for ID3 tag extraction. Does NOT load the 2.9 MB audio data until play.
     this.audio.preload = 'metadata';
@@ -184,7 +212,10 @@ class MusicPlayer {
   }
 
   setVolume(value) {
-    const volume = Math.max(0, Math.min(1, parseFloat(value)));
+    const parsed = parseFloat(value);
+    if (Number.isNaN(parsed)) return;
+
+    const volume = Math.max(0, Math.min(1, parsed));
     this.audio.volume = volume;
     this.savedVolume = volume;
     safeLocalSet(this.STORAGE_KEYS.VOLUME, volume.toString());
@@ -194,28 +225,6 @@ class MusicPlayer {
       this.toggleMute();
     }
     this.updateVolumeButton();
-  }
-
-  onLoadedMetadata() {
-    // Clamp saved time to duration
-    if (this.savedTime >= this.audio.duration) {
-      this.savedTime = 0;
-    }
-    this.audio.currentTime = this.savedTime;
-
-    // Attempt autoplay if not paused last session
-    if (!this.isPaused) {
-      this.audio
-        .play()
-        .then(() => {
-          setTimeout(() => {
-            if (!this.isMuted) this.audio.muted = false;
-          }, 150);
-        })
-        .catch(() => {
-          // Autoplay blocked, wait for user interaction
-        });
-    }
   }
 
   // Throttled time update to avoid excessive localStorage writes
@@ -256,10 +265,32 @@ class MusicPlayer {
   }
 
   loadAllMetadata() {
+    if (this.metadataLoaded || !this.trackFiles.length) {
+      return;
+    }
+
     // Check if jsmediatags is available
     if (typeof window.jsmediatags === 'undefined') {
-      console.warn('jsmediatags not loaded, skipping metadata');
+      // jsmediatags est charge en defer depuis CDN: sur premier chargement,
+      // il peut arriver apres l'initialisation du player.
+      if (this.metadataRetryCount < 20) {
+        this.metadataRetryCount += 1;
+        if (this.metadataRetryTimer) {
+          window.clearTimeout(this.metadataRetryTimer);
+        }
+        this.metadataRetryTimer = window.setTimeout(() => {
+          this.loadAllMetadata();
+        }, 250);
+      } else {
+        console.warn('jsmediatags not loaded after retries, keeping fallback metadata');
+      }
       return;
+    }
+
+    this.metadataLoaded = true;
+    if (this.metadataRetryTimer) {
+      window.clearTimeout(this.metadataRetryTimer);
+      this.metadataRetryTimer = null;
     }
 
     // Charger la piste courante immédiatement, stagger les autres
@@ -459,6 +490,7 @@ class MusicPlayer {
     this.updatePlayPauseButton();
     this.updateVolumeButton();
     this.populateQueueMenu();
+    this.setControlsDisabled(!this.trackFiles.length);
 
     // Sync peek-btn and retract-btn visuals with initial retracted state
     if (this.isRetracted) {
@@ -466,6 +498,28 @@ class MusicPlayer {
       this.elements.retractBtn.setAttribute('aria-label', 'Afficher le lecteur');
       this.elements.retractBtn.querySelector('i').className = 'fa-solid fa-chevron-right';
     }
+  }
+
+  setControlsDisabled(disabled) {
+    const controls = [
+      this.elements.playPauseBtn,
+      this.elements.nextBtn,
+      this.elements.queueBtn,
+      this.elements.muteBtn,
+      this.elements.volumeSlider,
+    ];
+
+    controls.forEach((element) => {
+      if (!element) return;
+      if ('disabled' in element) {
+        element.disabled = disabled;
+      }
+      if (disabled) {
+        element.setAttribute('aria-disabled', 'true');
+      } else {
+        element.removeAttribute('aria-disabled');
+      }
+    });
   }
 
   attachEventListeners() {
@@ -567,6 +621,8 @@ class MusicPlayer {
   }
 
   togglePlayPause() {
+    if (!this.trackFiles.length) return;
+
     if (this.audio.paused) {
       this.audio
         .play()
@@ -584,6 +640,8 @@ class MusicPlayer {
   }
 
   nextTrack() {
+    if (!this.trackFiles.length) return;
+
     this.currentTrackIndex = (this.currentTrackIndex + 1) % this.trackFiles.length;
     safeLocalSet(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
     safeLocalSet(this.STORAGE_KEYS.CURRENT_TIME, '0');
@@ -605,6 +663,8 @@ class MusicPlayer {
   }
 
   seek(event) {
+    if (!this.trackFiles.length || !this.audio.duration || !isFinite(this.audio.duration)) return;
+
     const rect = this.elements.progressContainer.getBoundingClientRect();
     const percent = (event.clientX - rect.left) / rect.width;
     this.audio.currentTime = percent * this.audio.duration;
@@ -614,7 +674,17 @@ class MusicPlayer {
     if (!this.elements.title || !this.elements.artist || !this.elements.albumArt) {
       return;
     }
-    const meta = this.trackMeta[this.currentTrackIndex];
+
+    if (!this.trackFiles.length) {
+      this.elements.title.textContent = 'Aucune piste disponible';
+      this.elements.artist.textContent =
+        'Ajoutez des fichiers .m4a ou .mp3 dans /public/assets/music';
+      this.elements.albumArt.src = getAssetPath('assets/images/favicon.svg');
+      return;
+    }
+
+    const currentFilename = this.trackFiles[this.currentTrackIndex];
+    const meta = this.trackMeta[this.currentTrackIndex] || this.createFallbackMeta(currentFilename);
     this.elements.title.textContent = meta.title;
     this.elements.artist.textContent = meta.artist;
     this.elements.albumArt.src = meta.pictureDataURL || getAssetPath('assets/images/favicon.svg');
@@ -853,6 +923,8 @@ class MusicPlayer {
   }
 
   toggleQueue() {
+    if (!this.trackFiles.length) return;
+
     if (this.isQueueOpen) {
       this.closeQueue();
     } else {
@@ -882,17 +954,28 @@ class MusicPlayer {
   populateQueueMenu() {
     if (!this.elements.queueList) return;
 
+    if (!this.trackFiles.length) {
+      this.elements.queueList.innerHTML =
+        '<div role="note" style="padding: 12px 10px; opacity: 0.8;">Aucune piste disponible</div>';
+      return;
+    }
+
     this.elements.queueList.innerHTML = this.trackFiles
       .map((filename, index) => {
-        const meta = this.trackMeta[index];
+        const meta = this.trackMeta[index] || this.createFallbackMeta(filename);
+        const safeTitle = this.escapeHtml(meta.title);
+        const safeArtist = this.escapeHtml(meta.artist);
+        const safePictureDataURL = this.escapeHtml(
+          meta.pictureDataURL || getAssetPath('assets/images/favicon.svg')
+        );
         const isCurrentTrack = index === this.currentTrackIndex;
         const liClass = isCurrentTrack ? 'queue-item current' : 'queue-item';
         const artistColor = 'rgba(var(--color-primary-rgb), 0.7)';
 
         // Build aria-label from current metadata
         const ariaLabel = isCurrentTrack
-          ? `${meta.title} (actuellement en cours de lecture)`
-          : meta.title;
+          ? `${safeTitle} (actuellement en cours de lecture)`
+          : safeTitle;
 
         return `
         <div class="${liClass}" 
@@ -900,13 +983,13 @@ class MusicPlayer {
              aria-label="${ariaLabel}"
              data-track-index="${index}" 
              style="cursor: pointer; padding: 8px 10px; border-left: 3px solid transparent; display: flex; align-items: center; gap: 8px;">
-          <img src="${meta.pictureDataURL}" alt="" style="width: 40px; height: 40px; border-radius: 4px; flex-shrink: 0; object-fit: cover;">
+          <img src="${safePictureDataURL}" alt="" style="width: 40px; height: 40px; border-radius: 4px; flex-shrink: 0; object-fit: cover;">
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span style="color: var(--color-primary); font-weight: 600; font-size: 0.8rem; flex-shrink: 0;">${index === this.currentTrackIndex ? '▶' : ''}</span>
               <div style="min-width: 0; flex: 1;">
-                <div style="font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.title}</div>
-                <div style="font-size: 0.8rem; color: ${artistColor}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta.artist}</div>
+                <div style="font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeTitle}</div>
+                <div style="font-size: 0.8rem; color: ${artistColor}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeArtist}</div>
               </div>
             </div>
           </div>
@@ -927,6 +1010,7 @@ class MusicPlayer {
   }
 
   selectTrack(trackIndex) {
+    if (!this.trackFiles.length) return;
     if (trackIndex < 0 || trackIndex >= this.trackFiles.length) return;
 
     this.currentTrackIndex = trackIndex;
@@ -1005,8 +1089,18 @@ class MusicPlayer {
   }
 
   formatTitle(filename) {
+    if (!filename) return 'Unknown Track';
     const baseName = filename.replace(/\.[^/.]+$/, '');
     return baseName.replace(/[-_]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   createFallbackMeta(filename) {
