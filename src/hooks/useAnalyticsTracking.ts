@@ -203,7 +203,7 @@ function collectUserPreferences(): {
     hacker: '> Terminal',
     vaporwave: '~ Vaporwave',
     europa: '❄ Europa',
-    industrial: '⚙ Industrial',
+    industrial: '⚙ Industriel',
   };
   const mood = moodLabels[moodKey] ?? moodKey;
 
@@ -224,10 +224,9 @@ function collectUserPreferences(): {
   }
 
   const musicPaused = safeLocalGet('music-isPaused');
-  const musicTrack = safeLocalGet('music-currentTrack');
   let musicState: string;
   if (musicPaused === 'false') {
-    musicState = musicTrack ? `▶ ${musicTrack}` : '▶ Playing';
+    musicState = '▶ Playing';
   } else if (musicPaused === 'true') {
     musicState = '⏸ Paused';
   } else {
