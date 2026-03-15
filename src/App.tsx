@@ -1,9 +1,10 @@
 import { lazy, Suspense, useEffect } from 'react';
 import type { ComponentType } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Layout from './components/Layout';
 import Loading from './components/Loading';
+import useAnalyticsTracking from './hooks/useAnalyticsTracking';
 
 // Retry wrapper: if a lazy chunk fails to load (e.g. after a new deploy),
 // force a page reload so the browser fetches the updated index.html.
@@ -32,23 +33,12 @@ const About = retryLazy(() => import('./pages/About'));
 const Credits = retryLazy(() => import('./pages/Credits'));
 const NotFound = retryLazy(() => import('./pages/NotFound'));
 
-const App = () => {
-  const { i18n } = useTranslation();
-
-  // Sync <html lang="..."> with the active i18n language so screen readers
-  // apply the correct pronunciation rules when the user switches languages.
-  useEffect(() => {
-    document.documentElement.lang = i18n.language || 'fr';
-  }, [i18n.language]);
+// Inner component to access useLocation (must be inside BrowserRouter)
+const AppContent = () => {
+  const location = useLocation();
+  useAnalyticsTracking(location.pathname);
 
   return (
-    <BrowserRouter
-    basename="/"
-    future={{
-      v7_startTransition: true,
-      v7_relativeSplatPath: true,
-    }}
-  >
     <Suspense fallback={<Loading />}>
       <Routes>
         <Route element={<Layout />}>
@@ -67,7 +57,28 @@ const App = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
-  </BrowserRouter>
+  );
+};
+
+const App = () => {
+  const { i18n } = useTranslation();
+
+  // Sync <html lang="..."> with the active i18n language so screen readers
+  // apply the correct pronunciation rules when the user switches languages.
+  useEffect(() => {
+    document.documentElement.lang = i18n.language || 'fr';
+  }, [i18n.language]);
+
+  return (
+    <BrowserRouter
+      basename="/"
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
+      <AppContent />
+    </BrowserRouter>
   );
 };
 

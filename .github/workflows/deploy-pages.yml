@@ -40,6 +40,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_DISCORD_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_WEBHOOK_URL }}
 
       - name: SPA fallback
         run: cp dist/index.html dist/404.html
