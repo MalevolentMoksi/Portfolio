@@ -20,7 +20,12 @@ export type NavButtonPreset = keyof typeof NAV_BUTTON_PRESETS;
 export const ACTIVE_NAV_BUTTON_PRESET: NavButtonPreset = 'default';
 
 // Add one or more features here to stack on top of the preset.
-export const ACTIVE_NAV_BUTTON_EXTRA_FEATURES: readonly NavButtonFeature[] = ['stagger', 'depth', 'icon-motion', 'press-crush'];
+export const ACTIVE_NAV_BUTTON_EXTRA_FEATURES: readonly NavButtonFeature[] = [
+  'stagger',
+  'depth',
+  'icon-motion',
+  'press-crush',
+];
 
 const ACTIVE_NAV_BUTTON_FEATURES = Array.from(
   new Set<NavButtonFeature>([

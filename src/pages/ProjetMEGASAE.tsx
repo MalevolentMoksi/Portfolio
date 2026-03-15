@@ -192,11 +192,11 @@ const ProjetMEGASAE = () => {
               This semester-long project successfully delivered a complete JavaFX application and
               comprehensive project documentation, demonstrating our capacity to navigate the full
               software development lifecycle in a structured team environment. The experience
-              reinforced key lessons: robust planning and risk management are as critical as technical
-              skill, clear communication prevents costly delays, and iterative feedback loops drive
-              quality. Most importantly, we learned that sustainable success emerges from balancing
-              individual contributions with collective accountability—a principle fundamental to
-              professional software engineering.
+              reinforced key lessons: robust planning and risk management are as critical as
+              technical skill, clear communication prevents costly delays, and iterative feedback
+              loops drive quality. Most importantly, we learned that sustainable success emerges
+              from balancing individual contributions with collective accountability—a principle
+              fundamental to professional software engineering.
             </p>
           </section>
         </article>
@@ -398,11 +398,11 @@ const ProjetMEGASAE = () => {
             Le projet a livré une application JavaFX complète et une documentation exhaustive,
             démontrant notre capacité à naviguer le cycle de développement logiciel complet dans un
             environnement d'équipe structuré. L'expérience a renforcé des leçons clés : une
-            planification robuste et une gestion des risques sont aussi critiques que les compétences
-            techniques, une communication claire prévient les délais coûteux, et les boucles de
-            rétroaction itératives stimulent la qualité. Plus important encore, nous avons appris
-            que le succès durable émerge en équilibrant les contributions individuelles avec la
-            responsabilité collective—un principe fondamental de l'ingénierie logicielle
+            planification robuste et une gestion des risques sont aussi critiques que les
+            compétences techniques, une communication claire prévient les délais coûteux, et les
+            boucles de rétroaction itératives stimulent la qualité. Plus important encore, nous
+            avons appris que le succès durable émerge en équilibrant les contributions individuelles
+            avec la responsabilité collective—un principe fondamental de l'ingénierie logicielle
             professionnelle.
           </p>
         </section>
