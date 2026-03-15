@@ -4,7 +4,7 @@ Tâches requiert Recherches A faire :
 
 Tâches simples :
 
-Tâches moyennes (besoin expertise IA) :
+Tâches moyennes :
 
-Tâches lourdes (Requiert une requête dédiés à elles-mêes) :
+Tâches lourdes :
 
