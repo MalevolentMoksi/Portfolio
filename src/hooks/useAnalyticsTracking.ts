@@ -275,19 +275,46 @@ function getBrowserInfo(ua: string): string {
 }
 
 async function fetchGeolocation(): Promise<GeoLocation | null> {
+  // Check localStorage cache first (session-level TTL: 30 minutes)
+  const cacheKey = 'portfolio-geo-cache';
+  const cached = safeLocalGet(cacheKey);
+  if (cached) {
+    try {
+      const { data, timestamp } = JSON.parse(cached) as {
+        data: GeoLocation | null;
+        timestamp: number;
+      };
+      const age = Date.now() - timestamp;
+      if (age < 30 * 60 * 1000) {
+        // Cache is fresh (less than 30 minutes old)
+        return data;
+      }
+    } catch {
+      /* ignore cache parse error */
+    }
+  }
+
+  // Fetch from ipapi.co
   try {
     const response = await fetch('https://ipapi.co/json/');
     if (!response.ok) throw new Error('Geolocation unavailable');
-    const data = (await response.json()) as {
+    const rawData = (await response.json()) as {
       country_name?: string;
       city?: string;
       timezone?: string;
     };
-    return {
-      country: data.country_name,
-      city: data.city,
-      timezone: data.timezone,
+    const geo: GeoLocation = {
+      country: rawData.country_name,
+      city: rawData.city,
+      timezone: rawData.timezone,
     };
+    // Cache the result
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({ data: geo, timestamp: Date.now() }));
+    } catch {
+      /* ignore cache write error */
+    }
+    return geo;
   } catch {
     console.debug('[Analytics] Geolocation fetch failed');
     return null;
