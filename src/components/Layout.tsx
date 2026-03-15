@@ -14,6 +14,7 @@ import ParticlesButton from './ParticlesButton';
 const PetButton = lazy(() => import('./pet/PetButton'));
 import useDocumentMeta from '../hooks/useDocumentMeta';
 import useDynamicFavicon from '../hooks/useDynamicFavicon';
+import useNavButtonEffects from '../hooks/useNavButtonEffects';
 import usePerformanceTier from '../hooks/usePerformanceTier';
 import usePortfolioModules from '../hooks/usePortfolioModules';
 import useSessionTracking from '../hooks/useSessionTracking';
@@ -117,6 +118,7 @@ const Layout = () => {
   const { mood } = useMood();
 
   useDocumentMeta(t(config.metaTitleKey), t(config.metaDescriptionKey));
+  useNavButtonEffects();
   usePortfolioModules(trackFiles);
   useSessionTracking(location.pathname);
   useDynamicFavicon(mood);
