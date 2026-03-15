@@ -4,6 +4,7 @@
    ══════════════════════════════════════════════ */
 import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { motion, useMotionValue } from 'framer-motion';
 import {
   PET_SIZE,
@@ -96,6 +97,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
   }: WanderingPetProps,
   _ref
 ) {
+  const { t } = useTranslation();
   const PET_TOP_MIN = HALF;
   // Position initiale aléatoire (calculée une seule fois)
   const posRef = useRef<any>(null);
@@ -1212,7 +1214,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
         onPointerLeave={handlePetHoverLeave}
         role="button"
         tabIndex={-1}
-        aria-label="Robot de compagnie — cliquer pour interagir"
+        aria-label={t('common.petHUD.ariaLabels.companionInteract')}
         onKeyDown={(e: any) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -1322,7 +1324,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
           }
           role="dialog"
           aria-modal="true"
-          aria-label="Robot de compagnie"
+          aria-label={t('common.petHUD.ariaLabels.hudLabel')}
           tabIndex={-1}
           onKeyDown={handleHudKeyDown}
           initial={{ opacity: 0, y: -6, scale: 0.95 }}
@@ -1371,12 +1373,12 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                   }}
                   autoFocus
                   maxLength={18}
-                  aria-label="Renommer le robot"
+                  aria-label={t('common.petHUD.buttons.rename')}
                 />
               ) : (
                 <>
                   <span className="pet-hud-name">{petName}</span>
-                  <Tooltip text="Renommer">
+                  <Tooltip text={t('common.petHUD.buttons.rename')}>
                     <button
                       className="pet-hud-name-pencil"
                       onClick={(e: any) => {
@@ -1384,7 +1386,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                         setNameDraft(petName);
                         setIsEditingName(true);
                       }}
-                      aria-label="Renommer"
+                      aria-label={t('common.petHUD.buttons.rename')}
                     >
                       <svg
                         viewBox="0 0 16 16"
@@ -1407,14 +1409,14 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
             </span>
             <div className="pet-hud-header-actions">
               {/* Trophy / achievements toggle */}
-              <Tooltip text="Succès">
+              <Tooltip text={t('common.petHUD.buttons.achievements')}>
                 <button
                   className={`pet-hud-trophy-btn${achOpen ? ' pet-hud-trophy-btn--active' : ''}`}
                   onClick={(e: any) => {
                     e.stopPropagation();
                     setAchOpen((a) => !a);
                   }}
-                  aria-label="Succès"
+                  aria-label={t('common.petHUD.buttons.achievements')}
                 >
                   {/* Trophée : coupe + anses + pied + socle */}
                   <svg
@@ -1453,7 +1455,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
               <button
                 className="pet-hud-close"
                 onClick={() => setHudOpen(false)}
-                aria-label="Fermer"
+                aria-label={t('common.petHUD.buttons.close')}
               >
                 <svg
                   viewBox="0 0 16 16"
@@ -1509,7 +1511,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                   </>
                 )}
               </svg>
-              {petMood === 'happy' ? 'Heureux' : petMood === 'content' ? 'Stable' : 'Triste'}
+              {petMood === 'happy' ? t('common.petHUD.moods.happy') : petMood === 'content' ? t('common.petHUD.moods.content') : t('common.petHUD.moods.sad')}
             </span>
           </div>
 
@@ -1536,7 +1538,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                 <line x1="8" y1="5" x2="8" y2="9" />
                 <circle cx="8" cy="11.5" r="0.8" fill="currentColor" stroke="none" />
               </svg>
-              Il a très faim !
+              {t('common.petHUD.hints.veryHungry')}
             </p>
           )}
           {stats.hunger >= 30 && stats.happiness < 30 && (
@@ -1556,7 +1558,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                 <line x1="8" y1="5" x2="8" y2="9" />
                 <circle cx="8" cy="11.5" r="0.8" fill="currentColor" stroke="none" />
               </svg>
-              Il se sent seul !
+              {t('common.petHUD.hints.lonely')}
             </p>
           )}
           {stats.hunger >= 30 && stats.hunger < 50 && stats.happiness >= 30 && (
@@ -1575,7 +1577,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                 <circle cx="8" cy="6" r="4.5" />
                 <line x1="8" y1="10.5" x2="8" y2="14" />
               </svg>
-              Il commence à avoir faim.
+              {t('common.petHUD.hints.gettingHungry')}
             </p>
           )}
           {stats.hunger >= 50 && stats.happiness >= 30 && stats.happiness < 50 && (
@@ -1594,7 +1596,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                 <circle cx="8" cy="6" r="4.5" />
                 <line x1="8" y1="10.5" x2="8" y2="14" />
               </svg>
-              Un câlin lui ferait du bien.
+              {t('common.petHUD.hints.needsCuddle')}
             </p>
           )}
           {stats.hunger >= 80 && stats.happiness >= 80 && stats.hunger < 85 && (
@@ -1613,7 +1615,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                 <circle cx="8" cy="6" r="4.5" />
                 <line x1="8" y1="10.5" x2="8" y2="14" />
               </svg>
-              Il explore joyeusement !
+              {t('common.petHUD.hints.exploring')}
             </p>
           )}
           {stats.hunger >= 85 && stats.happiness >= 85 && (
@@ -1629,7 +1631,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
               >
                 <path d="M8 1.5 L9.6 6 L14.5 6 L10.5 9 L12 13.5 L8 11 L4 13.5 L5.5 9 L1.5 6 L6.4 6 Z" />
               </svg>
-              En pleine forme ! — déclin ralenti
+              {t('common.petHUD.hints.thriving')}
             </p>
           )}
 
@@ -1645,7 +1647,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                 stroke="currentColor"
                 strokeWidth="1.5"
                 strokeLinecap="round"
-                aria-label="Faim"
+                aria-label={t('common.petHUD.stats.hunger')}
               >
                 <line x1="5" y1="2" x2="5" y2="6" />
                 <path d="M3 2 L3 5 Q3 7 5 7 Q7 7 7 5 L7 2" />
@@ -1671,7 +1673,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                 height="13"
                 fill="currentColor"
                 stroke="none"
-                aria-label="Bonheur"
+                aria-label={t('common.petHUD.stats.happiness')}
               >
                 <path d="M8 2 L9.5 6.2 L14 6.2 L10.5 8.8 L11.8 13 L8 10.5 L4.2 13 L5.5 8.8 L2 6.2 L6.5 6.2 Z" />
               </svg>
@@ -1690,14 +1692,14 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
             {[
               {
                 key: 'feed',
-                label: 'Nourrir',
-                title: 'Nourrir',
+                label: t('common.petHUD.actions.feed'),
+                title: t('common.petHUD.actions.feed'),
                 icon: FOOD_ICONS[feedIconIndex] || FOOD_ICONS[0],
               },
               {
                 key: 'pet',
-                label: 'Câliner',
-                title: 'Câliner',
+                label: t('common.petHUD.actions.pet'),
+                title: t('common.petHUD.actions.pet'),
                 icon: (
                   <svg
                     viewBox="0 0 16 16"
@@ -1716,8 +1718,8 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
               },
               {
                 key: 'play',
-                label: 'Jouer',
-                title: 'Jouer',
+                label: t('common.petHUD.actions.play'),
+                title: t('common.petHUD.actions.play'),
                 icon: (
                   <svg
                     viewBox="0 0 16 16"
@@ -1739,8 +1741,8 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
               },
               {
                 key: 'catch',
-                label: 'Attrape',
-                title: 'Attrape !',
+                label: t('common.petHUD.actions.catch'),
+                title: t('common.petHUD.actions.catch') + ' !',
                 noCooldown: true,
                 icon: (
                   <svg

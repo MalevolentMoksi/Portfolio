@@ -309,6 +309,56 @@
           "neglect": { "label": "Stubborn", "desc": "Stayed sad for too long", "hint": "Leave the robot sad without interacting" }
         }
       }
+    },
+    "catchGameUI": {
+      "title": "🏓 Catch Game",
+      "instructions": {
+        "aimStep": "Move mouse to aim",
+        "throwStep": "Click to throw the ball",
+        "returnStep": "Robot returns it — catch it!",
+        "start": "Click anywhere to begin"
+      },
+      "score": {
+        "label": "Rallies",
+        "best": "Best: {{score}}"
+      },
+      "stats": {
+        "hunger": "Hunger",
+        "happiness": "Happiness"
+      },
+      "hint": "Move mouse to aim, click to throw",
+      "exitLabel": "Exit game (ESC)"
+    },
+    "petHUD": {
+      "actions": {
+        "feed": "Feed",
+        "pet": "Pet",
+        "play": "Play",
+        "catch": "Catch"
+      },
+      "buttons": {
+        "rename": "Rename",
+        "achievements": "Achievements",
+        "close": "Close"
+      },
+      "moods": {
+        "happy": "Happy",
+        "content": "Stable",
+        "sad": "Sad"
+      },
+      "hints": {
+        "veryHungry": "Very hungry!",
+        "lonely": "Feeling lonely!",
+        "gettingHungry": "Getting hungry.",
+        "needsCuddle": "Could use a cuddle.",
+        "exploring": "Exploring joyfully!",
+        "thriving": "Thriving! — slowed decay"
+      },
+      "ariaLabels": {
+        "companion": "Companion robot",
+        "companionInteract": "Companion robot — click to interact",
+        "hudLabel": "Companion robot"
+      }
     }
   },
   "pageConfig": {

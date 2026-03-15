@@ -309,6 +309,56 @@
           "neglect": { "label": "Têtu", "desc": "Resté triste trop longtemps", "hint": "Laisse le robot dans un état triste sans t'en occuper" }
         }
       }
+    },
+    "catchGameUI": {
+      "title": "🏓 Jeu d'Attrape",
+      "instructions": {
+        "aimStep": "Bouge la souris pour viser",
+        "throwStep": "Clique pour lancer la balle",
+        "returnStep": "Le robot la renvoie — rattrape-la !",
+        "start": "Clique n'importe où pour commencer"
+      },
+      "score": {
+        "label": "Rallies",
+        "best": "Record : {{score}}"
+      },
+      "stats": {
+        "hunger": "Faim",
+        "happiness": "Bonheur"
+      },
+      "hint": "Bouge la souris pour viser, clique pour lancer",
+      "exitLabel": "Quitter le jeu (ESC)"
+    },
+    "petHUD": {
+      "actions": {
+        "feed": "Nourrir",
+        "pet": "Câliner",
+        "play": "Jouer",
+        "catch": "Attrape"
+      },
+      "buttons": {
+        "rename": "Renommer",
+        "achievements": "Succès",
+        "close": "Fermer"
+      },
+      "moods": {
+        "happy": "Heureux",
+        "content": "Stable",
+        "sad": "Triste"
+      },
+      "hints": {
+        "veryHungry": "Il a très faim !",
+        "lonely": "Il se sent seul !",
+        "gettingHungry": "Il commence à avoir faim.",
+        "needsCuddle": "Un câlin lui ferait du bien.",
+        "exploring": "Il explore joyeusement !",
+        "thriving": "En pleine forme ! — déclin ralenti"
+      },
+      "ariaLabels": {
+        "companion": "Robot compagnon",
+        "companionInteract": "Robot compagnon — cliquer pour interagir",
+        "hudLabel": "Robot compagnon"
+      }
     }
   },
   "pageConfig": {

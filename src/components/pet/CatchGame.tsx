@@ -5,6 +5,7 @@
    ══════════════════════════════════════════════ */
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import {
   CATCH_BALL_SIZE,
   CATCH_BALL_SPEED,
@@ -43,6 +44,7 @@ const closestPointOnSegment = (ax: any, ay: any, bx: any, by: any, px: any, py: 
 };
 
 const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }: any) => {
+  const { t } = useTranslation();
   const startX = window.innerWidth / 2;
   const startY = window.innerHeight - 120;
 
@@ -464,31 +466,31 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }: any
       {/* Écran d'instructions initial */}
       {showIntro && (
         <div className="catch-game-intro">
-          <div className="catch-game-intro-title">🏓 Jeu d'Attrape</div>
+          <div className="catch-game-intro-title">{t('common.catchGameUI.title')}</div>
           <div className="catch-game-intro-steps">
             <div className="catch-game-intro-step">
               <span className="catch-game-intro-icon">🖱️</span>
-              <span>Bouge la souris pour viser</span>
+              <span>{t('common.catchGameUI.instructions.aimStep')}</span>
             </div>
             <div className="catch-game-intro-step">
               <span className="catch-game-intro-icon">👆</span>
-              <span>Clique pour lancer la balle</span>
+              <span>{t('common.catchGameUI.instructions.throwStep')}</span>
             </div>
             <div className="catch-game-intro-step">
               <span className="catch-game-intro-icon">🤖</span>
-              <span>Le robot la renvoie — rattrape-la !</span>
+              <span>{t('common.catchGameUI.instructions.returnStep')}</span>
             </div>
           </div>
-          <div className="catch-game-intro-start">Clique n'importe où pour commencer</div>
+          <div className="catch-game-intro-start">{t('common.catchGameUI.instructions.start')}</div>
         </div>
       )}
 
       {/* HUD Score + Mini Stats — masqué pendant l'intro */}
       {!showIntro && (
         <div className="catch-game-score">
-          <div className="catch-game-score-label">Rallies</div>
+          <div className="catch-game-score-label">{t('common.catchGameUI.score.label')}</div>
           <div className="catch-game-score-value">{rallies}</div>
-          {bestScore > 0 && <div className="catch-game-score-best">Record : {bestScore}</div>}
+          {bestScore > 0 && <div className="catch-game-score-best">{t('common.catchGameUI.score.best', { score: bestScore })}</div>}
           {/* Mini stat bars */}
           {stats && (
             <div className="catch-game-stats">
@@ -502,7 +504,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }: any
                   stroke="currentColor"
                   strokeWidth="1.5"
                   strokeLinecap="round"
-                  aria-label="Faim"
+                  aria-label={t('common.catchGameUI.stats.hunger')}
                 >
                   <line x1="5" y1="2" x2="5" y2="6" />
                   <path d="M3 2 L3 5 Q3 7 5 7 Q7 7 7 5 L7 2" />
@@ -526,7 +528,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }: any
                   height="11"
                   fill="currentColor"
                   stroke="none"
-                  aria-label="Bonheur"
+                  aria-label={t('common.catchGameUI.stats.happiness')}
                 >
                   <path d="M8 2 L9.5 6.2 L14 6.2 L10.5 8.8 L11.8 13 L8 10.5 L4.2 13 L5.5 8.8 L2 6.2 L6.5 6.2 Z" />
                 </svg>
@@ -559,7 +561,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }: any
 
       {/* Hint — only after holding 3 s */}
       {showHint && isHeld && (
-        <div className="catch-game-hint">Bouge la souris pour viser, clique pour lancer</div>
+        <div className="catch-game-hint">{t('common.catchGameUI.hint')}</div>
       )}
 
       {/* Exit — agrandi + raccourci ESC */}
@@ -569,7 +571,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }: any
           e.stopPropagation();
           onGameEnd();
         }}
-        aria-label="Quitter le jeu (ESC)"
+        aria-label={t('common.catchGameUI.exitLabel')}
       >
         <svg
           viewBox="0 0 16 16"
