@@ -148,9 +148,9 @@ class MusicPlayer {
   private init(): void {
     this.loadState();
     this.setupAudio();
-    this.loadAllMetadata();
     this.render();
     this.setupVisualizer();
+    this.loadAllMetadata();
     this.attachEventListeners();
     this.setupMoodListener();
   }
@@ -355,14 +355,15 @@ class MusicPlayer {
     if (typeof window.jsmediatags === 'undefined') {
       // jsmediatags est charge en defer depuis CDN: sur premier chargement,
       // il peut arriver apres l'initialisation du player.
-      if (this.metadataRetryCount < 20) {
+      if (this.metadataRetryCount < 120) {
         this.metadataRetryCount += 1;
         if (this.metadataRetryTimer) {
           window.clearTimeout(this.metadataRetryTimer);
         }
+        const retryDelay = this.metadataRetryCount <= 20 ? 250 : 1000;
         this.metadataRetryTimer = window.setTimeout(() => {
           this.loadAllMetadata();
-        }, 250);
+        }, retryDelay);
       } else {
         console.warn('jsmediatags not loaded after retries, keeping fallback metadata');
       }
@@ -383,10 +384,11 @@ class MusicPlayer {
     const jsmediatags = window.jsmediatags;
     if (!jsmediatags) return;
 
-    const loadTrack = (filename: string, idx: number): Promise<void> => {
+    const loadTrack = (filename: string, idx: number, attempt = 0): Promise<void> => {
       const relUrl = getAssetPath(`assets/music/${filename}`);
       // jsmediatags XhrFileReader requires an absolute URL (http/https)
       const url = relUrl.startsWith('http') ? relUrl : window.location.origin + relUrl;
+      const maxAttempts = 3;
 
       return new Promise<void>((resolve) => {
         try {
@@ -406,33 +408,49 @@ class MusicPlayer {
                 this.trackMeta[idx].pictureDataURL = `data:${format};base64,${base64String}`;
               }
 
-              if (idx === this.currentTrackIndex) {
+              if (idx === this.currentTrackIndex && this.elements.title) {
                 this.updateTrackInfo();
               }
 
               // Refresh queue menu if open to show updated metadata
-              if (this.isQueueOpen) {
+              if (this.isQueueOpen && this.elements.queueList) {
                 this.populateQueueMenu();
               }
 
               resolve();
             },
             onError: (error: { type: string; info: string }) => {
+              if (attempt < maxAttempts - 1) {
+                const retryDelay = (attempt + 1) * 350;
+                window.setTimeout(() => {
+                  loadTrack(filename, idx, attempt + 1).then(resolve, resolve);
+                }, retryDelay);
+                return;
+              }
+
               console.warn(`Failed to read metadata for ${filename}:`, error);
               this.trackMeta[idx] = this.createFallbackMeta(filename);
-              if (idx === this.currentTrackIndex) {
+              if (idx === this.currentTrackIndex && this.elements.title) {
                 this.updateTrackInfo();
               }
-              if (this.isQueueOpen) {
+              if (this.isQueueOpen && this.elements.queueList) {
                 this.populateQueueMenu();
               }
               resolve();
             },
           });
         } catch (error: unknown) {
+          if (attempt < maxAttempts - 1) {
+            const retryDelay = (attempt + 1) * 350;
+            window.setTimeout(() => {
+              loadTrack(filename, idx, attempt + 1).then(resolve, resolve);
+            }, retryDelay);
+            return;
+          }
+
           console.warn(`Failed to initialize metadata reader for ${filename}:`, error);
           this.trackMeta[idx] = this.createFallbackMeta(filename);
-          if (idx === this.currentTrackIndex) {
+          if (idx === this.currentTrackIndex && this.elements.title) {
             this.updateTrackInfo();
           }
           resolve();
@@ -755,6 +773,10 @@ class MusicPlayer {
   }
 
   private updateTrackInfo(): void {
+    if (!this.elements.title || !this.elements.artist || !this.elements.albumArt) {
+      return;
+    }
+
     if (!this.trackFiles.length) {
       this.elements.title.textContent = 'Aucune piste disponible';
       this.elements.artist.textContent =
@@ -1021,6 +1043,7 @@ class MusicPlayer {
     this.elements.queueMenu.style.display = 'block';
     this.elements.queueBtn.setAttribute('aria-expanded', 'true');
     this.elements.queueMenu.classList.add('open');
+    this.loadAllMetadata();
     // Force refresh queue to show latest metadata
     this.populateQueueMenu();
     this.updateQueueHighlight();
@@ -1036,6 +1059,10 @@ class MusicPlayer {
   }
 
   private populateQueueMenu(): void {
+    if (!this.elements.queueList) {
+      return;
+    }
+
     if (!this.trackFiles.length) {
       this.elements.queueList.innerHTML =
         '<div role="note" style="padding: 12px 10px; opacity: 0.8;">Aucune piste disponible</div>';
