@@ -1,3 +1,4 @@
+import '@styles/components/_filter-bar.css';
 import { useState, useEffect, type KeyboardEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';

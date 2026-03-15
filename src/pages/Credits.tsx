@@ -1,3 +1,4 @@
+import '@styles/components/_credits.css';
 import useDocumentMeta from '@/hooks/useDocumentMeta';
 import { useTranslation } from 'react-i18next';
 

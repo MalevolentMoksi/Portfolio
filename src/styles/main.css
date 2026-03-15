@@ -16,7 +16,6 @@
 
 /* Components */
 @import './components/_header.css';
-@import './components/_hamburger-menu.css';
 @import './components/_footer.css';
 @import './components/_buttons.css';
 @import './components/_music-player.css';
@@ -24,21 +23,13 @@
 @import './components/_personal-projects.css';
 @import './components/_loading.css';
 @import './components/_breadcrumbs.css';
-@import './components/_project-pagination.css';
-@import './components/_filter-bar.css';
-@import './components/_contact-form.css';
 @import './components/_lightbox.css';
-@import './components/_mini-terminal.css';
-@import './components/_snake-game.css';
 @import './components/_mood-switcher.css';
 @import './components/_particles-button.css';
 @import './components/_pet-button.css';
 @import './components/_tooltip.css';
-@import './components/_not-found.css';
 @import './components/_toast.css';
 @import './components/_mood-echo.css';
-@import './components/_about.css';
-@import './components/_credits.css';
 @import './components/_language-button.css';
 @import './components/_accessibility-button.css';
 @import './components/_accessibility-overrides.css';

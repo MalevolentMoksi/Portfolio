@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AccessibilityButton from './AccessibilityButton';
@@ -11,7 +11,7 @@ import MiniTerminal from './MiniTerminal';
 import MoodSwitcher from './MoodSwitcher';
 import { useMood } from '../contexts/MoodContext';
 import ParticlesButton from './ParticlesButton';
-import PetButton from './pet/PetButton';
+const PetButton = lazy(() => import('./pet/PetButton'));
 import useDocumentMeta from '../hooks/useDocumentMeta';
 import useDynamicFavicon from '../hooks/useDynamicFavicon';
 import usePerformanceTier from '../hooks/usePerformanceTier';
@@ -185,7 +185,9 @@ const Layout = () => {
 
         {/* Actions interactives — slot droit de la barre de navigation */}
         <div className="header--actions" role="toolbar" aria-label={t('common.header.actionsAria')}>
-          <PetButton />
+          <Suspense fallback={null}>
+            <PetButton />
+          </Suspense>
           <MoodSwitcher />
           <ParticlesButton />
           <MiniTerminal />

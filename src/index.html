@@ -15,25 +15,8 @@
     />
 
     <!-- Preconnect aux domaines CDN pour éliminer le coût DNS+TCP+TLS au premier accès -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-
-    <!-- Font Awesome — chargement non-bloquant (media swap trick) -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-      media="print"
-      onload="this.media = 'all'"
-    />
-    <!-- Fallback si JS désactivé -->
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-      />
-    </noscript>
 
     <title>Portfolio - Enzo Morello</title>
     <meta
@@ -73,11 +56,19 @@
     <div id="ambient-root"></div>
 
     <!-- External libraries -->
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"
-      defer
-    ></script>
+    <!-- particles.js — only injected on high-performance devices to avoid jank on low-end/mobile -->
+    <script>
+      (function () {
+        var cores = navigator.hardwareConcurrency || 0;
+        var reduced =
+          window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduced && cores >= 4) {
+          var s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js';
+          document.head.appendChild(s);
+        }
+      })();
+    </script>
 
     <!-- Service Worker registration — deferred to avoid render blocking -->
     <script defer src="%BASE_URL%registerSW.js"></script>

@@ -3,6 +3,7 @@
  * Handles persistent background music with localStorage state management
  */
 
+import * as jsmediatags from 'jsmediatags';
 import { getAssetPath } from '../utils/assetPath';
 import { isLowTier } from '../utils/performanceTier';
 import { safeLocalGet, safeLocalSet } from '../utils/safeStorage';
@@ -64,6 +65,22 @@ interface VisualizerState {
   handleResize?: () => void;
 }
 
+/* ── Inline SVG icons (replaces Font Awesome CDN) ── */
+const ICON_CHEVRON_LEFT =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>';
+const ICON_CHEVRON_RIGHT =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>';
+const ICON_LIST =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z"/></svg>';
+const ICON_FORWARD_STEP =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M52.5 440.6c-9.5 7.9-22.8 9.7-34.1 4.4S0 428.4 0 416V96C0 83.6 7.2 72.3 18.4 67s24.5-3.6 34.1 4.4L224 214.3V96c0-17.7 14.3-32 32-32s32 14.3 32 32V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V297.7L52.5 440.6z"/></svg>';
+const ICON_VOLUME_HIGH =
+  '<svg class="volume-high" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M533.6 32.5C598.5 85.2 640 165.8 640 256s-41.5 170.7-106.4 223.5c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C557.5 398.2 592 331.2 592 256s-34.5-142.2-88.7-186.3c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5zM473.1 107c43.2 35.2 70.9 88.9 70.9 149s-27.7 113.8-70.9 149c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C475.3 341.3 496 301.1 496 256s-20.7-85.3-53.2-111.8c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5zm-60.5 74.5C434.1 199.1 448 225.9 448 256s-13.9 56.9-35.4 74.5c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C393.1 284.4 400 271 400 256s-6.9-28.4-17.7-37.3c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5zM301.1 34.8C312.6 40 320 51.4 320 64V448c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.6 34.4-5.3z"/></svg>';
+const ICON_VOLUME_LOW =
+  '<svg class="volume-low" style="display:none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M301.1 34.8C312.6 40 320 51.4 320 64V448c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.6 34.4-5.3zM412.6 181.5C434.1 199.1 448 225.9 448 256s-13.9 56.9-35.4 74.5c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C393.1 284.4 400 271 400 256s-6.9-28.4-17.7-37.3c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5z"/></svg>';
+const ICON_VOLUME_MUTED =
+  '<svg class="volume-muted" style="display:none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M301.1 34.8C312.6 40 320 51.4 320 64V448c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.6 34.4-5.3zM425 167l55 55 55-55c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-55 55 55 55c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-55-55-55 55c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l55-55-55-55c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0z"/></svg>';
+
 class MusicPlayer {
   private trackFiles: string[];
   private currentTrackIndex: number;
@@ -74,8 +91,6 @@ class MusicPlayer {
   private savedVolume: number;
   private isQueueOpen: boolean;
   private isRetracted: boolean;
-  private metadataRetryTimer: number | null;
-  private metadataRetryCount: number;
   private metadataLoaded: boolean;
   private savedTime: number;
   private lastSaveTime: number | null;
@@ -94,8 +109,6 @@ class MusicPlayer {
     this.savedVolume = 0.7; // Default volume
     this.isQueueOpen = false; // Track queue menu state
     this.isRetracted = false; // Track retract/collapse state
-    this.metadataRetryTimer = null;
-    this.metadataRetryCount = 0;
     this.metadataLoaded = false;
     this.savedTime = 0;
     this.lastSaveTime = null;
@@ -352,37 +365,11 @@ class MusicPlayer {
     }
 
     // Check if jsmediatags is available
-    if (typeof window.jsmediatags === 'undefined') {
-      // jsmediatags est charge en defer depuis CDN: sur premier chargement,
-      // il peut arriver apres l'initialisation du player.
-      if (this.metadataRetryCount < 120) {
-        this.metadataRetryCount += 1;
-        if (this.metadataRetryTimer) {
-          window.clearTimeout(this.metadataRetryTimer);
-        }
-        const retryDelay = this.metadataRetryCount <= 20 ? 250 : 1000;
-        this.metadataRetryTimer = window.setTimeout(() => {
-          this.loadAllMetadata();
-        }, retryDelay);
-      } else {
-        console.warn('jsmediatags not loaded after retries, keeping fallback metadata');
-      }
-      return;
-    }
-
     this.metadataLoaded = true;
-    if (this.metadataRetryTimer) {
-      window.clearTimeout(this.metadataRetryTimer);
-      this.metadataRetryTimer = null;
-    }
 
-    // Charger la piste courante immédiatement, stagger les autres
-    // pour ne pas saturer le réseau et le thread principal au démarrage.
     // jsmediatags.read() accepte une URL directement : il utilise des requêtes
     // HTTP Range pour ne télécharger que les octets des tags ID3, sans récupérer
     // l'intégralité du fichier audio.
-    const jsmediatags = window.jsmediatags;
-    if (!jsmediatags) return;
 
     const loadTrack = (filename: string, idx: number, attempt = 0): Promise<void> => {
       const relUrl = getAssetPath(`assets/music/${filename}`);
@@ -487,10 +474,10 @@ class MusicPlayer {
 
     container.innerHTML = `
       <button id="player-retract-btn" aria-label="R\u00e9duire le lecteur" title="R\u00e9duire">
-        <i class="fa-solid fa-chevron-left"></i>
+        ${ICON_CHEVRON_LEFT}
       </button>
       <div class="player-main">
-        <img class="album-art" src="" alt="Pochette de l'album" />
+        <img class="album-art" src="" alt="Pochette de l'album" width="60" height="60" />
         <div class="track-info">
           <div class="text-wrapper">
             <span class="title"></span>
@@ -509,7 +496,7 @@ class MusicPlayer {
       </div>
       <div class="controls">
         <button id="queue-btn" aria-label="Afficher la file de lecture" class="icon-btn" title="File de lecture">
-          <i class="fa-solid fa-list"></i>
+          ${ICON_LIST}
         </button>
         <button id="play-pause-btn" aria-label="Lecture/Pause" class="icon-btn">
           <svg class="play-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -520,13 +507,13 @@ class MusicPlayer {
           </svg>
         </button>
         <button id="next-btn" aria-label="Piste suivante" class="icon-btn">
-          <i class="fa-solid fa-forward-step"></i>
+          ${ICON_FORWARD_STEP}
         </button>
         <div class="volume-wrapper">
           <button id="mute-btn" aria-label="Couper le son" class="icon-btn">
-            <i class="fa-solid fa-volume-high volume-high"></i>
-            <i class="fa-solid fa-volume-low volume-low" style="display:none;"></i>
-            <i class="fa-solid fa-volume-xmark volume-muted" style="display:none;"></i>
+            ${ICON_VOLUME_HIGH}
+            ${ICON_VOLUME_LOW}
+            ${ICON_VOLUME_MUTED}
           </button>
           <div class="volume-popup">
             <div class="volume-popup-track">
@@ -559,7 +546,7 @@ class MusicPlayer {
     peekBtn.id = 'player-peek-btn';
     peekBtn.setAttribute('aria-label', 'Afficher le lecteur');
     peekBtn.setAttribute('title', 'Afficher le lecteur');
-    peekBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+    peekBtn.innerHTML = ICON_CHEVRON_RIGHT;
     document.body.appendChild(peekBtn);
 
     // Cache DOM elements
@@ -599,8 +586,7 @@ class MusicPlayer {
     if (this.isRetracted) {
       this.elements.peekBtn.classList.add('visible');
       this.elements.retractBtn.setAttribute('aria-label', 'Afficher le lecteur');
-      const retractIcon = this.elements.retractBtn.querySelector<HTMLElement>('i');
-      if (retractIcon) retractIcon.className = 'fa-solid fa-chevron-right';
+      this.elements.retractBtn.innerHTML = ICON_CHEVRON_RIGHT;
     }
   }
 
@@ -1173,8 +1159,7 @@ class MusicPlayer {
     this.elements.container.classList.add('retracted');
     this.elements.peekBtn.classList.add('visible');
     this.elements.retractBtn.setAttribute('aria-label', 'Afficher le lecteur');
-    const icon = this.elements.retractBtn.querySelector<HTMLElement>('i');
-    if (icon) icon.className = 'fa-solid fa-chevron-right';
+    this.elements.retractBtn.innerHTML = ICON_CHEVRON_RIGHT;
     safeLocalSet(this.STORAGE_KEYS.RETRACTED, 'true');
     // Close queue if open while retracting
     if (this.isQueueOpen) this.closeQueue();
@@ -1185,8 +1170,7 @@ class MusicPlayer {
     this.elements.container.classList.remove('retracted');
     this.elements.peekBtn.classList.remove('visible');
     this.elements.retractBtn.setAttribute('aria-label', 'R\u00e9duire le lecteur');
-    const icon = this.elements.retractBtn.querySelector<HTMLElement>('i');
-    if (icon) icon.className = 'fa-solid fa-chevron-left';
+    this.elements.retractBtn.innerHTML = ICON_CHEVRON_LEFT;
     safeLocalSet(this.STORAGE_KEYS.RETRACTED, 'false');
   }
 

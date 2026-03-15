@@ -1,3 +1,4 @@
+import '@styles/components/_mini-terminal.css';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';

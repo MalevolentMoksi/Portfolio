@@ -1,3 +1,4 @@
+import '@styles/components/_about.css';
 import useDocumentMeta from '@/hooks/useDocumentMeta';
 import { useTranslation } from 'react-i18next';
 import { MOODS } from '@/contexts/MoodContext';

@@ -5,6 +5,7 @@ Tâches requiert Recherches A faire :
 Tâches simples :
 
 Tâches moyennes :
+Music player : Make Lunar by Anthemics the default song, animate the track list apparition, upgrade the toast notification (right now it just shows the song name with and i icon)
 
 Tâches lourdes :
 

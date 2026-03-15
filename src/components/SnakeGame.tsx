@@ -1,3 +1,4 @@
+import '@styles/components/_snake-game.css';
 import { useEffect, useRef, useState } from 'react';
 import Tooltip from './Tooltip';
 import { safeLocalGet, safeLocalSet } from '@/utils/safeStorage';

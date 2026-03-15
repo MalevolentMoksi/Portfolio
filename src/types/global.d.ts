@@ -76,8 +76,8 @@ declare global {
     /* particles.js CDN DOM array */
     pJSDom?: PJSDomEntry[];
 
-    /* jsmediatags CDN — ID3 tag reader */
-    jsmediatags?: JsMediaTags;
+    /* jsmediatags CDN — ID3 tag reader (removed: now an npm module) */
+    // jsmediatags?: JsMediaTags;
 
     /* WebKit AudioContext (Safari fallback) */
     webkitAudioContext?: typeof AudioContext;

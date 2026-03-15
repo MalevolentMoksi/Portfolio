@@ -8,9 +8,12 @@ interface GeoLocation {
 }
 
 /**
- * Sends enhanced page view analytics to a Discord webhook.
+ * Sends enhanced page view analytics to a Discord webhook via Cloudflare Worker proxy.
  * Tracks: UTM parameters, user agent, geolocation (GDPR compliant - anonymized),
  * and session statistics.
+ *
+ * The Worker stores the real Discord webhook URL as a secret, so it never appears
+ * in the client bundle or network traffic.
  *
  * GDPR Compliance:
  * - No persistent cookies or device fingerprinting
@@ -24,8 +27,8 @@ const useAnalyticsTracking = (pathname: string): void => {
   const geoCache = useRef<GeoLocation | null>(null);
 
   useEffect(() => {
-    const webhookUrl = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
-    if (!webhookUrl) return;
+    const proxyUrl = import.meta.env.VITE_WEBHOOK_PROXY_URL;
+    if (!proxyUrl) return;
 
     // Parse UTM parameters from URL
     const params = new URLSearchParams(window.location.search);
@@ -115,8 +118,8 @@ const useAnalyticsTracking = (pathname: string): void => {
         inline: true,
       });
 
-      // Send to Discord
-      fetch(webhookUrl, {
+      // Send to Discord via Worker proxy
+      fetch(proxyUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

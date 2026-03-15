@@ -120,6 +120,9 @@ export default defineConfig({
         },
       },
     },
+      rollupOptions: {
+        external: ['react-native-fs'],
+      },
     assetsInlineLimit: 4096,
     cssCodeSplit: true,
     minify: 'terser',

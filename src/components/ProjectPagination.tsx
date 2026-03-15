@@ -1,3 +1,4 @@
+import '@styles/components/_project-pagination.css';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
