@@ -232,10 +232,10 @@ const Layout = () => {
             {t(config.headingKey)}
           </h1>
           {config.subheadingKey ? (
-            <h3 className="header-subheading">{t(config.subheadingKey)}</h3>
+            <h2 className="header-subheading">{t(config.subheadingKey)}</h2>
           ) : null}
           {config.subheadingAltKey ? (
-            <h4 className="header-subheading-alt">{t(config.subheadingAltKey)}</h4>
+            <h3 className="header-subheading-alt">{t(config.subheadingAltKey)}</h3>
           ) : null}
         </div>
       </section>

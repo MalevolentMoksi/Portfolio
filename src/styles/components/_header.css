@@ -217,8 +217,8 @@ header.header--main {
   filter: drop-shadow(0 2px 10px rgba(var(--color-primary-rgb), 0.35));
 }
 
-/* h3.header-subheading - sous-titre principal */
-.header--secondary .header--hero h3.header-subheading {
+/* h2.header-subheading - sous-titre principal */
+.header--secondary .header--hero h2.header-subheading {
   font-size: 0.9rem;
   margin-top: 0;
   margin-bottom: 0.25rem;
@@ -229,8 +229,16 @@ header.header--main {
   opacity: 0.9;
 }
 
-/* h4.header-subheading-alt - mention complementaire */
-.header--secondary .header--hero h4.header-subheading-alt {
+.header--secondary .header--hero h2.header-subheading::before {
+  display: none;
+}
+
+.header--secondary .header--hero h2.header-subheading {
+  padding-bottom: 0;
+}
+
+/* h3.header-subheading-alt - mention complementaire */
+.header--secondary .header--hero h3.header-subheading-alt {
   font-size: 0.82rem;
   margin-top: 0;
   margin-bottom: 0;
@@ -238,15 +246,7 @@ header.header--main {
   font-style: italic;
   color: var(--color-text);
   opacity: 0.72;
-}
-
-/* Compatibilite : anciens selecteurs h2/h3 (inutilises mais conserves) */
-.header--secondary .header--hero h2.header-subheading {
-  font-size: 0.9rem;
-  margin-top: 0;
-  margin-bottom: 0;
-  font-weight: 400;
-  opacity: 0.9;
+  -webkit-text-fill-color: unset;
 }
 
 /* ---- Typing effect cursor ---- */
@@ -388,9 +388,8 @@ header.header--main .hamburger-toggle {
     font-size: clamp(1.3rem, 4vw, 1.8rem);
   }
 
-  .header--secondary .header--hero h3.header-subheading,
-  .header--secondary .header--hero h4.header-subheading-alt,
-  .header--secondary .header--hero h2.header-subheading {
+  .header--secondary .header--hero h2.header-subheading,
+  .header--secondary .header--hero h3.header-subheading-alt {
     font-size: 0.82rem;
   }
 
@@ -435,9 +434,8 @@ header.header--main .hamburger-toggle {
     margin-bottom: 0.15rem;
   }
 
-  .header--secondary .header--hero h3.header-subheading,
-  .header--secondary .header--hero h4.header-subheading-alt,
-  .header--secondary .header--hero h2.header-subheading {
+  .header--secondary .header--hero h2.header-subheading,
+  .header--secondary .header--hero h3.header-subheading-alt {
     font-size: 0.75rem;
   }
 }
