@@ -11,7 +11,7 @@ interface GeoLocation {
  * Sends enhanced page view analytics to a Discord webhook.
  * Tracks: UTM parameters, user agent, geolocation (GDPR compliant - anonymized),
  * and session statistics.
- * 
+ *
  * GDPR Compliance:
  * - No persistent cookies or device fingerprinting
  * - Geolocation is anonymized to country/city level only
@@ -215,9 +215,7 @@ function getSessionStats(currentPath: string): {
   }
 
   const startTime = safeSessionGet('session-start');
-  const elapsed = startTime
-    ? Math.round((Date.now() - parseInt(startTime)) / 1000 / 60)
-    : 0;
+  const elapsed = startTime ? Math.round((Date.now() - parseInt(startTime)) / 1000 / 60) : 0;
 
   return {
     pages: pages.length,
@@ -226,4 +224,3 @@ function getSessionStats(currentPath: string): {
 }
 
 export default useAnalyticsTracking;
-

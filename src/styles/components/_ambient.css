@@ -274,8 +274,12 @@
 }
 
 /* Signal beacon — pulsing glow + rising smoke particles */
+.diorama-beacon .beacon-glow {
+  animation: beacon-glow-pulse 3s ease-in-out infinite;
+}
+
 .diorama-beacon .beacon-core {
-  animation: beacon-pulse 3s ease-in-out infinite;
+  opacity: 0.7;
 }
 
 .diorama-beacon .beacon-smoke {
@@ -291,15 +295,15 @@
   animation-delay: 2.6s;
 }
 
-@keyframes beacon-pulse {
+@keyframes beacon-glow-pulse {
   0%,
   100% {
-    filter: drop-shadow(0 0 2px currentColor);
-    opacity: 0.7;
+    opacity: 0.15;
+    transform: scale(1);
   }
   50% {
-    filter: drop-shadow(0 0 8px currentColor);
-    opacity: 1;
+    opacity: 0.4;
+    transform: scale(1.8);
   }
 }
 
@@ -318,8 +322,12 @@
 }
 
 /* Warmind node — pulsing core + orbiting rings */
+.diorama-warmind .warmind-glow {
+  animation: warmind-glow-pulse 4s ease-in-out infinite;
+}
+
 .diorama-warmind .warmind-core {
-  animation: warmind-pulse 4s ease-in-out infinite;
+  opacity: 0.6;
 }
 
 .diorama-warmind .warmind-ring-a {
@@ -332,15 +340,15 @@
   animation: orbit-b 11s linear infinite reverse;
 }
 
-@keyframes warmind-pulse {
+@keyframes warmind-glow-pulse {
   0%,
   100% {
-    filter: drop-shadow(0 0 3px currentColor);
-    opacity: 0.6;
+    opacity: 0.2;
+    transform: scale(1);
   }
   50% {
-    filter: drop-shadow(0 0 10px currentColor);
-    opacity: 1;
+    opacity: 0.5;
+    transform: scale(2.2);
   }
 }
 

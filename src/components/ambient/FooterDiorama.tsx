@@ -95,6 +95,8 @@ const BeaconDiorama = () => (
   >
     <polygon points="14,62 34,62 24,40" stroke="currentColor" strokeWidth="1.2" fill="none" />
     <line x1="19" y1="52" x2="29" y2="52" stroke="currentColor" strokeWidth="0.6" opacity="0.5" />
+    {/* GPU-friendly glow: animates opacity instead of filter */}
+    <circle className="beacon-glow" cx="24" cy="46" r="3.5" fill="currentColor" />
     <circle className="beacon-core" cx="24" cy="46" r="3.5" fill="currentColor" />
     <circle className="beacon-smoke" cx="23" cy="38" r="2" fill="currentColor" />
     <circle className="beacon-smoke" cx="26" cy="36" r="1.5" fill="currentColor" />
@@ -123,6 +125,8 @@ const WarmindDiorama = () => (
       strokeWidth="1.2"
       fill="none"
     />
+    {/* GPU-friendly glow: animates opacity instead of filter */}
+    <circle cx="24" cy="42" r="2" fill="currentColor" className="warmind-glow" />
     <circle cx="24" cy="42" r="2" fill="currentColor" className="warmind-core" />
     <ellipse
       className="warmind-ring-a"

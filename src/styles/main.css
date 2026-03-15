@@ -2,7 +2,11 @@
    Main Stylesheet - Imports all modules
    ============================================ */
 
-/* Google Fonts is now loaded in index.html for better parallelization */
+/* Self-hosted Roboto font (replaces Google Fonts CDN) */
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+@import '@fontsource/roboto/900.css';
 
 /* Core styles */
 @import './_variables.css';

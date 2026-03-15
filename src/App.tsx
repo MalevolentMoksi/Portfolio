@@ -9,13 +9,13 @@ import useAnalyticsTracking from './hooks/useAnalyticsTracking';
 // Retry wrapper: if a lazy chunk fails to load (e.g. after a new deploy),
 // force a page reload so the browser fetches the updated index.html.
 function retryLazy<T extends ComponentType<Record<string, never>>>(
-  importFn: () => Promise<{ default: T }>,
+  importFn: () => Promise<{ default: T }>
 ) {
   return lazy<T>(() =>
     importFn().catch(() => {
       window.location.reload();
       return { default: Loading } as unknown as { default: T };
-    }),
+    })
   );
 }
 
