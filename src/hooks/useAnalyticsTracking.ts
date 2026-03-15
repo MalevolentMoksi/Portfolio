@@ -63,58 +63,61 @@ const useAnalyticsTracking = (pathname: string): void => {
     const sendMessage = (geo: GeoLocation | null): void => {
       const isKnownVisitor = !!utm.visitor;
       const timeOnPage = Math.round((Date.now() - pageStartTimeRef.current) / 1000);
-      const fields: EmbedField[] = [];
+      const location = geo?.country
+        ? `${geo.city ? `${geo.city}, ` : ''}${geo.country}`
+        : 'Unavailable';
+      const fields: EmbedField[] = [
+        {
+          name: 'Navigation',
+          value: [
+            `**Path**: \`${pathname}\``,
+            `**Time on page**: ${timeOnPage}s`,
+            `**Referrer**: ${referrer ?? 'Direct'}`,
+          ].join('\n'),
+          inline: false,
+        },
+        {
+          name: 'Visitor',
+          value: [
+            `**Location**: ${location}`,
+            `**Language**: ${prefs.language.toUpperCase()}`,
+            `**Browser**: ${browserInfo}`,
+            `**Session**: ${sessionStats.pages} page${sessionStats.pages !== 1 ? 's' : ''} · ${sessionStats.elapsedMinutes} min`,
+          ].join('\n'),
+          inline: false,
+        },
+        {
+          name: 'Preferences',
+          value: [
+            `**Mood**: ${prefs.mood}`,
+            `**Accessibility**: ${prefs.a11y}`,
+            `**Music**: ${prefs.musicState}`,
+          ].join('\n'),
+          inline: true,
+        },
+        {
+          name: 'Device',
+          value: [
+            `**Display**: ${metrics.viewportCategory}${metrics.isPWA ? ' · PWA' : ''}`,
+            `**Connection**: ${metrics.connectionType}`,
+            `**RAM**: ${metrics.deviceMemory}`,
+            `**Load time**: ${metrics.loadTimeMs !== null ? `${metrics.loadTimeMs} ms` : 'N/A'}`,
+          ].join('\n'),
+          inline: true,
+        },
+      ];
 
-      // ── Row 1: Navigation ─────────────────────────────────
-      fields.push({ name: '📄 Page', value: `\`${pathname}\``, inline: true });
-      fields.push({ name: '⏱️ Time on Page', value: `${timeOnPage}s`, inline: true });
-      fields.push({ name: '🔗 Referrer', value: referrer ?? '*direct*', inline: true });
-
-      // ── Row 2: Location & Browser ─────────────────────────
-      fields.push({
-        name: '📍 Location',
-        value: geo?.country ? `${geo.city ?? '?'}, ${geo.country}` : '*unavailable*',
-        inline: true,
-      });
-      fields.push({ name: '🌐 Language', value: prefs.language.toUpperCase(), inline: true });
-      fields.push({ name: '🖥️ Browser', value: browserInfo, inline: true });
-
-      // ── Row 3: UTM tracking (only if any param present) ───
       if (utm.source || utm.medium || utm.campaign || utm.visitor) {
         fields.push({
-          name: '📣 Source',
-          value: `${utm.source ?? '?'} / ${utm.medium ?? '?'}`,
-          inline: true,
+          name: 'Attribution',
+          value: [
+            `**Source**: ${utm.source ?? 'Unknown'} / ${utm.medium ?? 'Unknown'}`,
+            `**Campaign**: ${utm.campaign ?? 'None'}`,
+            `**Visitor**: ${utm.visitor ?? 'Anonymous'}`,
+          ].join('\n'),
+          inline: false,
         });
-        fields.push({ name: '🎯 Campaign', value: utm.campaign ?? '*none*', inline: true });
-        fields.push({ name: '👤 Visitor', value: utm.visitor ?? '*anonymous*', inline: true });
       }
-
-      // ── Row 4: User Preferences ───────────────────────────
-      fields.push({ name: '🎨 Mood', value: prefs.mood, inline: true });
-      fields.push({ name: '♿ Accessibility', value: prefs.a11y, inline: true });
-      fields.push({ name: '🎵 Music', value: prefs.musicState, inline: true });
-
-      // ── Row 5: Technical ──────────────────────────────────
-      fields.push({
-        name: '⚡ Load Time',
-        value: metrics.loadTimeMs !== null ? `${metrics.loadTimeMs}ms` : '*n/a*',
-        inline: true,
-      });
-      fields.push({ name: '📶 Connection', value: metrics.connectionType, inline: true });
-      fields.push({ name: '💾 Device RAM', value: metrics.deviceMemory, inline: true });
-
-      // ── Row 6: Meta ───────────────────────────────────────
-      fields.push({
-        name: '🖥️ Display',
-        value: `${metrics.viewportCategory}${metrics.isPWA ? ' · PWA' : ''}`,
-        inline: true,
-      });
-      fields.push({
-        name: '📊 Session',
-        value: `${sessionStats.pages} page${sessionStats.pages !== 1 ? 's' : ''} · ${sessionStats.elapsedMinutes}min`,
-        inline: true,
-      });
 
       fetch(proxyUrl, {
         method: 'POST',
@@ -125,8 +128,8 @@ const useAnalyticsTracking = (pathname: string): void => {
               author: { name: '📊 Portfolio Analytics' },
               title: pageName,
               description: isKnownVisitor
-                ? `👤 **${utm.visitor}** is visiting`
-                : '🔍 Anonymous visit',
+                ? `Visitor: **${utm.visitor}**`
+                : 'Visitor: **Anonymous**',
               color: isKnownVisitor ? 0x00ff99 : 0x5865f2,
               fields,
               timestamp: new Date().toISOString(),
