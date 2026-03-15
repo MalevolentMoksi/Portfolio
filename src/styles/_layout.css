@@ -120,3 +120,30 @@ hr {
     border-right: none;
   }
 }
+
+/* ────────────────────────────────────────────
+   Mobile / touch optimisations
+   Cible les appareils tactiles (pointer: coarse + hover: none) :
+   téléphones et tablettes, mais PAS les laptops à écran tactile
+   qui ont aussi un trackpad/souris (hover: hover reste vrai).
+   ──────────────────────────────────────────── */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Supprime le blur + scale sur le fond — économise une couche GPU composite.
+     Le scale(1.15) était uniquement utile pour le parallax souris (désactivé
+     sur mobile dans effects.ts) ; l'enlever élimine le sur-rendu permanent. */
+  #background {
+    filter: none;
+    -webkit-filter: none;
+    transform: none;
+  }
+
+  /* backdrop-filter: blur() est l'opération CSS la plus coûteuse sur mobile
+     (force un nouveau contexte de stacking GPU à chaque frame). On remplace
+     par un fond légèrement plus opaque pour maintenir la lisibilité. */
+  main {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: rgba(20, 20, 20, 0.93);
+  }
+}

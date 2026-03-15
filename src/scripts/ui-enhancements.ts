@@ -77,6 +77,20 @@ class UIEnhancements {
       element.textContent = '';
       element.classList.add('typing');
 
+      // When reduced-motion is active (either user-set or auto-detected for
+      // low-end devices), skip the letter-by-letter animation entirely and
+      // reveal the full text immediately — guaranteed smooth on any device.
+      const noMotion =
+        document.body?.classList.contains('a11y--no-motion') ||
+        window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      if (noMotion) {
+        element.textContent = fullText;
+        element.style.minHeight = '';
+        element.classList.remove('typing');
+        element.dataset.typed = 'true';
+        return;
+      }
+
       let i = 0;
       const typeLetter = (): void => {
         // Ignore callbacks from older runs if route changed mid-animation.

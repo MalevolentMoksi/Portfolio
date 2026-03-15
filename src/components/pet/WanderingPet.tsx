@@ -1511,7 +1511,11 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
                   </>
                 )}
               </svg>
-              {petMood === 'happy' ? t('common.petHUD.moods.happy') : petMood === 'content' ? t('common.petHUD.moods.content') : t('common.petHUD.moods.sad')}
+              {petMood === 'happy'
+                ? t('common.petHUD.moods.happy')
+                : petMood === 'content'
+                  ? t('common.petHUD.moods.content')
+                  : t('common.petHUD.moods.sad')}
             </span>
           </div>
 

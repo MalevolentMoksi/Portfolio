@@ -37,6 +37,15 @@ const safeSessionSet = (key: string, value: string): void => {
    Détection synchrone basée sur les hints hardware
    ──────────────────────────────────────────── */
 
+/**
+ * Retourne true si le dispositif de pointage principal est tactile
+ * (téléphone, tablette). Les laptops à écran tactile ont aussi un
+ * pointeur fin (souris/trackpad) → (hover: hover) est vrai pour eux
+ * et ne sont donc pas affectés.
+ */
+const isTouchDevice = (): boolean =>
+  window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches ?? false;
+
 const detectTierSync = (): PerformanceTier => {
   // 1. prefers-reduced-motion → forcer 'low' (accessibilité, W3C standard)
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
@@ -54,7 +63,11 @@ const detectTierSync = (): PerformanceTier => {
   // Moins de 4 cœurs logiques → machine clairement faible
   if (cores < 4) return 'low';
 
-  // ≥ 4 cœurs : 'high' sur desktop ET mobile.
+  // Sur mobile/tactile, même avec ≥ 4 cœurs, on plafonne à 'mid' :
+  // les téléphones haut de gamme n'ont pas la GPU/batterie d'un desktop
+  // et souffriraient avec les particules + effets haute qualité.
+  if (isTouchDevice()) return 'mid';
+
   return 'high';
 };
 
@@ -105,6 +118,8 @@ export const startFpsMonitor = ({
   // Ne mesurer qu'une fois par session (flag stocké) — accès protégé
   if (safeSessionGet(SS_FPS_KEY)) return;
   if (_fpsRunning) return;
+  // Déjà au tier minimum → dégradation impossible, inutile de mesurer
+  if (getPerformanceTier() === 'low') return;
 
   const startRun = (): void => {
     _fpsRunning = true;

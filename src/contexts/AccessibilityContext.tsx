@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { safeLocalGet, safeLocalSet } from '@/utils/safeStorage';
+import { getPerformanceTier } from '@/utils/performanceTier';
 import type { AccessibilitySettings, FontSize } from '@/types';
 
 const STORAGE_KEY = 'portfolio-a11y-settings';
@@ -39,18 +40,38 @@ const AccessibilityContext = createContext<AccessibilityContextValue>({
 const readSettings = (): AccessibilitySettings => {
   try {
     const raw = safeLocalGet(STORAGE_KEY);
-    if (!raw) return DEFAULT_SETTINGS;
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    const safeFont = FONT_SIZES.has(parsed.fontSize as FontSize)
-      ? (parsed.fontSize as FontSize)
-      : 'normal';
-    return {
-      // Migrate: old `reduceEffects` flag is folded into `noMotion`
-      noMotion: !!(parsed.noMotion || parsed.reduceEffects),
-      highContrast: !!parsed.highContrast,
-      fontSize: safeFont,
-      dyslexiaFont: !!parsed.dyslexiaFont,
-    };
+    let settings: AccessibilitySettings;
+
+    if (!raw) {
+      // First visit — auto-enable noMotion on low-end touch devices.
+      // Uses the same (hover: none) + (pointer: coarse) heuristic as
+      // performanceTier so the detection is consistent.
+      const isLowEndMobile =
+        typeof window !== 'undefined' &&
+        (window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches ?? false) &&
+        getPerformanceTier() === 'low';
+      settings = { ...DEFAULT_SETTINGS, noMotion: isLowEndMobile };
+    } else {
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      const safeFont = FONT_SIZES.has(parsed.fontSize as FontSize)
+        ? (parsed.fontSize as FontSize)
+        : 'normal';
+      settings = {
+        // Migrate: old `reduceEffects` flag is folded into `noMotion`
+        noMotion: !!(parsed.noMotion || parsed.reduceEffects),
+        highContrast: !!parsed.highContrast,
+        fontSize: safeFont,
+        dyslexiaFont: !!parsed.dyslexiaFont,
+      };
+    }
+
+    // Apply body classes synchronously here, before React renders.
+    // This ensures `a11y--no-motion` (and friends) are on <body> when the
+    // first useLayoutEffect fires in Layout.tsx — preventing the race where
+    // UIEnhancements starts the typing animation before the class is set.
+    if (typeof document !== 'undefined') applyBodyClasses(settings);
+
+    return settings;
   } catch {
     return DEFAULT_SETTINGS;
   }
@@ -131,6 +152,31 @@ export const AccessibilityProvider = ({ children }: AccessibilityProviderProps) 
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Show Toast when noMotion is auto-enabled on first visit (low-end mobile detection).
+  // Only fires once per session to avoid spamming the user.
+  useEffect(() => {
+    const alreadyNotified = sessionStorage.getItem('a11y-auto-noMotion-notified');
+    if (alreadyNotified || !settings.noMotion) return;
+
+    // Check if this is a first visit with auto-detection:
+    // - noMotion is true (user has it enabled)
+    // - No localStorage key means readSettings() auto-detected it on first visit
+    // - Device is touch-only (hover: none) and low-end (< 4 cores)
+    const isFirstVisit = !safeLocalGet(STORAGE_KEY);
+    const isLowEndMobile =
+      typeof window !== 'undefined' &&
+      (window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches ?? false) &&
+      getPerformanceTier() === 'low';
+
+    if (isFirstVisit && isLowEndMobile && typeof window !== 'undefined' && window.showToast) {
+      sessionStorage.setItem('a11y-auto-noMotion-notified', 'true');
+      window.showToast(
+        "Optimisations d'accessibilité : les animations ont été réduites pour améliorer la performance et l'accessibilité sur votre appareil.",
+        { type: 'info', duration: 0 }
+      );
+    }
+  }, [settings.noMotion]);
 
   const value = useMemo(
     () => ({ settings, setSetting, toggleSetting }),

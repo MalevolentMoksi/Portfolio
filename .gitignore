@@ -27,3 +27,4 @@ npm-debug.log*
 .env
 .env.local
 .env.production
+FEATURE_INVENTORY.md

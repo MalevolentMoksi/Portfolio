@@ -102,4 +102,14 @@ body.a11y--reduce-effects .language-panel,
 body.a11y--reduce-effects .accessibility-panel {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
+
+  /* Hamburger menu — suppress the cascade (stagger) animation when reduced-motion
+   is active. The global animation-duration: 0.01ms rule kills the animation itself
+   but does NOT override animation-delay, so items would still appear with a
+   0.12–0.24 s gap before snapping visible. This rule bypasses that entirely. */
+  body.a11y--no-motion .hamburger-nav.open ul li {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

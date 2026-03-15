@@ -490,7 +490,11 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }: any
         <div className="catch-game-score">
           <div className="catch-game-score-label">{t('common.catchGameUI.score.label')}</div>
           <div className="catch-game-score-value">{rallies}</div>
-          {bestScore > 0 && <div className="catch-game-score-best">{t('common.catchGameUI.score.best', { score: bestScore })}</div>}
+          {bestScore > 0 && (
+            <div className="catch-game-score-best">
+              {t('common.catchGameUI.score.best', { score: bestScore })}
+            </div>
+          )}
           {/* Mini stat bars */}
           {stats && (
             <div className="catch-game-stats">
@@ -560,9 +564,7 @@ const CatchGame = ({ botPosRef, onBotCatch, onGameEnd, ballInfoRef, stats }: any
       </svg>
 
       {/* Hint — only after holding 3 s */}
-      {showHint && isHeld && (
-        <div className="catch-game-hint">{t('common.catchGameUI.hint')}</div>
-      )}
+      {showHint && isHeld && <div className="catch-game-hint">{t('common.catchGameUI.hint')}</div>}
 
       {/* Exit — agrandi + raccourci ESC */}
       <button

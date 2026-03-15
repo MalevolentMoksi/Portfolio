@@ -34,6 +34,11 @@ class VisualEffects {
       return;
     }
 
+    // Pas de particules sur mobile/tactile — coût GPU/batterie prohibitif
+    if (window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches) {
+      return;
+    }
+
     // Check if particles.js is loaded
     if (typeof particlesJS === 'undefined') {
       console.warn('particles.js not loaded');
@@ -280,6 +285,12 @@ class VisualEffects {
   }
 
   private initParallax(): void {
+    // Pas de parallax sur mobile/tactile — mousemove ne se déclenche pas
+    // et le RAF initial consomme des ressources inutilement.
+    if (window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches) {
+      return;
+    }
+
     // ── Toggle 3 plans de profondeur ──────────────────────
     // true  = fond + particules bougent à vitesses différentes (3 plans de profondeur)
     // false = comportement original (seul le fond bouge, particules immobiles)

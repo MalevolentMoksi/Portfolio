@@ -14,6 +14,19 @@ img:hover {
   box-shadow: 0 0 10px var(--color-primary);
 }
 
+/* Disable hover transforms on touch devices — improves tap response time
+   and avoids repaints triggered by touch pseudo-hover states. */
+@media (hover: none) {
+  img {
+    transition: none;
+  }
+
+  img:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 /* Email glitch effect */
 .email-glitch {
   position: relative;
