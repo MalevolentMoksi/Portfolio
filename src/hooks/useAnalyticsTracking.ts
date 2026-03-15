@@ -176,7 +176,9 @@ function collectPageMetrics(): {
     if (nav?.loadEventEnd > 0) {
       loadTimeMs = Math.round(nav.loadEventEnd - nav.startTime);
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   const connectionType = navigator.connection?.effectiveType ?? 'unknown';
   const deviceMemory =
@@ -216,7 +218,9 @@ function collectUserPreferences(): {
       if (s.highContrast) a11yFlags.push('high-contrast');
       if (s.dyslexiaFont) a11yFlags.push('dyslexia');
       if (s.fontSize && s.fontSize !== 'normal') a11yFlags.push(`font-${String(s.fontSize)}`);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   const musicPaused = safeLocalGet('music-isPaused');
@@ -305,9 +309,7 @@ function getSessionStats(currentPath: string): { pages: number; elapsedMinutes: 
   }
 
   const startTime = safeSessionGet('session-start');
-  const elapsed = startTime
-    ? Math.round((Date.now() - parseInt(startTime, 10)) / 1000 / 60)
-    : 0;
+  const elapsed = startTime ? Math.round((Date.now() - parseInt(startTime, 10)) / 1000 / 60) : 0;
   return { pages: pages.length, elapsedMinutes: elapsed };
 }
 

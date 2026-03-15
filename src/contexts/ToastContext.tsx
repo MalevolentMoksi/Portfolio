@@ -80,6 +80,22 @@ const TOAST_ICONS: Record<ToastType, React.ReactNode> = {
       <circle cx="12" cy="18.5" r="1.3" fill="currentColor" stroke="none" />
     </svg>
   ),
+  music: (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10" fill="currentColor" fillOpacity="0.15" strokeWidth="1.5" />
+      <line x1="14" y1="6" x2="14" y2="15" strokeWidth="2" />
+      <ellipse cx="11.5" cy="15.5" rx="2.3" ry="1.8" fill="currentColor" stroke="none" />
+    </svg>
+  ),
 };
 
 /* ── Types ──────────────────────────────────────────── */
@@ -221,6 +237,7 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
       error: () => showToast(t('common.toast.debug.error'), { type: 'error' }),
       info: () => showToast(t('common.toast.debug.info'), { type: 'info' }),
       warning: () => showToast(t('common.toast.debug.warning'), { type: 'warning' }),
+      music: () => showToast('En lecture: Lunar - Anthemics', { type: 'music' }),
     };
     return () => {
       delete window.showToast;

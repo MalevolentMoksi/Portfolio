@@ -90,6 +90,17 @@
   color: rgba(255, 255, 255, 0.93);
 }
 
+.toast--music {
+  color: #7dd3fc;
+  border-color: rgba(125, 211, 252, 0.28);
+  background:
+    linear-gradient(120deg, rgba(10, 20, 34, 0.96), rgba(10, 26, 45, 0.94)), rgba(16, 16, 18, 0.96);
+}
+.toast--music .toast-message {
+  color: rgba(245, 252, 255, 0.95);
+  font-weight: 600;
+}
+
 /* ---- Icône dans un fond pill coloré ---- */
 .toast-icon {
   flex-shrink: 0;
@@ -120,6 +131,10 @@
 .toast--warning .toast-icon {
   background: rgba(251, 191, 36, 0.15);
   color: #fbbf24;
+}
+.toast--music .toast-icon {
+  background: rgba(125, 211, 252, 0.18);
+  color: #7dd3fc;
 }
 
 /* ---- Message ---- */
@@ -247,4 +262,40 @@ body[data-mood='industrial'] .toast--info {
 body[data-mood='industrial'] .toast--info .toast-icon {
   background: rgba(255, 87, 34, 0.12);
   color: #ff5722;
+}
+
+body[data-mood='hacker'] .toast--music {
+  color: #35ff8f;
+  border-color: rgba(53, 255, 143, 0.22);
+}
+body[data-mood='hacker'] .toast--music .toast-icon {
+  background: rgba(53, 255, 143, 0.14);
+  color: #35ff8f;
+}
+
+body[data-mood='vaporwave'] .toast--music {
+  color: #8ab4ff;
+  border-color: rgba(138, 180, 255, 0.24);
+}
+body[data-mood='vaporwave'] .toast--music .toast-icon {
+  background: rgba(138, 180, 255, 0.14);
+  color: #8ab4ff;
+}
+
+body[data-mood='europa'] .toast--music {
+  color: #00e5ff;
+  border-color: rgba(0, 229, 255, 0.24);
+}
+body[data-mood='europa'] .toast--music .toast-icon {
+  background: rgba(0, 229, 255, 0.14);
+  color: #00e5ff;
+}
+
+body[data-mood='industrial'] .toast--music {
+  color: #ffa270;
+  border-color: rgba(255, 162, 112, 0.24);
+}
+body[data-mood='industrial'] .toast--music .toast-icon {
+  background: rgba(255, 162, 112, 0.14);
+  color: #ffa270;
 }

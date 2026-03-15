@@ -18,7 +18,7 @@ export interface MoodConfig {
 export type MoodMap = Record<MoodKey, MoodConfig>;
 
 /* ── Toast ── */
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'music';
 
 /* ── Accessibility ── */
 export type FontSize = 'normal' | 'lg' | 'xl';

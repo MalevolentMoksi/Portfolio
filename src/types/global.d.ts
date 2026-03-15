@@ -60,13 +60,14 @@ declare global {
     /* Toast system — exposed by ToastContext for legacy JS modules */
     showToast?: (
       message: string,
-      options?: { type?: 'success' | 'error' | 'info' | 'warning'; duration?: number }
+      options?: { type?: 'success' | 'error' | 'info' | 'warning' | 'music'; duration?: number }
     ) => number;
     testToast?: {
       success: () => void;
       error: () => void;
       info: () => void;
       warning: () => void;
+      music: () => void;
     };
 
     /* Particle effects — exposed by effects.ts for MoodContext */

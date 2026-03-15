@@ -1,6 +1,7 @@
 /**
  * OccasionalCommuter — Véhicule qui traverse lentement l'écran
- * toutes les 30s-60s. Type choisi aléatoirement parmi :
+ * toutes les 30s-60s (base), avec ajustement auto selon la longueur
+ * de la page. Type choisi aléatoirement parmi :
  * spacecraft, satellite, rover.
  *
  * Utilise createPortal pour un positionnement fixe indépendant du scroll.
@@ -20,6 +21,7 @@ const MIN_DELAY_MS = 30_000; // 30 sec
 const MAX_DELAY_MS = 60_000; // 1 min
 const FIRST_DELAY_MS = 20_000; // 20 sec — premier spawn plus rapide
 const BUFFER_MS = 1_000; // marge après la durée d'animation avant nettoyage
+const SPAWN_PADDING_PX = 18; // marge pour éviter le chevauchement visuel des bords
 
 /** Durée de traversée par type (en secondes) */
 const DURATIONS = {
@@ -253,21 +255,70 @@ const VEHICLE_CLASSES = {
 
 /* ─── Helpers ─── */
 
-const randomBetween = (min: any, max: any) => Math.random() * (max - min) + min;
+const randomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
 const randomType = (): VehicleType =>
   VEHICLE_TYPES[Math.floor(Math.random() * VEHICLE_TYPES.length)];
 
-/* ─── Composant interne : rendu du véhicule avec animation en deux phases ─── */
+const getPageDensityFactor = (): number => {
+  const viewportHeight = Math.max(window.innerHeight, 1);
+  const pageHeight = Math.max(
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight,
+    viewportHeight
+  );
+  const pageScreens = pageHeight / viewportHeight;
 
-/**
- * Décalage vertical par type — fraction du viewport au-dessus du scroll actuel.
- * Puisque les commuters sont position: absolute, on calcule un `top` en pixels
- * relatif au document au moment du spawn pour qu'ils apparaissent dans le viewport courant.
- */
-const VIEWPORT_OFFSETS: Partial<Record<VehicleType, number>> = {
-  spacecraft: 0.08, // 8% du viewport depuis le haut courant
-  satellite: 0.2, // 20% du viewport
+  // Home garde un rythme proche de l'actuel; les pages longues densifient progressivement.
+  if (pageScreens <= 2.2) return 1;
+  return Math.min(2.25, 1 + (pageScreens - 2.2) * 0.18);
 };
+
+const getAdaptiveDelay = (baseDelayMs: number): number => {
+  return Math.round(baseDelayMs / getPageDensityFactor());
+};
+
+const pickCommuterTopPx = (type: VehicleType): string => {
+  if (type === 'rover') {
+    // Le rover roule au sommet du footer — on soustrait la hauteur du SVG
+    // (56 px) pour que les roues reposent sur le bord supérieur du footer.
+    const ROVER_SVG_HEIGHT = 56;
+    const footer = document.querySelector('footer');
+    if (footer instanceof HTMLElement) {
+      return `${footer.offsetTop - ROVER_SVG_HEIGHT}px`;
+    }
+    // Fallback : bas du document moins la hauteur du rover
+    return `${Math.max(document.body.scrollHeight, window.innerHeight) - ROVER_SVG_HEIGHT}px`;
+  }
+
+  const scrollTop = window.scrollY;
+  const viewportHeight = window.innerHeight;
+  const viewportBottom = scrollTop + viewportHeight;
+
+  const header = document.querySelector('header.header--main');
+  const headerHeight = header instanceof HTMLElement ? header.getBoundingClientRect().height : 0;
+
+  let minY = scrollTop + headerHeight + SPAWN_PADDING_PX;
+  let maxY = viewportBottom - SPAWN_PADDING_PX;
+
+  // Si le footer est visible dans le viewport courant, on évite sa zone.
+  const footer = document.querySelector('footer');
+  if (footer instanceof HTMLElement) {
+    const footerRect = footer.getBoundingClientRect();
+    if (footerRect.top < viewportHeight) {
+      const footerTopAbsolute = scrollTop + Math.max(0, footerRect.top);
+      maxY = Math.min(maxY, footerTopAbsolute - SPAWN_PADDING_PX);
+    }
+  }
+
+  if (maxY <= minY) {
+    const fallbackY = scrollTop + Math.max(headerHeight + SPAWN_PADDING_PX, viewportHeight * 0.45);
+    return `${Math.round(fallbackY)}px`;
+  }
+
+  return `${Math.round(randomBetween(minY, maxY))}px`;
+};
+
+/* ─── Composant interne : rendu du véhicule avec animation en deux phases ─── */
 
 /**
  * CommuterVehicle — monte le div sans la classe d'animation,
@@ -283,20 +334,7 @@ const CommuterVehicle = ({ type, duration }: { type: VehicleType; duration: numb
   const [animating, setAnimating] = useState(false);
 
   // Calculer la position verticale absolue à l'instant du spawn
-  const topPx = useMemo(() => {
-    if (type === 'rover') {
-      // Le rover roule au sommet du footer — on soustrait la hauteur du SVG
-      // (56 px) pour que les roues reposent sur le bord supérieur du footer.
-      const ROVER_SVG_HEIGHT = 56;
-      const footer = document.querySelector('footer');
-      if (footer) return footer.offsetTop - ROVER_SVG_HEIGHT + 'px';
-      // Fallback : bas du document moins la hauteur du rover
-      return Math.max(document.body.scrollHeight, window.innerHeight) - ROVER_SVG_HEIGHT + 'px';
-    }
-    // Spacecraft / satellite : fraction du viewport, ancrée au scroll courant
-    const frac = VIEWPORT_OFFSETS[type] ?? 0.1;
-    return Math.round(window.scrollY + window.innerHeight * frac) + 'px';
-  }, [type]);
+  const topPx = useMemo(() => pickCommuterTopPx(type), [type]);
 
   // Phase 2 : ajouter la classe d'animation au prochain frame
   useEffect(() => {
@@ -349,7 +387,7 @@ const OccasionalCommuter = () => {
       clearTimeout(lifetimeTimerRef.current);
       lifetimeTimerRef.current = null;
     }
-    const delay = randomBetween(MIN_DELAY_MS, MAX_DELAY_MS);
+    const delay = randomBetween(getAdaptiveDelay(MIN_DELAY_MS), getAdaptiveDelay(MAX_DELAY_MS));
     spawnTimerRef.current = setTimeout(() => {
       if (!mountedRef.current) return;
       spawnVehicle();
@@ -382,7 +420,7 @@ const OccasionalCommuter = () => {
     mountedRef.current = true;
     spawnTimerRef.current = setTimeout(() => {
       spawnVehicle();
-    }, FIRST_DELAY_MS);
+    }, getAdaptiveDelay(FIRST_DELAY_MS));
 
     return () => {
       mountedRef.current = false;

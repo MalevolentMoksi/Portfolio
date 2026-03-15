@@ -101,7 +101,7 @@ class MusicPlayer {
 
   constructor(trackFiles: string[]) {
     this.trackFiles = Array.isArray(trackFiles) ? trackFiles : [];
-    this.currentTrackIndex = 0;
+    this.currentTrackIndex = this.getPreferredDefaultTrackIndex();
     this.audio = new Audio();
     this.isPaused = false;
     this.isLoading = false;
@@ -146,6 +146,12 @@ class MusicPlayer {
     };
 
     this.init();
+  }
+
+  private getPreferredDefaultTrackIndex(): number {
+    if (!this.trackFiles.length) return 0;
+    const lunarIndex = this.trackFiles.findIndex((filename) => /lunar/i.test(filename));
+    return lunarIndex >= 0 ? lunarIndex : 0;
   }
 
   private parseStoredBoolean(value: string | null, fallbackValue: boolean): boolean {
@@ -736,12 +742,7 @@ class MusicPlayer {
 
     this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
     this.updateTrackInfo();
-
-    const meta = this.trackMeta[this.currentTrackIndex];
-    window.showToast?.(meta?.title || this.formatTitle(this.trackFiles[this.currentTrackIndex]), {
-      type: 'info',
-      duration: 2500,
-    });
+    this.showNowPlayingToast();
 
     if (!this.isPaused) {
       this.audio.play().catch(() => {
@@ -1031,7 +1032,7 @@ class MusicPlayer {
     this.elements.queueMenu.classList.add('open');
     this.loadAllMetadata();
     // Force refresh queue to show latest metadata
-    this.populateQueueMenu();
+    this.populateQueueMenu(true);
     this.updateQueueHighlight();
   }
 
@@ -1044,7 +1045,7 @@ class MusicPlayer {
     }, 300); // Wait for animation to finish
   }
 
-  private populateQueueMenu(): void {
+  private populateQueueMenu(animateItems = false): void {
     if (!this.elements.queueList) {
       return;
     }
@@ -1064,8 +1065,13 @@ class MusicPlayer {
           meta.pictureDataURL || getAssetPath('assets/images/favicon.svg')
         );
         const isCurrentTrack = index === this.currentTrackIndex;
-        const liClass = isCurrentTrack ? 'queue-item current' : 'queue-item';
+        const liClass = isCurrentTrack
+          ? `queue-item current${animateItems ? ' queue-item--enter' : ''}`
+          : `queue-item${animateItems ? ' queue-item--enter' : ''}`;
         const artistColor = 'rgba(var(--color-primary-rgb), 0.7)';
+        const itemDelay = animateItems
+          ? `style="--queue-item-delay: ${Math.min(index, 8) * 45}ms;"`
+          : '';
 
         // Build aria-label from current metadata
         const ariaLabel = isCurrentTrack
@@ -1077,7 +1083,7 @@ class MusicPlayer {
              role="option" 
              aria-label="${ariaLabel}"
              data-track-index="${index}" 
-             style="cursor: pointer; padding: 8px 10px; border-left: 3px solid transparent; display: flex; align-items: center; gap: 8px;">
+             ${itemDelay}>
           <img src="${safePictureDataURL}" alt="" style="width: 40px; height: 40px; border-radius: 4px; flex-shrink: 0; object-fit: cover;">
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; align-items: center; gap: 6px;">
@@ -1117,12 +1123,7 @@ class MusicPlayer {
     this.audio.currentTime = 0; // Reset playback to start of track
     this.updateTrackInfo();
     this.populateQueueMenu();
-
-    const meta = this.trackMeta[this.currentTrackIndex];
-    window.showToast?.(meta?.title || this.formatTitle(this.trackFiles[this.currentTrackIndex]), {
-      type: 'info',
-      duration: 2500,
-    });
+    this.showNowPlayingToast();
 
     if (!this.isPaused) {
       this.audio.play().catch(() => {
@@ -1199,11 +1200,31 @@ class MusicPlayer {
   }
 
   private createFallbackMeta(filename: string): TrackMeta {
+    if (/lunar/i.test(filename)) {
+      return {
+        title: 'Lunar',
+        artist: 'Anthemics',
+        pictureDataURL: getAssetPath('assets/images/favicon.svg'),
+      };
+    }
+
     return {
       title: this.formatTitle(filename),
       artist: 'Unknown Artist',
       pictureDataURL: getAssetPath('assets/images/favicon.svg'),
     };
+  }
+
+  private showNowPlayingToast(): void {
+    const currentFilename = this.trackFiles[this.currentTrackIndex];
+    const meta = this.trackMeta[this.currentTrackIndex] || this.createFallbackMeta(currentFilename);
+    const title = meta?.title || this.formatTitle(currentFilename);
+    const artist = meta?.artist && meta.artist !== 'Unknown Artist' ? ` - ${meta.artist}` : '';
+
+    window.showToast?.(`En lecture: ${title}${artist}`, {
+      type: 'music',
+      duration: 3200,
+    });
   }
 }
 
