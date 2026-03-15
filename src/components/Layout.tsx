@@ -13,11 +13,12 @@ import { useMood } from '../contexts/MoodContext';
 import ParticlesButton from './ParticlesButton';
 import PetButton from './pet/PetButton';
 import useDocumentMeta from '../hooks/useDocumentMeta';
+import useDynamicFavicon from '../hooks/useDynamicFavicon';
+import usePerformanceTier from '../hooks/usePerformanceTier';
 import usePortfolioModules from '../hooks/usePortfolioModules';
+import useSessionTracking from '../hooks/useSessionTracking';
 import { getAssetPath } from '../utils/assetPath';
 import { discoverMusicTracks } from '../utils/discoverMusicTracks';
-import { getPerformanceTier } from '../utils/performanceTier';
-import { safeSessionGet, safeSessionSet } from '../utils/safeStorage';
 import { ReadingTimeProvider } from '../contexts/ReadingTimeContext';
 import AmbientEffects from './ambient/AmbientEffects';
 import FooterDiorama from './ambient/FooterDiorama';
@@ -38,7 +39,7 @@ const pageConfig: Record<string, PageConfigItem> = {
     headingKey: 'pageConfig.home.heading',
     subheadingKey: 'pageConfig.home.subheading',
     subheadingAltKey: 'pageConfig.home.subheadingAlt',
-    backgroundSrc: getAssetPath('assets/images/backgrounds/risk-of-rain-2-launch-update.jpg'),
+    backgroundSrc: getAssetPath('assets/images/backgrounds/risk-of-rain-2-launch-update.webp'),
     metaTitleKey: 'pageConfig.home.metaTitle',
     metaDescriptionKey: 'pageConfig.home.metaDescription',
   },
@@ -117,6 +118,9 @@ const Layout = () => {
 
   useDocumentMeta(t(config.metaTitleKey), t(config.metaDescriptionKey));
   usePortfolioModules(trackFiles);
+  useSessionTracking(location.pathname);
+  useDynamicFavicon(mood);
+  usePerformanceTier();
 
   // Scroll to top when route changes
   useEffect(() => {
@@ -126,42 +130,6 @@ const Layout = () => {
     });
   }, [location.pathname]);
 
-  // Initialisation du suivi de session (timestamp de début)
-  useEffect(() => {
-    if (!safeSessionGet('session-start')) {
-      safeSessionSet('session-start', Date.now().toString());
-    }
-  }, []);
-
-  // Suivi des pages visitées dans la session courante
-  useEffect(() => {
-    const rawPages = safeSessionGet('session-pages') || '[]';
-    let pages = [];
-    try {
-      pages = JSON.parse(rawPages);
-    } catch {
-      pages = [];
-    }
-    if (!pages.includes(location.pathname)) {
-      pages.push(location.pathname);
-      safeSessionSet('session-pages', JSON.stringify(pages));
-    }
-  }, [location.pathname]);
-
-  // Ajouter le tier de performance à body pour les règles CSS conditionnelles
-  useEffect(() => {
-    const tier = getPerformanceTier();
-    document.body.setAttribute('data-perf-tier', tier);
-  }, []);
-
-  // Swap favicon selon le mood actif
-  useEffect(() => {
-    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-    if (link) {
-      link.href = getAssetPath(`assets/images/favicon-${mood}.svg`);
-    }
-  }, [mood]);
-
   return (
     <>
       <a href="#main" className="skip-to-content">
@@ -170,8 +138,6 @@ const Layout = () => {
       <div id="particles-js" aria-hidden="true"></div>
       <img
         src={config.backgroundSrc}
-        width="800"
-        height="450"
         alt=""
         id="background"
         aria-hidden="true"

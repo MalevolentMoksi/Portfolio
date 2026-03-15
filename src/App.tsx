@@ -1,24 +1,48 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+import type { ComponentType } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Layout from './components/Layout';
 import Loading from './components/Loading';
 
-// Lazy load pages pour code splitting
-const Home = lazy(() => import('./pages/Home'));
-const Projets = lazy(() => import('./pages/Projets'));
-const ProjetsPersonnels = lazy(() => import('./pages/ProjetsPersonnels'));
-const ProjetMEGASAE = lazy(() => import('./pages/ProjetMEGASAE'));
-const ProjetSAE12 = lazy(() => import('./pages/ProjetSAE12'));
-const ProjetSAE3 = lazy(() => import('./pages/ProjetSAE3'));
-const ProjetSAE4 = lazy(() => import('./pages/ProjetSAE4'));
-const ProjetSAE56 = lazy(() => import('./pages/ProjetSAE56'));
-const ProjetSAE301 = lazy(() => import('./pages/ProjetSAE301'));
-const About = lazy(() => import('./pages/About'));
-const Credits = lazy(() => import('./pages/Credits'));
-const NotFound = lazy(() => import('./pages/NotFound'));
+// Retry wrapper: if a lazy chunk fails to load (e.g. after a new deploy),
+// force a page reload so the browser fetches the updated index.html.
+function retryLazy<T extends ComponentType<Record<string, never>>>(
+  importFn: () => Promise<{ default: T }>,
+) {
+  return lazy<T>(() =>
+    importFn().catch(() => {
+      window.location.reload();
+      return { default: Loading } as unknown as { default: T };
+    }),
+  );
+}
 
-const App = () => (
-  <BrowserRouter
+// Lazy load pages pour code splitting
+const Home = retryLazy(() => import('./pages/Home'));
+const Projets = retryLazy(() => import('./pages/Projets'));
+const ProjetsPersonnels = retryLazy(() => import('./pages/ProjetsPersonnels'));
+const ProjetMEGASAE = retryLazy(() => import('./pages/ProjetMEGASAE'));
+const ProjetSAE12 = retryLazy(() => import('./pages/ProjetSAE12'));
+const ProjetSAE3 = retryLazy(() => import('./pages/ProjetSAE3'));
+const ProjetSAE4 = retryLazy(() => import('./pages/ProjetSAE4'));
+const ProjetSAE56 = retryLazy(() => import('./pages/ProjetSAE56'));
+const ProjetSAE301 = retryLazy(() => import('./pages/ProjetSAE301'));
+const About = retryLazy(() => import('./pages/About'));
+const Credits = retryLazy(() => import('./pages/Credits'));
+const NotFound = retryLazy(() => import('./pages/NotFound'));
+
+const App = () => {
+  const { i18n } = useTranslation();
+
+  // Sync <html lang="..."> with the active i18n language so screen readers
+  // apply the correct pronunciation rules when the user switches languages.
+  useEffect(() => {
+    document.documentElement.lang = i18n.language || 'fr';
+  }, [i18n.language]);
+
+  return (
+    <BrowserRouter
     basename="/"
     future={{
       v7_startTransition: true,
@@ -44,6 +68,7 @@ const App = () => (
       </Routes>
     </Suspense>
   </BrowserRouter>
-);
+  );
+};
 
 export default App;
