@@ -7,4 +7,4 @@ Tâches simples :
 Tâches moyennes :
 
 Tâches lourdes :
-
+Rendre les pages de projets plus dynamiques (ex: + d'élements spéciaux, animations, interactions, etc.)

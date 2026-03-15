@@ -14,7 +14,7 @@
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   padding: 0;
-  z-index: 10021;
+  z-index: 11021;
   transition:
     background-color var(--transition-fast),
     border-color var(--transition-fast);
@@ -66,45 +66,134 @@
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0);
-  z-index: 10019;
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  z-index: 11019;
   pointer-events: none;
-  transition: background-color var(--transition-base);
+  transition:
+    background-color var(--transition-base),
+    -webkit-backdrop-filter var(--transition-base),
+    backdrop-filter var(--transition-base);
 }
 
 .hamburger-overlay.open {
-  background-color: rgba(0, 0, 0, 0.62);
+  background-color: rgba(4, 6, 8, 0.64);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   pointer-events: auto;
 }
 
 .hamburger-nav {
+  --hamburger-closed-transform: translateX(-102%);
+  --hamburger-open-transform: translateX(0);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   position: fixed;
   top: 0;
   left: 0;
-  width: 280px;
+  width: clamp(300px, 34vw, 380px);
+  max-width: 100vw;
   height: 100vh;
   height: 100dvh;
-  background: rgba(26, 26, 26, 0.98);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  z-index: 10020;
-  transform: translateX(-100%);
-  transition: transform var(--transition-base);
-  padding: calc(60px + var(--space-md)) var(--space-md) var(--space-md);
+  background:
+    radial-gradient(circle at 14% 12%, rgba(var(--color-primary-rgb), 0.18), transparent 42%),
+    linear-gradient(160deg, rgba(12, 14, 16, 0.98), rgba(8, 10, 12, 0.98));
+  border-right: 1px solid rgba(var(--color-primary-rgb), 0.28);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  z-index: 11020;
+  transform: var(--hamburger-closed-transform);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    opacity var(--transition-fast),
+    visibility 0s linear var(--transition-fast);
+  padding: calc(58px + var(--space-md)) var(--space-md) calc(var(--space-md) + 0.25rem);
   overflow-y: auto;
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    20px 0 44px rgba(0, 0, 0, 0.5),
+    inset -1px 0 0 rgba(255, 255, 255, 0.02);
+}
+
+.hamburger-nav::before,
+.hamburger-nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hamburger-nav::before {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(var(--color-primary-rgb), 0.12) 0,
+      rgba(var(--color-primary-rgb), 0.02) 22%,
+      transparent 58%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.04) 0,
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+  opacity: 0.52;
+}
+
+.hamburger-nav::after {
+  top: 0;
+  bottom: auto;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--color-primary-rgb), 0.75),
+    transparent
+  );
+  transform: translateX(-110%);
 }
 
 .hamburger-nav.open {
-  transform: translateX(0);
+  transform: var(--hamburger-open-transform);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.hamburger-nav.open::after {
+  animation: hamburger-beam-sweep 1.25s cubic-bezier(0.2, 0.9, 0.2, 1) 0.08s both;
+}
+
+.hamburger-nav__header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0.8rem;
+  padding: 0 0.2rem 0.55rem;
+  border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.2);
+}
+
+.hamburger-nav__eyebrow {
+  margin: 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .hamburger-nav ul {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 0.55rem;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -113,51 +202,156 @@
 
 .hamburger-nav ul li {
   width: 100%;
+  opacity: 1;
+  transform: none;
+}
+
+.hamburger-nav.open ul li {
+  animation: hamburger-item-in 0.44s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hamburger-nav.open ul li:nth-child(1) {
+  animation-delay: 0.12s;
+}
+
+.hamburger-nav.open ul li:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.hamburger-nav.open ul li:nth-child(3) {
+  animation-delay: 0.24s;
 }
 
 .hamburger-nav ul li a {
-  display: block;
-  padding: var(--space-sm) var(--space-md);
-  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0.75rem 0.95rem;
+  color: rgba(var(--color-primary-rgb), 0.95);
   text-decoration: none;
   font-weight: 600;
-  font-size: 1.05rem;
-  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
-  border-radius: var(--border-radius-sm);
-  background: rgba(var(--color-primary-rgb), 0.08);
+  font-size: 1.02rem;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.22);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(var(--color-primary-rgb), 0.1), rgba(255, 255, 255, 0.03));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  will-change: transform;
   transition:
     background-color var(--transition-fast),
     color var(--transition-fast),
-    border-color var(--transition-fast);
+    border-color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.hamburger-nav ul li a::after {
+  content: '\203A';
+  font-size: 1.08rem;
+  color: rgba(var(--color-primary-rgb), 0.65);
+  transform: translateX(0);
+  transition:
+    transform var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .hamburger-nav ul li a:hover,
 .hamburger-nav ul li a:focus-visible {
-  background-color: rgba(var(--color-primary-rgb), 0.2);
+  background-color: rgba(var(--color-primary-rgb), 0.18);
   color: var(--color-accent-light);
   border-color: var(--color-accent-light);
+  transform: translateX(3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.22);
+}
+
+.hamburger-nav ul li a:hover::after,
+.hamburger-nav ul li a:focus-visible::after {
+  color: var(--color-accent-light);
+  transform: translateX(2px);
 }
 
 .hamburger-nav ul li a[aria-current='page'],
 .hamburger-nav ul li a.active {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
+  background: linear-gradient(130deg, var(--color-primary), var(--color-accent-pale));
+  border-color: rgba(var(--color-primary-rgb), 0.95);
   color: var(--color-secondary);
   font-weight: 700;
   pointer-events: none;
-  padding-left: calc(var(--space-md) + 6px);
-  border-left: 4px solid var(--color-accent-light);
+  padding-left: calc(0.95rem + 4px);
+  border-left: 4px solid rgba(255, 255, 255, 0.62);
+  box-shadow: 0 10px 20px rgba(var(--color-primary-rgb), 0.28);
 }
 
-@media (max-width: 768px) {
+.hamburger-nav ul li a[aria-current='page']::after,
+.hamburger-nav ul li a.active::after {
+  color: rgba(var(--color-secondary-rgb), 0.86);
+}
+
+@keyframes hamburger-beam-sweep {
+  from {
+    transform: translateX(-110%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(115%);
+    opacity: 0;
+  }
+}
+
+@keyframes hamburger-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 1120px) {
   .hamburger-toggle {
     display: flex;
   }
 }
 
+@media (max-width: 900px) {
+  .hamburger-nav {
+    --hamburger-closed-transform: translateY(110%);
+    --hamburger-open-transform: translateY(0);
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-width: 100%;
+    height: min(76dvh, 560px);
+    border-right: none;
+    border-top: 1px solid rgba(var(--color-primary-rgb), 0.28);
+    border-radius: 16px 16px 0 0;
+    padding-top: var(--space-md);
+    justify-content: flex-start;
+    box-shadow:
+      0 -22px 42px rgba(0, 0, 0, 0.46),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+}
+
 @media (max-width: 480px) {
   .hamburger-nav {
-    padding-top: calc(var(--space-xl) + 1rem);
-    justify-content: flex-start;
+    border-radius: 14px 14px 0 0;
   }
+
+  .hamburger-nav ul li a {
+    font-size: 1rem;
+  }
+}
+
+/* Ensure global floating UI (music player + peek tab) stays under the opened hamburger. */
+body.hamburger-menu-open #music-player,
+body.hamburger-menu-open #player-peek-btn {
+  z-index: 10990 !important;
 }

@@ -6,6 +6,17 @@
   position: relative;
 }
 
+.accessibility-btn {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 10px;
+}
+
+.accessibility-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
 .accessibility-panel {
   position: fixed;
   width: min(340px, 92vw);

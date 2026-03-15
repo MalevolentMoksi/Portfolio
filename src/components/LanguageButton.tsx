@@ -27,6 +27,7 @@ const LanguageButton = () => {
       <Tooltip text={t('common.language.tooltip')} position="bottom">
         <div
           className="language-segmented"
+          data-current={currentLang}
           role="group"
           aria-label={t('common.language.ariaLabel')}
         >

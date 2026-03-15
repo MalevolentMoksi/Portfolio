@@ -9,7 +9,7 @@ const FONT_OPTIONS: FontSize[] = ['normal', 'lg', 'xl'];
 
 interface PanelPosition {
   top: number;
-  right: number;
+  left: number;
 }
 
 const AccessibilityButton = () => {
@@ -51,7 +51,11 @@ const AccessibilityButton = () => {
   useEffect(() => {
     if (!isOpen || !panelRef.current) return;
     const rect = panelRef.current.getBoundingClientRect();
-    setPanelPos({ top: rect.bottom + 12, right: window.innerWidth - rect.right });
+    // Right-align the panel to the button, but clamp so it never overflows either edge
+    const approxPanelWidth = Math.min(340, window.innerWidth * 0.92);
+    const rawLeft = rect.right - approxPanelWidth;
+    const safeLeft = Math.max(8, Math.min(rawLeft, window.innerWidth - approxPanelWidth - 8));
+    setPanelPos({ top: rect.bottom + 8, left: safeLeft });
   }, [isOpen]);
 
   return (
@@ -90,7 +94,7 @@ const AccessibilityButton = () => {
             className="accessibility-panel"
             role="dialog"
             aria-label={t('common.accessibility.title')}
-            style={panelPos ? { top: `${panelPos.top}px`, right: `${panelPos.right}px` } : {}}
+            style={panelPos ? { top: `${panelPos.top}px`, left: `${panelPos.left}px` } : {}}
           >
             <div className="accessibility-panel-title">{t('common.accessibility.title')}</div>
 

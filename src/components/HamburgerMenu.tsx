@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '@styles/components/_hamburger-menu.css';
@@ -22,6 +23,13 @@ const HamburgerMenu = () => {
   useEffect(() => {
     closeMenu();
   }, [location.pathname]);
+
+  // Close menu on viewport resize to avoid layout inconsistency
+  useEffect(() => {
+    const handleResize = () => setIsOpen(false);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Escape key, body scroll lock, and focus trap
   useEffect(() => {
@@ -57,19 +65,24 @@ const HamburgerMenu = () => {
       document.addEventListener('keydown', handleEscape);
       document.addEventListener('keydown', handleFocusTrap);
       document.body.style.overflow = 'hidden';
-      // Move focus into nav
+      document.body.classList.add('hamburger-menu-open');
+      // Defer focus so a rapid second click on the toggle button isn't swallowed
       const firstLink = navRef.current?.querySelector('a');
-      if (firstLink) firstLink.focus();
+      if (firstLink) requestAnimationFrame(() => (firstLink as HTMLElement).focus());
     } else {
       document.body.style.overflow = '';
+      document.body.classList.remove('hamburger-menu-open');
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.removeEventListener('keydown', handleFocusTrap);
       document.body.style.overflow = '';
+      document.body.classList.remove('hamburger-menu-open');
     };
   }, [isOpen]);
+
+  const portalTarget = typeof document !== 'undefined' ? document.body : null;
 
   return (
     <>
@@ -87,36 +100,46 @@ const HamburgerMenu = () => {
         <span className="hamburger-toggle__line"></span>
       </button>
 
-      <div
-        className={`hamburger-overlay ${isOpen ? 'open' : ''}`}
-        onClick={closeMenu}
-        aria-hidden="true"
-      ></div>
+      {portalTarget
+        ? createPortal(
+            <>
+              <div
+                className={`hamburger-overlay ${isOpen ? 'open' : ''}`}
+                onClick={closeMenu}
+                aria-hidden="true"
+              ></div>
 
-      <nav
-        id="mobile-navigation"
-        ref={navRef}
-        className={`hamburger-nav ${isOpen ? 'open' : ''}`}
-        aria-label={t('common.mobileNav.aria')}
-      >
-        <ul>
-          <li>
-            <NavLink to="/" end onClick={closeMenu}>
-              {t('common.nav.home')}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/projets" onClick={closeMenu}>
-              {t('common.nav.projects')}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/projets-personnels" onClick={closeMenu}>
-              {t('common.nav.personalProjects')}
-            </NavLink>
-          </li>
-        </ul>
-      </nav>
+              <nav
+                id="mobile-navigation"
+                ref={navRef}
+                className={`hamburger-nav ${isOpen ? 'open' : ''}`}
+                aria-label={t('common.mobileNav.aria')}
+              >
+                <div className="hamburger-nav__header">
+                  <p className="hamburger-nav__eyebrow">{t('common.mobileNav.aria')}</p>
+                </div>
+                <ul>
+                  <li>
+                    <NavLink to="/" end onClick={closeMenu}>
+                      {t('common.nav.home')}
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/projets" onClick={closeMenu}>
+                      {t('common.nav.projects')}
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/projets-personnels" onClick={closeMenu}>
+                      {t('common.nav.personalProjects')}
+                    </NavLink>
+                  </li>
+                </ul>
+              </nav>
+            </>,
+            portalTarget
+          )
+        : null}
     </>
   );
 };
