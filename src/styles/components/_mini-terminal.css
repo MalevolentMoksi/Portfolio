@@ -254,6 +254,14 @@
   font-family: inherit;
   font-size: 0.8rem;
   caret-color: var(--color-primary);
+  box-shadow: none;
+}
+
+.mini-terminal-input:focus,
+.mini-terminal-input:focus-visible {
+  outline: none;
+  border: none;
+  box-shadow: none;
 }
 
 .mini-terminal-input::placeholder {
