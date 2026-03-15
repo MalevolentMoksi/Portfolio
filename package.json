@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "npm run format",
+    "prebuild": "npm run format && npm run seo:generate",
     "build": "vite build",
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,html}\"",
+    "seo:generate": "node scripts/generate-seo-files.mjs",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

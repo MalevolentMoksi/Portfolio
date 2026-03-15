@@ -3,10 +3,8 @@ Tâches manuelles :
 Tâches requiert Recherches A faire :
 
 Tâches simples :
-ENsure ambient commuters can appear all over the page, and try to avoid Header and Footer to not be hidden behind them
 
 Tâches moyennes :
-Music player : Make Lunar by Anthemics the default song, animate the track list apparition, upgrade the toast notification (right now it just shows the song name with and i icon)
 
 Tâches lourdes :
 

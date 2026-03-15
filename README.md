@@ -31,6 +31,7 @@ Le serveur de dev démarre sur `http://localhost:3000`.
 | `npm run build` | Formate (`prebuild`) puis build de production dans `dist/` |
 | `npm run preview` | Prévisualise le build de production sur `http://localhost:8080` |
 | `npm run format` | Formate `src/**/*.{ts,tsx,css,html}` avec Prettier |
+| `npm run seo:generate` | Génère `public/sitemap.xml` et `public/robots.txt` |
 
 ## Stack actuelle
 
@@ -173,6 +174,19 @@ VITE_FORMSPREE_ENDPOINT=https://formspree.io/f/votre_form_id
 npm run typecheck
 npm run build
 npm run preview
+```
+
+### Sitemap et robots.txt
+
+- Génération automatique avant chaque `npm run build` via `npm run seo:generate`.
+- URL de base configurable avec `SITE_URL` (ou `VITE_SITE_URL`).
+- Valeur par défaut : `https://moksi.studio`.
+
+Exemple (PowerShell) :
+
+```powershell
+$env:SITE_URL="https://moksi.studio"
+npm run seo:generate
 ```
 
 ### GitHub Pages (CI)
