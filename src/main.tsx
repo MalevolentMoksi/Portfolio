@@ -10,6 +10,30 @@ import '@styles/main.css';
 
 document.documentElement.dataset.spaMode = 'true';
 
+const loadDeferredStyles = () => {
+  void import('@styles/deferred.css');
+};
+
+const idleWindow = window as Window & {
+  requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+};
+
+if (document.readyState === 'complete') {
+  setTimeout(loadDeferredStyles, 1200);
+} else {
+  window.addEventListener(
+    'load',
+    () => {
+      if (typeof idleWindow.requestIdleCallback === 'function') {
+        idleWindow.requestIdleCallback(loadDeferredStyles, { timeout: 2500 });
+        return;
+      }
+      setTimeout(loadDeferredStyles, 1200);
+    },
+    { once: true }
+  );
+}
+
 const root = document.getElementById('root');
 
 if (!root) {

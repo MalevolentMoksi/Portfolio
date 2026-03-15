@@ -45,114 +45,182 @@ const useAnalyticsTracking = (pathname: string): void => {
     const proxyUrl = import.meta.env.VITE_WEBHOOK_PROXY_URL;
     if (!proxyUrl) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const utm = {
-      source: params.get('utm_source') || null,
-      medium: params.get('utm_medium') || null,
-      campaign: params.get('utm_campaign') || null,
-      visitor: params.get('visitor') || null,
-    };
+    let isCancelled = false;
+    let loadDelayTimer: number | null = null;
+    let fallbackTimer: number | null = null;
+    let idleCallbackId: number | null = null;
+    let loadListenerAttached = false;
+    let onLoadHandler: (() => void) | null = null;
 
-    const browserInfo = getBrowserInfo(navigator.userAgent);
-    const metrics = collectPageMetrics();
-    const prefs = collectUserPreferences();
-    const referrer = getReferrerDomain();
-    const sessionStats = getSessionStats(pathname);
-    const pageName = formatPageName(pathname);
+    const runTracking = () => {
+      if (isCancelled) return;
 
-    const sendMessage = (geo: GeoLocation | null): void => {
-      const isKnownVisitor = !!utm.visitor;
-      const timeOnPage = Math.round((Date.now() - pageStartTimeRef.current) / 1000);
-      const location = geo?.country
-        ? `${geo.city ? `${geo.city}, ` : ''}${geo.country}`
-        : 'Unavailable';
-      const fields: EmbedField[] = [
-        {
-          name: 'Navigation',
-          value: [
-            `**Path**: \`${pathname}\``,
-            `**Time on page**: ${timeOnPage}s`,
-            `**Referrer**: ${referrer ?? 'Direct'}`,
-          ].join('\n'),
-          inline: false,
-        },
-        {
-          name: 'Visitor',
-          value: [
-            `**Location**: ${location}`,
-            `**Language**: ${prefs.language.toUpperCase()}`,
-            `**Browser**: ${browserInfo}`,
-            `**Session**: ${sessionStats.pages} page${sessionStats.pages !== 1 ? 's' : ''} · ${sessionStats.elapsedMinutes} min`,
-          ].join('\n'),
-          inline: false,
-        },
-        {
-          name: 'Preferences',
-          value: [
-            `**Mood**: ${prefs.mood}`,
-            `**Accessibility**: ${prefs.a11y}`,
-            `**Music**: ${prefs.musicState}`,
-          ].join('\n'),
-          inline: true,
-        },
-        {
-          name: 'Device',
-          value: [
-            `**Display**: ${metrics.viewportCategory}${metrics.isPWA ? ' · PWA' : ''}`,
-            `**Connection**: ${metrics.connectionType}`,
-            `**RAM**: ${metrics.deviceMemory}`,
-            `**Load time**: ${metrics.loadTimeMs !== null ? `${metrics.loadTimeMs} ms` : 'N/A'}`,
-          ].join('\n'),
-          inline: true,
-        },
-      ];
+      const params = new URLSearchParams(window.location.search);
+      const utm = {
+        source: params.get('utm_source') || null,
+        medium: params.get('utm_medium') || null,
+        campaign: params.get('utm_campaign') || null,
+        visitor: params.get('visitor') || null,
+      };
 
-      if (utm.source || utm.medium || utm.campaign || utm.visitor) {
-        fields.push({
-          name: 'Attribution',
-          value: [
-            `**Source**: ${utm.source ?? 'Unknown'} / ${utm.medium ?? 'Unknown'}`,
-            `**Campaign**: ${utm.campaign ?? 'None'}`,
-            `**Visitor**: ${utm.visitor ?? 'Anonymous'}`,
-          ].join('\n'),
-          inline: false,
+      const browserInfo = getBrowserInfo(navigator.userAgent);
+      const metrics = collectPageMetrics();
+      const prefs = collectUserPreferences();
+      const referrer = getReferrerDomain();
+      const sessionStats = getSessionStats(pathname);
+      const pageName = formatPageName(pathname);
+
+      const sendMessage = (geo: GeoLocation | null): void => {
+        if (isCancelled) return;
+
+        const isKnownVisitor = !!utm.visitor;
+        const timeOnPage = Math.round((Date.now() - pageStartTimeRef.current) / 1000);
+        const location = geo?.country
+          ? `${geo.city ? `${geo.city}, ` : ''}${geo.country}`
+          : 'Unavailable';
+        const fields: EmbedField[] = [
+          {
+            name: 'Navigation',
+            value: [
+              `**Path**: \`${pathname}\``,
+              `**Time on page**: ${timeOnPage}s`,
+              `**Referrer**: ${referrer ?? 'Direct'}`,
+            ].join('\n'),
+            inline: false,
+          },
+          {
+            name: 'Visitor',
+            value: [
+              `**Location**: ${location}`,
+              `**Language**: ${prefs.language.toUpperCase()}`,
+              `**Browser**: ${browserInfo}`,
+              `**Session**: ${sessionStats.pages} page${sessionStats.pages !== 1 ? 's' : ''} · ${sessionStats.elapsedMinutes} min`,
+            ].join('\n'),
+            inline: false,
+          },
+          {
+            name: 'Preferences',
+            value: [
+              `**Mood**: ${prefs.mood}`,
+              `**Accessibility**: ${prefs.a11y}`,
+              `**Music**: ${prefs.musicState}`,
+            ].join('\n'),
+            inline: true,
+          },
+          {
+            name: 'Device',
+            value: [
+              `**Display**: ${metrics.viewportCategory}${metrics.isPWA ? ' · PWA' : ''}`,
+              `**Connection**: ${metrics.connectionType}`,
+              `**RAM**: ${metrics.deviceMemory}`,
+              `**Load time**: ${metrics.loadTimeMs !== null ? `${metrics.loadTimeMs} ms` : 'N/A'}`,
+            ].join('\n'),
+            inline: true,
+          },
+        ];
+
+        if (utm.source || utm.medium || utm.campaign || utm.visitor) {
+          fields.push({
+            name: 'Attribution',
+            value: [
+              `**Source**: ${utm.source ?? 'Unknown'} / ${utm.medium ?? 'Unknown'}`,
+              `**Campaign**: ${utm.campaign ?? 'None'}`,
+              `**Visitor**: ${utm.visitor ?? 'Anonymous'}`,
+            ].join('\n'),
+            inline: false,
+          });
+        }
+
+        fetch(proxyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: JSON.stringify({
+            embeds: [
+              {
+                author: { name: '📊 Portfolio Analytics' },
+                title: pageName,
+                description: isKnownVisitor
+                  ? `Visitor: **${utm.visitor}**`
+                  : 'Visitor: **Anonymous**',
+                color: isKnownVisitor ? 0x00ff99 : 0x5865f2,
+                fields,
+                timestamp: new Date().toISOString(),
+                footer: {
+                  text: geo?.timezone ?? 'timezone unknown',
+                },
+              },
+            ],
+          }),
+        }).catch((err: unknown) => {
+          console.debug('[Analytics] Failed to send:', err);
         });
+      };
+
+      if (geoFetched.current) {
+        sendMessage(geoCache.current);
+        return;
       }
 
-      fetch(proxyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          embeds: [
-            {
-              author: { name: '📊 Portfolio Analytics' },
-              title: pageName,
-              description: isKnownVisitor
-                ? `Visitor: **${utm.visitor}**`
-                : 'Visitor: **Anonymous**',
-              color: isKnownVisitor ? 0x00ff99 : 0x5865f2,
-              fields,
-              timestamp: new Date().toISOString(),
-              footer: {
-                text: geo?.timezone ?? 'timezone unknown',
-              },
-            },
-          ],
-        }),
-      }).catch((err: unknown) => {
-        console.debug('[Analytics] Failed to send:', err);
-      });
-    };
-
-    if (geoFetched.current) {
-      sendMessage(geoCache.current);
-    } else {
       geoFetched.current = true;
       fetchGeolocation().then((geo) => {
         geoCache.current = geo;
         sendMessage(geo);
       });
+    };
+
+    const scheduleRun = () => {
+      if (isCancelled) return;
+
+      loadDelayTimer = window.setTimeout(() => {
+        if (isCancelled) return;
+
+        if ('requestIdleCallback' in window) {
+          idleCallbackId = window.requestIdleCallback(runTracking, { timeout: 2000 });
+          return;
+        }
+
+        runTracking();
+      }, 1200);
+    };
+
+    if (document.readyState === 'complete') {
+      scheduleRun();
+    } else {
+      onLoadHandler = () => {
+        loadListenerAttached = false;
+        scheduleRun();
+      };
+      loadListenerAttached = true;
+      window.addEventListener('load', onLoadHandler, { once: true });
+
+      // Safety fallback for pages where load may have already happened before listener attachment.
+      fallbackTimer = window.setTimeout(() => {
+        if (!loadListenerAttached) return;
+        if (onLoadHandler) {
+          window.removeEventListener('load', onLoadHandler);
+          onLoadHandler = null;
+        }
+        loadListenerAttached = false;
+        scheduleRun();
+      }, 2000);
     }
+
+    return () => {
+      isCancelled = true;
+      if (loadDelayTimer !== null) {
+        window.clearTimeout(loadDelayTimer);
+      }
+      if (fallbackTimer !== null) {
+        window.clearTimeout(fallbackTimer);
+      }
+      if (idleCallbackId !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleCallbackId);
+      }
+      if (loadListenerAttached && onLoadHandler) {
+        window.removeEventListener('load', onLoadHandler);
+      }
+    };
   }, [pathname]);
 };
 
@@ -298,8 +366,10 @@ async function fetchGeolocation(): Promise<GeoLocation | null> {
   }
 
   // Fetch from ipapi.co
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 1500);
   try {
-    const response = await fetch('https://ipapi.co/json/');
+    const response = await fetch('https://ipapi.co/json/', { signal: controller.signal });
     if (!response.ok) throw new Error('Geolocation unavailable');
     const rawData = (await response.json()) as {
       country_name?: string;
@@ -321,6 +391,8 @@ async function fetchGeolocation(): Promise<GeoLocation | null> {
   } catch {
     console.debug('[Analytics] Geolocation fetch failed');
     return null;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
 }
 

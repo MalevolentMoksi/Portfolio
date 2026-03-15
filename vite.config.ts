@@ -16,7 +16,8 @@ export default defineConfig({
       injectRegister: false,
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-        globPatterns: ['**/*.{js,css,html,ico,svg,woff,woff2}', 'assets/images/**/*.webp'],
+        // Keep install-time precache lean; cache heavy assets on demand at runtime.
+        globPatterns: ['**/*.{html,ico,png,svg,webmanifest}'],
         globIgnores: [
           '**/assets/images/_unused/**',
           '**/assets/images/drawings/**',
@@ -27,29 +28,44 @@ export default defineConfig({
         navigateFallback: null,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'google-fonts-stylesheets',
-              expiration: { maxAgeSeconds: 60 * 60 * 24 * 7 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
+            urlPattern: /\/assets\/.*\.(mp3|m4a|ogg)$/i,
+            handler: 'NetworkOnly',
           },
           {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
+            urlPattern: /\/assets\/.*\.js$/i,
+            handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'google-fonts-webfonts',
+              cacheName: 'portfolio-assets-js',
               expiration: {
-                maxEntries: 30,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
+                maxEntries: 80,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
               },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
-            urlPattern: /\/assets\/.*\.(mp3|m4a|ogg)$/i,
-            handler: 'NetworkOnly',
+            urlPattern: /\/assets\/.*\.css$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'portfolio-assets-css',
+              expiration: {
+                maxEntries: 40,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /\/assets\/.*\.woff2$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'portfolio-fonts',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
           },
           {
             urlPattern: /\/assets\/images\/(?:drawings|projects|_unused)\/.*\.(jpg|jpeg|png|webp)$/i,

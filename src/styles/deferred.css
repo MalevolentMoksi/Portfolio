@@ -1,0 +1,3 @@
+/* Non-critical visual layers loaded after first paint */
+@import './components/_ambient.css';
+@import './_effects.css';

@@ -92,6 +92,7 @@ class MusicPlayer {
   private isQueueOpen: boolean;
   private isRetracted: boolean;
   private metadataLoaded: boolean;
+  private metadataTracksLoaded: Set<number>;
   private savedTime: number;
   private lastSaveTime: number | null;
   private readonly STORAGE_KEYS: StorageKeys;
@@ -110,6 +111,7 @@ class MusicPlayer {
     this.isQueueOpen = false; // Track queue menu state
     this.isRetracted = false; // Track retract/collapse state
     this.metadataLoaded = false;
+    this.metadataTracksLoaded = new Set<number>();
     this.savedTime = 0;
     this.lastSaveTime = null;
 
@@ -169,7 +171,7 @@ class MusicPlayer {
     this.setupAudio();
     this.render();
     this.setupVisualizer();
-    this.loadAllMetadata();
+    this.scheduleCurrentTrackMetadataLoad();
     this.attachEventListeners();
     this.setupMoodListener();
   }
@@ -219,10 +221,12 @@ class MusicPlayer {
       return;
     }
 
-    // Preload only metadata (~50KB): loads duration & format headers needed by jsmediatags
-    // for ID3 tag extraction. Does NOT load the 2.9 MB audio data until play.
-    this.audio.preload = 'metadata';
-    this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
+    // Avoid early media downloads on first paint: only attach src immediately
+    // when playback should resume from a previous session.
+    this.audio.preload = this.isPaused ? 'none' : 'metadata';
+    if (!this.isPaused) {
+      this.ensureAudioSourceLoaded();
+    }
     this.audio.muted = true; // Start muted for autoplay policy
     this.audio.volume = this.savedVolume;
 
@@ -243,6 +247,120 @@ class MusicPlayer {
 
     // Auto-unmute on user interaction
     document.addEventListener('click', () => this.attemptAutoplay(), { once: true });
+  }
+
+  private getCurrentTrackUrl(): string {
+    return getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
+  }
+
+  private ensureAudioSourceLoaded(): void {
+    if (!this.trackFiles.length) return;
+
+    const targetSrc = this.getCurrentTrackUrl();
+    const absoluteTarget = new URL(targetSrc, window.location.origin).href;
+    if (this.audio.src !== absoluteTarget) {
+      this.audio.src = targetSrc;
+    }
+  }
+
+  private scheduleCurrentTrackMetadataLoad(): void {
+    if (!this.trackFiles.length) return;
+
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+    };
+
+    const start = () => {
+      if (typeof idleWindow.requestIdleCallback === 'function') {
+        idleWindow.requestIdleCallback(
+          () => this.loadTrackMetadataForIndex(this.currentTrackIndex),
+          {
+            timeout: 2500,
+          }
+        );
+        return;
+      }
+      setTimeout(() => this.loadTrackMetadataForIndex(this.currentTrackIndex), 1200);
+    };
+
+    if (document.readyState === 'complete') {
+      start();
+      return;
+    }
+
+    window.addEventListener('load', start, { once: true });
+  }
+
+  private loadTrackMetadataForIndex(trackIndex: number): void {
+    if (!this.trackFiles.length) return;
+    if (trackIndex < 0 || trackIndex >= this.trackFiles.length) return;
+    if (this.metadataTracksLoaded.has(trackIndex)) return;
+
+    this.metadataTracksLoaded.add(trackIndex);
+
+    const filename = this.trackFiles[trackIndex];
+    const relUrl = getAssetPath(`assets/music/${filename}`);
+    const url = relUrl.startsWith('http') ? relUrl : window.location.origin + relUrl;
+    const maxAttempts = 3;
+
+    const read = (attempt: number) => {
+      try {
+        jsmediatags.read(url, {
+          onSuccess: (tag: JsMediaTagsResult) => {
+            this.trackMeta[trackIndex].title = tag.tags.title || this.formatTitle(filename);
+            this.trackMeta[trackIndex].artist = tag.tags.artist || 'Unknown Artist';
+
+            if (tag.tags.picture) {
+              const { data, format } = tag.tags.picture;
+              let binary = '';
+              for (let i = 0; i < data.length; i++) {
+                binary += String.fromCharCode(data[i]);
+              }
+              const base64String = window.btoa(binary);
+              this.trackMeta[trackIndex].pictureDataURL = `data:${format};base64,${base64String}`;
+            }
+
+            if (trackIndex === this.currentTrackIndex && this.elements.title) {
+              this.updateTrackInfo();
+            }
+
+            if (this.isQueueOpen && this.elements.queueList) {
+              this.populateQueueMenu();
+            }
+          },
+          onError: (error: { type: string; info: string }) => {
+            if (attempt < maxAttempts - 1) {
+              const retryDelay = (attempt + 1) * 350;
+              window.setTimeout(() => read(attempt + 1), retryDelay);
+              return;
+            }
+
+            console.warn(`Failed to read metadata for ${filename}:`, error);
+            this.trackMeta[trackIndex] = this.createFallbackMeta(filename);
+            if (trackIndex === this.currentTrackIndex && this.elements.title) {
+              this.updateTrackInfo();
+            }
+            if (this.isQueueOpen && this.elements.queueList) {
+              this.populateQueueMenu();
+            }
+          },
+        });
+      } catch (error: unknown) {
+        if (attempt < maxAttempts - 1) {
+          const retryDelay = (attempt + 1) * 350;
+          window.setTimeout(() => read(attempt + 1), retryDelay);
+          return;
+        }
+
+        console.warn(`Failed to initialize metadata reader for ${filename}:`, error);
+        this.trackMeta[trackIndex] = this.createFallbackMeta(filename);
+        if (trackIndex === this.currentTrackIndex && this.elements.title) {
+          this.updateTrackInfo();
+        }
+      }
+    };
+
+    read(0);
   }
 
   private onLoadStart(): void {
@@ -354,6 +472,7 @@ class MusicPlayer {
 
   private attemptAutoplay(): void {
     if (!this.isPaused && this.audio.paused) {
+      this.ensureAudioSourceLoaded();
       this.audio
         .play()
         .then(() => {
@@ -378,6 +497,10 @@ class MusicPlayer {
     // l'intégralité du fichier audio.
 
     const loadTrack = (filename: string, idx: number, attempt = 0): Promise<void> => {
+      if (this.metadataTracksLoaded.has(idx)) {
+        return Promise.resolve();
+      }
+
       const relUrl = getAssetPath(`assets/music/${filename}`);
       // jsmediatags XhrFileReader requires an absolute URL (http/https)
       const url = relUrl.startsWith('http') ? relUrl : window.location.origin + relUrl;
@@ -410,6 +533,8 @@ class MusicPlayer {
                 this.populateQueueMenu();
               }
 
+              this.metadataTracksLoaded.add(idx);
+
               resolve();
             },
             onError: (error: { type: string; info: string }) => {
@@ -429,6 +554,7 @@ class MusicPlayer {
               if (this.isQueueOpen && this.elements.queueList) {
                 this.populateQueueMenu();
               }
+              this.metadataTracksLoaded.add(idx);
               resolve();
             },
           });
@@ -446,6 +572,7 @@ class MusicPlayer {
           if (idx === this.currentTrackIndex && this.elements.title) {
             this.updateTrackInfo();
           }
+          this.metadataTracksLoaded.add(idx);
           resolve();
         }
       });
@@ -718,6 +845,8 @@ class MusicPlayer {
     if (!this.trackFiles.length) return;
 
     if (this.audio.paused) {
+      this.ensureAudioSourceLoaded();
+      this.loadTrackMetadataForIndex(this.currentTrackIndex);
       this.audio
         .play()
         .then(() => {
@@ -739,8 +868,10 @@ class MusicPlayer {
     this.currentTrackIndex = (this.currentTrackIndex + 1) % this.trackFiles.length;
     safeLocalSet(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
     safeLocalSet(this.STORAGE_KEYS.CURRENT_TIME, '0');
+    this.savedTime = 0;
 
-    this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
+    this.ensureAudioSourceLoaded();
+    this.loadTrackMetadataForIndex(this.currentTrackIndex);
     this.updateTrackInfo();
     this.showNowPlayingToast();
 
@@ -1119,7 +1250,8 @@ class MusicPlayer {
     safeLocalSet(this.STORAGE_KEYS.CURRENT_TIME, '0');
     this.savedTime = 0; // Reset saved time so onLoadedMetadata doesn't restore old time
 
-    this.audio.src = getAssetPath(`assets/music/${this.trackFiles[this.currentTrackIndex]}`);
+    this.ensureAudioSourceLoaded();
+    this.loadTrackMetadataForIndex(this.currentTrackIndex);
     this.audio.currentTime = 0; // Reset playback to start of track
     this.updateTrackInfo();
     this.populateQueueMenu();

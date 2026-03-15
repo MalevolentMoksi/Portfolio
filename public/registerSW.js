@@ -17,8 +17,7 @@ const basePath = registerScriptUrl.pathname.replace(/registerSW\.js$/, '');
 const swUrl = `${basePath}sw.js`;
 
 if ('serviceWorker' in navigator && isSecureOrigin) {
-  // Register SW after page loads
-  window.addEventListener('load', () => {
+  const registerServiceWorker = () => {
     navigator.serviceWorker
       .register(swUrl, { scope: basePath })
       .then((registration) => {
@@ -29,5 +28,22 @@ if ('serviceWorker' in navigator && isSecureOrigin) {
           console.warn('Service Worker registration failed:', error);
         }
       });
-  });
+  };
+
+  const runWhenIdle = () => {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(
+        () => {
+          registerServiceWorker();
+        },
+        { timeout: 4000 }
+      );
+      return;
+    }
+
+    window.setTimeout(registerServiceWorker, 2500);
+  };
+
+  // Register after page load and idle time to avoid competing with initial rendering/network.
+  window.addEventListener('load', runWhenIdle, { once: true });
 }
