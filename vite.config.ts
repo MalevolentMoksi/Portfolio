@@ -8,9 +8,28 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const buildDate = new Date().toISOString().split('T')[0];
 
+/**
+ * Plugin: Exclude music files from build output
+ * Music files are served separately (on-demand from public/)
+ * and not included in the dist/ folder to reduce initial bundle
+ */
+const excludeMusicFilesPlugin = {
+  name: 'exclude-music-files',
+  apply: 'build',
+  generateBundle(options, bundle) {
+    // Remove music files from the build output
+    Object.keys(bundle).forEach((fileName) => {
+      if (/\.(mp3|m4a|ogg)$/i.test(fileName)) {
+        delete bundle[fileName];
+      }
+    });
+  },
+};
+
 export default defineConfig({
   plugins: [
     react(),
+    excludeMusicFilesPlugin,
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
@@ -120,6 +139,7 @@ export default defineConfig({
     target: ['es2020', 'chrome90', 'firefox88', 'safari14', 'edge90'],
     rollupOptions: {
       input: resolve(__dirname, 'src/index.html'),
+      external: ['react-native-fs'],
       output: {
         manualChunks(id) {
           if (id.includes('node_modules/framer-motion')) {
@@ -136,9 +156,6 @@ export default defineConfig({
         },
       },
     },
-      rollupOptions: {
-        external: ['react-native-fs'],
-      },
     assetsInlineLimit: 4096,
     cssCodeSplit: true,
     minify: 'terser',

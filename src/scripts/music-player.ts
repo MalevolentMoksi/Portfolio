@@ -3,7 +3,6 @@
  * Handles persistent background music with localStorage state management
  */
 
-import * as jsmediatags from 'jsmediatags';
 import { getAssetPath } from '../utils/assetPath';
 import { isLowTier } from '../utils/performanceTier';
 import { safeLocalGet, safeLocalSet } from '../utils/safeStorage';
@@ -303,9 +302,10 @@ class MusicPlayer {
     const url = relUrl.startsWith('http') ? relUrl : window.location.origin + relUrl;
     const maxAttempts = 3;
 
-    const read = (attempt: number) => {
+    const read = async (attempt: number) => {
       try {
-        jsmediatags.read(url, {
+        const jsmediatags = await import('jsmediatags');
+        jsmediatags.default?.read(url, {
           onSuccess: (tag: JsMediaTagsResult) => {
             this.trackMeta[trackIndex].title = tag.tags.title || this.formatTitle(filename);
             this.trackMeta[trackIndex].artist = tag.tags.artist || 'Unknown Artist';
@@ -506,9 +506,10 @@ class MusicPlayer {
       const url = relUrl.startsWith('http') ? relUrl : window.location.origin + relUrl;
       const maxAttempts = 3;
 
-      return new Promise<void>((resolve) => {
+      return new Promise<void>(async (resolve) => {
         try {
-          jsmediatags.read(url, {
+          const jsmediatags = await import('jsmediatags');
+          jsmediatags.default?.read(url, {
             onSuccess: (tag: JsMediaTagsResult) => {
               this.trackMeta[idx].title = tag.tags.title || this.formatTitle(filename);
               this.trackMeta[idx].artist = tag.tags.artist || 'Unknown Artist';

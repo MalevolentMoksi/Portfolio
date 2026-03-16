@@ -21,8 +21,8 @@ import useSessionTracking from '../hooks/useSessionTracking';
 import { getAssetPath } from '../utils/assetPath';
 import { discoverMusicTracks } from '../utils/discoverMusicTracks';
 import { ReadingTimeProvider } from '../contexts/ReadingTimeContext';
-import AmbientEffects from './ambient/AmbientEffects';
-import FooterDiorama from './ambient/FooterDiorama';
+const AmbientEffects = lazy(() => import('./ambient/AmbientEffects'));
+const FooterDiorama = lazy(() => import('./ambient/FooterDiorama'));
 
 const trackFiles = discoverMusicTracks();
 
@@ -224,9 +224,17 @@ const Layout = () => {
         </ReadingTimeProvider>
       </main>
 
-      <Footer diorama={<FooterDiorama />} />
+      <Footer
+        diorama={
+          <Suspense fallback={null}>
+            <FooterDiorama />
+          </Suspense>
+        }
+      />
       <div className="ambient-layers" aria-hidden="true">
-        <AmbientEffects />
+        <Suspense fallback={null}>
+          <AmbientEffects />
+        </Suspense>
       </div>
       <BackToTopButton />
     </>

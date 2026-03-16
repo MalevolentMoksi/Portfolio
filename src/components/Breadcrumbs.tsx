@@ -69,7 +69,11 @@ const Breadcrumbs = () => {
     // Si c'est la page Informations legales
     // -> Accueil > Informations legales
     else if (firstSegment === 'informations-legales') {
-      trail.push({ label: t('common.footer.legal'), path: '/informations-legales', isCurrent: true });
+      trail.push({
+        label: t('common.footer.legal'),
+        path: '/informations-legales',
+        isCurrent: true,
+      });
     }
 
     return trail;
