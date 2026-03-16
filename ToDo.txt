@@ -4,6 +4,7 @@ Tâches requiert Recherches A faire :
 
 Tâches simples :
 CSS des éléments en chargmenet de page à revoir.
+Contrast forces mood
 
 Tâches moyennes :
 Rendre les boutons du MoodSwitcher personalliés selon le Mood, avec des gradiants très esthétiques
