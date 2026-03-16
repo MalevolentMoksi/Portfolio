@@ -6,6 +6,8 @@ Tâches simples :
 CSS des éléments en chargmenet de page à revoir.
 
 Tâches moyennes :
+Rendre les boutons du MoodSwitcher personalliés selon le Mood, avec des gradiants très esthétiques
 
 Tâches lourdes :
 Rendre les pages de projets plus dynamiques (ex: + d'élements spéciaux, animations, interactions, etc.)
+Six-shooter moodSwitcher revamp

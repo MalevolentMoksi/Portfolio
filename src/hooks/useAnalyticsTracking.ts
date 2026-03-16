@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { safeLocalGet, safeLocalSet, safeSessionGet, safeSessionSet } from '../utils/safeStorage';
+import { upsertAnalyticsSession, touchAnalyticsSessionActivity } from '../utils/analyticsSession';
+import { safeLocalGet, safeLocalSet } from '../utils/safeStorage';
 
 /* ── Non-standard Navigator API extensions ─────────────── */
 interface NetworkInformation {
@@ -45,8 +46,11 @@ interface VisitorIdentity {
 interface SessionStats {
   pages: number;
   elapsedMinutes: number;
-  previousPath: string | null;
+  sessionId: string;
+  lifetimeSessions: number;
 }
+
+type ExitReason = 'visibility-hidden' | 'pagehide' | 'route-change';
 
 const GEO_CACHE_KEY = 'portfolio-geo-cache-v2';
 const GEO_CACHE_TTL_MS = 30 * 60 * 1000;
@@ -62,12 +66,27 @@ const GEO_CACHE_TTL_MS = 30 * 60 * 1000;
  */
 const useAnalyticsTracking = (pathname: string): void => {
   const pageStartTimeRef = useRef<number>(Date.now());
+  const visibleWindowStartRef = useRef<number>(
+    document.visibilityState === 'visible' ? Date.now() : 0
+  );
+  const accumulatedVisibleMsRef = useRef<number>(0);
+  const lastSentVisibleSecondsRef = useRef<number>(0);
+  const previousPathRef = useRef<string | null>(null);
+  const entryReferrerRef = useRef<string>(formatEntryReferrer(document.referrer));
   const geoCache = useRef<GeoLocation | null>(null);
   const geoFetched = useRef(false);
 
   useEffect(() => {
-    // Reset page-start time on every navigation
+    const previousInternalPath = previousPathRef.current;
+    previousPathRef.current = pathname;
+
+    // Reset page-start time on every navigation.
     pageStartTimeRef.current = Date.now();
+    accumulatedVisibleMsRef.current = 0;
+    lastSentVisibleSecondsRef.current = 0;
+    visibleWindowStartRef.current = document.visibilityState === 'visible' ? Date.now() : 0;
+
+    touchAnalyticsSessionActivity();
 
     const proxyUrl = import.meta.env.VITE_WEBHOOK_PROXY_URL;
     if (!proxyUrl) return;
@@ -78,6 +97,96 @@ const useAnalyticsTracking = (pathname: string): void => {
     let idleCallbackId: number | null = null;
     let loadListenerAttached = false;
     let onLoadHandler: (() => void) | null = null;
+
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (cb: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    const closeVisibleWindow = () => {
+      if (visibleWindowStartRef.current > 0) {
+        accumulatedVisibleMsRef.current += Date.now() - visibleWindowStartRef.current;
+        visibleWindowStartRef.current = 0;
+      }
+    };
+
+    const openVisibleWindow = () => {
+      if (document.visibilityState === 'visible' && visibleWindowStartRef.current === 0) {
+        visibleWindowStartRef.current = Date.now();
+      }
+    };
+
+    const getVisibleTimeMs = () => {
+      if (visibleWindowStartRef.current > 0) {
+        return accumulatedVisibleMsRef.current + (Date.now() - visibleWindowStartRef.current);
+      }
+      return accumulatedVisibleMsRef.current;
+    };
+
+    const sendPayload = (payload: unknown, preferBeacon = false) => {
+      const body = JSON.stringify(payload);
+
+      if (preferBeacon && typeof navigator.sendBeacon === 'function') {
+        const sent = navigator.sendBeacon(proxyUrl, new Blob([body], { type: 'application/json' }));
+        if (sent) return;
+      }
+
+      fetch(proxyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body,
+      }).catch((err: unknown) => {
+        console.debug('[Analytics] Failed to send:', err);
+      });
+    };
+
+    const flushTimeOnPage = (reason: ExitReason, preferBeacon: boolean) => {
+      const visibleSeconds = Math.max(1, Math.round(getVisibleTimeMs() / 1000));
+      if (visibleSeconds <= lastSentVisibleSecondsRef.current) return;
+      lastSentVisibleSecondsRef.current = visibleSeconds;
+
+      const sessionStats = getSessionStats(pathname);
+
+      sendPayload(
+        {
+          embeds: [
+            {
+              author: { name: '📊 Portfolio Analytics' },
+              title: `Exit Signal · ${formatPageName(pathname)}`,
+              color: 0xf5a623,
+              fields: [
+                {
+                  name: 'Navigation',
+                  value: [
+                    `**Path**: \`${pathname}\``,
+                    `**Time on page (final)**: ${visibleSeconds}s`,
+                    `**Entry referrer**: ${entryReferrerRef.current}`,
+                    `**Internal from**: ${formatInternalPath(previousInternalPath)}`,
+                    `**Trigger**: ${reason}`,
+                  ].join('\n'),
+                  inline: false,
+                },
+                {
+                  name: 'Session',
+                  value: [
+                    `**Session ID**: ${sessionStats.sessionId}`,
+                    `**Pages**: ${sessionStats.pages}`,
+                    `**Elapsed**: ${sessionStats.elapsedMinutes} min`,
+                  ].join('\n'),
+                  inline: false,
+                },
+              ],
+              timestamp: new Date().toISOString(),
+              footer: {
+                text: getBrowserTimezone() ?? 'timezone unavailable',
+              },
+            },
+          ],
+        },
+        preferBeacon
+      );
+    };
 
     const runTracking = () => {
       if (isCancelled) return;
@@ -90,27 +199,27 @@ const useAnalyticsTracking = (pathname: string): void => {
         visitor: normalizeVisitorLabel(params.get('visitor')),
       };
 
-      const visitor = resolveVisitorIdentity(utm.visitor);
+      const sessionStats = getSessionStats(pathname);
+      const visitor = resolveVisitorIdentity(utm.visitor, sessionStats.lifetimeSessions);
       const browserInfo = getBrowserInfo(navigator.userAgent);
       const metrics = collectPageMetrics(pageStartTimeRef.current);
       const prefs = collectUserPreferences();
-      const sessionStats = getSessionStats(pathname);
-      const referrer = getReferrerDomain(sessionStats.previousPath);
       const pageName = formatPageName(pathname);
 
       const sendMessage = (geo: GeoLocation | null): void => {
         if (isCancelled) return;
 
         const isKnownVisitor = visitor.source !== 'generated';
-        const timeOnPage = Math.round((Date.now() - pageStartTimeRef.current) / 1000);
+        const timeOnPage = Math.max(1, Math.round(getVisibleTimeMs() / 1000));
         const location = formatLocation(geo);
         const fields: EmbedField[] = [
           {
             name: 'Navigation',
             value: [
               `**Path**: \`${pathname}\``,
-              `**Time on page**: ${timeOnPage}s`,
-              `**Referrer**: ${referrer}`,
+              `**Time on page (live)**: ${timeOnPage}s`,
+              `**Entry referrer**: ${entryReferrerRef.current}`,
+              `**Internal from**: ${formatInternalPath(previousInternalPath)}`,
             ].join('\n'),
             inline: false,
           },
@@ -123,6 +232,7 @@ const useAnalyticsTracking = (pathname: string): void => {
               `**Language**: ${prefs.language.toUpperCase()}`,
               `**Browser**: ${browserInfo}`,
               `**Session**: ${sessionStats.pages} page${sessionStats.pages !== 1 ? 's' : ''} · ${sessionStats.elapsedMinutes} min · #${visitor.lifetimeSessions}`,
+              `**Session ID**: ${sessionStats.sessionId}`,
             ].join('\n'),
             inline: false,
           },
@@ -141,8 +251,14 @@ const useAnalyticsTracking = (pathname: string): void => {
               `**Display**: ${metrics.viewportCategory}${metrics.isPWA ? ' · PWA' : ''}`,
               `**Connection**: ${metrics.connectionType}`,
               `**RAM**: ${metrics.deviceMemory}`,
+              `**CPU Cores**: ${metrics.hardwareConcurrency}`,
               `**Route ready**: ${metrics.routeReadyMs} ms`,
-              `**Page load**: ${metrics.loadTimeMs !== null ? `${metrics.loadTimeMs} ms` : 'SPA route'}`,
+              `**Navigation DOM ready**: ${
+                metrics.domReadyMs !== null ? `${metrics.domReadyMs} ms` : 'n/a'
+              }`,
+              `**Navigation load**: ${
+                metrics.loadTimeMs !== null ? `${metrics.loadTimeMs} ms` : 'n/a'
+              }`,
             ].join('\n'),
             inline: true,
           },
@@ -160,29 +276,22 @@ const useAnalyticsTracking = (pathname: string): void => {
           });
         }
 
-        fetch(proxyUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          keepalive: true,
-          body: JSON.stringify({
-            embeds: [
-              {
-                author: { name: '📊 Portfolio Analytics' },
-                title: pageName,
-                description: isKnownVisitor
-                  ? `Visitor: **${visitor.label}**`
-                  : `Visitor: **${visitor.label} (guest)**`,
-                color: isKnownVisitor ? 0x00ff99 : 0x5865f2,
-                fields,
-                timestamp: new Date().toISOString(),
-                footer: {
-                  text: geo?.timezone ?? getBrowserTimezone() ?? 'timezone unavailable',
-                },
+        sendPayload({
+          embeds: [
+            {
+              author: { name: '📊 Portfolio Analytics' },
+              title: pageName,
+              description: isKnownVisitor
+                ? `Visitor: **${visitor.label}**`
+                : `Visitor: **${visitor.label} (guest)**`,
+              color: isKnownVisitor ? 0x00ff99 : 0x5865f2,
+              fields,
+              timestamp: new Date().toISOString(),
+              footer: {
+                text: geo?.timezone ?? getBrowserTimezone() ?? 'timezone unavailable',
               },
-            ],
-          }),
-        }).catch((err: unknown) => {
-          console.debug('[Analytics] Failed to send:', err);
+            },
+          ],
         });
       };
 
@@ -204,8 +313,8 @@ const useAnalyticsTracking = (pathname: string): void => {
       loadDelayTimer = window.setTimeout(() => {
         if (isCancelled) return;
 
-        if ('requestIdleCallback' in window) {
-          idleCallbackId = window.requestIdleCallback(runTracking, { timeout: 2000 });
+        if (typeof idleWindow.requestIdleCallback === 'function') {
+          idleCallbackId = idleWindow.requestIdleCallback(runTracking, { timeout: 2000 });
           return;
         }
 
@@ -235,6 +344,25 @@ const useAnalyticsTracking = (pathname: string): void => {
       }, 2000);
     }
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        closeVisibleWindow();
+        flushTimeOnPage('visibility-hidden', true);
+        return;
+      }
+
+      openVisibleWindow();
+      touchAnalyticsSessionActivity();
+    };
+
+    const handlePageHide = () => {
+      closeVisibleWindow();
+      flushTimeOnPage('pagehide', true);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+
     return () => {
       isCancelled = true;
       if (loadDelayTimer !== null) {
@@ -243,12 +371,18 @@ const useAnalyticsTracking = (pathname: string): void => {
       if (fallbackTimer !== null) {
         window.clearTimeout(fallbackTimer);
       }
-      if (idleCallbackId !== null && 'cancelIdleCallback' in window) {
-        window.cancelIdleCallback(idleCallbackId);
+      if (idleCallbackId !== null && typeof idleWindow.cancelIdleCallback === 'function') {
+        idleWindow.cancelIdleCallback(idleCallbackId);
       }
       if (loadListenerAttached && onLoadHandler) {
         window.removeEventListener('load', onLoadHandler);
       }
+
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
+
+      closeVisibleWindow();
+      flushTimeOnPage('route-change', false);
     };
   }, [pathname]);
 };
@@ -265,15 +399,21 @@ function formatPageName(pathname: string): string {
 
 function collectPageMetrics(routeStartTime: number): {
   loadTimeMs: number | null;
+  domReadyMs: number | null;
   connectionType: string;
   deviceMemory: string;
+  hardwareConcurrency: string;
   viewportCategory: string;
   isPWA: boolean;
   routeReadyMs: number;
 } {
   let loadTimeMs: number | null = null;
+  let domReadyMs: number | null = null;
   try {
     const [nav] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+    if (nav?.domContentLoadedEventEnd > 0) {
+      domReadyMs = Math.round(nav.domContentLoadedEventEnd - nav.startTime);
+    }
     if (nav?.loadEventEnd > 0) {
       loadTimeMs = Math.round(nav.loadEventEnd - nav.startTime);
     }
@@ -285,6 +425,7 @@ function collectPageMetrics(routeStartTime: number): {
 
   const connectionType = getConnectionType();
   const deviceMemory = getDeviceMemoryLabel();
+  const hardwareConcurrency = getHardwareConcurrencyLabel();
 
   const w = window.innerWidth;
   const viewportCategory = w < 768 ? '📱 Mobile' : w < 1024 ? '💻 Tablet' : '🖥️ Desktop';
@@ -293,7 +434,16 @@ function collectPageMetrics(routeStartTime: number): {
     navigator.standalone === true ||
     document.referrer.startsWith('android-app://');
 
-  return { loadTimeMs, connectionType, deviceMemory, viewportCategory, isPWA, routeReadyMs };
+  return {
+    loadTimeMs,
+    domReadyMs,
+    connectionType,
+    deviceMemory,
+    hardwareConcurrency,
+    viewportCategory,
+    isPWA,
+    routeReadyMs,
+  };
 }
 
 function collectUserPreferences(): {
@@ -358,22 +508,20 @@ function collectUserPreferences(): {
   };
 }
 
-function getReferrerDomain(previousPath: string | null): string {
+function formatEntryReferrer(referrer: string): string {
   try {
-    const ref = document.referrer;
-    if (ref) {
-      // Hostname only — never the full URL (query params can contain personal data)
-      return new URL(ref).hostname;
+    if (referrer) {
+      // Hostname only — never the full URL (query params can contain personal data).
+      return new URL(referrer).hostname;
     }
-
-    if (previousPath) {
-      return `Internal: ${previousPath}`;
-    }
-
     return 'Direct';
   } catch {
-    return previousPath ? `Internal: ${previousPath}` : 'Direct';
+    return 'Direct';
   }
+}
+
+function formatInternalPath(previousPath: string | null): string {
+  return previousPath ?? 'Entry page';
 }
 
 function detectLanguage(): string {
@@ -411,6 +559,9 @@ function getConnectionType(): string {
 
 function getDeviceMemoryLabel(): string {
   if (typeof navigator.deviceMemory === 'number' && Number.isFinite(navigator.deviceMemory)) {
+    if (navigator.deviceMemory >= 8) {
+      return '8+ GB (browser cap)';
+    }
     return `${navigator.deviceMemory} GB`;
   }
 
@@ -421,6 +572,17 @@ function getDeviceMemoryLabel(): string {
   }
 
   return 'estimated 4 GB';
+}
+
+function getHardwareConcurrencyLabel(): string {
+  if (
+    typeof navigator.hardwareConcurrency === 'number' &&
+    Number.isFinite(navigator.hardwareConcurrency)
+  ) {
+    return `${navigator.hardwareConcurrency} (browser-reported)`;
+  }
+
+  return 'unavailable';
 }
 
 function getBrowserTimezone(): string | null {
@@ -443,7 +605,7 @@ function getBrowserInfo(ua: string): string {
     }
   }
 
-  // Order matters: Edge/Opera include "Chrome" in their UA string
+  // Order matters: Edge/Opera include "Chrome" in their UA string.
   const browsers = [
     { regex: /CriOS\//, name: 'Chrome iOS' },
     { regex: /Edg\//, name: 'Edge' },
@@ -468,7 +630,7 @@ function getBrowserInfo(ua: string): string {
 }
 
 async function fetchGeolocation(): Promise<GeoLocation | null> {
-  // Check localStorage cache first (TTL: 30 minutes)
+  // Check localStorage cache first (TTL: 30 minutes).
   const localeFallback = inferGeoFromLocale();
   const cached = safeLocalGet(GEO_CACHE_KEY);
   if (cached) {
@@ -644,29 +806,13 @@ function normalizeAttribution(rawValue: string | null): string | null {
   return trimmed.slice(0, 80);
 }
 
-function getOrCreateLifetimeSessionNumber(): number {
-  const sessionMarkerKey = 'portfolio-analytics-session-id';
-  const existingSessionMarker = safeSessionGet(sessionMarkerKey);
-  if (existingSessionMarker) {
-    const existingCount = parseInt(safeLocalGet('portfolio-analytics-session-count') || '1', 10);
-    return Number.isFinite(existingCount) && existingCount > 0 ? existingCount : 1;
-  }
-
-  safeSessionSet(sessionMarkerKey, createShortId(10));
-
-  const currentCount = parseInt(safeLocalGet('portfolio-analytics-session-count') || '0', 10);
-  const nextCount = Number.isFinite(currentCount) && currentCount > 0 ? currentCount + 1 : 1;
-  safeLocalSet('portfolio-analytics-session-count', String(nextCount));
-  return nextCount;
-}
-
-function resolveVisitorIdentity(explicitVisitor: string | null): VisitorIdentity {
+function resolveVisitorIdentity(explicitVisitor: string | null, lifetimeSessions: number): VisitorIdentity {
   if (explicitVisitor) {
     safeLocalSet('portfolio-visitor-label', explicitVisitor);
     return {
       label: explicitVisitor,
       source: 'utm',
-      lifetimeSessions: getOrCreateLifetimeSessionNumber(),
+      lifetimeSessions,
     };
   }
 
@@ -675,7 +821,7 @@ function resolveVisitorIdentity(explicitVisitor: string | null): VisitorIdentity
     return {
       label: savedVisitor,
       source: 'saved',
-      lifetimeSessions: getOrCreateLifetimeSessionNumber(),
+      lifetimeSessions,
     };
   }
 
@@ -688,36 +834,18 @@ function resolveVisitorIdentity(explicitVisitor: string | null): VisitorIdentity
   return {
     label: `Guest-${guestId}`,
     source: 'generated',
-    lifetimeSessions: getOrCreateLifetimeSessionNumber(),
+    lifetimeSessions,
   };
 }
 
 function getSessionStats(currentPath: string): SessionStats {
-  const previousPath = safeSessionGet('session-last-path');
-
-  const rawPages = safeSessionGet('session-pages') ?? '[]';
-  let pages: string[] = [];
-  try {
-    pages = JSON.parse(rawPages) as string[];
-  } catch {
-    pages = [];
-  }
-
-  if (!pages.includes(currentPath)) {
-    pages.push(currentPath);
-    safeSessionSet('session-pages', JSON.stringify(pages));
-  }
-
-  let startTime = safeSessionGet('session-start');
-  if (!startTime || Number.isNaN(parseInt(startTime, 10))) {
-    startTime = Date.now().toString();
-    safeSessionSet('session-start', startTime);
-  }
-
-  safeSessionSet('session-last-path', currentPath);
-
-  const elapsed = Math.max(0, Math.round((Date.now() - parseInt(startTime, 10)) / 1000 / 60));
-  return { pages: pages.length, elapsedMinutes: elapsed, previousPath };
+  const snapshot = upsertAnalyticsSession(currentPath);
+  return {
+    pages: snapshot.pagesCount,
+    elapsedMinutes: snapshot.elapsedMinutes,
+    sessionId: snapshot.sessionId,
+    lifetimeSessions: snapshot.lifetimeSessions,
+  };
 }
 
 export default useAnalyticsTracking;
