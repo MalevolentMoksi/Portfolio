@@ -99,6 +99,8 @@ const CosmicSatellite = ({ isActive, onSpin, orbitBoostKey, isReducedMotion }: a
         type="button"
         className="footer-widget-orbit-trigger"
         onClick={onSpin}
+        disabled={!isActive}
+        tabIndex={isActive ? 0 : -1}
         aria-label={t('common.footerWidget.spinOrbit')}
       >
         <svg

@@ -1,3 +1,4 @@
 /* Non-critical visual layers loaded after first paint */
 @import './components/_ambient.css';
+@import './components/_pet-button.css';
 @import './_effects.css';

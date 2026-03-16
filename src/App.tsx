@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import Layout from './components/Layout';
 import Loading from './components/Loading';
 import useAnalyticsTracking from './hooks/useAnalyticsTracking';
+import Home from './pages/Home';
 
 // Retry wrapper: if a lazy chunk fails to load (e.g. after a new deploy),
 // force a page reload so the browser fetches the updated index.html.
@@ -20,7 +21,6 @@ function retryLazy<T extends ComponentType<Record<string, never>>>(
 }
 
 // Lazy load pages pour code splitting
-const Home = retryLazy(() => import('./pages/Home'));
 const Projets = retryLazy(() => import('./pages/Projets'));
 const ProjetsPersonnels = retryLazy(() => import('./pages/ProjetsPersonnels'));
 const ProjetMEGASAE = retryLazy(() => import('./pages/ProjetMEGASAE'));
