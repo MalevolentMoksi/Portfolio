@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,html}\"",
     "seo:generate": "node scripts/generate-seo-files.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy": "npx wrangler deploy"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
