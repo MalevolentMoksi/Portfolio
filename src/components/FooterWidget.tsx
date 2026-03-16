@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { safeSessionGet } from '@/utils/safeStorage';
+import { safeLocalGet } from '@/utils/safeStorage';
 
 /**
  * FooterWidget — Cycles between three states every 6.5 seconds:
@@ -32,7 +32,7 @@ const SessionTimer = ({ isActive }: any) => {
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
-    const startTime = parseInt(safeSessionGet('session-start') || '0', 10);
+    const startTime = parseInt(safeLocalGet('portfolio-analytics-session-start') || '0', 10);
     if (!startTime || !isActive) return undefined;
 
     const updateTimer = () => {

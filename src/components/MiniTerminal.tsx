@@ -81,7 +81,10 @@ const calculateStats = (t: any, skills: any) => {
   const uniqueTechs = getAllTags(t).length;
 
   // Session
-  const sessionStart = parseInt(safeSessionGet('session-start') || String(Date.now()), 10);
+  const sessionStart = parseInt(
+    safeLocalGet('portfolio-analytics-session-start') || String(Date.now()),
+    10
+  );
   const elapsed = formatElapsed(Date.now() - sessionStart);
   let sessionPages = [];
   try {
@@ -156,7 +159,10 @@ const MiniTerminal = () => {
   /* ── Timer session (titlebar) ── */
   useEffect(() => {
     if (!isOpen) return;
-    const sessionStart = parseInt(safeSessionGet('session-start') || String(Date.now()), 10);
+    const sessionStart = parseInt(
+      safeLocalGet('portfolio-analytics-session-start') || String(Date.now()),
+      10
+    );
     const update = () => setSessionTime(formatElapsed(Date.now() - sessionStart));
     update();
     const id = setInterval(update, 1000);
