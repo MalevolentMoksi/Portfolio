@@ -9,9 +9,17 @@ export const MOODS: MoodMap = {
   vaporwave: { label: 'Vaporwave', emoji: '~', color: '#ff71ce', rgb: '255, 113, 206' },
   europa: { label: 'Europa', emoji: '❄', color: '#00E5FF', rgb: '0, 229, 255' },
   industrial: { label: 'Industriel', emoji: '⚙', color: '#FF5722', rgb: '255, 87, 34' },
+  nightshade: { label: 'Nightshade', emoji: '⚘', color: '#A366FF', rgb: '163, 102, 255' },
 };
 
-const MOOD_ORDER: MoodKey[] = ['default', 'hacker', 'vaporwave', 'europa', 'industrial'];
+const MOOD_ORDER: MoodKey[] = [
+  'default',
+  'hacker',
+  'vaporwave',
+  'europa',
+  'industrial',
+  'nightshade',
+];
 
 /* Niveau de brutalisme pour le mood Industrial : 'full' | 'moderate' | 'minimal' */
 const INDUSTRIAL_BRUTALIST_LEVEL = 'minimal';

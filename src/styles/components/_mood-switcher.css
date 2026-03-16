@@ -62,8 +62,8 @@
 .mood-panel {
   position: fixed;
   width: 190px;
-  background: rgba(8, 8, 8, 0.96);
-  border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+  background: var(--mood-shell-bg-strong);
+  border: 1px solid var(--mood-border-strong);
   border-radius: 10px;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.6),
@@ -116,14 +116,14 @@
 }
 
 .mood-option:hover {
-  background: rgba(var(--color-primary-rgb), 0.1);
-  border-color: rgba(var(--color-primary-rgb), 0.2);
+  background: var(--mood-button-bg);
+  border-color: var(--mood-border-soft);
   transform: translateX(2px);
 }
 
 .mood-option--active {
-  background: rgba(var(--color-primary-rgb), 0.15);
-  border-color: var(--mood-color, var(--color-primary));
+  background: var(--mood-button-hover-bg);
+  border-color: var(--mood-color, var(--color-accent-pale));
 }
 
 .mood-swatch {
@@ -803,6 +803,81 @@ body[data-mood='industrial'].power-surge-active .neon-text {
   100% {
     opacity: 0.7;
   }
+}
+
+/* ── NIGHTSHADE (botanical / dark-yet-grounded) ── */
+
+/* ::before : vignette nuit profonde + brume indigo sur les bords */
+body[data-mood='nightshade']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(45, 42, 74, 0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 0% 100%, rgba(13, 18, 18, 0.45) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(13, 18, 18, 0.45) 0%, transparent 65%),
+    radial-gradient(ellipse 100% 30% at 50% 100%, rgba(45, 42, 74, 0.2) 0%, transparent 80%);
+  opacity: 0.85;
+}
+
+/* ::after : motif de feuilles / lierre en silhouette — très subtil */
+body[data-mood='nightshade']::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle 1px at 8% 12%, rgba(163, 102, 255, 0.06) 0%, transparent 100%),
+    radial-gradient(circle 1px at 92% 8%, rgba(163, 102, 255, 0.05) 0%, transparent 100%),
+    radial-gradient(circle 1.5px at 15% 85%, rgba(139, 94, 131, 0.07) 0%, transparent 100%),
+    radial-gradient(circle 1px at 85% 90%, rgba(163, 102, 255, 0.06) 0%, transparent 100%),
+    radial-gradient(circle 1px at 50% 5%, rgba(232, 216, 255, 0.04) 0%, transparent 100%),
+    repeating-linear-gradient(
+      135deg,
+      transparent 0px,
+      transparent 38px,
+      rgba(163, 102, 255, 0.018) 38px,
+      rgba(163, 102, 255, 0.018) 39px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      transparent 0px,
+      transparent 52px,
+      rgba(139, 94, 131, 0.012) 52px,
+      rgba(139, 94, 131, 0.012) 53px
+    );
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 1;
+}
+
+/* Nightshade — douce oscillation sur les titres (sway organique) */
+body[data-mood='nightshade'] h1,
+body[data-mood='nightshade'] h2 {
+  animation: nightshade-header-sway 12s ease-in-out infinite;
+}
+
+@keyframes nightshade-header-sway {
+  0%,
+  100% {
+    letter-spacing: inherit;
+    text-shadow: inherit;
+  }
+  40% {
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 18px rgba(163, 102, 255, 0.15);
+  }
+  70% {
+    letter-spacing: inherit;
+    text-shadow: 0 0 8px rgba(139, 94, 131, 0.1);
+  }
+}
+
+/* Performance gate : désactiver overlay sur low-tier */
+body[data-perf-tier='low'][data-mood='nightshade']::before,
+body[data-perf-tier='low'][data-mood='nightshade']::after {
+  display: none !important;
 }
 
 /* ---- VHS transition overlay ---- */

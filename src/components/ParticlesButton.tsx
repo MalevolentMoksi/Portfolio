@@ -167,6 +167,46 @@ const randomEdgePoint = () => {
  */
 const getBaseSpeed = () => (getPJS()?.particles.move.speed ?? 1) * 0.22;
 
+const getCurrentMood = () => document.body.getAttribute('data-mood') || 'default';
+
+const getMoodFxProfile = () => {
+  const mood = getCurrentMood();
+  if (mood === 'industrial') {
+    return {
+      spawnMult: 1.9,
+      burstMult: 1.45,
+      pullForce: 0.78,
+      pullCap: 11,
+      stormBonusMult: 2.1,
+      stormSpeed: 7.2,
+      gravityAccel: 0.24,
+      bounceDamp: -0.62,
+    };
+  }
+  if (mood === 'nightshade') {
+    return {
+      spawnMult: 1.6,
+      burstMult: 1.35,
+      pullForce: 0.66,
+      pullCap: 9.5,
+      stormBonusMult: 1.85,
+      stormSpeed: 6.3,
+      gravityAccel: 0.14,
+      bounceDamp: -0.5,
+    };
+  }
+  return {
+    spawnMult: 1,
+    burstMult: 1,
+    pullForce: 0.5,
+    pullCap: 8,
+    stormBonusMult: 1,
+    stormSpeed: 5,
+    gravityAccel: 0.18,
+    bounceDamp: -0.55,
+  };
+};
+
 /**
  * Décélération exponentielle smooth : ramène toutes les particules vers
  * baseSpeed sur `duration` ms sans snap brutal.
@@ -233,6 +273,7 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
     setParticlesForeground(true);
     const pJS = getPJS();
     if (!pJS) return { restoreHandle: null };
+    const profile = getMoodFxProfile();
 
     const W = window.innerWidth;
     const H = window.innerHeight;
@@ -241,8 +282,9 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
     const zoneH = H * 0.35;
     const headerH = 70;
 
-    // Adapter le nombre de particules spawnées au tier
-    const spawnCount = getPerformanceTier() === 'low' ? 8 : 15;
+    // Adapter le nombre de particules spawnées au tier + mood
+    const baseSpawnCount = getPerformanceTier() === 'low' ? 8 : 15;
+    const spawnCount = Math.max(6, Math.round(baseSpawnCount * profile.spawnMult));
 
     for (let i = 0; i < spawnCount; i++) {
       pJS.fn.modes.pushParticles(1, {
@@ -263,7 +305,7 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
       const dx = pt.x - cx;
       const dy = pt.y - cy;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const burst = 5 + Math.random() * 5;
+      const burst = (5 + Math.random() * 5) * profile.burstMult;
       pt.vx = (dx / dist) * burst;
       pt.vy = (dy / dist) * burst;
     });
@@ -297,6 +339,7 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
     const pxr = pJS.canvas.pxratio ?? 1;
     const pcx = cx * pxr;
     const pcy = cy * pxr;
+    const { pullForce, pullCap } = getMoodFxProfile();
 
     const pull = () => {
       if (signal.cancelled) return;
@@ -306,12 +349,12 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
         const dx = pcx - pt.x;
         const dy = pcy - pt.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        pt.vx += (dx / dist) * 0.5;
-        pt.vy += (dy / dist) * 0.5;
+        pt.vx += (dx / dist) * pullForce;
+        pt.vy += (dy / dist) * pullForce;
         const spd = Math.sqrt(pt.vx * pt.vx + pt.vy * pt.vy);
-        if (spd > 8) {
-          pt.vx = (pt.vx / spd) * 8;
-          pt.vy = (pt.vy / spd) * 8;
+        if (spd > pullCap) {
+          pt.vx = (pt.vx / spd) * pullCap;
+          pt.vy = (pt.vy / spd) * pullCap;
         }
       });
       requestAnimationFrame(pull);
@@ -343,12 +386,15 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
 
     const pJS = getPJS();
     if (!pJS) return { restoreHandle: null };
+    const profile = getMoodFxProfile();
 
     const originalCount = pJS.particles.array.length;
     // Adapter le nombre de particules bonus au tier (proportionnel au baseline réduit)
-    const maxBonus = getPerformanceTier() === 'low' ? 20 : getPerformanceTier() === 'mid' ? 40 : 60;
+    const baseMaxBonus =
+      getPerformanceTier() === 'low' ? 20 : getPerformanceTier() === 'mid' ? 40 : 60;
+    const maxBonus = Math.round(baseMaxBonus * profile.stormBonusMult);
     const bonus = Math.min(originalCount, maxBonus);
-    const stormSpeed = 5;
+    const stormSpeed = profile.stormSpeed;
     const pxr = pJS.canvas.pxratio ?? 1;
 
     for (let i = 0; i < bonus; i++) {
@@ -400,6 +446,7 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
 
     const pJS = getPJS();
     if (!pJS) return { restoreHandle: null };
+    const { gravityAccel, bounceDamp } = getMoodFxProfile();
 
     const fall = () => {
       if (signal.cancelled) return;
@@ -408,9 +455,9 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
       const floor = p.canvas.h - 4;
 
       p.particles.array.forEach((pt: any) => {
-        pt.vy += 0.18;
+        pt.vy += gravityAccel;
         if (pt.y >= floor) {
-          pt.vy *= -0.55;
+          pt.vy *= bounceDamp;
           pt.y = floor;
         }
       });

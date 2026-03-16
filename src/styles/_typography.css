@@ -11,7 +11,12 @@ h1 {
   margin-bottom: var(--space-md);
   /* Fallback color visible si background-clip: text échoue */
   color: var(--color-primary);
-  background: linear-gradient(90deg, var(--color-accent-pale) 30%, var(--color-primary) 100%);
+  background: linear-gradient(
+    96deg,
+    var(--mood-heading-start) 0%,
+    var(--mood-heading-mid) 48%,
+    var(--mood-heading-end) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -33,7 +38,7 @@ h2,
 h3 {
   /* Fallback color */
   color: var(--color-primary);
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent-light));
+  background: linear-gradient(96deg, var(--mood-heading-mid), var(--mood-heading-end));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -63,7 +68,7 @@ h2::before {
   bottom: 0;
   width: 50px;
   height: 3px;
-  background: var(--color-primary);
+  background: linear-gradient(90deg, var(--mood-heading-start), var(--mood-heading-mid));
   border-radius: 2px;
 }
 
@@ -84,7 +89,7 @@ p:last-child {
 /* Strong & emphasis */
 strong {
   font-weight: 700;
-  color: var(--color-accent-light);
+  color: var(--color-accent-pale);
 }
 
 em {

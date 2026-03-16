@@ -104,31 +104,98 @@ class VisualEffects {
     }
 
     if (mood === 'industrial') {
-      // Cendres/poussière flottante — orange, lent, montée verticale
+      // Cendres incandescentes + braises électriques — dense et dramatique
       const count = byTier({
-        high: isMobile ? 12 : 22,
-        mid: isMobile ? 8 : 15,
-        low: isMobile ? 5 : 10,
+        high: isMobile ? 26 : 52,
+        mid: isMobile ? 18 : 36,
+        low: isMobile ? 10 : 20,
       });
       return {
         particles: {
-          number: { value: count, density: { enable: true, value_area: 1200 } },
-          color: { value: ['#FF5722', '#FF8A65', '#FFD600', '#BF360C'] },
-          shape: { type: 'edge', stroke: { width: 0, color: '#000' } },
+          number: { value: count, density: { enable: true, value_area: 980 } },
+          color: { value: ['#FF5722', '#FF8A65', '#FFD600', '#BF360C', '#FF7043', '#FFD180'] },
+          shape: { type: ['circle', 'edge'], stroke: { width: 0, color: '#000' } },
           opacity: {
-            value: 0.35,
+            value: 0.52,
             random: true,
-            anim: { enable: enableAnims, speed: 0.4, opacity_min: 0.05, sync: false },
+            anim: { enable: enableAnims, speed: 0.65, opacity_min: 0.12, sync: false },
           },
           size: {
-            value: 3.2,
+            value: 4.2,
             random: true,
-            anim: { enable: enableAnims, speed: 0.8, size_min: 0.8, sync: false },
+            anim: { enable: enableAnims, speed: 1.25, size_min: 1.1, sync: false },
           },
-          line_linked: { enable: false },
+          line_linked: {
+            enable: true,
+            distance: byTier({ high: 120, mid: 105, low: 90 }),
+            color: '#FF8A65',
+            opacity: 0.12,
+            width: 0.5,
+          },
           move: {
             enable: true,
-            speed: byTier({ high: 0.7, mid: 0.5, low: 0.3 }),
+            speed: byTier({ high: 1.35, mid: 1.0, low: 0.65 }),
+            direction: 'top-right',
+            random: true,
+            straight: false,
+            out_mode: 'out',
+            bounce: false,
+          },
+        },
+        interactivity: {
+          detect_on: 'canvas',
+          events: {
+            onhover: { enable: enableAnims, mode: 'bubble' },
+            onclick: { enable: true, mode: 'push' },
+            resize: true,
+          },
+          modes: {
+            bubble: {
+              distance: byTier({ high: 170, mid: 145, low: 120 }),
+              size: 6.4,
+              duration: 1,
+              opacity: 0.82,
+              speed: 3,
+            },
+            push: { particles_nb: byTier({ high: 9, mid: 7, low: 4 }) },
+          },
+        },
+        retina_detect: retinaDetect,
+      };
+    }
+
+    if (mood === 'nightshade') {
+      // Voile de spores mystiques — plus dense, plus profond, plus vivant
+      const count = byTier({
+        high: isMobile ? 38 : 78,
+        mid: isMobile ? 26 : 52,
+        low: isMobile ? 14 : 26,
+      });
+      return {
+        particles: {
+          number: { value: count, density: { enable: true, value_area: 860 } },
+          color: { value: ['#A366FF', '#8B5E83', '#C8B0D8', '#2D6A4F', '#52B788'] },
+          shape: { type: 'circle', stroke: { width: 0, color: '#000' } },
+          opacity: {
+            value: 0.58,
+            random: true,
+            anim: { enable: enableAnims, speed: 0.65, opacity_min: 0.12, sync: false },
+          },
+          size: {
+            value: 3.6,
+            random: true,
+            anim: { enable: enableAnims, speed: 1.05, size_min: 0.9, sync: false },
+          },
+          line_linked: {
+            enable: true,
+            distance: byTier({ high: 132, mid: 118, low: 98 }),
+            color: '#A366FF',
+            opacity: 0.06,
+            width: 0.35,
+          },
+          move: {
+            enable: true,
+            speed: byTier({ high: 1.0, mid: 0.74, low: 0.42 }),
             direction: 'top',
             random: true,
             straight: false,
@@ -138,8 +205,15 @@ class VisualEffects {
         },
         interactivity: {
           detect_on: 'canvas',
-          events: { onhover: { enable: false }, onclick: { enable: false }, resize: true },
-          modes: {},
+          events: {
+            onhover: { enable: enableAnims, mode: 'repulse' },
+            onclick: { enable: true, mode: 'push' },
+            resize: true,
+          },
+          modes: {
+            repulse: { distance: byTier({ high: 170, mid: 145, low: 120 }), duration: 0.8 },
+            push: { particles_nb: byTier({ high: 12, mid: 9, low: 5 }) },
+          },
         },
         retina_detect: retinaDetect,
       };
@@ -226,7 +300,7 @@ class VisualEffects {
    */
   updateParticlesMood(mood: string): void {
     // Europa et Industrial nécessitent une reconfiguration complète
-    if (mood === 'europa' || mood === 'industrial') {
+    if (mood === 'europa' || mood === 'industrial' || mood === 'nightshade') {
       this.reconfigureParticles(mood);
       return;
     }
@@ -237,6 +311,7 @@ class VisualEffects {
       vaporwave: '#ff71ce',
       europa: '#00E5FF',
       industrial: '#FF5722',
+      nightshade: '#A366FF',
     };
 
     const color: string = MOOD_COLORS[mood] || MOOD_COLORS.default;
@@ -408,6 +483,34 @@ class VisualEffects {
       }
     };
     document.addEventListener('visibilitychange', this._visibilityHandler);
+  }
+
+  /**
+   * Disable/enable all particle animations based on accessibility noMotion setting.
+   * Called when accessibility context's noMotion changes.
+   */
+  setAnimationsEnabled(enabled: boolean): void {
+    if (typeof particlesJS === 'undefined') return;
+    try {
+      const pJS = (window as any).pJSDOM?.[0]?.pJS;
+      if (!pJS) return;
+
+      // Disable/enable animations across all particle properties
+      if (pJS.particles?.opacity?.anim) {
+        pJS.particles.opacity.anim.enable = enabled;
+      }
+      if (pJS.particles?.size?.anim) {
+        pJS.particles.size.anim.enable = enabled;
+      }
+      if (pJS.particles?.color?.anim) {
+        pJS.particles.color.anim.enable = enabled;
+      }
+      if (pJS.particles?.move) {
+        pJS.particles.move.enable = enabled;
+      }
+    } catch (e) {
+      console.warn('Could not update particle animations:', e);
+    }
   }
 
   /**

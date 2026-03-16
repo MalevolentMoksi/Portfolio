@@ -53,6 +53,8 @@ const usePortfolioModules = (trackFiles: string[]): void => {
       }
       if (!visualEffectsInstance) {
         visualEffectsInstance = new VisualEffects();
+        // Expose globally for accessibility hook
+        (window as any).visualEffectsInstance = visualEffectsInstance;
       }
 
       // Lancer le monitoring FPS passif (une seule fois par session)

@@ -11,7 +11,9 @@ img {
 
 img:hover {
   transform: scale(0.99);
-  box-shadow: 0 0 10px var(--color-primary);
+  box-shadow:
+    0 0 14px var(--mood-glow),
+    0 0 24px rgba(var(--color-primary-rgb), 0.18);
 }
 
 /* Disable hover transforms on touch devices — improves tap response time

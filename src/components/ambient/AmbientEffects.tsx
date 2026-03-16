@@ -25,6 +25,7 @@
 
 import { lazy, Suspense } from 'react';
 import DistantSilhouettes from './DistantSilhouettes';
+import { useAccessibilityEffects } from '@/hooks/useAccessibilityEffects';
 import OccasionalCommuter from './OccasionalCommuter';
 // import ObservationDrone from './ObservationDrone';
 // import AmbientBoids from './AmbientBoids';
@@ -42,31 +43,46 @@ const IndustrialSteam = lazy(() => import('./IndustrialSteam'));
 const PowerSurge = lazy(() => import('./PowerSurge'));
 const ElectricalGrid = lazy(() => import('./ElectricalGrid'));
 
+// Groupe Nightshade — chargé seulement quand le mood nightshade est activé
+const NightshadeSpores = lazy(() => import('./NightshadeSpores'));
+const NightshadeFog = lazy(() => import('./NightshadeFog'));
+const NightshadeIvy = lazy(() => import('./NightshadeIvy'));
+const NightshadeBioGlow = lazy(() => import('./NightshadeBioGlow'));
+
 // Groupe signatures default/hacker
 // const FloatingGeometry = lazy(() => import('./FloatingGeometry')); // désactivé — remplacé par DefaultStarField
 // const DefaultStarField = lazy(() => import('./DefaultStarField')); // désactivé — conflits visuels avec particles existants
 const DigitalRain = lazy(() => import('./DigitalRain'));
 
-const AmbientEffects = () => (
-  <>
-    <OccasionalCommuter />
-    {/* <FooterWalkers /> */}
-    <DistantSilhouettes />
-    {/* <ObservationDrone /> */}
-    {/* <AmbientBoids /> */}
-    <Suspense fallback={null}>
-      <EuropaSnowfall />
-      <EuropaIcicles />
-      <EuropaFrost />
-      <RisingEmbers />
-      <IndustrialNeons />
-      <IndustrialSteam />
-      <PowerSurge />
-      <ElectricalGrid />
-      {/* <DefaultStarField /> */}
-      <DigitalRain />
-    </Suspense>
-  </>
-);
+const AmbientEffects = () => {
+  // Sync accessibility settings (noMotion) with visual effects
+  useAccessibilityEffects();
+
+  return (
+    <>
+      <OccasionalCommuter />
+      {/* <FooterWalkers /> */}
+      <DistantSilhouettes />
+      {/* <ObservationDrone /> */}
+      {/* <AmbientBoids /> */}
+      <Suspense fallback={null}>
+        <EuropaSnowfall />
+        <EuropaIcicles />
+        <EuropaFrost />
+        <RisingEmbers />
+        <IndustrialNeons />
+        <IndustrialSteam />
+        <PowerSurge />
+        <ElectricalGrid />
+        {/* <DefaultStarField /> */}
+        <DigitalRain />
+        <NightshadeSpores />
+        <NightshadeFog />
+        <NightshadeIvy />
+        <NightshadeBioGlow />
+      </Suspense>
+    </>
+  );
+};
 
 export default AmbientEffects;

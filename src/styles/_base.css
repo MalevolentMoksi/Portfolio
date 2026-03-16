@@ -37,6 +37,8 @@ body {
   line-height: var(--line-height-base);
   color: var(--color-text);
   background-color: var(--color-bg);
+  background-image: var(--mood-page-tint);
+  background-attachment: fixed;
   overflow-x: hidden;
 }
 
@@ -66,7 +68,7 @@ a {
 }
 
 a:hover {
-  color: #ff9100;
+  color: var(--color-accent-pale);
 }
 
 /* Reset buttons */
@@ -106,7 +108,7 @@ video {
   left: 50%;
   transform: translateX(-50%);
   padding: var(--space-sm) var(--space-md);
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--mood-heading-start), var(--mood-heading-mid));
   color: var(--color-bg);
   font-weight: 700;
   border-radius: var(--border-radius-sm);

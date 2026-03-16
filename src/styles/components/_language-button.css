@@ -18,12 +18,8 @@
   gap: var(--seg-gap);
   padding: var(--seg-pad);
   border-radius: 999px;
-  border: 1px solid rgba(var(--color-primary-rgb), 0.24);
-  background: linear-gradient(
-    135deg,
-    rgba(var(--color-accent-pale-rgb), 0.06) 0%,
-    rgba(var(--color-primary-rgb), 0.08) 100%
-  );
+  border: 1px solid var(--mood-border-strong);
+  background: var(--mood-button-bg);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 2px 8px rgba(0, 0, 0, 0.28);
@@ -47,9 +43,9 @@
   z-index: 0;
   background: linear-gradient(
     135deg,
-    var(--color-accent-pale) 0%,
-    var(--color-primary) 45%,
-    var(--color-accent-light) 100%
+    var(--mood-heading-start) 0%,
+    var(--mood-heading-mid) 45%,
+    var(--mood-heading-end) 100%
   );
   box-shadow:
     0 4px 12px rgba(var(--color-primary-rgb), 0.35),
@@ -109,8 +105,8 @@
 .language-segmented__btn:not(.language-segmented__btn--active):hover,
 .language-segmented__btn:not(.language-segmented__btn--active):focus-visible {
   color: var(--color-accent-light);
-  background: rgba(var(--color-primary-rgb), 0.08);
-  border-color: rgba(var(--color-primary-rgb), 0.32);
+  background: rgba(var(--color-accent-pale-rgb), 0.12);
+  border-color: var(--mood-border-strong);
   transform: translateY(-0.5px);
 }
 

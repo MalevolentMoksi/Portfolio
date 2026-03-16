@@ -28,3 +28,4 @@ npm-debug.log*
 .env.local
 .env.production
 FEATURE_INVENTORY.md
+NIGHTSHADE_IMPLEMENTATION_PLAN.md

@@ -10,6 +10,7 @@ import LanguageButton from './LanguageButton';
 import MiniTerminal from './MiniTerminal';
 import MoodSwitcher from './MoodSwitcher';
 import { useMood } from '../contexts/MoodContext';
+import { useAccessibility } from '../contexts/AccessibilityContext';
 import ParticlesButton from './ParticlesButton';
 const PetButton = lazy(() => import('./pet/PetButton'));
 import useDocumentMeta from '../hooks/useDocumentMeta';
@@ -123,6 +124,7 @@ const Layout = () => {
   const location = useLocation();
   const config = pageConfig[location.pathname] || pageConfig['/'];
   const { mood } = useMood();
+  const { settings: accessibilitySettings } = useAccessibility();
 
   useDocumentMeta(t(config.metaTitleKey), t(config.metaDescriptionKey));
   useNavButtonEffects();
@@ -231,11 +233,13 @@ const Layout = () => {
           </Suspense>
         }
       />
-      <div className="ambient-layers" aria-hidden="true">
-        <Suspense fallback={null}>
-          <AmbientEffects />
-        </Suspense>
-      </div>
+      {!accessibilitySettings.noMotion && (
+        <div className="ambient-layers" aria-hidden="true">
+          <Suspense fallback={null}>
+            <AmbientEffects />
+          </Suspense>
+        </div>
+      )}
       <BackToTopButton />
     </>
   );

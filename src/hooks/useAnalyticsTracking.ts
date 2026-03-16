@@ -806,7 +806,10 @@ function normalizeAttribution(rawValue: string | null): string | null {
   return trimmed.slice(0, 80);
 }
 
-function resolveVisitorIdentity(explicitVisitor: string | null, lifetimeSessions: number): VisitorIdentity {
+function resolveVisitorIdentity(
+  explicitVisitor: string | null,
+  lifetimeSessions: number
+): VisitorIdentity {
   if (explicitVisitor) {
     safeLocalSet('portfolio-visitor-label', explicitVisitor);
     return {

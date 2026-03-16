@@ -3,7 +3,14 @@ import { useMood, MOODS } from '@/contexts/MoodContext';
 import type { MoodKey } from '@/types';
 
 /* Ordre canonique d'affichage des thèmes */
-const MOOD_ORDER: MoodKey[] = ['default', 'hacker', 'vaporwave', 'europa', 'industrial'];
+const MOOD_ORDER: MoodKey[] = [
+  'default',
+  'hacker',
+  'vaporwave',
+  'europa',
+  'industrial',
+  'nightshade',
+];
 
 /**
  * MoodEchoDot — Pastille interactive reflétant le thème actif.

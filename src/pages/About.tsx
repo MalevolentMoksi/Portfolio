@@ -190,7 +190,14 @@ const ARCH = [
 ];
 
 /* ─── Ordre canonique des moods ─────────────────────────── */
-const MOOD_ORDER: MoodKey[] = ['default', 'hacker', 'vaporwave', 'europa', 'industrial'];
+const MOOD_ORDER: MoodKey[] = [
+  'default',
+  'hacker',
+  'vaporwave',
+  'europa',
+  'industrial',
+  'nightshade',
+];
 
 /* ─── Effets ambiants ───────────────────────────────────── */
 const AMBIENT = [
@@ -279,7 +286,7 @@ const AMBIENT = [
 const STATS = [
   { value: '12', id: 'pages', label: 'Pages' },
   { value: '43', id: 'reactComponents', label: 'Composants React' },
-  { value: '5', id: 'visualThemes', label: 'Thèmes visuels' },
+  { value: '6', id: 'visualThemes', label: 'Thèmes visuels' },
   { value: '35', id: 'cssModules', label: 'Modules CSS' },
   { value: '4', id: 'legacyScripts', label: 'Scripts legacy' },
   { value: '1', id: 'pet', label: 'Robot mascotte' },

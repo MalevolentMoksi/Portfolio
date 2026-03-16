@@ -6,7 +6,7 @@
 export type PerformanceTier = 'high' | 'mid' | 'low';
 
 /* ── Mood system ── */
-export type MoodKey = 'default' | 'hacker' | 'vaporwave' | 'europa' | 'industrial';
+export type MoodKey = 'default' | 'hacker' | 'vaporwave' | 'europa' | 'industrial' | 'nightshade';
 
 export interface MoodConfig {
   label: string;

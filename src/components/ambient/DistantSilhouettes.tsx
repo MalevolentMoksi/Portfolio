@@ -447,6 +447,66 @@ const GearMachine = ({ size = 70 }) => (
   </svg>
 );
 
+/* Nightshade — papillon de nuit dérivant silencieusement */
+const MothSilhouette = ({ size = 70 }) => (
+  <svg
+    width={size}
+    height={size * 0.65}
+    viewBox="0 0 56 36"
+    fill="none"
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    {/* Ailes supérieures — oscillation douce */}
+    <g className="sil-moth-wing sil-moth-wing--upper-left">
+      <path
+        d="M28 18 Q18 6 6 8 Q2 14 8 20 Q16 24 28 18Z"
+        stroke="currentColor"
+        strokeWidth="0.8"
+        fill="none"
+        opacity="0.7"
+      />
+      <path d="M28 18 Q20 10 10 14" stroke="currentColor" strokeWidth="0.4" opacity="0.35" />
+    </g>
+    <g className="sil-moth-wing sil-moth-wing--upper-right">
+      <path
+        d="M28 18 Q38 6 50 8 Q54 14 48 20 Q40 24 28 18Z"
+        stroke="currentColor"
+        strokeWidth="0.8"
+        fill="none"
+        opacity="0.7"
+      />
+      <path d="M28 18 Q36 10 46 14" stroke="currentColor" strokeWidth="0.4" opacity="0.35" />
+    </g>
+    {/* Ailes inférieures — plus petites, décalées */}
+    <g className="sil-moth-wing sil-moth-wing--lower-left">
+      <path
+        d="M28 18 Q14 22 10 30 Q16 34 24 28 Q28 24 28 18Z"
+        stroke="currentColor"
+        strokeWidth="0.6"
+        fill="none"
+        opacity="0.5"
+      />
+    </g>
+    <g className="sil-moth-wing sil-moth-wing--lower-right">
+      <path
+        d="M28 18 Q42 22 46 30 Q40 34 32 28 Q28 24 28 18Z"
+        stroke="currentColor"
+        strokeWidth="0.6"
+        fill="none"
+        opacity="0.5"
+      />
+    </g>
+    {/* Corps — étroit et allongé */}
+    <line x1="28" y1="10" x2="28" y2="30" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+    {/* Antènnes */}
+    <path d="M28 10 Q24 4 21 2" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
+    <path d="M28 10 Q32 4 35 2" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
+    <circle cx="21" cy="2" r="0.8" fill="currentColor" opacity="0.4" />
+    <circle cx="35" cy="2" r="0.8" fill="currentColor" opacity="0.4" />
+  </svg>
+);
+
 /* ─── Configuration par silhouette ─── */
 
 /**
@@ -481,6 +541,13 @@ const INDUSTRIAL_CONFIGS = [
   { topFrac: 0.78, duration: '50s', delay: '6s', drift: 'drift-upward' },
 ];
 
+/* Nightshade — papillons de nuit dérivant lentement en diagonale */
+const NIGHTSHADE_CONFIGS = [
+  { topFrac: 0.2, duration: '70s', delay: '0s', drift: 'drift-rtl-slow' },
+  { topFrac: 0.5, duration: '90s', delay: '18s', drift: 'drift-diagonal' },
+  { topFrac: 0.75, duration: '60s', delay: '8s', drift: 'drift-rtl-slow' },
+];
+
 const getInitialTransform = (drift: string) => {
   switch (drift) {
     case 'drift-ltr':
@@ -513,6 +580,8 @@ const DistantSilhouettes = () => {
         return { ShapeComponent: IceShard, configs: EUROPA_CONFIGS };
       case 'industrial':
         return { ShapeComponent: GearMachine, configs: INDUSTRIAL_CONFIGS };
+      case 'nightshade':
+        return { ShapeComponent: MothSilhouette, configs: NIGHTSHADE_CONFIGS };
       default:
         return { ShapeComponent: BirdFlock, configs: SILHOUETTE_CONFIGS };
     }
@@ -548,9 +617,14 @@ const DistantSilhouettes = () => {
   // Commande console de test : window.testSilhouettes('default'|'hacker'|'vaporwave')
   useEffect(() => {
     window.testSilhouettes = (testMood: any) => {
-      const validMood = ['default', 'hacker', 'vaporwave', 'europa', 'industrial'].includes(
-        testMood
-      )
+      const validMood = [
+        'default',
+        'hacker',
+        'vaporwave',
+        'europa',
+        'industrial',
+        'nightshade',
+      ].includes(testMood)
         ? testMood
         : mood;
       console.log(`Testing silhouettes with mood: ${validMood}`);
@@ -572,7 +646,14 @@ const DistantSilhouettes = () => {
           left: 0,
           opacity: 0,
           transform: getInitialTransform(cfg.drift),
-          '--sil-opacity': mood === 'hacker' ? '0.18' : mood === 'europa' ? '0.25' : '0.30',
+          '--sil-opacity':
+            mood === 'hacker'
+              ? '0.18'
+              : mood === 'europa'
+                ? '0.25'
+                : mood === 'nightshade'
+                  ? '0.22'
+                  : '0.30',
           animationName: cfg.drift,
           animationDuration: cfg.duration,
           animationDelay: cfg.delay,
