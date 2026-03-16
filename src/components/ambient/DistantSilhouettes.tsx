@@ -481,6 +481,20 @@ const INDUSTRIAL_CONFIGS = [
   { topFrac: 0.78, duration: '50s', delay: '6s', drift: 'drift-upward' },
 ];
 
+const getInitialTransform = (drift: string) => {
+  switch (drift) {
+    case 'drift-ltr':
+      return 'translateX(-100px)';
+    case 'drift-upward':
+      return 'translateX(-5%) translateY(0)';
+    case 'drift-rtl-slow':
+      return 'translate(calc(100vw + 80px), 0)';
+    case 'drift-diagonal':
+    default:
+      return 'translate(calc(100vw + 60px), -60px)';
+  }
+};
+
 /* ─── Composant ─── */
 
 const DistantSilhouettes = () => {
@@ -556,13 +570,16 @@ const DistantSilhouettes = () => {
         style={{
           top: Math.round(cfg.topFrac * docHeight) + 'px',
           left: 0,
+          opacity: 0,
+          transform: getInitialTransform(cfg.drift),
           '--sil-opacity': mood === 'hacker' ? '0.18' : mood === 'europa' ? '0.25' : '0.30',
           animationName: cfg.drift,
           animationDuration: cfg.duration,
           animationDelay: cfg.delay,
           animationTimingFunction: 'linear',
           animationIterationCount: 'infinite',
-          animationFillMode: 'both',
+          // Keep pre-delay keyframe, but avoid sticky "last frame" when animation is interrupted.
+          animationFillMode: 'backwards',
         }}
       >
         <ShapeComponent />

@@ -22,6 +22,7 @@ const Breadcrumbs = () => {
     'projet-SAE4': t('common.breadcrumbs.labels.projetSae4'),
     'projet-SAE56': t('common.breadcrumbs.labels.projetSae56'),
     'projet-SAE3.01': t('common.breadcrumbs.labels.projetSae301'),
+    'informations-legales': t('common.breadcrumbs.labels.legal'),
   };
 
   // Génère le fil d'Ariane en respectant la hiérarchie du site
@@ -64,6 +65,11 @@ const Breadcrumbs = () => {
     // → Accueil › Crédits
     else if (firstSegment === 'credits') {
       trail.push({ label: t('common.footer.credits'), path: '/credits', isCurrent: true });
+    }
+    // Si c'est la page Informations legales
+    // -> Accueil > Informations legales
+    else if (firstSegment === 'informations-legales') {
+      trail.push({ label: t('common.footer.legal'), path: '/informations-legales', isCurrent: true });
     }
 
     return trail;

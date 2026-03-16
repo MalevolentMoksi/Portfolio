@@ -31,6 +31,7 @@ const ProjetSAE56 = retryLazy(() => import('./pages/ProjetSAE56'));
 const ProjetSAE301 = retryLazy(() => import('./pages/ProjetSAE301'));
 const About = retryLazy(() => import('./pages/About'));
 const Credits = retryLazy(() => import('./pages/Credits'));
+const Legal = retryLazy(() => import('./pages/Legal'));
 const NotFound = retryLazy(() => import('./pages/NotFound'));
 
 // Inner component to access useLocation (must be inside BrowserRouter)
@@ -53,6 +54,7 @@ const AppContent = () => {
           <Route path="projet-SAE3.01" element={<ProjetSAE301 />} />
           <Route path="about" element={<About />} />
           <Route path="credits" element={<Credits />} />
+          <Route path="informations-legales" element={<Legal />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

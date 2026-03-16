@@ -37,6 +37,7 @@ const Footer = ({ diorama }: any) => {
         <nav className="footer-top-nav" aria-label={t('common.footer.secondaryNavAria')}>
           <FooterLink to="/about">{t('common.footer.about')}</FooterLink>
           <FooterLink to="/credits">{t('common.footer.credits')}</FooterLink>
+          <FooterLink to="/informations-legales">{t('common.footer.legal')}</FooterLink>
         </nav>
         <FooterWidget />
       </div>

@@ -92,7 +92,8 @@
         "projetSae3": "Development workstation setup",
         "projetSae4": "Database creation",
         "projetSae56": "Institutional website creation",
-        "projetSae301": "Web app for caregivers"
+        "projetSae301": "Web app for caregivers",
+        "legal": "Legal information"
       }
     },
     "filterBar": {
@@ -125,6 +126,7 @@
       "secondaryNavAria": "Secondary navigation",
       "about": "About the portfolio",
       "credits": "Credits",
+      "legal": "Legal information",
       "githubAria": "GitHub profile",
       "emailAria": "Email",
       "gitlabAria": "GitLab profile",
@@ -423,6 +425,12 @@
       "subheading": "Music, visuals, and thanks",
       "metaTitle": "Credits | Portfolio - Enzo Morello",
       "metaDescription": "Acknowledgements and credits for Enzo Morello portfolio - artists, studios, and teaching team."
+    },
+    "legal": {
+      "heading": "Legal information",
+      "subheading": "Legal notice, privacy and cookies",
+      "metaTitle": "Legal information | Portfolio - Enzo Morello",
+      "metaDescription": "Legal notice, privacy policy and cookie management for Enzo Morello's portfolio."
     }
   },
   "home": {
@@ -691,6 +699,68 @@
       "Wallpapers sourced from official game visuals.",
       "Wallpapers sourced from official visuals, including the Beyond Light expansion (Europa)."
     ]
+  },
+  "legal": {
+    "metaTitle": "Legal information | Portfolio",
+    "metaDescription": "Legal notice, privacy policy and cookie management.",
+    "lastUpdated": "Last updated: March 16, 2026",
+    "sections": {
+      "mentions": {
+        "title": "Legal notice",
+        "intro": "This website is a personal portfolio for informational purposes and is published on a non-commercial basis.",
+        "editorLabel": "Website publisher",
+        "editorValue": "Enzo Morello",
+        "directorLabel": "Publication director",
+        "directorValue": "Enzo Morello",
+        "hostingLabel": "Hosting",
+        "hostingValue": "GitHub Pages (GitHub, Inc.)",
+        "contactLabel": "Contact",
+        "contactValue": "Through the site contact form and public GitHub/GitLab profiles.",
+        "privateIndividualNotice": "In line with the framework applicable to private individuals publishing a personal site, only strictly relevant information is disclosed here."
+      },
+      "privacy": {
+        "title": "Privacy policy",
+        "intro": "Data is processed only for portfolio operation and contact handling.",
+        "collectedDataTitle": "Potentially collected data",
+        "collectedData": {
+          "contactForm": "Contact form: name, email and message sent to Formspree.",
+          "preferences": "Local preferences: language, accessibility, visual mood, music player state (stored in localStorage/sessionStorage).",
+          "analytics": "Technical audience measurement: only if the analytics environment variable is configured, with navigation and technical context data."
+        },
+        "usageTitle": "Purposes",
+        "usage": {
+          "contact": "Reply to messages sent through the contact form.",
+          "experience": "Remember comfort settings and keep site features working.",
+          "measurement": "Track traffic in a technical way to improve the site (when analytics is enabled)."
+        },
+        "recipientsTitle": "Recipients / processors",
+        "recipients": {
+          "formspree": "Formspree (contact form message delivery).",
+          "hosting": "GitHub Pages (static site hosting).",
+          "analytics": "Depending on configuration: Cloudflare Workers (webhook proxy), Discord Webhook, and approximate geolocation services (ipapi.co / ipwho.is)."
+        }
+      },
+      "cookies": {
+        "title": "Cookie and tracker management",
+        "intro": "The website does not set advertising cookies or proprietary marketing trackers in its standard configuration.",
+        "items": {
+          "noAds": "No advertising cookie or retargeting tool is used.",
+          "localStorage": "Local storage (localStorage) is used to keep interface preferences.",
+          "sessionStorage": "Session storage (sessionStorage) is used for temporary navigation data."
+        },
+        "manage": "You can clear or block these storages from your browser settings (site data removal)."
+      },
+      "rights": {
+        "title": "Your rights",
+        "intro": "Under GDPR, you notably have rights of access, rectification, erasure, and objection regarding your personal data.",
+        "contact": "For any request related to your data on this site, use the contact form and specify your request."
+      },
+      "ip": {
+        "title": "Intellectual property",
+        "paragraph1": "Source code, texts, and original elements of this portfolio are protected by copyright law.",
+        "paragraph2": "Third-party music, visuals, and trademarks remain the property of their respective rights holders and are credited on the Credits page."
+      }
+    }
   },
   "notFound": {
     "metaTitle": "404 - Page not found",

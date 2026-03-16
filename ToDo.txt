@@ -3,6 +3,7 @@ Tâches manuelles :
 Tâches requiert Recherches A faire :
 
 Tâches simples :
+CSS des éléments en chargmenet de page à revoir.
 
 Tâches moyennes :
 

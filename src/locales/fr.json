@@ -92,7 +92,8 @@
         "projetSae3": "Installation d'un poste pour le développement",
         "projetSae4": "Création d'une base de données",
         "projetSae56": "Création d'un site institutionnel",
-        "projetSae301": "Application Web pour les aidants"
+        "projetSae301": "Application Web pour les aidants",
+        "legal": "Informations légales"
       }
     },
     "filterBar": {
@@ -125,6 +126,7 @@
       "secondaryNavAria": "Navigation secondaire",
       "about": "À propos du portfolio",
       "credits": "Crédits",
+      "legal": "Informations légales",
       "githubAria": "Profil GitHub",
       "emailAria": "Email",
       "gitlabAria": "Profil GitLab",
@@ -423,6 +425,12 @@
       "subheading": "Musique, visuels et remerciements",
       "metaTitle": "Crédits | Portfolio - Enzo Morello",
       "metaDescription": "Remerciements et crédits du portfolio d'Enzo Morello - artistes, studios et équipe pédagogique."
+    },
+    "legal": {
+      "heading": "Informations légales",
+      "subheading": "Mentions légales, confidentialité et cookies",
+      "metaTitle": "Informations légales | Portfolio - Enzo Morello",
+      "metaDescription": "Mentions légales, politique de confidentialité et gestion des cookies du portfolio d'Enzo Morello."
     }
   },
   "home": {
@@ -691,6 +699,68 @@
       "Fonds d'écran tirés des visuels officiels du jeu.",
       "Fonds d'écran tirés des visuels officiels, dont l'extension Beyond Light (Europa)."
     ]
+  },
+  "legal": {
+    "metaTitle": "Informations légales | Portfolio",
+    "metaDescription": "Mentions légales, politique de confidentialité et gestion des cookies.",
+    "lastUpdated": "Dernière mise à jour : 16 mars 2026",
+    "sections": {
+      "mentions": {
+        "title": "Mentions légales",
+        "intro": "Ce site est un portfolio personnel à finalité informative, publié dans un cadre non commercial.",
+        "editorLabel": "Éditeur du site",
+        "editorValue": "Enzo Morello",
+        "directorLabel": "Directeur de la publication",
+        "directorValue": "Enzo Morello",
+        "hostingLabel": "Hébergement",
+        "hostingValue": "GitHub Pages (GitHub, Inc.)",
+        "contactLabel": "Contact",
+        "contactValue": "Via le formulaire de contact du site et les profils publics GitHub/GitLab.",
+        "privateIndividualNotice": "Conformément au cadre applicable aux personnes physiques éditant un site personnel, seules les informations strictement pertinentes sont publiées ici."
+      },
+      "privacy": {
+        "title": "Politique de confidentialité",
+        "intro": "Les données sont traitées uniquement pour le fonctionnement du portfolio et les prises de contact.",
+        "collectedDataTitle": "Données potentiellement collectées",
+        "collectedData": {
+          "contactForm": "Formulaire de contact : nom, email et message transmis au service Formspree.",
+          "preferences": "Préférences locales : langue, accessibilité, ambiance visuelle, état du lecteur audio (stockées dans localStorage/sessionStorage).",
+          "analytics": "Mesure d'audience technique : uniquement si la variable d'environnement d'analytics est configurée, avec des données de navigation et de contexte technique."
+        },
+        "usageTitle": "Finalités",
+        "usage": {
+          "contact": "Répondre aux messages envoyés via le formulaire.",
+          "experience": "Mémoriser vos réglages de confort et maintenir les fonctionnalités du site.",
+          "measurement": "Suivre la fréquentation de façon technique pour améliorer le site (quand l'analytics est active)."
+        },
+        "recipientsTitle": "Destinataires / sous-traitants",
+        "recipients": {
+          "formspree": "Formspree (envoi des messages du formulaire de contact).",
+          "hosting": "GitHub Pages (hébergement statique du site).",
+          "analytics": "Selon configuration : Cloudflare Workers (proxy webhook), Discord Webhook, et services de géolocalisation approximative (ipapi.co / ipwho.is)."
+        }
+      },
+      "cookies": {
+        "title": "Gestion des cookies et traceurs",
+        "intro": "Le site ne dépose pas de cookie publicitaire ni de traceur marketing propriétaire dans sa configuration standard.",
+        "items": {
+          "noAds": "Aucun cookie publicitaire ni outil de reciblage n'est utilisé.",
+          "localStorage": "Le stockage local (localStorage) est utilisé pour conserver vos préférences d'interface.",
+          "sessionStorage": "Le stockage de session (sessionStorage) est utilisé pour des informations temporaires de navigation."
+        },
+        "manage": "Vous pouvez supprimer ou bloquer ces stockages depuis les paramètres de votre navigateur (suppression des données de site)."
+      },
+      "rights": {
+        "title": "Vos droits",
+        "intro": "Conformément au RGPD, vous disposez notamment des droits d'accès, de rectification, d'effacement et d'opposition pour les données personnelles vous concernant.",
+        "contact": "Pour toute demande liée à vos données sur ce site, utilisez le formulaire de contact en précisant votre demande."
+      },
+      "ip": {
+        "title": "Propriété intellectuelle",
+        "paragraph1": "Le code source, les textes et les éléments originaux de ce portfolio sont protégés par le droit d'auteur.",
+        "paragraph2": "Les musiques, visuels et marques de tiers restent la propriété de leurs ayants droit respectifs et sont crédités sur la page Crédits."
+      }
+    }
   },
   "notFound": {
     "metaTitle": "404 - Page introuvable",

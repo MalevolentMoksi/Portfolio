@@ -109,6 +109,13 @@ const pageConfig: Record<string, PageConfigItem> = {
     metaTitleKey: 'pageConfig.credits.metaTitle',
     metaDescriptionKey: 'pageConfig.credits.metaDescription',
   },
+  '/informations-legales': {
+    headingKey: 'pageConfig.legal.heading',
+    subheadingKey: 'pageConfig.legal.subheading',
+    backgroundSrc: getAssetPath('assets/images/backgrounds/SpaceStation.webp'),
+    metaTitleKey: 'pageConfig.legal.metaTitle',
+    metaDescriptionKey: 'pageConfig.legal.metaDescription',
+  },
 };
 
 const Layout = () => {
