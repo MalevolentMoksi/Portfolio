@@ -20,7 +20,28 @@ interface Spore {
   twinkle: number;
 }
 
-const SPORE_COLORS = ['#A366FF', '#C8B0D8', '#8B5E83', '#E8D8FF', '#52B788'];
+const SPORE_COLORS = [
+  {
+    core: 'var(--color-primary)',
+    glow: 'rgba(var(--color-primary-rgb), 0.52)',
+  },
+  {
+    core: 'var(--color-accent-light)',
+    glow: 'rgba(var(--color-accent-light-rgb), 0.42)',
+  },
+  {
+    core: 'var(--color-accent-pale)',
+    glow: 'rgba(var(--color-accent-pale-rgb), 0.4)',
+  },
+  {
+    core: 'color-mix(in srgb, var(--color-primary) 62%, var(--color-accent-pale) 38%)',
+    glow: 'rgba(var(--color-primary-rgb), 0.32)',
+  },
+  {
+    core: 'color-mix(in srgb, var(--color-accent-pale) 56%, var(--color-accent-light) 44%)',
+    glow: 'rgba(var(--color-accent-pale-rgb), 0.34)',
+  },
+];
 
 const NightshadeSpores = () => {
   const { mood } = useMood();
@@ -52,8 +73,8 @@ const NightshadeSpores = () => {
       el.style.cssText = `
         width: ${size}px;
         height: ${size}px;
-        background: ${color};
-        box-shadow: 0 0 ${size * 4}px ${color}, 0 0 ${size * 2}px ${color}88;
+        background: ${color.core};
+        box-shadow: 0 0 ${size * 4}px ${color.core}, 0 0 ${size * 2}px ${color.glow};
       `;
       wrapper.appendChild(el);
 

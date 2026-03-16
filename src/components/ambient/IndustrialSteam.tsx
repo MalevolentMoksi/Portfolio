@@ -47,8 +47,7 @@ const PipeFixture = ({ x }: any) => (
         width="12"
         height="36"
         rx="1"
-        fill="#3a3a3a"
-        stroke="#555"
+        className="industrial-pipe-body"
         strokeWidth="0.8"
       />
       {/* Collerette/bride en haut */}
@@ -58,20 +57,19 @@ const PipeFixture = ({ x }: any) => (
         width="18"
         height="5"
         rx="1"
-        fill="#4a4a4a"
-        stroke="#666"
+        className="industrial-pipe-flange"
         strokeWidth="0.6"
       />
       {/* Boulons sur la bride */}
-      <circle cx="6" cy="12.5" r="1.2" fill="#555" />
-      <circle cx="18" cy="12.5" r="1.2" fill="#555" />
+      <circle cx="6" cy="12.5" r="1.2" className="industrial-pipe-rivet" />
+      <circle cx="18" cy="12.5" r="1.2" className="industrial-pipe-rivet" />
       {/* Ouverture / buse en haut */}
-      <ellipse cx="12" cy="10" rx="6" ry="2" fill="#2a2a2a" stroke="#555" strokeWidth="0.5" />
+      <ellipse cx="12" cy="10" rx="6" ry="2" className="industrial-pipe-nozzle" strokeWidth="0.5" />
       {/* Rivets latéraux */}
-      <circle cx="8" cy="24" r="0.8" fill="#666" />
-      <circle cx="16" cy="24" r="0.8" fill="#666" />
-      <circle cx="8" cy="34" r="0.8" fill="#666" />
-      <circle cx="16" cy="34" r="0.8" fill="#666" />
+      <circle cx="8" cy="24" r="0.8" className="industrial-pipe-rivet" />
+      <circle cx="16" cy="24" r="0.8" className="industrial-pipe-rivet" />
+      <circle cx="8" cy="34" r="0.8" className="industrial-pipe-rivet" />
+      <circle cx="16" cy="34" r="0.8" className="industrial-pipe-rivet" />
     </svg>
   </div>
 );

@@ -35,12 +35,12 @@
 }
 
 .breadcrumbs a:hover {
-  color: var(--color-accent);
+  color: var(--color-accent-pale);
   opacity: 1;
 }
 
 .breadcrumb-separator {
-  color: var(--color-accent);
+  color: var(--color-accent-pale);
   opacity: 0.5;
   font-size: 1.1rem;
   -webkit-user-select: none;
@@ -48,12 +48,12 @@
 }
 
 .breadcrumb-current {
-  color: var(--color-accent);
+  color: var(--color-accent-pale);
   font-weight: 400;
 }
 
 .reading-time {
-  color: var(--color-accent);
+  color: var(--color-accent-pale);
   font-weight: 700;
   font-size: 0.85rem;
   letter-spacing: 0.04em;

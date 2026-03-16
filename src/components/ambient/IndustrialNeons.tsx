@@ -27,9 +27,9 @@ const HazardSign = ({ style }: any) => (
     aria-hidden="true"
   >
     {/* Bras métallique horizontal venant de la gauche (hors-champ) */}
-    <line x1="-50" y1="0" x2="30" y2="0" stroke="#4a4a4a" strokeWidth="3" />
+    <line x1="-50" y1="0" x2="30" y2="0" className="industrial-metal-line" strokeWidth="3" />
     {/* Support vertical descendant vers l'enseigne */}
-    <line x1="30" y1="0" x2="30" y2="10" stroke="#4a4a4a" strokeWidth="2.5" />
+    <line x1="30" y1="0" x2="30" y2="10" className="industrial-metal-line" strokeWidth="2.5" />
     {/* Plaque de fixation */}
     <rect
       x="24"
@@ -37,41 +37,42 @@ const HazardSign = ({ style }: any) => (
       width="12"
       height="6"
       rx="1"
-      fill="#3a3a3a"
-      stroke="#555"
+      className="industrial-metal-plate"
       strokeWidth="0.5"
     />
     {/* Boulon */}
-    <circle cx="30" cy="0" r="2" fill="#555" stroke="#666" strokeWidth="0.5" />
+    <circle cx="30" cy="0" r="2" className="industrial-metal-bolt" strokeWidth="0.5" />
 
     {/* Triangle néon */}
     <g transform="translate(0, 12)">
       <polygon
         points="30,2 56,48 4,48"
         fill="none"
-        stroke="#FF5722"
+        className="neon-stroke industrial-neon-core"
         strokeWidth="2"
         strokeLinejoin="round"
-        className="neon-stroke"
       />
       <polygon
         points="30,12 48,44 12,44"
         fill="none"
-        stroke="rgba(255, 87, 34, 0.4)"
+        className="industrial-neon-soft"
         strokeWidth="0.8"
-        className="neon-stroke"
       />
       <line
         x1="30"
         y1="22"
         x2="30"
         y2="34"
-        stroke="#FFD600"
+        className="neon-stroke neon-stroke--accent industrial-neon-accent"
         strokeWidth="2.5"
         strokeLinecap="round"
-        className="neon-stroke neon-stroke--accent"
       />
-      <circle cx="30" cy="40" r="1.8" fill="#FFD600" className="neon-stroke neon-stroke--accent" />
+      <circle
+        cx="30"
+        cy="40"
+        r="1.8"
+        className="neon-stroke neon-stroke--accent industrial-neon-accent-fill"
+      />
     </g>
   </svg>
 );
@@ -85,9 +86,9 @@ const BoltSign = ({ style }: any) => (
     aria-hidden="true"
   >
     {/* Bras métallique horizontal venant de la droite (hors-champ) */}
-    <line x1="75" y1="0" x2="20" y2="0" stroke="#4a4a4a" strokeWidth="3" />
+    <line x1="75" y1="0" x2="20" y2="0" className="industrial-metal-line" strokeWidth="3" />
     {/* Coude en L descendant */}
-    <line x1="20" y1="0" x2="20" y2="12" stroke="#4a4a4a" strokeWidth="2.5" />
+    <line x1="20" y1="0" x2="20" y2="12" className="industrial-metal-line" strokeWidth="2.5" />
     {/* Plaque de fixation */}
     <rect
       x="14"
@@ -95,27 +96,25 @@ const BoltSign = ({ style }: any) => (
       width="12"
       height="6"
       rx="1"
-      fill="#3a3a3a"
-      stroke="#555"
+      className="industrial-metal-plate"
       strokeWidth="0.5"
     />
-    <circle cx="20" cy="0" r="2" fill="#555" stroke="#666" strokeWidth="0.5" />
+    <circle cx="20" cy="0" r="2" className="industrial-metal-bolt" strokeWidth="0.5" />
 
     {/* Éclair néon */}
     <g transform="translate(0, 10)">
       <polyline
         points="22,2 10,28 20,28 14,58 34,22 22,22 30,2"
         fill="none"
-        stroke="#FFD600"
+        className="neon-stroke neon-stroke--accent industrial-neon-accent"
         strokeWidth="2"
         strokeLinejoin="round"
         strokeLinecap="round"
-        className="neon-stroke neon-stroke--accent"
       />
       <polyline
         points="22,2 10,28 20,28 14,58 34,22 22,22 30,2"
         fill="none"
-        stroke="rgba(255, 214, 0, 0.2)"
+        className="industrial-neon-accent-soft"
         strokeWidth="4"
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -140,7 +139,7 @@ const CautionSign = () => (
     aria-hidden="true"
   >
     {/* Rail métallique horizontal en haut (dépasse l'écran) */}
-    <line x1="-20" y1="-28" x2="160" y2="-28" stroke="#4a4a4a" strokeWidth="3" />
+    <line x1="-20" y1="-28" x2="160" y2="-28" className="industrial-metal-line" strokeWidth="3" />
 
     {/* Chaîne gauche — maillons alternés */}
     {[0, 5, 10, 15, 20].map((y, i) => (
@@ -152,7 +151,7 @@ const CautionSign = () => (
         height="4"
         rx="1"
         fill="none"
-        stroke="#666"
+        className="industrial-chain-link"
         strokeWidth="0.8"
       />
     ))}
@@ -166,7 +165,7 @@ const CautionSign = () => (
         height="4"
         rx="1"
         fill="none"
-        stroke="#666"
+        className="industrial-chain-link"
         strokeWidth="0.8"
       />
     ))}
@@ -178,8 +177,7 @@ const CautionSign = () => (
       width="140"
       height="24"
       rx="2"
-      fill="rgba(26, 26, 26, 0.8)"
-      stroke="#4a4a4a"
+      className="industrial-sign-plate"
       strokeWidth="1"
     />
     {/* Bordure néon */}
@@ -190,9 +188,8 @@ const CautionSign = () => (
       height="20"
       rx="1.5"
       fill="none"
-      stroke="#FF5722"
+      className="neon-stroke industrial-neon-core"
       strokeWidth="1.2"
-      className="neon-stroke"
     />
     {/* Texte néon */}
     <text
@@ -202,9 +199,8 @@ const CautionSign = () => (
       fontFamily="monospace"
       fontSize="12"
       fontWeight="bold"
-      fill="#FF5722"
+      className="neon-text industrial-sign-text"
       letterSpacing="4"
-      className="neon-text"
     >
       CAUTION
     </text>

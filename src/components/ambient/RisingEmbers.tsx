@@ -20,6 +20,29 @@ const SPAWN_MAX_MS = 1200;
 
 let _emberId = 0;
 
+const EMBER_PALETTE = [
+  {
+    core: 'var(--color-primary)',
+    glow: 'rgba(var(--color-primary-rgb), 0.55)',
+  },
+  {
+    core: 'color-mix(in srgb, var(--color-primary) 72%, var(--color-accent-light) 28%)',
+    glow: 'rgba(var(--color-primary-rgb), 0.42)',
+  },
+  {
+    core: 'var(--color-accent-pale)',
+    glow: 'rgba(var(--color-accent-pale-rgb), 0.5)',
+  },
+  {
+    core: 'color-mix(in srgb, var(--color-primary) 78%, var(--color-accent-pale) 22%)',
+    glow: 'rgba(var(--color-primary-rgb), 0.48)',
+  },
+  {
+    core: 'color-mix(in srgb, var(--color-primary) 58%, var(--color-secondary) 42%)',
+    glow: 'rgba(var(--color-primary-rgb), 0.34)',
+  },
+];
+
 const RisingEmbers = () => {
   const { mood } = useMood();
   const [embers, setEmbers] = useState<any[]>([]);
@@ -32,9 +55,7 @@ const RisingEmbers = () => {
     const id = ++_emberId;
     const isSpark = Math.random() < 0.28; // 28 % → plus d'étincelles horizontales
 
-    // Couleur : orange dominant, parfois jaune ou rouge foncé
-    const colors = ['#FF5722', '#FF8A65', '#FFD600', '#FF6E40', '#BF360C'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
+    const palette = EMBER_PALETTE[Math.floor(Math.random() * EMBER_PALETTE.length)];
 
     let ember: any;
     if (isSpark) {
@@ -43,12 +64,12 @@ const RisingEmbers = () => {
       const top = 20 + Math.random() * 60; // 20–80 vh
       const duration = 0.25 + Math.random() * 0.35; // 0.25–0.6 s
       const direction = Math.random() > 0.5 ? 1 : -1;
-      ember = { id, spark: true, width, left, top, duration, color, direction };
+      ember = { id, spark: true, width, left, top, duration, palette, direction };
     } else {
       const size = 3 + Math.random() * 4.5; // 3–7.5 px
       const left = 5 + Math.random() * 90; // 5–95 vw
       const duration = 5 + Math.random() * 5; // 5–10 s
-      ember = { id, spark: false, size, left, duration, color };
+      ember = { id, spark: false, size, left, duration, palette };
     }
 
     setEmbers((prev) => {
@@ -101,8 +122,8 @@ const RisingEmbers = () => {
               height: '2px',
               left: e.left + 'vw',
               top: e.top + 'vh',
-              background: e.color,
-              boxShadow: `0 0 10px ${e.color}, 0 0 20px rgba(255, 87, 34, 0.55)`,
+              background: e.palette.core,
+              boxShadow: `0 0 10px ${e.palette.core}, 0 0 20px ${e.palette.glow}`,
               animationDuration: e.duration + 's',
               '--spark-dir': e.direction,
             }}
@@ -116,8 +137,8 @@ const RisingEmbers = () => {
               height: e.size + 'px',
               left: e.left + 'vw',
               bottom: '5%',
-              background: e.color,
-              boxShadow: `0 0 ${e.size * 3}px ${e.color}, 0 0 ${e.size * 6}px rgba(255, 87, 34, 0.55)`,
+              background: e.palette.core,
+              boxShadow: `0 0 ${e.size * 3}px ${e.palette.core}, 0 0 ${e.size * 6}px ${e.palette.glow}`,
               animationDuration: e.duration + 's',
             }}
           />
