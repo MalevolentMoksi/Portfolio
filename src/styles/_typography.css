@@ -5,7 +5,7 @@
 /* Headings with gradient effect */
 h1 {
   font-size: var(--font-size-h1);
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0.05em;
   margin-top: var(--space-md);
   margin-bottom: var(--space-md);
@@ -83,7 +83,7 @@ p:last-child {
 
 /* Strong & emphasis */
 strong {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-accent-light);
 }
 

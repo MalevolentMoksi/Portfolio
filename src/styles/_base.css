@@ -108,7 +108,7 @@ video {
   padding: var(--space-sm) var(--space-md);
   background: var(--color-primary);
   color: var(--color-bg);
-  font-weight: 600;
+  font-weight: 700;
   border-radius: var(--border-radius-sm);
   z-index: 9999;
   transition: top var(--transition-fast);

@@ -2,11 +2,9 @@
    Main Stylesheet - Imports all modules
    ============================================ */
 
-/* Self-hosted Roboto latin subsets only */
+/* Self-hosted Roboto latin: optimized to 2 weights only (400, 700) */
 @import '@fontsource/roboto/latin-400.css';
-@import '@fontsource/roboto/latin-500.css';
 @import '@fontsource/roboto/latin-700.css';
-@import '@fontsource/roboto/latin-900.css';
 
 /* Core styles */
 @import './_variables.css';

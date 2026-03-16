@@ -1219,9 +1219,9 @@ class MusicPlayer {
           <img src="${safePictureDataURL}" alt="" style="width: 40px; height: 40px; border-radius: 4px; flex-shrink: 0; object-fit: cover;">
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="color: var(--color-primary); font-weight: 600; font-size: 0.8rem; flex-shrink: 0;">${index === this.currentTrackIndex ? '▶' : ''}</span>
+              <span style="color: var(--color-primary); font-weight: 700; font-size: 0.8rem; flex-shrink: 0;">${index === this.currentTrackIndex ? '▶' : ''}</span>
               <div style="min-width: 0; flex: 1;">
-                <div style="font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeTitle}</div>
+                <div style="font-size: 0.9rem; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeTitle}</div>
                 <div style="font-size: 0.8rem; color: ${artistColor}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeArtist}</div>
               </div>
             </div>
