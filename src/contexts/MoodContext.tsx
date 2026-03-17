@@ -12,7 +12,7 @@ export const MOODS: MoodMap = {
   nightshade: { label: 'Nightshade', emoji: '⚘', color: '#A366FF', rgb: '163, 102, 255' },
 };
 
-const MOOD_ORDER: MoodKey[] = [
+export const MOOD_ORDER: MoodKey[] = [
   'default',
   'hacker',
   'vaporwave',

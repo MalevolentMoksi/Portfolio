@@ -1,31 +1,123 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type CSSProperties,
+  type ReactElement,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { useMood, MOODS } from '../contexts/MoodContext';
+import { useMood, MOODS, MOOD_ORDER } from '../contexts/MoodContext';
 import Tooltip from './Tooltip';
 import type { MoodKey } from '@/types';
 
-const MOOD_KEYS = Object.keys(MOODS) as MoodKey[];
+type SelectorMode = 'dropdown' | 'rotaryCylinder' | 'hexGrid' | 'analogTuner';
+const ACTIVE_SELECTOR_MODE = 'dropdown' as SelectorMode;
+
+const createVhsOverlay = (newMood: MoodKey): HTMLDivElement => {
+  const overlay = document.createElement('div');
+  overlay.className = 'mood-vhs-overlay';
+  overlay.style.setProperty('--vhs-color', MOODS[newMood].color);
+  document.body.appendChild(overlay);
+
+  const stripCount = 4 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < stripCount; i++) {
+    const strip = document.createElement('div');
+    strip.className = 'vhs-strip';
+    const topPct = Math.random() * 88;
+    const heightPct = 3 + Math.random() * 18;
+    const offsetX = (Math.random() - 0.5) * 90;
+    const delay = Math.round(Math.random() * 80);
+
+    strip.style.cssText = [
+      `top: ${topPct.toFixed(1)}%`,
+      `height: ${heightPct.toFixed(1)}%`,
+      `transform: translateX(${offsetX.toFixed(0)}px)`,
+      `background: ${MOODS[newMood].color}`,
+      `animation-delay: ${delay}ms`,
+    ].join('; ');
+
+    overlay.appendChild(strip);
+  }
+
+  return overlay;
+};
 
 const MoodSwitcher = () => {
   const { t } = useTranslation();
   const { mood, setMood } = useMood();
   const [isOpen, setIsOpen] = useState(false);
   const [spinKey, setSpinKey] = useState(0);
-  const panelRef = useRef<any>(null);
-  const panelDivRef = useRef<any>(null);
-  const [panelPos, setPanelPos] = useState<any>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const panelDivRef = useRef<HTMLDivElement>(null);
+  const timeoutIdsRef = useRef<number[]>([]);
+  const [panelPos, setPanelPos] = useState<{ top: number; right: number } | null>(null);
+
+  const schedule = useCallback((callback: () => void, delay: number) => {
+    const timeoutId = window.setTimeout(() => {
+      timeoutIdsRef.current = timeoutIdsRef.current.filter((id) => id !== timeoutId);
+      callback();
+    }, delay);
+
+    timeoutIdsRef.current.push(timeoutId);
+    return timeoutId;
+  }, []);
+
+  const clearScheduledTimeouts = useCallback(() => {
+    timeoutIdsRef.current.forEach((id) => window.clearTimeout(id));
+    timeoutIdsRef.current = [];
+  }, []);
+
+  const closePanel = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  const commitMood = useCallback(
+    (newMood: MoodKey, options?: { delayBeforeCommit?: number }) => {
+      const delayBeforeCommit = options?.delayBeforeCommit ?? 0;
+
+      const runCommit = () => {
+        if (newMood !== mood) {
+          const overlay = createVhsOverlay(newMood);
+          schedule(() => {
+            setMood(newMood);
+          }, 60);
+          schedule(() => {
+            overlay.remove();
+          }, 200);
+          setSpinKey((key) => key + 1);
+        }
+
+        closePanel();
+      };
+
+      if (delayBeforeCommit > 0) {
+        schedule(runCommit, delayBeforeCommit);
+      } else {
+        runCommit();
+      }
+    },
+    [closePanel, mood, schedule, setMood]
+  );
+
+  useEffect(() => {
+    return () => {
+      clearScheduledTimeouts();
+    };
+  }, [clearScheduledTimeouts]);
 
   /* ── Fermer au clic extérieur ── */
   useEffect(() => {
     if (!isOpen) return;
-    const handle = (e: any) => {
+    const handle = (e: MouseEvent) => {
+      const targetNode = e.target as Node | null;
       if (
         panelRef.current &&
-        !panelRef.current.contains(e.target) &&
-        !(panelDivRef.current && panelDivRef.current.contains(e.target))
+        !panelRef.current.contains(targetNode) &&
+        !(panelDivRef.current && panelDivRef.current.contains(targetNode))
       ) {
-        setIsOpen(false);
+        closePanel();
       }
     };
     const id = setTimeout(() => document.addEventListener('mousedown', handle), 0);
@@ -33,70 +125,86 @@ const MoodSwitcher = () => {
       clearTimeout(id);
       document.removeEventListener('mousedown', handle);
     };
-  }, [isOpen]);
+  }, [closePanel, isOpen]);
 
   /* ── Fermer avec Escape ── */
   useEffect(() => {
     if (!isOpen) return;
-    const handle = (e: any) => {
-      if (e.key === 'Escape') setIsOpen(false);
+    const handle = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closePanel();
     };
     document.addEventListener('keydown', handle);
     return () => document.removeEventListener('keydown', handle);
-  }, [isOpen]);
+  }, [closePanel, isOpen]);
+
   /* —— Position du panneau (portal → coordonnées viewport) —— */
   useEffect(() => {
     if (!isOpen || !panelRef.current) return;
-    const rect = panelRef.current.getBoundingClientRect();
-    setPanelPos({ top: rect.bottom + 12, right: window.innerWidth - rect.right });
+
+    const updatePanelPosition = () => {
+      if (!panelRef.current) return;
+      const rect = panelRef.current.getBoundingClientRect();
+      setPanelPos({
+        top: Math.max(12, rect.bottom + 12),
+        right: Math.max(12, window.innerWidth - rect.right),
+      });
+    };
+
+    updatePanelPosition();
+    window.addEventListener('resize', updatePanelPosition);
+    window.addEventListener('scroll', updatePanelPosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePanelPosition);
+      window.removeEventListener('scroll', updatePanelPosition, true);
+    };
   }, [isOpen]);
-  /* ── Changer de mood avec animation VHS ── */
-  const handleMoodChange = useCallback(
-    (newMood: MoodKey) => {
-      if (newMood === mood) return;
 
-      // Overlay VHS flash + scanline
-      const overlay = document.createElement('div');
-      overlay.className = 'mood-vhs-overlay';
-      // Couleur du flash = couleur du mood entrant
-      overlay.style.setProperty('--vhs-color', MOODS[newMood].color);
-      document.body.appendChild(overlay);
+  useEffect(() => {
+    if (!isOpen || !panelDivRef.current) return;
+    schedule(() => panelDivRef.current?.focus(), 0);
+  }, [isOpen, schedule]);
 
-      // Bandes glitch horizontales aléatoires (4–6 strips)
-      const stripCount = 4 + Math.floor(Math.random() * 3);
-      for (let i = 0; i < stripCount; i++) {
-        const strip = document.createElement('div');
-        strip.className = 'vhs-strip';
-        const topPct = Math.random() * 88;
-        const heightPct = 3 + Math.random() * 18;
-        const offsetX = (Math.random() - 0.5) * 90; // −45px à +45px
-        const delay = Math.round(Math.random() * 80);
-        strip.style.cssText = [
-          `top: ${topPct.toFixed(1)}%`,
-          `height: ${heightPct.toFixed(1)}%`,
-          `transform: translateX(${offsetX.toFixed(0)}px)`,
-          `background: ${MOODS[newMood].color}`,
-          `animation-delay: ${delay}ms`,
-        ].join('; ');
-        overlay.appendChild(strip);
-      }
-
-      // Changer le mood au milieu de la transition (60 ms)
-      setTimeout(() => {
-        setMood(newMood);
-        // Toast disabled for mood switching
-      }, 60);
-
-      // Retirer l'overlay après la fin de l'animation (200 ms)
-      setTimeout(() => {
-        overlay.remove();
-      }, 200);
-
-      // Incrémenter spinKey : React remonte le SVG et l'animation rejoue depuis 0%
-      setSpinKey((k) => k + 1);
-    },
-    [mood, setMood]
+  const renderDropdownSelector = () => (
+    <>
+      <div className="mood-panel-title">{t('common.mood.title')}</div>
+      {MOOD_ORDER.map((key) => {
+        const m = MOODS[key];
+        const isActive = key === mood;
+        return (
+          <button
+            key={key}
+            className={`mood-option ${isActive ? 'mood-option--active' : ''}`}
+            onClick={() => commitMood(key)}
+            role="radio"
+            aria-checked={isActive}
+            style={{ '--mood-color': m.color } as CSSProperties}
+          >
+            <span className="mood-swatch" style={{ background: m.color }} />
+            <span className="mood-label">
+              <span className="mood-emoji">{m.emoji}</span> {t(`common.mood.names.${key}`)}
+            </span>
+            {isActive && (
+              <span className="mood-check" aria-hidden="true">
+                ✓
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </>
   );
+
+  const renderActiveSelector = () => {
+    const renderers: Record<SelectorMode, () => ReactElement> = {
+      dropdown: renderDropdownSelector,
+      rotaryCylinder: renderDropdownSelector, // TODO: implement
+      hexGrid: renderDropdownSelector, // TODO: implement
+      analogTuner: renderDropdownSelector, // TODO: implement
+    };
+
+    return renderers[ACTIVE_SELECTOR_MODE]();
+  };
 
   const currentMood = MOODS[mood];
   const currentMoodLabel = t(`common.mood.names.${mood}`);
@@ -110,6 +218,7 @@ const MoodSwitcher = () => {
           onClick={() => setIsOpen((prev) => !prev)}
           aria-label={t('common.mood.ariaLabel')}
           aria-expanded={isOpen}
+          aria-haspopup="dialog"
         >
           <svg
             key={spinKey}
@@ -199,9 +308,10 @@ const MoodSwitcher = () => {
         createPortal(
           <div
             ref={panelDivRef}
-            className="mood-panel"
-            role="radiogroup"
+            className={`mood-panel mood-panel--${ACTIVE_SELECTOR_MODE}`}
+            role="dialog"
             aria-label={t('common.mood.chooseAria')}
+            tabIndex={-1}
             style={
               panelPos
                 ? {
@@ -211,31 +321,7 @@ const MoodSwitcher = () => {
                 : {}
             }
           >
-            <div className="mood-panel-title">{t('common.mood.title')}</div>
-            {MOOD_KEYS.map((key: MoodKey) => {
-              const m = MOODS[key];
-              const isActive = key === mood;
-              return (
-                <button
-                  key={key}
-                  className={`mood-option ${isActive ? 'mood-option--active' : ''}`}
-                  onClick={() => handleMoodChange(key)}
-                  role="radio"
-                  aria-checked={isActive}
-                  style={{ '--mood-color': m.color }}
-                >
-                  <span className="mood-swatch" style={{ background: m.color }} />
-                  <span className="mood-label">
-                    <span className="mood-emoji">{m.emoji}</span> {t(`common.mood.names.${key}`)}
-                  </span>
-                  {isActive && (
-                    <span className="mood-check" aria-hidden="true">
-                      ✓
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+            {renderActiveSelector()}
           </div>,
           document.body
         )}
