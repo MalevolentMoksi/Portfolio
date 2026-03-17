@@ -1,6 +1,7 @@
 Tâches manuelles :
 
 Tâches requiert Recherches A faire :
+Reactivate High Perf after low assignment
 
 Tâches simples :
 CSS des éléments en chargmenet de page à revoir.

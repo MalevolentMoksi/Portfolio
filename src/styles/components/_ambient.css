@@ -1106,7 +1106,7 @@
 }
 
 .europa-frost-crack {
-  animation: frost-draw-in 3s ease-out forwards;
+  animation: frost-draw-in 12s ease-out forwards;
 }
 
 @keyframes frost-draw-in {

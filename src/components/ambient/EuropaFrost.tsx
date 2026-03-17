@@ -27,17 +27,30 @@ const branch = (ox: any, oy: any, angle: any, len: any) => {
 const buildCornerBranches = (cx: any, cy: any, baseAngle: any, count: any, spread: any) => {
   const branches = [];
   for (let i = 0; i < count; i++) {
-    const a = baseAngle - spread / 2 + (spread / (count - 1)) * i;
-    const len = 20 + Math.random() * 60; // 20–80 px
+    // Add random jitter to main angle for more natural variation
+    const angleJitter = (Math.random() - 0.5) * 15;
+    const a = baseAngle - spread / 2 + (spread / (count - 1)) * i + angleJitter;
+    const len = 5 + Math.random() * 22; // 5–27 unités du viewBox, wider range
     branches.push(branch(cx, cy, a, len));
-    // Sous-branches
-    if (Math.random() > 0.4) {
-      const mid = 0.4 + Math.random() * 0.3;
+    // Sous-branches with more randomness
+    if (Math.random() > 0.35) {
+      const mid = 0.35 + Math.random() * 0.4;
       const rad = (a * Math.PI) / 180;
       const mx = cx + Math.cos(rad) * len * mid;
       const my = cy + Math.sin(rad) * len * mid;
-      const subA = a + (Math.random() > 0.5 ? 25 : -25);
-      branches.push(branch(mx, my, subA, len * 0.4));
+      // More varied sub-branch angles
+      const subAngleVariance = 18 + Math.random() * 28; // 18–46 degrees
+      const subA = a + (Math.random() > 0.5 ? subAngleVariance : -subAngleVariance);
+      branches.push(branch(mx, my, subA, len * (0.3 + Math.random() * 0.3)));
+    }
+    // Occasional tertiary branches for extra complexity
+    if (Math.random() > 0.75) {
+      const mid = 0.5 + Math.random() * 0.35;
+      const rad = (a * Math.PI) / 180;
+      const mx = cx + Math.cos(rad) * len * mid;
+      const my = cy + Math.sin(rad) * len * mid;
+      const tertiaryAngle = (Math.random() - 0.5) * 60;
+      branches.push(branch(mx, my, a + tertiaryAngle, len * (0.2 + Math.random() * 0.25)));
     }
   }
   return branches;
@@ -45,10 +58,10 @@ const buildCornerBranches = (cx: any, cy: any, baseAngle: any, count: any, sprea
 
 /* Coins : [cx, cy, baseAngle, spread] */
 const CORNERS = [
-  { cx: 0, cy: 0, base: 135, spread: 70 }, // haut-gauche → vers bas-droite
-  { cx: 100, cy: 0, base: 225, spread: 70 }, // haut-droit → vers bas-gauche
-  { cx: 0, cy: 100, base: 45, spread: 70 }, // bas-gauche → vers haut-droite
-  { cx: 100, cy: 100, base: 315, spread: 70 }, // bas-droit → vers haut-gauche
+  { cx: 0, cy: 0, base: 45, spread: 70 }, // haut-gauche → vers bas-droite
+  { cx: 100, cy: 0, base: 135, spread: 70 }, // haut-droit → vers bas-gauche
+  { cx: 0, cy: 100, base: 315, spread: 70 }, // bas-gauche → vers haut-droite
+  { cx: 100, cy: 100, base: 225, spread: 70 }, // bas-droit → vers haut-gauche
 ];
 
 const EuropaFrost = () => {
@@ -76,8 +89,8 @@ const EuropaFrost = () => {
             y1={`${b.y1}%`}
             x2={`${b.x2}%`}
             y2={`${b.y2}%`}
-            stroke="rgba(0, 229, 255, 0.18)"
-            strokeWidth="0.25"
+            stroke="rgba(0, 229, 255, 0.09)"
+            strokeWidth="0.12"
             strokeLinecap="round"
             style={{
               strokeDasharray: dashLen,
