@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { NormalizedOutputOptions, OutputBundle } from 'rollup';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,7 +17,7 @@ const buildDate = new Date().toISOString().split('T')[0];
 const excludeMusicFilesPlugin = {
   name: 'exclude-music-files',
   apply: 'build',
-  generateBundle(options, bundle) {
+  generateBundle(_options: NormalizedOutputOptions, bundle: OutputBundle) {
     // Remove music files from the build output
     Object.keys(bundle).forEach((fileName) => {
       if (/\.(mp3|m4a|ogg)$/i.test(fileName)) {
@@ -137,6 +138,16 @@ export default defineConfig({
     outDir: '../dist',
     emptyOutDir: true,
     target: ['es2020', 'chrome90', 'firefox88', 'safari14', 'edge90'],
+    modulePreload: {
+      resolveDependencies(_filename, deps, context) {
+        if (context.hostType !== 'js') {
+          return deps;
+        }
+
+        // Avoid preloading the already-loaded app entry chunk from lazy imports.
+        return deps.filter((dep) => !/^assets\/index-[A-Za-z0-9_-]+\.js$/i.test(dep));
+      },
+    },
     rollupOptions: {
       input: resolve(__dirname, 'src/index.html'),
       external: ['react-native-fs'],
