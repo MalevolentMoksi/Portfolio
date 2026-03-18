@@ -549,7 +549,7 @@ const Home = () => {
     {
       id: 'web',
       title: t('home.skills.cards.web.title'),
-      skills: ['HTML / CSS', 'JavaScript', 'TypeScript', 'PHP', 'Symfony', 'React', 'Vite'],
+      skills: ['HTML / CSS', 'JavaScript', 'TypeScript', 'Node.js', 'PHP', 'Symfony', 'React', 'Vite'],
       tree: [
         { id: 'web-html-css', label: 'HTML / CSS' },
         {
@@ -565,6 +565,7 @@ const Home = () => {
               ],
             },
             { id: 'web-vite', label: 'Vite' },
+            { id: 'web-nodejs', label: 'Node.js' },
           ],
         },
         {
