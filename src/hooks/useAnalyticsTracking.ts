@@ -347,7 +347,7 @@ const useAnalyticsTracking = (pathname: string): void => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         closeVisibleWindow();
-        flushTimeOnPage('visibility-hidden', true);
+        // flushTimeOnPage('visibility-hidden', true);
         return;
       }
 
