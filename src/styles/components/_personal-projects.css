@@ -4,55 +4,88 @@
 
 /* Video gallery title */
 .video-gallery-title {
-  text-align: center;
-  font-size: 1.25rem;
-  font-weight: 600;
+  text-align: left;
+  font-size: clamp(1.1rem, 0.95rem + 0.8vw, 1.35rem);
+  font-weight: 700;
   color: var(--color-primary);
-  margin: var(--space-lg) 0 var(--space-md) 0;
-  letter-spacing: 0.05em;
+  margin: var(--space-lg) 0 var(--space-md);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 /* Video gallery grid */
 .video-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-lg);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: clamp(var(--space-md), 2vw, var(--space-lg));
   margin: var(--space-lg) 0;
 }
 
 .video-item {
+  --video-card-radius: 14px;
   display: flex;
   flex-direction: column;
-  text-align: center;
+  gap: var(--space-sm);
   position: relative;
-  transition: transform 0.75s ease;
-  z-index: 1;
+  isolation: isolate;
+  padding: clamp(0.65rem, 0.5rem + 0.55vw, 1rem);
+  border-radius: var(--video-card-radius);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.22);
+  background:
+    radial-gradient(circle at 8% 2%, rgba(var(--color-primary-rgb), 0.12) 0%, transparent 46%),
+    linear-gradient(
+      165deg,
+      rgba(var(--color-secondary-rgb), 0.7),
+      rgba(var(--color-secondary-rgb), 0.5)
+    );
+  box-shadow:
+    0 16px 32px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    border-color var(--transition-base);
 }
 
 .video-item:hover {
-  transform: scale(1.2);
-  z-index: 10;
+  transform: translateY(-6px);
+  border-color: rgba(var(--color-primary-rgb), 0.48);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.video-item.is-playing {
+  border-color: rgba(var(--color-primary-rgb), 0.6);
+  box-shadow:
+    0 20px 42px rgba(0, 0, 0, 0.42),
+    0 0 18px rgba(var(--color-primary-rgb), 0.28);
 }
 
 .video-wrapper {
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
-  background: var(--color-secondary);
-  border-radius: var(--border-radius-sm);
+  background: #080808;
+  border-radius: calc(var(--video-card-radius) - 2px);
   overflow: hidden;
-  border: 2px solid rgba(var(--color-primary-rgb), 0.35);
-  box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.25);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.34);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.46);
   transition:
+    transform var(--transition-base),
     border-color var(--transition-base),
     box-shadow var(--transition-base);
 }
 
 .video-wrapper:hover {
-  border-color: rgba(var(--color-primary-rgb), 0.65);
-  box-shadow: 0 8px 24px rgba(var(--color-primary-rgb), 0.4);
+  border-color: rgba(var(--color-primary-rgb), 0.62);
+  box-shadow: 0 12px 28px rgba(var(--color-primary-rgb), 0.24);
+}
+
+.video-item.is-playing .video-wrapper {
+  transform: translateY(-1px);
+  border-color: rgba(var(--color-primary-rgb), 0.7);
 }
 
 .video-wrapper video {
@@ -61,34 +94,45 @@
   object-fit: cover;
   display: block;
   cursor: default;
+  transition:
+    transform var(--transition-base),
+    filter var(--transition-base);
+}
+
+.video-item:hover video,
+.video-item.is-playing video {
+  transform: scale(1.02);
+  filter: saturate(1.08) contrast(1.03);
 }
 
 .progress-container {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  position: relative;
   width: 100%;
-  height: 3px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 0;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  border: 1px solid rgba(var(--color-primary-rgb), 0.22);
   overflow: hidden;
 }
 
 .progress {
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, var(--color-primary), #f0bf4f);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent), #f0bf4f);
   transform-origin: left center;
   transform: scaleX(0);
-  transition: transform 100ms linear;
+  transition: transform 120ms linear;
+  box-shadow: 0 0 14px rgba(var(--color-primary-rgb), 0.5);
 }
 
 .caption {
-  text-align: center;
-  margin-top: var(--space-xs);
-  font-size: 0.9rem;
+  text-align: left;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
   color: var(--color-text);
-  opacity: 0.9;
+  opacity: 0.86;
 }
 
 /* Drawings grid */

@@ -177,10 +177,22 @@ class UIEnhancements {
     hoverVideos.forEach((video) => {
       if (video.dataset.hoverInit === 'true') return;
       video.dataset.hoverInit = 'true';
-      const progressBar = video
-        .closest('.video-item')
-        ?.querySelector('.progress') as HTMLElement | null;
-      if (!progressBar) return;
+      const videoItem = video.closest('.video-item') as HTMLElement | null;
+      const progressBar = videoItem?.querySelector('.progress') as HTMLElement | null;
+      if (!videoItem || !progressBar) return;
+
+      const setProgress = (): void => {
+        if (!video.duration || Number.isNaN(video.duration)) {
+          progressBar.style.transform = 'scaleX(0)';
+          return;
+        }
+        const ratio = Math.min(1, Math.max(0, video.currentTime / video.duration));
+        progressBar.style.transform = `scaleX(${ratio})`;
+      };
+
+      const syncPlayingState = (): void => {
+        videoItem.classList.toggle('is-playing', !video.paused);
+      };
 
       video.addEventListener('mouseenter', () => {
         video.play().catch(() => {
@@ -192,22 +204,15 @@ class UIEnhancements {
         video.pause();
       });
 
-      video.addEventListener('timeupdate', () => {
-        if (!video.duration) return;
-        const percentage = (video.currentTime / video.duration) * 100;
-        progressBar.style.width = `${percentage}%`;
-      });
+      video.addEventListener('loadedmetadata', setProgress);
+      video.addEventListener('timeupdate', setProgress);
+      video.addEventListener('seeking', setProgress);
+      video.addEventListener('ended', setProgress);
+      video.addEventListener('play', syncPlayingState);
+      video.addEventListener('pause', syncPlayingState);
 
-      video.addEventListener('loadedmetadata', () => {
-        progressBar.style.width = '0%';
-      });
-
-      // Reset progress on loop
-      video.addEventListener('timeupdate', () => {
-        if (video.currentTime >= video.duration - 0.05) {
-          progressBar.style.width = '0%';
-        }
-      });
+      setProgress();
+      syncPlayingState();
     });
 
     // Touch device fallback: tap to play
