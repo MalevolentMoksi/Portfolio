@@ -477,3 +477,30 @@ header.header--main .hamburger-toggle {
     font-size: 0.75rem;
   }
 }
+
+/* Accessibility font scaling: keep desktop header items from overlapping. */
+@media (min-width: 769px) {
+  body.a11y--font-lg .header--nav-desktop,
+  body.a11y--font-xl .header--nav-desktop {
+    position: static;
+    top: auto;
+    left: auto;
+    transform: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    margin-inline: clamp(0.25rem, 0.9vw, 0.75rem);
+    pointer-events: auto;
+  }
+
+  body.a11y--font-lg .header--actions,
+  body.a11y--font-xl .header--actions {
+    margin-left: 0;
+    flex: 0 0 auto;
+  }
+
+  body.a11y--font-lg .header--nav-desktop ul,
+  body.a11y--font-xl .header--nav-desktop ul {
+    justify-content: center;
+  }
+}

@@ -9,6 +9,7 @@ import {
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useMood, MOODS, MOOD_ORDER } from '../contexts/MoodContext';
+import { useAccessibility } from '../contexts/AccessibilityContext';
 import Tooltip from './Tooltip';
 import type { MoodKey } from '@/types';
 
@@ -47,12 +48,15 @@ const createVhsOverlay = (newMood: MoodKey): HTMLDivElement => {
 const MoodSwitcher = () => {
   const { t } = useTranslation();
   const { mood, setMood } = useMood();
+  const { settings: a11ySettings } = useAccessibility();
   const [isOpen, setIsOpen] = useState(false);
   const [spinKey, setSpinKey] = useState(0);
   const panelRef = useRef<HTMLDivElement>(null);
   const panelDivRef = useRef<HTMLDivElement>(null);
   const timeoutIdsRef = useRef<number[]>([]);
   const [panelPos, setPanelPos] = useState<{ top: number; right: number } | null>(null);
+
+  const isContrastMode = a11ySettings.highContrast;
 
   const schedule = useCallback((callback: () => void, delay: number) => {
     const timeoutId = window.setTimeout(() => {
@@ -208,17 +212,22 @@ const MoodSwitcher = () => {
 
   const currentMood = MOODS[mood];
   const currentMoodLabel = t(`common.mood.names.${mood}`);
+  const buttonTooltip = isContrastMode
+    ? t('common.mood.contrastModeDisabled')
+    : t('common.mood.tooltip', { mood: currentMoodLabel });
 
   return (
     <div className="mood-switcher-wrapper" ref={panelRef}>
       {/* Bouton icône */}
-      <Tooltip text={t('common.mood.tooltip', { mood: currentMoodLabel })} position="bottom">
+      <Tooltip text={buttonTooltip} position="bottom">
         <button
           className="header-action-btn mood-btn"
-          onClick={() => setIsOpen((prev) => !prev)}
+          onClick={() => !isContrastMode && setIsOpen((prev) => !prev)}
           aria-label={t('common.mood.ariaLabel')}
           aria-expanded={isOpen}
           aria-haspopup="dialog"
+          disabled={isContrastMode}
+          title={isContrastMode ? t('common.mood.contrastModeDisabled') : undefined}
         >
           <svg
             key={spinKey}

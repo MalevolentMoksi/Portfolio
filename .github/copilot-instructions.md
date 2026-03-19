@@ -174,6 +174,13 @@ On Windows, use PowerShell cmdlets instead of Unix-style tools:
 - **File discovery**: Use `Get-ChildItem -Path "src" -Recurse -Filter "*.tsx"`
 - **Text search in file**: `Select-String -Path "file.ts" -Pattern "text"`
 
+**Avoid using `| tail` (not available in PowerShell). Instead, use `Select-Object -Last N`.**
+Example:
+```powershell
+# Show the last 10 lines of a file (like `tail -n 10 file.txt`)
+Get-Content file.txt | Select-Object -Last 10
+```
+
 Example:
 ```powershell
 # Find all TypeScript files with a specific pattern

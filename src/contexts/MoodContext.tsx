@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { safeLocalGet, safeLocalSet } from '@/utils/safeStorage';
+import { useAccessibility } from './AccessibilityContext';
 import type { MoodKey, MoodMap } from '@/types';
 
 /* ── Configuration des moods ─────────────────────── */
@@ -47,6 +48,7 @@ interface MoodProviderProps {
 }
 
 export const MoodProvider = ({ children }: MoodProviderProps) => {
+  const { settings: a11ySettings } = useAccessibility();
   const [mood, setMoodState] = useState<MoodKey>(() => {
     const saved = safeLocalGet('portfolio-mood');
     return isMoodKey(saved) ? saved : 'default';
@@ -78,28 +80,39 @@ export const MoodProvider = ({ children }: MoodProviderProps) => {
   const setMood = useCallback(
     (newMood: MoodKey) => {
       if (!MOODS[newMood]) return;
-      setMoodState(newMood);
-      safeLocalSet('portfolio-mood', newMood);
-      applyMood(newMood);
+      // Enforce default mood when high contrast is on
+      const effectiveMood = a11ySettings.highContrast ? 'default' : newMood;
+      setMoodState(effectiveMood);
+      safeLocalSet('portfolio-mood', effectiveMood);
+      applyMood(effectiveMood);
     },
-    [applyMood]
+    [applyMood, a11ySettings.highContrast]
   );
 
   const cycleMood = useCallback(() => {
     setMoodState((prev) => {
       const idx = MOOD_ORDER.indexOf(prev);
       const next = MOOD_ORDER[(idx + 1) % MOOD_ORDER.length];
-      safeLocalSet('portfolio-mood', next);
-      applyMood(next);
-      return next;
+      // Enforce default mood when high contrast is on
+      const effectiveMood = a11ySettings.highContrast ? 'default' : next;
+      safeLocalSet('portfolio-mood', effectiveMood);
+      applyMood(effectiveMood);
+      return effectiveMood;
     });
-  }, [applyMood]);
+  }, [applyMood, a11ySettings.highContrast]);
 
-  /* ── Appliquer le mood initial au montage ── */
+  /* ── Appliquer le mood initial au montage et respecter les changements d'accessibilité ── */
   useEffect(() => {
-    applyMood(mood);
+    // If high contrast is on and current mood is not default, force default
+    if (a11ySettings.highContrast && mood !== 'default') {
+      setMoodState('default');
+      safeLocalSet('portfolio-mood', 'default');
+      applyMood('default');
+    } else {
+      applyMood(mood);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [a11ySettings.highContrast]);
 
   return (
     <MoodContext.Provider value={{ mood, setMood, cycleMood, MOODS }}>

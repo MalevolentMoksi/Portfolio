@@ -49,6 +49,7 @@
       "ariaLabel": "Change visual mood",
       "chooseAria": "Choose a mood",
       "title": "Mood",
+      "contrastModeDisabled": "Mood locked due to High Contrast mode",
       "toastActivated": "{{emoji}}  \"{{mood}}\" mood enabled",
       "names": {
         "default": "Default",

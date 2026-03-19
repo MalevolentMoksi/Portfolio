@@ -49,6 +49,7 @@
       "ariaLabel": "Changer l'ambiance visuelle",
       "chooseAria": "Choisir une ambiance",
       "title": "Ambiance",
+      "contrastModeDisabled": "Ambiance vérouillée due au mode Contraste élevé",
       "toastActivated": "{{emoji}}  Ambiance « {{mood}} » activée",
       "names": {
         "default": "Default",

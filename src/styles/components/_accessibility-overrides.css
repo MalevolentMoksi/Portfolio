@@ -12,6 +12,7 @@ body.a11y--no-motion *::after {
 }
 
 body.a11y--high-contrast {
+  color-scheme: dark;
   --color-bg: #000000;
   --color-secondary: #000000;
   --color-secondary-rgb: 0, 0, 0;
@@ -19,56 +20,157 @@ body.a11y--high-contrast {
   --color-primary: #ffff00;
   --color-primary-rgb: 255, 255, 0;
   --color-accent-light: #ffffff;
-  --color-accent-pale: #ffff66;
+  --color-accent-light-rgb: 255, 255, 255;
+  --color-accent-pale: #ffff00;
+  --color-accent-pale-rgb: 255, 255, 0;
+  --mood-heading-start: #ffff00;
+  --mood-heading-mid: #ffff00;
+  --mood-heading-end: #ffffff;
+  --mood-page-tint: none;
+  --mood-shell-bg: #000000;
+  --mood-shell-bg-strong: #000000;
+  --mood-section-bg: #000000;
+  --mood-button-bg: #000000;
+  --mood-button-hover-bg: #1a1a1a;
+  --mood-border-soft: #ffffff;
+  --mood-border-strong: #ffff00;
+  --mood-shadow: none;
+  --mood-glow: transparent;
+
+  background-color: #000000;
+  color: #ffffff;
 }
 
 body.a11y--high-contrast * {
   text-shadow: none !important;
   box-shadow: none !important;
+  filter: none !important;
 }
 
-body.a11y--high-contrast a,
-body.a11y--high-contrast button {
-  outline-color: var(--color-primary);
+/* Surfaces stay dark and legible in high contrast mode. */
+body.a11y--high-contrast header,
+body.a11y--high-contrast main,
+body.a11y--high-contrast footer,
+body.a11y--high-contrast section,
+body.a11y--high-contrast article,
+body.a11y--high-contrast nav,
+body.a11y--high-contrast aside,
+body.a11y--high-contrast .header--secondary,
+body.a11y--high-contrast .project,
+body.a11y--high-contrast .footer-widget,
+body.a11y--high-contrast .mini-terminal-panel,
+body.a11y--high-contrast .mood-panel,
+body.a11y--high-contrast .language-panel,
+body.a11y--high-contrast .accessibility-panel {
+  background: #000000 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
 
-  /* ── High Contrast : MoodSwitcher ──────────────────────────────────
-   Les couleurs du MoodSwitcher proviennent en partie d'attributs SVG
-   inline (fill=) et de styles inline (background: m.color), qui ne
-   sont pas affectés par les variables CSS body-level. On les force.
-*/
-  body.a11y--high-contrast .mood-orb {
-    fill: var(--color-primary) !important;
-    stroke: var(--color-primary) !important;
-  }
-  body.a11y--high-contrast .mood-dot {
-    fill: var(--color-primary) !important;
-  }
-  body.a11y--high-contrast .mood-swatch {
-    background: var(--color-primary) !important;
-  }
-  body.a11y--high-contrast .mood-emoji {
-    color: currentColor !important;
-  }
-  body.a11y--high-contrast .mood-check {
-    color: var(--color-primary) !important;
-  }
-  body.a11y--high-contrast .mood-option--active,
-  body.a11y--high-contrast .mood-option:hover {
-    border-color: var(--color-primary) !important;
-    background: rgba(255, 255, 0, 0.1) !important;
-  }
-  body.a11y--high-contrast .mood-panel-title {
-    /* Valeur codée en dur dans _mood-switcher.css, pas une variable */
-    color: rgba(255, 255, 255, 0.7) !important;
-  }
+/* WCAG 1.4.1: links remain identifiable beyond color only. */
+body.a11y--high-contrast a {
+  color: #ffff00 !important;
+  text-decoration: underline !important;
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.16em;
+}
 
-  /* ── High Contrast : liens ─────────────────────────────────────────
-   Certains liens utilisent des couleurs hors var(--color-primary) ;
-   on garantit la couleur de contraste élevé partout.
-*/
-  body.a11y--high-contrast a {
-    color: var(--color-primary) !important;
-  }
+body.a11y--high-contrast a:hover,
+body.a11y--high-contrast a:focus-visible {
+  color: #ffffff !important;
+}
+
+body.a11y--high-contrast button,
+body.a11y--high-contrast [role='button'],
+body.a11y--high-contrast input,
+body.a11y--high-contrast select,
+body.a11y--high-contrast textarea {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.a11y--high-contrast button:hover,
+body.a11y--high-contrast button:focus-visible,
+body.a11y--high-contrast [role='button']:hover,
+body.a11y--high-contrast [role='button']:focus-visible,
+body.a11y--high-contrast input:hover,
+body.a11y--high-contrast input:focus-visible,
+body.a11y--high-contrast select:hover,
+body.a11y--high-contrast select:focus-visible,
+body.a11y--high-contrast textarea:hover,
+body.a11y--high-contrast textarea:focus-visible {
+  border-color: #ffff00 !important;
+}
+
+body.a11y--high-contrast :disabled {
+  opacity: 1;
+  color: #bfbfbf !important;
+  border-color: #bfbfbf !important;
+}
+
+body.a11y--high-contrast :focus-visible {
+  outline: 3px solid #ffff00 !important;
+  outline-offset: 3px;
+}
+
+body.a11y--high-contrast ::selection {
+  background: #ffff00;
+  color: #000000;
+}
+
+/* MoodSwitcher contains inline colors; force high-contrast visual tokens. */
+body.a11y--high-contrast .mood-orb {
+  fill: var(--color-primary) !important;
+  stroke: var(--color-primary) !important;
+}
+
+body.a11y--high-contrast .mood-dot {
+  fill: var(--color-primary) !important;
+}
+
+body.a11y--high-contrast .mood-swatch {
+  background: var(--color-primary) !important;
+}
+
+body.a11y--high-contrast .mood-emoji {
+  color: currentColor !important;
+}
+
+body.a11y--high-contrast .mood-check {
+  color: var(--color-primary) !important;
+}
+
+body.a11y--high-contrast .mood-option--active,
+body.a11y--high-contrast .mood-option:hover {
+  border-color: var(--color-primary) !important;
+  background: #1a1a1a !important;
+}
+
+body.a11y--high-contrast .mood-panel-title {
+  color: #ffffff !important;
+}
+
+/* High Contrast nav links: ensure active state has maximum readability. */
+body.a11y--high-contrast .header--nav-desktop ul li a {
+  background: #000000 !important;
+  color: #ffff00 !important;
+  border: 2px solid #ffffff !important;
+  text-decoration: none;
+}
+
+body.a11y--high-contrast .header--nav-desktop ul li a:hover {
+  background: #1a1a1a !important;
+  border-color: #ffff00 !important;
+}
+
+body.a11y--high-contrast .header--nav-desktop ul li a[aria-current='page'],
+body.a11y--high-contrast .header--nav-desktop ul li a.active {
+  background: #000000 !important;
+  color: #ffff00 !important;
+  border: 3px solid #ffff00 !important;
+  box-shadow: none !important;
 }
 
 body.a11y--dyslexia,
@@ -102,14 +204,52 @@ body.a11y--reduce-effects .language-panel,
 body.a11y--reduce-effects .accessibility-panel {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
+}
 
-  /* Hamburger menu — suppress the cascade (stagger) animation when reduced-motion
-   is active. The global animation-duration: 0.01ms rule kills the animation itself
-   but does NOT override animation-delay, so items would still appear with a
-   0.12–0.24 s gap before snapping visible. This rule bypasses that entirely. */
-  body.a11y--no-motion .hamburger-nav.open ul li {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
+/* Suppress staggered hamburger item animation with reduced motion. */
+body.a11y--no-motion .hamburger-nav.open ul li {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* High Contrast button styles: ensure all buttons are readable. */
+body.a11y--high-contrast .btn {
+  background: #000000 !important;
+  color: #ffff00 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.a11y--high-contrast .btn:hover,
+body.a11y--high-contrast .btn:focus-visible {
+  background: #1a1a1a !important;
+  color: #ffff00 !important;
+  border-color: #ffff00 !important;
+}
+
+body.a11y--high-contrast .btn:active {
+  background: #000000 !important;
+  color: #ffff00 !important;
+  box-shadow: none !important;
+}
+
+body.a11y--high-contrast .btn--secondary {
+  background: #000000 !important;
+  color: #ffff00 !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.a11y--high-contrast .btn--secondary:hover,
+body.a11y--high-contrast .btn--secondary:focus-visible {
+  background: #1a1a1a !important;
+  color: #ffff00 !important;
+  border-color: #ffff00 !important;
+}
+
+/* Respect operating-system forced color mode when active. */
+@media (forced-colors: active) {
+  body.a11y--high-contrast {
+    forced-color-adjust: auto;
   }
 }
