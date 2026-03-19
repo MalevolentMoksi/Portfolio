@@ -607,7 +607,7 @@
       "router": { "role": "Navigation SPA", "desc": "BrowserRouter avec Layout partagé via <Outlet />, NavLink actifs et navigation côté client sans rechargement." },
       "framerMotion": { "role": "Animations", "desc": "Morphing de chemins SVG pour le robot mascotte, transitions de montée/sortie et effets de ressort." },
       "css": { "role": "Système de thèmes", "desc": "35 modules CSS isolés, proprietes personnalisees centralisees dans _variables.css, zero !important, PostCSS + Autoprefixer." },
-      "githubPages": { "role": "Déploiement", "desc": "Build Vite deployee via GitHub Actions (typecheck + build + fallback 404). Configs Netlify/Vercel presentes pour un deploiement alternatif." }
+      "githubPages": { "role": "Déploiement", "desc": "Build Vite deployee via GitHub Actions (typecheck + build + fallback 404)." }
     },
     "arch": {
       "routing": {

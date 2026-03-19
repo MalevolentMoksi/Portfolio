@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+﻿import { useEffect, useRef } from 'react';
 import { upsertAnalyticsSession, touchAnalyticsSessionActivity } from '../utils/analyticsSession';
 import { safeLocalGet, safeLocalSet } from '../utils/safeStorage';
 
@@ -459,6 +459,7 @@ function collectUserPreferences(): {
     vaporwave: '~ Vaporwave',
     europa: '❄ Europa',
     industrial: '⚙ Industriel',
+    nightshade: '⚘ Nightshade',
   };
   const mood = moodLabels[moodKey] ?? moodKey;
 

@@ -118,7 +118,7 @@ const STACK = [
     id: 'githubPages',
     name: 'GitHub Pages + CI',
     role: 'Déploiement',
-    desc: 'Build Vite deploye via GitHub Actions (typecheck + build + fallback 404). Configs Netlify/Vercel presentes pour un deploiement alternatif.',
+    desc: 'Build Vite deploye via GitHub Actions (typecheck + build + fallback 404).',
     color: '#6E7681',
     icon: (
       <svg

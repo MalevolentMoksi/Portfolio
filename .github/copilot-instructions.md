@@ -195,10 +195,6 @@ Workflow file: `.github/workflows/deploy-pages.yml`
 - Creates `dist/404.html` fallback
 - Deploys Pages artifact
 
-### Netlify / Vercel
-Repository already includes:
-- `netlify.toml` (SPA redirect + build output)
-- `vercel.json` (rewrites + cache headers)
 
 ## Critical File Reference
 

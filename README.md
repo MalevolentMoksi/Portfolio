@@ -28,10 +28,12 @@ Le serveur de dev démarre sur `http://localhost:3000`.
 |----------|-------------|
 | `npm run dev` | Lance Vite en développement (HMR) |
 | `npm run typecheck` | Vérifie le typage TypeScript (`tsc --noEmit`) |
-| `npm run build` | Formate (`prebuild`) puis build de production dans `dist/` |
+| `npm run build` | Build de production dans `dist/` + génération de `sitemap.xml` / `robots.txt` dans `dist/` |
 | `npm run preview` | Prévisualise le build de production sur `http://localhost:8080` |
 | `npm run format` | Formate `src/**/*.{ts,tsx,css,html}` avec Prettier |
-| `npm run seo:generate` | Génère `public/sitemap.xml` et `public/robots.txt` |
+| `npm run seo:generate` | Génère `dist/sitemap.xml` et `dist/robots.txt` |
+| `npm run seo:generate:public` | Génère `public/sitemap.xml` et `public/robots.txt` (mise à jour versionnée) |
+| `npm run test` | Lance les tests automatisés Node (`node --test`) |
 
 ## Stack actuelle
 
@@ -57,7 +59,7 @@ src/
     ambient/                  # 18 composants d'ambiance
     pet/                      # Sous-système robot interactif
 
-  pages/                      # 12 pages routées
+  pages/                      # 13 pages routées
   contexts/                   # Mood, Toast, ReadingTime, Accessibility
   hooks/                      # useDocumentMeta, usePortfolioModules, etc.
   scripts/                    # Modules legacy TypeScript (music/effects/ui/lightbox)
@@ -79,6 +81,7 @@ src/
 - `/projet-SAE3.01`
 - `/about`
 - `/credits`
+- `/informations-legales`
 - `*` (NotFound)
 
 ### Providers globaux (main.tsx)
@@ -105,20 +108,21 @@ Les instances principales (musique, effets, UI) sont conservées et réutilisée
 ### Lecteur audio persistant
 
 - Découverte automatique des pistes `.m4a` et `.mp3` via `discoverMusicTracks()`
-- Métadonnées ID3 lues par `jsmediatags` (CDN)
+- Métadonnées ID3 lues par `jsmediatags` (import dynamique npm)
 - État persistant (`track`, `time`, `paused`, `volume`, `muted`, `retracted`) en localStorage
 - Throttle d'écriture de la position à ~1 écriture/seconde
 - Première visite : lecteur en pause par défaut
 
 ### Système de thèmes (moods)
 
-5 moods disponibles :
+6 moods disponibles :
 
 - `default`
 - `hacker`
 - `vaporwave`
 - `europa`
 - `industrial`
+- `nightshade`
 
 Le mood est stocké en localStorage (`portfolio-mood`) et appliqué sur `body[data-mood]`.
 
@@ -178,7 +182,8 @@ npm run preview
 
 ### Sitemap et robots.txt
 
-- Génération automatique avant chaque `npm run build` via `npm run seo:generate`.
+- Génération automatique pendant `npm run build` via `npm run seo:generate`.
+- Sortie par défaut dans `dist/` pour éviter les modifications involontaires des fichiers versionnés.
 - URL de base configurable avec `SITE_URL` (ou `VITE_SITE_URL`).
 - Valeur par défaut : `https://moksi.studio`.
 
@@ -187,6 +192,12 @@ Exemple (PowerShell) :
 ```powershell
 $env:SITE_URL="https://moksi.studio"
 npm run seo:generate
+```
+
+Pour mettre à jour explicitement les fichiers versionnés dans `public/` :
+
+```powershell
+npm run seo:generate:public
 ```
 
 ### GitHub Pages (CI)
@@ -202,10 +213,11 @@ Workflow : `.github/workflows/deploy-pages.yml`
 
 ### Netlify / Vercel
 
-Le projet contient déjà :
+Le projet contient :
 
 - `netlify.toml` (build + redirect SPA)
-- `vercel.json` (headers cache + rewrites SPA)
+- `vercel.json` (rewrites SPA + cache des assets)
+
 
 ## Conventions de code
 

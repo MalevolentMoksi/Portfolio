@@ -8,8 +8,8 @@ const HamburgerMenu = () => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const navRef = useRef<any>(null);
-  const toggleRef = useRef<any>(null);
+  const navRef = useRef<HTMLElement | null>(null);
+  const toggleRef = useRef<HTMLButtonElement | null>(null);
 
   const closeMenu = () => {
     setIsOpen(false);
@@ -33,21 +33,21 @@ const HamburgerMenu = () => {
 
   // Escape key, body scroll lock, and focus trap
   useEffect(() => {
-    const handleEscape = (e: any) => {
+    const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         closeMenu();
         toggleRef.current?.focus();
       }
     };
 
-    const handleFocusTrap = (e: any) => {
+    const handleFocusTrap = (e: KeyboardEvent) => {
       if (e.key !== 'Tab' || !navRef.current) return;
       const focusable = navRef.current.querySelectorAll(
         'a, button, [tabindex]:not([tabindex=\"-1\"])'
       );
       if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
+      const first = focusable[0] as HTMLElement;
+      const last = focusable[focusable.length - 1] as HTMLElement;
       if (e.shiftKey) {
         if (document.activeElement === first) {
           e.preventDefault();

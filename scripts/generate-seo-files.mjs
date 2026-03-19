@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, '..');
-const publicDir = resolve(projectRoot, 'public');
 
 const DEFAULT_SITE_URL = 'https://moksi.studio';
 
@@ -21,6 +20,7 @@ const ROUTES = [
   '/projet-SAE3.01',
   '/about',
   '/credits',
+  '/informations-legales',
 ];
 
 const ROUTE_META = {
@@ -35,6 +35,25 @@ const ROUTE_META = {
   '/projet-SAE3.01': { changefreq: 'monthly', priority: '0.8' },
   '/about': { changefreq: 'monthly', priority: '0.7' },
   '/credits': { changefreq: 'yearly', priority: '0.5' },
+  '/informations-legales': { changefreq: 'yearly', priority: '0.4' },
+};
+
+const DEFAULT_OUTPUT_DIR = 'dist';
+
+const parseOutputDirArg = () => {
+  const prefixedArg = process.argv.find((arg) => arg.startsWith('--outDir='));
+  if (prefixedArg) {
+    const value = prefixedArg.slice('--outDir='.length).trim();
+    if (value) return value;
+  }
+
+  const flagIndex = process.argv.findIndex((arg) => arg === '--outDir');
+  if (flagIndex >= 0) {
+    const value = process.argv[flagIndex + 1]?.trim();
+    if (value) return value;
+  }
+
+  return process.env.SEO_OUTPUT_DIR?.trim() || DEFAULT_OUTPUT_DIR;
 };
 
 const xmlEscape = (value) =>
@@ -95,13 +114,14 @@ const main = async () => {
   const configuredSiteUrl = process.env.SITE_URL || process.env.VITE_SITE_URL || DEFAULT_SITE_URL;
   const siteUrl = normalizeSiteUrl(configuredSiteUrl);
   const lastModified = new Date().toISOString().split('T')[0];
+  const outputDir = resolve(projectRoot, parseOutputDirArg());
 
-  await mkdir(publicDir, { recursive: true });
+  await mkdir(outputDir, { recursive: true });
 
-  await writeFile(resolve(publicDir, 'sitemap.xml'), createSitemapXml(siteUrl, lastModified), 'utf8');
-  await writeFile(resolve(publicDir, 'robots.txt'), createRobotsTxt(siteUrl), 'utf8');
+  await writeFile(resolve(outputDir, 'sitemap.xml'), createSitemapXml(siteUrl, lastModified), 'utf8');
+  await writeFile(resolve(outputDir, 'robots.txt'), createRobotsTxt(siteUrl), 'utf8');
 
-  console.log(`Generated sitemap.xml and robots.txt for ${siteUrl}`);
+  console.log(`Generated sitemap.xml and robots.txt for ${siteUrl} in ${outputDir}`);
 };
 
 main().catch((error) => {

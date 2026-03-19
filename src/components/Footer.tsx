@@ -1,13 +1,23 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import type { ReactNode } from 'react';
 import FooterWidget from './FooterWidget';
 
-const Footer = ({ diorama }: any) => {
+interface FooterProps {
+  diorama?: ReactNode;
+}
+
+interface FooterLinkProps {
+  to: string;
+  children: ReactNode;
+}
+
+const Footer = ({ diorama }: FooterProps) => {
   const { t } = useTranslation();
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const FooterLink = ({ to, children }: any) => {
+  const FooterLink = ({ to, children }: FooterLinkProps) => {
     const isActive = currentPath === to;
     if (isActive) {
       return (
@@ -20,7 +30,9 @@ const Footer = ({ diorama }: any) => {
     return (
       <NavLink
         to={to}
-        className={({ isActive }: any) => (isActive ? 'footer-top-link active' : 'footer-top-link')}
+        className={({ isActive }: { isActive: boolean }) =>
+          isActive ? 'footer-top-link active' : 'footer-top-link'
+        }
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       >
         {children}

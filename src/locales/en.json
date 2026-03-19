@@ -607,7 +607,7 @@
       "router": { "role": "SPA navigation", "desc": "BrowserRouter with shared Layout via <Outlet />, active NavLinks, and client-side navigation." },
       "framerMotion": { "role": "Animations", "desc": "SVG path morphing for the mascot robot, enter/exit transitions, and spring effects." },
       "css": { "role": "Theme system", "desc": "35 isolated CSS modules, centralized custom properties in _variables.css, zero !important, PostCSS + Autoprefixer." },
-      "githubPages": { "role": "Deployment", "desc": "Vite build deployed via GitHub Actions (typecheck + build + 404 fallback). Netlify/Vercel configs are included for alternate deployment." }
+      "githubPages": { "role": "Deployment", "desc": "Vite build deployed via GitHub Actions (typecheck + build + 404 fallback)." }
     },
     "arch": {
       "routing": {
