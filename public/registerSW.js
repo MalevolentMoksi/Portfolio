@@ -1,5 +1,5 @@
 /**
- * Service Worker Registration
+ * Service Worker Registration with Update & Error Handling
  * Deferred to avoid render blocking
  */
 
@@ -21,6 +21,24 @@ if ('serviceWorker' in navigator && isSecureOrigin) {
     navigator.serviceWorker
       .register(swUrl, { scope: basePath })
       .then((registration) => {
+        // Listen for updates and activate new SW immediately (skip waiting)
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker?.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New SW is ready; tell it to skip waiting
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+              // Notify user of update (optional)
+              console.log('Service Worker updated — page will reload');
+            }
+          });
+        });
+
+        // Handle skip-waiting message from new SW
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload();
+        });
+
         // console.log('Service Worker registered:', registration);
       })
       .catch((error) => {

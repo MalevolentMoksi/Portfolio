@@ -36,6 +36,9 @@ export default defineConfig({
       injectRegister: false,
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
         // Keep install-time precache lean; cache heavy assets on demand at runtime.
         globPatterns: ['**/*.{html,ico,png,svg,webmanifest}'],
         globIgnores: [
@@ -53,9 +56,10 @@ export default defineConfig({
           },
           {
             urlPattern: /\/assets\/.*\.js$/i,
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'portfolio-assets-js',
+              networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 80,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
@@ -65,9 +69,10 @@ export default defineConfig({
           },
           {
             urlPattern: /\/assets\/.*\.css$/i,
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'portfolio-assets-css',
+              networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 40,
                 maxAgeSeconds: 60 * 60 * 24 * 30,

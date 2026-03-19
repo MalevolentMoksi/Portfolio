@@ -227,6 +227,11 @@ Workflow file: `.github/workflows/deploy-pages.yml`
 - Creates `dist/404.html` fallback
 - Deploys Pages artifact
 
+### Cloudflare
+- **Domain**: Managed by Cloudflare
+- **Worker**: Cloudflare Worker handles domain routing and request processing
+- Configuration: `wrangler.toml` defines worker deployment settings
+
 
 ## Critical File Reference
 
