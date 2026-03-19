@@ -153,6 +153,38 @@ Notes:
 - Prefer semantic HTML + ARIA where relevant
 - Prefer SVG icons over emojis for UI iconography
 
+## Windows Development Environment
+
+### CRLF Line Endings (CRITICAL)
+All source files must use **CRLF (Windows) line endings**, not LF. This is required for proper tooling operation.
+
+**Why**: Replace tools on Windows expect CRLF. LF files show confusing diffs like `+0 -418` (appears to replace entire file) and can cause edits to fail.
+
+**To convert a file to CRLF**:
+```powershell
+$f = "path/to/file.ts"
+$c = [System.IO.File]::ReadAllText($f)
+[System.IO.File]::WriteAllText($f, ($c -replace "`n", "`r`n"), [System.Text.Encoding]::UTF8)
+```
+
+### PowerShell CLI Alternatives
+On Windows, use PowerShell cmdlets instead of Unix-style tools:
+- **Instead of `rg` (ripgrep)**: Use `Select-String -Path "**/*.ts" -Pattern "pattern"`
+- **Instead of `ls`**: Use `Get-ChildItem` or `Get-ChildItem -Recurse -Filter "*.ts"`
+- **File discovery**: Use `Get-ChildItem -Path "src" -Recurse -Filter "*.tsx"`
+- **Text search in file**: `Select-String -Path "file.ts" -Pattern "text"`
+
+Example:
+```powershell
+# Find all TypeScript files with a specific pattern
+Get-ChildItem -Path "src" -Recurse -Filter "*.ts" | Select-String -Pattern "useEffect" | Select-Object Path, LineNumber, Line
+```
+
+### File Path Conventions
+- Prefer **forward slashes** (`/`) in paths instead of backslashes (`\`)
+- Use forward slashes in absolute paths passed to tools: `c:/Users/enzom/Documents/.../file.ts`
+- Avoids escaping issues and ensures cross-platform compatibility
+
 ## Common Development Tasks
 
 ### Add a new page route
