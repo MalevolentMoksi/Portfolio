@@ -2,6 +2,11 @@
    Layout & Container Styles
    ============================================ */
 
+.mood-stage {
+  position: relative;
+  min-height: 100vh;
+}
+
 /* Fixed background image layers with parallax */
 #background,
 .background-layer--overlay {

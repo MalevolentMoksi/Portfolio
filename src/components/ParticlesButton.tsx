@@ -167,7 +167,10 @@ const randomEdgePoint = () => {
  */
 const getBaseSpeed = () => (getPJS()?.particles.move.speed ?? 1) * 0.22;
 
-const getCurrentMood = () => document.body.getAttribute('data-mood') || 'default';
+const getCurrentMood = () =>
+  document.querySelector('.mood-stage')?.getAttribute('data-mood') ||
+  document.body.getAttribute('data-mood') ||
+  'default';
 
 const getMoodFxProfile = () => {
   const mood = getCurrentMood();

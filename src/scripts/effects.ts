@@ -45,7 +45,10 @@ class VisualEffects {
       return;
     }
 
-    const currentMood: string = document.body.getAttribute('data-mood') || 'default';
+    const currentMood: string =
+      document.querySelector('.mood-stage')?.getAttribute('data-mood') ||
+      document.body.getAttribute('data-mood') ||
+      'default';
     this._applyParticlesConfig(currentMood);
 
     // Exposer les fonctions globales pour les composants React

@@ -223,27 +223,28 @@ const Layout = () => {
       <a href="#main" className="skip-to-content">
         {t('common.header.skipToContent')}
       </a>
-      <div id="particles-js" aria-hidden="true"></div>
-      <img
-        src={activeBackgroundSrc}
-        alt=""
-        id="background"
-        aria-hidden="true"
-        loading="eager"
-        fetchpriority="high"
-      />
-      {overlayBackgroundSrc ? (
+      <div className="mood-stage" data-mood={mood}>
+        <div id="particles-js" aria-hidden="true"></div>
         <img
-          src={overlayBackgroundSrc}
+          src={activeBackgroundSrc}
           alt=""
-          className={`background-layer--overlay${isBackgroundFading ? ' is-visible' : ''}`}
+          id="background"
           aria-hidden="true"
           loading="eager"
-          decoding="async"
+          fetchpriority="high"
         />
-      ) : null}
+        {overlayBackgroundSrc ? (
+          <img
+            src={overlayBackgroundSrc}
+            alt=""
+            className={`background-layer--overlay${isBackgroundFading ? ' is-visible' : ''}`}
+            aria-hidden="true"
+            loading="eager"
+            decoding="async"
+          />
+        ) : null}
 
-      <header className="header--main">
+        <header className="header--main">
         {/* Branding Section */}
         <div className="header--branding">
           <NavLink to="/" className="brand-logo" aria-label={t('common.header.brandAria')}>
@@ -290,44 +291,45 @@ const Layout = () => {
           <ParticlesButton />
           <MiniTerminal />
         </div>
-      </header>
+        </header>
 
-      <section className="header--secondary" aria-label={t('common.header.secondaryAria')}>
-        <div className="header--hero">
-          <h1 id="main-title" data-typing-text={t(config.headingKey)}>
-            {t(config.headingKey)}
-          </h1>
-          {config.subheadingKey ? (
-            <h2 className="header-subheading">{t(config.subheadingKey)}</h2>
-          ) : null}
-          {config.subheadingAltKey ? (
-            <h3 className="header-subheading-alt">{t(config.subheadingAltKey)}</h3>
-          ) : null}
+        <section className="header--secondary" aria-label={t('common.header.secondaryAria')}>
+          <div className="header--hero">
+            <h1 id="main-title" data-typing-text={t(config.headingKey)}>
+              {t(config.headingKey)}
+            </h1>
+            {config.subheadingKey ? (
+              <h2 className="header-subheading">{t(config.subheadingKey)}</h2>
+            ) : null}
+            {config.subheadingAltKey ? (
+              <h3 className="header-subheading-alt">{t(config.subheadingAltKey)}</h3>
+            ) : null}
+          </div>
+        </section>
+
+        <main id="main">
+          <ReadingTimeProvider>
+            <Breadcrumbs />
+            <Outlet />
+          </ReadingTimeProvider>
+        </main>
+
+        <Footer
+          diorama={
+            <Suspense fallback={null}>
+              <FooterDiorama />
+            </Suspense>
+          }
+        />
+        {!accessibilitySettings.noMotion && (
+          <div className="ambient-layers" aria-hidden="true">
+            <Suspense fallback={null}>
+              <AmbientEffects />
+            </Suspense>
+          </div>
+        )}
+        <BackToTopButton />
         </div>
-      </section>
-
-      <main id="main">
-        <ReadingTimeProvider>
-          <Breadcrumbs />
-          <Outlet />
-        </ReadingTimeProvider>
-      </main>
-
-      <Footer
-        diorama={
-          <Suspense fallback={null}>
-            <FooterDiorama />
-          </Suspense>
-        }
-      />
-      {!accessibilitySettings.noMotion && (
-        <div className="ambient-layers" aria-hidden="true">
-          <Suspense fallback={null}>
-            <AmbientEffects />
-          </Suspense>
-        </div>
-      )}
-      <BackToTopButton />
     </>
   );
 };

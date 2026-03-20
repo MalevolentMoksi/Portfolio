@@ -159,6 +159,320 @@
   font-weight: 700;
 }
 
+.mood-fallback-hint {
+  margin: 0.15rem 0.45rem 0.55rem;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+/* ---- Analog tuner mode ---- */
+.mood-panel--analogTuner {
+  width: min(360px, calc(100vw - 24px));
+  padding: 0.65rem;
+}
+
+.mood-tuner-shell {
+  --mood-color: var(--color-primary);
+  --tuner-progress: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.62rem;
+  padding: 0.42rem;
+  border-radius: 10px;
+  background:
+    linear-gradient(132deg, rgba(18, 24, 34, 0.88) 0%, rgba(8, 10, 15, 0.88) 100%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, transparent 30%, rgba(255, 255, 255, 0.02) 60%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 6px 24px rgba(0, 0, 0, 0.38);
+}
+
+.mood-tuner-display {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 7px;
+  background: rgba(4, 8, 12, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.mood-tuner-display-band {
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.mood-tuner-display-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--mood-color);
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.08);
+}
+
+.mood-tuner-display-mood {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.mood-tuner {
+  --indicator-size: 18px;
+  position: relative;
+  touch-action: none;
+  user-select: none;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(18, 24, 35, 0.88) 0%, rgba(10, 13, 19, 0.9) 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.02) 0,
+      rgba(255, 255, 255, 0.02) 2px,
+      transparent 2px,
+      transparent 8px
+    );
+  outline: none;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease;
+}
+
+.mood-tuner:focus-visible {
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.4);
+}
+
+.mood-tuner--horizontal {
+  height: 76px;
+}
+
+.mood-tuner--vertical {
+  height: 230px;
+}
+
+.mood-tuner--dragging {
+  transform: translateY(1px) scale(0.992);
+  box-shadow:
+    inset 0 3px 16px rgba(0, 0, 0, 0.56),
+    0 6px 12px rgba(0, 0, 0, 0.35);
+}
+
+.mood-tuner--settling {
+  animation: mood-tuner-settle 260ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes mood-tuner-settle {
+  0% {
+    transform: translateY(2px) scale(0.99);
+  }
+  65% {
+    transform: translateY(-1px) scale(1.005);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mood-tuner-track {
+  position: absolute;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.02) 28%, rgba(0, 0, 0, 0.35) 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(90deg, rgba(0, 208, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 52%, rgba(255, 123, 30, 0.08) 100%),
+    rgba(2, 4, 8, 0.75);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.11),
+    inset 0 8px 14px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.07);
+}
+
+.mood-tuner--horizontal .mood-tuner-track {
+  left: 14px;
+  right: 14px;
+  top: calc(50% - 8px);
+  height: 16px;
+}
+
+.mood-tuner--vertical .mood-tuner-track {
+  top: 14px;
+  bottom: 14px;
+  left: calc(50% - 8px);
+  width: 16px;
+}
+
+.mood-tuner-indicator {
+  --indicator-size: 22px;
+  position: absolute;
+  width: var(--indicator-size);
+  height: var(--indicator-size);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.95) 0%, transparent 30%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 62%),
+    linear-gradient(145deg, color-mix(in srgb, var(--mood-color) 72%, #ffffff 28%) 0%, var(--mood-color) 64%, color-mix(in srgb, var(--mood-color) 76%, #000000 24%) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.48),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.48),
+    0 0 0 2px rgba(255, 255, 255, 0.08),
+    0 0 22px color-mix(in srgb, var(--mood-color) 66%, transparent),
+    0 5px 14px rgba(0, 0, 0, 0.55);
+  transition:
+    transform 0.14s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    top 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.3s ease;
+}
+
+.mood-tuner-indicator::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: rgba(12, 18, 29, 0.62);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.22);
+}
+
+.mood-tuner--dragging .mood-tuner-indicator {
+  transform: scale(1.16) translateY(-1px);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.54),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.54),
+    0 0 30px color-mix(in srgb, var(--mood-color) 78%, transparent),
+    0 8px 22px rgba(0, 0, 0, 0.45);
+}
+
+.mood-tuner--horizontal .mood-tuner-indicator {
+  top: calc(50% - (var(--indicator-size) / 2));
+  left: calc(14px + (100% - 28px) * var(--tuner-progress) - (var(--indicator-size) / 2));
+}
+
+.mood-tuner--vertical .mood-tuner-indicator {
+  left: calc(50% - (var(--indicator-size) / 2));
+  top: calc(14px + (100% - 28px) * var(--tuner-progress) - (var(--indicator-size) / 2));
+}
+
+.mood-tuner-notch {
+  position: absolute;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition:
+    transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.16s ease;
+}
+
+.mood-tuner-notch:hover {
+  filter: brightness(1.18);
+}
+
+.mood-tuner--horizontal .mood-tuner-notch {
+  left: calc(14px + (100% - 28px) * (var(--tuner-stop) / 100));
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mood-tuner--vertical .mood-tuner-notch {
+  top: calc(14px + (100% - 28px) * (var(--tuner-stop) / 100));
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mood-tuner-notch-dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.72) 0%, transparent 34%),
+    rgba(196, 206, 222, 0.58);
+  border: 1px solid rgba(37, 44, 57, 0.8);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.4),
+    0 0 0 2px rgba(0, 0, 0, 0.28);
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mood-tuner-notch-label {
+  position: absolute;
+  font-size: 0.64rem;
+  color: rgba(255, 255, 255, 0.54);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition:
+    color 0.2s ease,
+    text-shadow 0.2s ease;
+}
+
+.mood-tuner--horizontal .mood-tuner-notch-label {
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mood-tuner--vertical .mood-tuner-notch-label {
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.mood-tuner-notch--preview .mood-tuner-notch-dot,
+.mood-tuner-notch--current .mood-tuner-notch-dot {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.82) 0%, transparent 34%),
+    var(--mood-color);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.35),
+    0 0 16px color-mix(in srgb, var(--mood-color) 72%, transparent);
+  transform: scale(1.1);
+}
+
+.mood-tuner-notch--preview .mood-tuner-notch-label,
+.mood-tuner-notch--current .mood-tuner-notch-label {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--mood-color) 52%, transparent);
+}
+
+.mood-tuner-help {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.mood-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 /* ================================================================
    Mood-specific body overlays — persistants par ambiance
    Stratégie : ::before = effet de fond/glitch, ::after = scanlines
@@ -373,15 +687,17 @@ body[data-perf-tier='low'][data-mood='hacker']::before {
 /* ── VAPORWAVE (rose + bleu) ── */
 /* body : gradient sunset animé */
 body[data-mood='vaporwave'] {
-  background: linear-gradient(
+  background-color: #0d001a !important;
+  background-image: linear-gradient(
     160deg,
-    #0d001a 0%,
-    #0a1040 28%,
-    #2d0050 60%,
-    #430070 85%,
-    #0a1040 100%
+    rgba(13, 0, 26, 0.42) 0%,
+    rgba(10, 16, 64, 0.4) 28%,
+    rgba(45, 0, 80, 0.48) 60%,
+    rgba(67, 0, 112, 0.5) 85%,
+    rgba(10, 16, 64, 0.4) 100%
   ) !important;
   background-size: 200% 200% !important;
+  background-attachment: fixed;
   animation: vapor-gradient-pulse 8s ease-in-out infinite;
 }
 
@@ -888,6 +1204,39 @@ body[data-perf-tier='low'][data-mood='nightshade']::after {
   pointer-events: none;
 }
 
+/* ---- View-transition circular reveal ---- */
+.mood-view-transition-active::view-transition-group(root),
+.mood-view-transition-active::view-transition-old(root),
+.mood-view-transition-active::view-transition-new(root) {
+  animation-duration: var(--mood-reveal-duration-ms, 620ms);
+  animation-timing-function: cubic-bezier(0.3, 0.1, 0.2, 1);
+}
+
+.mood-view-transition-active::view-transition-old(root) {
+  animation-name: none;
+}
+
+.mood-view-transition-active::view-transition-new(root) {
+  clip-path: circle(
+    0px at var(--mood-reveal-origin-x, 50vw) var(--mood-reveal-origin-y, 50vh)
+  );
+  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.32));
+  animation-name: mood-view-new-reveal;
+}
+
+@keyframes mood-view-new-reveal {
+  from {
+    clip-path: circle(
+      0px at var(--mood-reveal-origin-x, 50vw) var(--mood-reveal-origin-y, 50vh)
+    );
+  }
+  to {
+    clip-path: circle(
+      150vmax at var(--mood-reveal-origin-x, 50vw) var(--mood-reveal-origin-y, 50vh)
+    );
+  }
+}
+
 /* Flash coloré de fond */
 .mood-vhs-overlay::before {
   content: '';
@@ -966,5 +1315,13 @@ body[data-perf-tier='low'][data-mood='nightshade']::after {
 @media (max-width: 480px) {
   .mood-panel {
     width: 170px;
+  }
+
+  .mood-panel--analogTuner {
+    width: min(330px, calc(100vw - 24px));
+  }
+
+  .mood-tuner--vertical {
+    height: 205px;
   }
 }

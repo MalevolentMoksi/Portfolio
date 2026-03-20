@@ -11,7 +11,7 @@ import '@styles/main.css';
 document.documentElement.dataset.spaMode = 'true';
 
 const loadDeferredStyles = () => {
-  void import('@styles/deferred.css');
+  void import('./styles/deferred.css');
 };
 
 const idleWindow = window as Window & {

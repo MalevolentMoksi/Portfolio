@@ -792,6 +792,14 @@ class MusicPlayer {
       attributes: true,
       attributeFilter: ['data-mood'],
     });
+
+    const moodStage = document.querySelector('.mood-stage');
+    if (moodStage) {
+      observer.observe(moodStage, {
+        attributes: true,
+        attributeFilter: ['data-mood'],
+      });
+    }
   }
 
   private onMoodChange(): void {

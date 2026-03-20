@@ -9,6 +9,11 @@ const usePerformanceTier = (): void => {
   useEffect(() => {
     const tier = getPerformanceTier();
     document.body.setAttribute('data-perf-tier', tier);
+
+    const moodStages = document.querySelectorAll<HTMLElement>('.mood-stage');
+    moodStages.forEach((stage) => {
+      stage.setAttribute('data-perf-tier', tier);
+    });
   }, []);
 };
 

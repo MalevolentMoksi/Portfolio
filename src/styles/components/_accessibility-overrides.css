@@ -62,6 +62,9 @@ body.a11y--high-contrast .project,
 body.a11y--high-contrast .footer-widget,
 body.a11y--high-contrast .mini-terminal-panel,
 body.a11y--high-contrast .mood-panel,
+body.a11y--high-contrast .mood-tuner-shell,
+body.a11y--high-contrast .mood-tuner,
+body.a11y--high-contrast .mood-tuner-display,
 body.a11y--high-contrast .language-panel,
 body.a11y--high-contrast .accessibility-panel {
   background: #000000 !important;

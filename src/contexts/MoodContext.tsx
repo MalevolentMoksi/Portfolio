@@ -23,7 +23,17 @@ export const MOOD_ORDER: MoodKey[] = [
 ];
 
 /* Niveau de brutalisme pour le mood Industrial : 'full' | 'moderate' | 'minimal' */
-const INDUSTRIAL_BRUTALIST_LEVEL = 'minimal';
+export const INDUSTRIAL_BRUTALIST_LEVEL = 'minimal';
+
+const BRUTALIST_CLASSES = ['brutalist-full', 'brutalist-moderate', 'brutalist-minimal'] as const;
+
+const applyMoodAttributesToElement = (element: HTMLElement, mood: MoodKey): void => {
+  element.setAttribute('data-mood', mood);
+  element.classList.remove(...BRUTALIST_CLASSES);
+  if (mood === 'industrial') {
+    element.classList.add(`brutalist-${INDUSTRIAL_BRUTALIST_LEVEL}`);
+  }
+};
 
 interface MoodContextValue {
   mood: MoodKey;
@@ -56,13 +66,10 @@ export const MoodProvider = ({ children }: MoodProviderProps) => {
 
   /* ── Appliquer le mood au DOM ── */
   const applyMood = useCallback((m: MoodKey) => {
-    document.body.setAttribute('data-mood', m);
+    applyMoodAttributesToElement(document.body, m);
 
-    // Gérer la classe brutalist pour le mood Industrial
-    document.body.classList.remove('brutalist-full', 'brutalist-moderate', 'brutalist-minimal');
-    if (m === 'industrial') {
-      document.body.classList.add(`brutalist-${INDUSTRIAL_BRUTALIST_LEVEL}`);
-    }
+    const moodStages = document.querySelectorAll<HTMLElement>('.mood-stage');
+    moodStages.forEach((stage) => applyMoodAttributesToElement(stage, m));
 
     // Reconfigurer les particules (physique + couleurs) pour le nouveau mood
     const tryReconfigure = (): void => {

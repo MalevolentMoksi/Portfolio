@@ -452,7 +452,8 @@ function collectUserPreferences(): {
   a11y: string;
   musicState: string;
 } {
-  const moodKey = safeLocalGet('portfolio-mood') ?? document.body.dataset.mood ?? 'default';
+  const stageMood = document.querySelector('.mood-stage')?.getAttribute('data-mood');
+  const moodKey = safeLocalGet('portfolio-mood') ?? stageMood ?? document.body.dataset.mood ?? 'default';
   const moodLabels: Record<string, string> = {
     default: '◆ Default',
     hacker: '> Terminal',
