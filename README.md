@@ -28,11 +28,11 @@ Le serveur de dev démarre sur `http://localhost:3000`.
 |----------|-------------|
 | `npm run dev` | Lance Vite en développement (HMR) |
 | `npm run typecheck` | Vérifie le typage TypeScript (`tsc --noEmit`) |
-| `npm run build` | Build de production dans `dist/` + génération de `sitemap.xml` / `robots.txt` dans `dist/` |
+| `npm run build` | Build de production dans `dist/` + génération de `sitemap.xml` dans `dist/` |
 | `npm run preview` | Prévisualise le build de production sur `http://localhost:8080` |
 | `npm run format` | Formate `src/**/*.{ts,tsx,css,html}` avec Prettier |
-| `npm run seo:generate` | Génère `dist/sitemap.xml` et `dist/robots.txt` |
-| `npm run seo:generate:public` | Génère `public/sitemap.xml` et `public/robots.txt` (mise à jour versionnée) |
+| `npm run seo:generate` | Génère `dist/sitemap.xml` |
+| `npm run seo:generate:public` | Génère `public/sitemap.xml` (mise à jour versionnée) |
 | `npm run test` | Lance les tests automatisés Node (`node --test`) |
 
 ## Stack actuelle
@@ -180,7 +180,7 @@ npm run build
 npm run preview
 ```
 
-### Sitemap et robots.txt
+### Sitemap
 
 - Génération automatique pendant `npm run build` via `npm run seo:generate`.
 - Sortie par défaut dans `dist/` pour éviter les modifications involontaires des fichiers versionnés.
@@ -194,7 +194,7 @@ $env:SITE_URL="https://moksi.studio"
 npm run seo:generate
 ```
 
-Pour mettre à jour explicitement les fichiers versionnés dans `public/` :
+Pour mettre à jour explicitement le fichier versionné dans `public/` :
 
 ```powershell
 npm run seo:generate:public

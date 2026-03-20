@@ -13,7 +13,7 @@ const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, '..');
 const seoScriptPath = resolve(projectRoot, 'scripts/generate-seo-files.mjs');
 
-test('SEO generator includes legal route and writes robots to requested output dir', async () => {
+test('SEO generator includes legal route and only writes sitemap to requested output dir', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'portfolio-seo-test-'));
 
   try {
@@ -29,13 +29,10 @@ test('SEO generator includes legal route and writes robots to requested output d
     const robotsPath = resolve(outDir, 'robots.txt');
 
     const sitemap = await readFile(sitemapPath, 'utf8');
-    const robots = await readFile(robotsPath, 'utf8');
 
     assert.match(sitemap, /https:\/\/example\.test\//);
     assert.match(sitemap, /https:\/\/example\.test\/informations-legales/);
-    assert.match(robots, /Disallow: \/api\//);
-    assert.match(robots, /Disallow: \/api\/webhook/);
-    assert.match(robots, /Sitemap: https:\/\/example\.test\/sitemap\.xml/);
+    await assert.rejects(readFile(robotsPath, 'utf8'), /ENOENT/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

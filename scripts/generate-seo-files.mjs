@@ -101,17 +101,6 @@ const createSitemapXml = (siteUrl, lastModified) => {
   ].join('\n');
 };
 
-const createRobotsTxt = (siteUrl) =>
-  [
-    'User-agent: *',
-    'Allow: /',
-    'Disallow: /api/',
-    'Disallow: /api/webhook',
-    '',
-    `Sitemap: ${siteUrl}/sitemap.xml`,
-    '',
-  ].join('\n');
-
 const main = async () => {
   const configuredSiteUrl = process.env.SITE_URL || process.env.VITE_SITE_URL || DEFAULT_SITE_URL;
   const siteUrl = normalizeSiteUrl(configuredSiteUrl);
@@ -121,9 +110,8 @@ const main = async () => {
   await mkdir(outputDir, { recursive: true });
 
   await writeFile(resolve(outputDir, 'sitemap.xml'), createSitemapXml(siteUrl, lastModified), 'utf8');
-  await writeFile(resolve(outputDir, 'robots.txt'), createRobotsTxt(siteUrl), 'utf8');
 
-  console.log(`Generated sitemap.xml and robots.txt for ${siteUrl} in ${outputDir}`);
+  console.log(`Generated sitemap.xml for ${siteUrl} in ${outputDir}`);
 };
 
 main().catch((error) => {
