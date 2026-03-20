@@ -2,20 +2,39 @@
    Layout & Container Styles
    ============================================ */
 
-/* Fixed background image with parallax */
-#background {
+/* Fixed background image layers with parallax */
+#background,
+.background-layer--overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+#background {
   z-index: var(--z-background);
   opacity: 0.4;
   transform: scale(1.15);
   pointer-events: none;
   filter: blur(4px);
   -webkit-filter: blur(4px);
+}
+
+.background-layer--overlay {
+  z-index: var(--z-background);
+  opacity: 0;
+  transform: scale(1.15);
+  pointer-events: none;
+  filter: blur(4px);
+  -webkit-filter: blur(4px);
+  transition: opacity 0.65s ease;
+  will-change: opacity;
+}
+
+.background-layer--overlay.is-visible {
+  opacity: 0.4;
 }
 
 /* Conteneur des couches ambient (silhouettes, commuters).
@@ -135,7 +154,8 @@ hr {
   /* Supprime le blur + scale sur le fond — économise une couche GPU composite.
      Le scale(1.15) était uniquement utile pour le parallax souris (désactivé
      sur mobile dans effects.ts) ; l'enlever élimine le sur-rendu permanent. */
-  #background {
+  #background,
+  .background-layer--overlay {
     filter: none;
     -webkit-filter: none;
     transform: none;

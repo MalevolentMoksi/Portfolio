@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AccessibilityButton from './AccessibilityButton';
@@ -26,6 +26,7 @@ const AmbientEffects = lazy(() => import('./ambient/AmbientEffects'));
 const FooterDiorama = lazy(() => import('./ambient/FooterDiorama'));
 
 const trackFiles = discoverMusicTracks();
+const BACKGROUND_TRANSITION_MS = 650;
 
 interface PageConfigItem {
   headingKey: string;
@@ -125,6 +126,11 @@ const Layout = () => {
   const config = pageConfig[location.pathname] || pageConfig['/'];
   const { mood } = useMood();
   const { settings: accessibilitySettings } = useAccessibility();
+  const [activeBackgroundSrc, setActiveBackgroundSrc] = useState(config.backgroundSrc);
+  const [overlayBackgroundSrc, setOverlayBackgroundSrc] = useState<string | null>(null);
+  const [isBackgroundFading, setIsBackgroundFading] = useState(false);
+  const transitionTokenRef = useRef(0);
+  const overlayCleanupTimeoutRef = useRef<number | null>(null);
 
   useDocumentMeta(t(config.metaTitleKey), t(config.metaDescriptionKey));
   useNavButtonEffects();
@@ -132,6 +138,77 @@ const Layout = () => {
   useSessionTracking(location.pathname);
   useDynamicFavicon(mood);
   usePerformanceTier();
+
+  useEffect(() => {
+    return () => {
+      if (overlayCleanupTimeoutRef.current !== null) {
+        window.clearTimeout(overlayCleanupTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeBackgroundSrc === config.backgroundSrc) {
+      return;
+    }
+
+    transitionTokenRef.current += 1;
+    const transitionToken = transitionTokenRef.current;
+
+    if (overlayCleanupTimeoutRef.current !== null) {
+      window.clearTimeout(overlayCleanupTimeoutRef.current);
+      overlayCleanupTimeoutRef.current = null;
+    }
+
+    if (accessibilitySettings.noMotion) {
+      setOverlayBackgroundSrc(null);
+      setIsBackgroundFading(false);
+      setActiveBackgroundSrc(config.backgroundSrc);
+      return;
+    }
+
+    setOverlayBackgroundSrc(activeBackgroundSrc);
+    setIsBackgroundFading(true);
+
+    const nextBackgroundImage = new window.Image();
+    nextBackgroundImage.decoding = 'async';
+    nextBackgroundImage.src = config.backgroundSrc;
+
+    const finalizeTransition = () => {
+      if (transitionTokenRef.current !== transitionToken) {
+        return;
+      }
+
+      setActiveBackgroundSrc(config.backgroundSrc);
+
+      requestAnimationFrame(() => {
+        if (transitionTokenRef.current !== transitionToken) {
+          return;
+        }
+        setIsBackgroundFading(false);
+      });
+
+      overlayCleanupTimeoutRef.current = window.setTimeout(() => {
+        if (transitionTokenRef.current !== transitionToken) {
+          return;
+        }
+        setOverlayBackgroundSrc(null);
+        overlayCleanupTimeoutRef.current = null;
+      }, BACKGROUND_TRANSITION_MS);
+    };
+
+    if (nextBackgroundImage.complete) {
+      finalizeTransition();
+    } else {
+      nextBackgroundImage.onload = finalizeTransition;
+      nextBackgroundImage.onerror = finalizeTransition;
+    }
+
+    return () => {
+      nextBackgroundImage.onload = null;
+      nextBackgroundImage.onerror = null;
+    };
+  }, [accessibilitySettings.noMotion, activeBackgroundSrc, config.backgroundSrc]);
 
   // Scroll to top when route changes
   useEffect(() => {
@@ -148,13 +225,23 @@ const Layout = () => {
       </a>
       <div id="particles-js" aria-hidden="true"></div>
       <img
-        src={config.backgroundSrc}
+        src={activeBackgroundSrc}
         alt=""
         id="background"
         aria-hidden="true"
         loading="eager"
         fetchpriority="high"
       />
+      {overlayBackgroundSrc ? (
+        <img
+          src={overlayBackgroundSrc}
+          alt=""
+          className={`background-layer--overlay${isBackgroundFading ? ' is-visible' : ''}`}
+          aria-hidden="true"
+          loading="eager"
+          decoding="async"
+        />
+      ) : null}
 
       <header className="header--main">
         {/* Branding Section */}
