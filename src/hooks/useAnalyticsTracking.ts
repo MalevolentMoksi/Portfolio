@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { upsertAnalyticsSession, touchAnalyticsSessionActivity } from '../utils/analyticsSession';
 import { safeLocalGet, safeLocalSet } from '../utils/safeStorage';
 
@@ -652,7 +652,7 @@ async function fetchGeolocation(): Promise<GeoLocation | null> {
   let remoteGeo: GeoLocation | null = null;
 
   try {
-    remoteGeo = await fetchGeoProvider('https://ipapi.co/json/', {
+    remoteGeo = await fetchGeoProvider('https://get.geojs.io/v1/ip/geo.json', {
       countryField: 'country_name',
       cityField: 'city',
       timezoneField: 'timezone',
@@ -660,10 +660,10 @@ async function fetchGeolocation(): Promise<GeoLocation | null> {
     });
 
     if (!remoteGeo) {
-      remoteGeo = await fetchGeoProvider('https://ipwho.is/', {
-        countryField: 'country',
+      remoteGeo = await fetchGeoProvider('https://freeipapi.com/api/json', {
+        countryField: 'countryName',
         cityField: 'city',
-        timezoneField: 'timezone.id',
+        timezoneField: 'timezone',
         timeoutMs: 2500,
       });
     }

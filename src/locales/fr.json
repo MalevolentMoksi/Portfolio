@@ -739,7 +739,7 @@
         "recipients": {
           "formspree": "Formspree (envoi des messages du formulaire de contact).",
           "hosting": "GitHub Pages (hébergement statique du site).",
-          "analytics": "Selon configuration : Cloudflare Workers (proxy webhook), Discord Webhook, et services de géolocalisation approximative (ipapi.co / ipwho.is)."
+          "analytics": "Selon configuration : Cloudflare Workers (proxy webhook), Discord Webhook, et services de géolocalisation approximative (geojs.io / freeipapi.com)."
         }
       },
       "cookies": {
