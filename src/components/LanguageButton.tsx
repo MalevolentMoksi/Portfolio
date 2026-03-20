@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip';
 
@@ -11,19 +11,41 @@ const LanguageButton = () => {
   const currentLang: LanguageKey = LANGS.includes(resolvedLang as LanguageKey)
     ? (resolvedLang as LanguageKey)
     : 'fr';
+  const [isFading, setIsFading] = useState(false);
+  const fadeTimeoutRef = useRef<number | null>(null);
 
   const handleSelect = useCallback(
     async (lng: LanguageKey) => {
       if (lng === currentLang) {
         return;
       }
-      await i18n.changeLanguage(lng);
+
+      if (fadeTimeoutRef.current !== null) {
+        window.clearTimeout(fadeTimeoutRef.current);
+      }
+
+      setIsFading(true);
+      fadeTimeoutRef.current = window.setTimeout(async () => {
+        await i18n.changeLanguage(lng);
+        setIsFading(false);
+        fadeTimeoutRef.current = null;
+      }, 150);
     },
     [currentLang, i18n]
   );
 
+  useEffect(() => {
+    return () => {
+      if (fadeTimeoutRef.current !== null) {
+        window.clearTimeout(fadeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const wrapperClassName = `language-switcher-wrapper${isFading ? ' is-fading-language' : ''}`;
+
   return (
-    <div className="language-switcher-wrapper">
+    <div className={wrapperClassName}>
       <Tooltip text={t('common.language.tooltip')} position="bottom">
         <div
           className="language-segmented"

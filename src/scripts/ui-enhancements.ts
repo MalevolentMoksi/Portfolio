@@ -6,6 +6,7 @@
 class UIEnhancements {
   private _typingTimeout: ReturnType<typeof setTimeout> | null = null;
   private _typingRunId = 0;
+  private _lastTypedTitle = '';
   private _glitchInterval: ReturnType<typeof setInterval> | null = null;
   private _clockInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -46,48 +47,28 @@ class UIEnhancements {
     // pour éviter que deux chaînes de setTimeout tournent en parallèle.
     this.cancelTypingEffect();
     const runId = this._typingRunId;
+    const ERASE_SPEED_MS = 28;
+    const TYPE_SPEED_MS = 50;
 
-    const startTyping = (attempt = 0): void => {
-      if (runId !== this._typingRunId) return;
+    const finishTyping = (element: HTMLElement, fullText: string): void => {
+      this._typingTimeout = null;
+      element.style.minHeight = '';
+      element.classList.remove('typing');
+      element.dataset.typed = 'true';
+      this._lastTypedTitle = fullText;
+    };
 
-      const element = document.getElementById('main-title');
-      if (!element) return;
-
-      // Le titre peut être vide pendant un bref instant lors d'un changement
-      // de route rapide: réessayer plutôt que de reprendre un ancien texte.
-      const fullText = (element.dataset.typingText ?? element.textContent ?? '').trim();
-      if (!fullText) {
-        if (attempt < 10) {
-          this._typingTimeout = setTimeout(() => {
-            startTyping(attempt + 1);
-          }, 25);
-        }
+    const startTyping = (element: HTMLElement, fullText: string): void => {
+      if (runId !== this._typingRunId || !element.isConnected) {
         return;
       }
 
-      element.dataset.originalText = fullText;
-      if (element.dataset.typedText === fullText && element.dataset.typed === 'true') {
-        return;
-      }
-      element.dataset.typed = 'false';
-      element.dataset.typedText = fullText;
-      // Pin layout height before clearing to prevent scroll-anchor adjustments
-      const measuredH = element.getBoundingClientRect().height;
-      if (measuredH > 0) element.style.minHeight = measuredH + 'px';
-      element.textContent = '';
-      element.classList.add('typing');
-
-      // When reduced-motion is active (either user-set or auto-detected for
-      // low-end devices), skip the letter-by-letter animation entirely and
-      // reveal the full text immediately — guaranteed smooth on any device.
       const noMotion =
         document.body?.classList.contains('a11y--no-motion') ||
         window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
       if (noMotion) {
         element.textContent = fullText;
-        element.style.minHeight = '';
-        element.classList.remove('typing');
-        element.dataset.typed = 'true';
+        finishTyping(element, fullText);
         return;
       }
 
@@ -101,19 +82,101 @@ class UIEnhancements {
         if (i <= fullText.length) {
           element.textContent = fullText.slice(0, i);
           i++;
-          this._typingTimeout = setTimeout(typeLetter, 50);
+          this._typingTimeout = setTimeout(typeLetter, TYPE_SPEED_MS);
         } else {
-          this._typingTimeout = null;
-          element.style.minHeight = '';
-          element.classList.remove('typing');
-          element.dataset.typed = 'true';
+          finishTyping(element, fullText);
         }
       };
 
       typeLetter();
     };
 
-    startTyping();
+    const startTransition = (attempt = 0): void => {
+      if (runId !== this._typingRunId) return;
+
+      const element = document.getElementById('main-title');
+      if (!element) return;
+
+      // Le titre peut être vide pendant un bref instant lors d'un changement
+      // de route rapide: réessayer plutôt que de reprendre un ancien texte.
+      const fullText = (element.dataset.typingText ?? element.textContent ?? '').trim();
+      if (!fullText) {
+        if (attempt < 10) {
+          this._typingTimeout = setTimeout(() => {
+            startTransition(attempt + 1);
+          }, 25);
+        }
+        return;
+      }
+
+      element.dataset.originalText = fullText;
+      if (
+        element.dataset.typedText === fullText &&
+        element.dataset.typed === 'true' &&
+        (element.textContent ?? '').trim() === fullText
+      ) {
+        this._lastTypedTitle = fullText;
+        return;
+      }
+
+      // React route updates set the new title immediately; keep track of the
+      // previously typed title so we can still erase something meaningful.
+      const currentVisibleText = (element.textContent ?? '').trim();
+      const previousTypedTitle = this._lastTypedTitle.trim();
+
+      let eraseSource = '';
+      if (previousTypedTitle && previousTypedTitle !== fullText) {
+        eraseSource = previousTypedTitle;
+      } else if (currentVisibleText && currentVisibleText !== fullText) {
+        eraseSource = currentVisibleText;
+      }
+
+      element.dataset.typed = 'false';
+      element.dataset.typedText = fullText;
+      // Pin layout height before clearing to prevent scroll-anchor adjustments
+      const measuredH = element.getBoundingClientRect().height;
+      if (measuredH > 0) element.style.minHeight = measuredH + 'px';
+      element.classList.add('typing');
+
+      // When reduced-motion is active (either user-set or auto-detected for
+      // low-end devices), skip the letter-by-letter animation entirely and
+      // reveal the full text immediately — guaranteed smooth on any device.
+      const noMotion =
+        document.body?.classList.contains('a11y--no-motion') ||
+        window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      if (noMotion) {
+        element.textContent = fullText;
+        finishTyping(element, fullText);
+        return;
+      }
+
+      // If there is nothing meaningful to erase, start typing immediately.
+      if (!eraseSource) {
+        element.textContent = '';
+        startTyping(element, fullText);
+        return;
+      }
+
+      element.textContent = eraseSource;
+      let eraseIndex = eraseSource.length;
+      const eraseLetter = (): void => {
+        if (runId !== this._typingRunId || !element.isConnected) {
+          return;
+        }
+
+        if (eraseIndex > 0) {
+          eraseIndex -= 1;
+          element.textContent = eraseSource.slice(0, eraseIndex);
+          this._typingTimeout = setTimeout(eraseLetter, ERASE_SPEED_MS);
+        } else {
+          startTyping(element, fullText);
+        }
+      };
+
+      eraseLetter();
+    };
+
+    startTransition();
   }
 
   private initEmailGlitch(): void {

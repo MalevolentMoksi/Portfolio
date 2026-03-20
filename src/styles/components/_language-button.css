@@ -5,6 +5,12 @@
 .language-switcher-wrapper {
   position: relative;
   display: inline-flex;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.language-switcher-wrapper.is-fading-language {
+  opacity: 0;
 }
 
 .language-segmented {

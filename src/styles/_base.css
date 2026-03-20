@@ -16,6 +16,7 @@ html {
   scroll-padding-top: 6rem;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: font-size 0.3s ease;
 }
 
 @media (max-width: 768px) {

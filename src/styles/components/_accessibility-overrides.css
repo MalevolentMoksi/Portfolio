@@ -39,12 +39,14 @@ body.a11y--high-contrast {
 
   background-color: #000000;
   color: #ffffff;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body.a11y--high-contrast * {
   text-shadow: none !important;
   box-shadow: none !important;
   filter: none !important;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Surfaces stay dark and legible in high contrast mode. */
@@ -66,6 +68,7 @@ body.a11y--high-contrast .accessibility-panel {
   background-image: none !important;
   color: #ffffff !important;
   border-color: #ffffff !important;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* WCAG 1.4.1: links remain identifiable beyond color only. */
