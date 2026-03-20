@@ -1,5 +1,6 @@
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import MusicPlayer from '../scripts/music-player';
 import VisualEffects from '../scripts/effects';
 import UIEnhancements from '../scripts/ui-enhancements';
@@ -45,6 +46,8 @@ const scheduleWhenPageReady = (callback: () => void): (() => void) => {
 
 const usePortfolioModules = (trackFiles: string[]): void => {
   const location = useLocation();
+  const { i18n } = useTranslation();
+  const hasHandledInitialLanguageSync = useRef(false);
 
   useEffect(() => {
     return scheduleWhenPageReady(() => {
@@ -82,6 +85,18 @@ const usePortfolioModules = (trackFiles: string[]): void => {
       uiEnhancementsInstance?.cancelTypingEffect();
     };
   }, [location.pathname]);
+
+  useLayoutEffect(() => {
+    if (!hasHandledInitialLanguageSync.current) {
+      hasHandledInitialLanguageSync.current = true;
+      return;
+    }
+
+    // Language changes update title text outside the typing pipeline; resync
+    // cached fragment so the next route transition erases the correct locale.
+    uiEnhancementsInstance?.cancelTypingEffect();
+    uiEnhancementsInstance?.syncTypingSnapshotFromDom(i18n.resolvedLanguage || 'fr');
+  }, [i18n.resolvedLanguage]);
 };
 
 export default usePortfolioModules;
