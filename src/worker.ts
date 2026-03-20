@@ -54,6 +54,8 @@ const createCorsHeaders = (
   const headers = new Headers({
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
+    'X-Robots-Tag': 'noindex, nofollow',
+    'Cache-Control': 'no-store',
     Vary: 'Origin',
   });
 
@@ -83,6 +85,10 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const allowedOrigins = parseAllowedOrigins(env);
     const requestOrigin = getRequestOrigin(request);
+
+    if (request.method === 'GET' || request.method === 'HEAD') {
+      return responseWithCors('Webhook endpoint. Use POST only.', 200, requestOrigin, allowedOrigins);
+    }
 
     // Handle CORS preflight requests
     if (request.method === 'OPTIONS') {

@@ -28,6 +28,8 @@
 
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /api/webhook
 
 User-agent: Amazonbot
 Disallow: /

@@ -105,6 +105,8 @@ const createRobotsTxt = (siteUrl) =>
   [
     'User-agent: *',
     'Allow: /',
+    'Disallow: /api/',
+    'Disallow: /api/webhook',
     '',
     `Sitemap: ${siteUrl}/sitemap.xml`,
     '',

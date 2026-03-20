@@ -33,6 +33,8 @@ test('SEO generator includes legal route and writes robots to requested output d
 
     assert.match(sitemap, /https:\/\/example\.test\//);
     assert.match(sitemap, /https:\/\/example\.test\/informations-legales/);
+    assert.match(robots, /Disallow: \/api\//);
+    assert.match(robots, /Disallow: \/api\/webhook/);
     assert.match(robots, /Sitemap: https:\/\/example\.test\/sitemap\.xml/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
