@@ -4,7 +4,7 @@
   "description": "Portfolio professionnel - Enzo Morello",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --no-open",
     "build": "vite build && npm run seo:generate",
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,html}\"",
