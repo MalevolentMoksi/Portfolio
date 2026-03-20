@@ -7,6 +7,7 @@ class UIEnhancements {
   private _typingTimeout: ReturnType<typeof setTimeout> | null = null;
   private _typingRunId = 0;
   private _lastTypedTitle = '';
+  private _lastAnimatedTitleFragment = '';
   private _glitchInterval: ReturnType<typeof setInterval> | null = null;
   private _clockInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -56,6 +57,7 @@ class UIEnhancements {
       element.classList.remove('typing');
       element.dataset.typed = 'true';
       this._lastTypedTitle = fullText;
+      this._lastAnimatedTitleFragment = fullText;
     };
 
     const startTyping = (element: HTMLElement, fullText: string): void => {
@@ -80,7 +82,9 @@ class UIEnhancements {
         }
 
         if (i <= fullText.length) {
-          element.textContent = fullText.slice(0, i);
+          const nextText = fullText.slice(0, i);
+          element.textContent = nextText;
+          this._lastAnimatedTitleFragment = nextText;
           i++;
           this._typingTimeout = setTimeout(typeLetter, TYPE_SPEED_MS);
         } else {
@@ -116,16 +120,32 @@ class UIEnhancements {
         (element.textContent ?? '').trim() === fullText
       ) {
         this._lastTypedTitle = fullText;
+        this._lastAnimatedTitleFragment = fullText;
         return;
       }
 
-      // React route updates set the new title immediately; keep track of the
-      // previously typed title so we can still erase something meaningful.
+      // React can replace the title before reinit runs; use the last fragment
+      // we actually rendered (possibly partial) so the erase phase reflects
+      // what users really saw before the route switch.
+      // Also handle external DOM updates (e.g., language switch) by detecting
+      // when currentVisibleText differs from our stored fragments.
       const currentVisibleText = (element.textContent ?? '').trim();
+      const previousAnimatedFragment = this._lastAnimatedTitleFragment.trim();
       const previousTypedTitle = this._lastTypedTitle.trim();
 
       let eraseSource = '';
-      if (previousTypedTitle && previousTypedTitle !== fullText) {
+      // If DOM was externally changed (language switch), currentVisibleText won't
+      // match our stored fragments. Prioritize erasing what's actually visible.
+      if (
+        currentVisibleText &&
+        currentVisibleText !== previousAnimatedFragment &&
+        currentVisibleText !== previousTypedTitle &&
+        currentVisibleText !== fullText
+      ) {
+        eraseSource = currentVisibleText;
+      } else if (previousAnimatedFragment && previousAnimatedFragment !== fullText) {
+        eraseSource = previousAnimatedFragment;
+      } else if (previousTypedTitle && previousTypedTitle !== fullText) {
         eraseSource = previousTypedTitle;
       } else if (currentVisibleText && currentVisibleText !== fullText) {
         eraseSource = currentVisibleText;
@@ -158,6 +178,7 @@ class UIEnhancements {
       }
 
       element.textContent = eraseSource;
+      this._lastAnimatedTitleFragment = eraseSource;
       let eraseIndex = eraseSource.length;
       const eraseLetter = (): void => {
         if (runId !== this._typingRunId || !element.isConnected) {
@@ -166,7 +187,9 @@ class UIEnhancements {
 
         if (eraseIndex > 0) {
           eraseIndex -= 1;
-          element.textContent = eraseSource.slice(0, eraseIndex);
+          const nextText = eraseSource.slice(0, eraseIndex);
+          element.textContent = nextText;
+          this._lastAnimatedTitleFragment = nextText;
           this._typingTimeout = setTimeout(eraseLetter, ERASE_SPEED_MS);
         } else {
           startTyping(element, fullText);
