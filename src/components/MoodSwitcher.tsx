@@ -22,9 +22,10 @@ type TransitionMode = 'vhs' | 'circleReveal';
 const ACTIVE_SELECTOR_MODE = 'analogTuner' as SelectorMode;
 const ACTIVE_TRANSITION_MODE = 'circleReveal' as TransitionMode;
 
-const CIRCLE_REVEAL_DURATION_MS = 620;
+const CIRCLE_REVEAL_DURATION_MS = 900;
 const VHS_DURATION_MS = 200;
 const VHS_FLIP_DELAY_MS = 60;
+const NOTCH_SNAP_VISUAL_MS = 190;
 
 const TUNER_COAST_FACTOR = 10;
 const TUNER_FRICTION = 0.82;
@@ -35,6 +36,7 @@ const TUNER_SETTLE_MIN_VELOCITY = 0.0015;
 const TUNER_MAX_VELOCITY = 0.08;
 const TUNER_RESISTANCE_RADIUS = 0.14;
 const TUNER_RESISTANCE_STRENGTH = 0.58;
+const TUNER_PROGRESS_EPSILON = 0.0008;
 
 interface Point {
   x: number;
@@ -44,6 +46,7 @@ interface Point {
 interface CommitMoodOptions {
   delayBeforeCommit?: number;
   origin?: Point;
+  shouldClosePanel?: boolean;
 }
 
 const clamp = (value: number, min: number, max: number): number =>
@@ -124,6 +127,7 @@ const MoodSwitcher = () => {
   const [dragProgress, setDragProgress] = useState<number>(() => indexToProgress(getMoodIndex(mood)));
   const [isDragging, setIsDragging] = useState(false);
   const [isSettling, setIsSettling] = useState(false);
+  const [isNotchSnapping, setIsNotchSnapping] = useState(false);
   const [isVerticalTuner, setIsVerticalTuner] = useState<boolean>(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return false;
     return window.matchMedia('(max-width: 720px)').matches;
@@ -134,9 +138,11 @@ const MoodSwitcher = () => {
   const tunerRulerRef = useRef<HTMLDivElement>(null);
   const timeoutIdsRef = useRef<number[]>([]);
   const transitionOverlaysRef = useRef<HTMLDivElement[]>([]);
+  const transitionInFlightRef = useRef(false);
   const settleRafRef = useRef<number | null>(null);
   const velocityRef = useRef(0);
   const pointerSampleRef = useRef<{ progress: number; time: number } | null>(null);
+  const previewMoodRef = useRef<MoodKey>(mood);
   const dragProgressRef = useRef(dragProgress);
   const [panelPos, setPanelPos] = useState<{ top: number; right: number } | null>(null);
 
@@ -146,9 +152,22 @@ const MoodSwitcher = () => {
   const syncPreviewToMood = useCallback((targetMood: MoodKey) => {
     const nextProgress = indexToProgress(getMoodIndex(targetMood));
     setPreviewMood(targetMood);
+    previewMoodRef.current = targetMood;
     setDragProgress(nextProgress);
     dragProgressRef.current = nextProgress;
   }, []);
+
+  const applyMoodImmediately = useCallback(
+    (newMood: MoodKey) => {
+      setMood(newMood);
+      setAnnouncement(
+        t('common.mood.tunerCommitted', {
+          mood: t(`common.mood.names.${newMood}`),
+        })
+      );
+    },
+    [setMood, t]
+  );
 
   const removeTransitionOverlay = useCallback((overlay: HTMLDivElement) => {
     overlay.remove();
@@ -192,6 +211,7 @@ const MoodSwitcher = () => {
   const runViewCircleTransition = useCallback(
     (newMood: MoodKey, origin: Point): boolean => {
       if (typeof document.startViewTransition !== 'function') return false;
+      if (transitionInFlightRef.current) return false;
 
       const sanitizedOrigin = sanitizeTransitionOrigin(origin);
 
@@ -201,16 +221,24 @@ const MoodSwitcher = () => {
       root.style.setProperty('--mood-reveal-duration-ms', `${CIRCLE_REVEAL_DURATION_MS}ms`);
       root.classList.add('mood-view-transition-active');
 
-      const transition = document.startViewTransition(() => {
-        setMood(newMood);
-        setAnnouncement(
-          t('common.mood.tunerCommitted', {
-            mood: t(`common.mood.names.${newMood}`),
-          })
-        );
-      });
+      transitionInFlightRef.current = true;
+
+      let transition;
+      try {
+        transition = document.startViewTransition(() => {
+          applyMoodImmediately(newMood);
+        });
+      } catch {
+        transitionInFlightRef.current = false;
+        root.classList.remove('mood-view-transition-active');
+        root.style.removeProperty('--mood-reveal-origin-x');
+        root.style.removeProperty('--mood-reveal-origin-y');
+        root.style.removeProperty('--mood-reveal-duration-ms');
+        return false;
+      }
 
       transition.finished.finally(() => {
+        transitionInFlightRef.current = false;
         root.classList.remove('mood-view-transition-active');
         root.style.removeProperty('--mood-reveal-origin-x');
         root.style.removeProperty('--mood-reveal-origin-y');
@@ -219,7 +247,7 @@ const MoodSwitcher = () => {
 
       return true;
     },
-    [setMood, t]
+    [applyMoodImmediately]
   );
 
   const schedule = useCallback((callback: () => void, delay: number) => {
@@ -243,6 +271,7 @@ const MoodSwitcher = () => {
     cancelSettleAnimation();
     setIsDragging(false);
     setIsSettling(false);
+    setIsNotchSnapping(false);
     setIsOpen(false);
   }, [cancelSettleAnimation]);
 
@@ -250,19 +279,17 @@ const MoodSwitcher = () => {
     (newMood: MoodKey, options?: CommitMoodOptions) => {
       const delayBeforeCommit = options?.delayBeforeCommit ?? 0;
       const origin = options?.origin;
+      const shouldClosePanel = options?.shouldClosePanel ?? false;
 
       const runCommit = () => {
         if (newMood !== mood) {
           const shouldSkipTransitions =
-            isNoMotionMode || document.body.classList.contains('a11y--reduce-effects');
+            isNoMotionMode ||
+            document.body.classList.contains('a11y--reduce-effects') ||
+            transitionInFlightRef.current;
 
           if (shouldSkipTransitions) {
-            setMood(newMood);
-            setAnnouncement(
-              t('common.mood.tunerCommitted', {
-                mood: t(`common.mood.names.${newMood}`),
-              })
-            );
+            applyMoodImmediately(newMood);
           } else {
             const transitionMode = resolveTransitionMode();
             if (transitionMode === 'circleReveal') {
@@ -270,12 +297,7 @@ const MoodSwitcher = () => {
               if (!hasViewTransition) {
                 const fallbackOverlay = registerTransitionOverlay(createVhsOverlay(newMood));
                 schedule(() => {
-                  setMood(newMood);
-                  setAnnouncement(
-                    t('common.mood.tunerCommitted', {
-                      mood: t(`common.mood.names.${newMood}`),
-                    })
-                  );
+                  applyMoodImmediately(newMood);
                 }, VHS_FLIP_DELAY_MS);
                 schedule(() => {
                   removeTransitionOverlay(fallbackOverlay);
@@ -284,12 +306,7 @@ const MoodSwitcher = () => {
             } else {
               const overlay = registerTransitionOverlay(createVhsOverlay(newMood));
               schedule(() => {
-                setMood(newMood);
-                setAnnouncement(
-                  t('common.mood.tunerCommitted', {
-                    mood: t(`common.mood.names.${newMood}`),
-                  })
-                );
+                applyMoodImmediately(newMood);
               }, VHS_FLIP_DELAY_MS);
               schedule(() => {
                 removeTransitionOverlay(overlay);
@@ -300,7 +317,9 @@ const MoodSwitcher = () => {
           setSpinKey((key) => key + 1);
         }
 
-        closePanel();
+        if (shouldClosePanel) {
+          closePanel();
+        }
       };
 
       if (delayBeforeCommit > 0) {
@@ -311,6 +330,7 @@ const MoodSwitcher = () => {
     },
     [
       closePanel,
+      applyMoodImmediately,
       getFallbackOrigin,
       isNoMotionMode,
       mood,
@@ -348,6 +368,8 @@ const MoodSwitcher = () => {
   useEffect(() => {
     if (!isOpen) return;
     const handle = (e: MouseEvent) => {
+      if (transitionInFlightRef.current) return;
+
       const targetNode = e.target as Node | null;
       if (
         panelRef.current &&
@@ -407,10 +429,15 @@ const MoodSwitcher = () => {
   }, [dragProgress]);
 
   useEffect(() => {
+    previewMoodRef.current = previewMood;
+  }, [previewMood]);
+
+  useEffect(() => {
     if (!isOpen) return;
     syncPreviewToMood(mood);
     setIsDragging(false);
     setIsSettling(false);
+    setIsNotchSnapping(false);
   }, [isOpen, mood, syncPreviewToMood]);
 
   const getProgressFromPointer = useCallback(
@@ -448,10 +475,17 @@ const MoodSwitcher = () => {
     const clampedProgress = clamp(nextProgress, 0, 1);
     const nextIndex = progressToMoodIndex(clampedProgress);
     const nextMood = MOOD_ORDER[nextIndex];
+    const previousProgress = dragProgressRef.current;
+    const progressDelta = Math.abs(clampedProgress - previousProgress);
+
+    if (progressDelta < TUNER_PROGRESS_EPSILON && nextMood === previewMoodRef.current) {
+      return;
+    }
 
     setDragProgress(clampedProgress);
     dragProgressRef.current = clampedProgress;
     setPreviewMood(nextMood);
+    previewMoodRef.current = nextMood;
   }, []);
 
   const getTunerOrigin = useCallback(
@@ -525,6 +559,7 @@ const MoodSwitcher = () => {
     if (isNoMotionMode) return;
 
     cancelSettleAnimation();
+    setIsNotchSnapping(false);
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     setIsDragging(true);
@@ -565,6 +600,7 @@ const MoodSwitcher = () => {
     if (!isDragging) return;
 
     setIsDragging(false);
+    setIsNotchSnapping(false);
 
     const projectedProgress = clamp(
       dragProgressRef.current + velocityRef.current * TUNER_COAST_FACTOR,
@@ -583,6 +619,7 @@ const MoodSwitcher = () => {
 
     setIsDragging(false);
     setIsSettling(false);
+    setIsNotchSnapping(false);
     velocityRef.current = 0;
     pointerSampleRef.current = null;
     cancelSettleAnimation();
@@ -599,6 +636,11 @@ const MoodSwitcher = () => {
     pointerSampleRef.current = null;
     setIsDragging(false);
     setIsSettling(true);
+    setIsNotchSnapping(true);
+
+    schedule(() => {
+      setIsNotchSnapping(false);
+    }, NOTCH_SNAP_VISUAL_MS);
 
     schedule(() => {
       setIsSettling(false);
@@ -710,7 +752,9 @@ const MoodSwitcher = () => {
             ref={tunerRulerRef}
             className={`mood-tuner ${isVerticalTuner ? 'mood-tuner--vertical' : 'mood-tuner--horizontal'}${
               isDragging ? ' mood-tuner--dragging' : ''
-            }${isSettling ? ' mood-tuner--settling' : ''}`}
+            }${isSettling ? ' mood-tuner--settling' : ''}${
+              isNotchSnapping ? ' mood-tuner--notch-snapping' : ''
+            }`}
             role="slider"
             aria-label={t('common.mood.tunerAriaLabel')}
             aria-valuemin={0}

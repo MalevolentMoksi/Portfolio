@@ -281,6 +281,7 @@
 
 .mood-tuner-track {
   position: absolute;
+  z-index: 1;
   border-radius: 999px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.02) 28%, rgba(0, 0, 0, 0.35) 100%),
@@ -314,10 +315,12 @@
 }
 
 .mood-tuner-indicator {
-  --indicator-size: 22px;
+  --indicator-size: 26px;
   position: absolute;
+  z-index: 5;
   width: var(--indicator-size);
   height: var(--indicator-size);
+  cursor: grab;
   border-radius: 50%;
   background:
     radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.95) 0%, transparent 30%),
@@ -332,8 +335,8 @@
     0 5px 14px rgba(0, 0, 0, 0.55);
   transition:
     transform 0.14s cubic-bezier(0.22, 1, 0.36, 1),
-    left 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-    top 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    left 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    top 0.2s cubic-bezier(0.22, 1, 0.36, 1),
     background 0.3s ease;
 }
 
@@ -347,12 +350,21 @@
 }
 
 .mood-tuner--dragging .mood-tuner-indicator {
+  cursor: grabbing;
   transform: scale(1.16) translateY(-1px);
   box-shadow:
     inset 0 1px 2px rgba(255, 255, 255, 0.54),
     inset 0 -2px 4px rgba(0, 0, 0, 0.54),
     0 0 30px color-mix(in srgb, var(--mood-color) 78%, transparent),
     0 8px 22px rgba(0, 0, 0, 0.45);
+}
+
+.mood-tuner--notch-snapping .mood-tuner-indicator {
+  transition:
+    left 0.16s cubic-bezier(0.2, 0.9, 0.2, 1),
+    top 0.16s cubic-bezier(0.2, 0.9, 0.2, 1),
+    transform 0.12s ease-out,
+    background 0.3s ease;
 }
 
 .mood-tuner--horizontal .mood-tuner-indicator {
@@ -367,6 +379,11 @@
 
 .mood-tuner-notch {
   position: absolute;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
   padding: 0;
   margin: 0;
   border: none;
@@ -396,8 +413,8 @@
 
 .mood-tuner-notch-dot {
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background:
     radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.72) 0%, transparent 34%),
@@ -415,8 +432,11 @@
 
 .mood-tuner-notch-label {
   position: absolute;
-  font-size: 0.64rem;
-  color: rgba(255, 255, 255, 0.54);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.55);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   transition:
@@ -425,13 +445,13 @@
 }
 
 .mood-tuner--horizontal .mood-tuner-notch-label {
-  top: -15px;
+  top: -20px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .mood-tuner--vertical .mood-tuner-notch-label {
-  left: 14px;
+  left: 20px;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -445,7 +465,7 @@
     inset 0 1px 2px rgba(255, 255, 255, 0.45),
     inset 0 -1px 2px rgba(0, 0, 0, 0.35),
     0 0 16px color-mix(in srgb, var(--mood-color) 72%, transparent);
-  transform: scale(1.1);
+  transform: scale(1.18);
 }
 
 .mood-tuner-notch--preview .mood-tuner-notch-label,
@@ -459,6 +479,44 @@
   font-size: 0.68rem;
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.62);
+}
+
+/* Low-tier performance profile: keep clarity, reduce expensive glow/compositing. */
+body[data-perf-tier='low'] .mood-tuner-shell {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 3px 12px rgba(0, 0, 0, 0.26);
+}
+
+body[data-perf-tier='low'] .mood-tuner--settling {
+  animation: none;
+}
+
+body[data-perf-tier='low'] .mood-tuner-indicator {
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.32),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.44),
+    0 2px 8px rgba(0, 0, 0, 0.36);
+}
+
+body[data-perf-tier='low'] .mood-tuner--dragging .mood-tuner-indicator {
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.42),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.44),
+    0 4px 10px rgba(0, 0, 0, 0.34);
+}
+
+body[data-perf-tier='low'] .mood-tuner-notch-label {
+  text-shadow: none;
+}
+
+body[data-perf-tier='low'] .mood-tuner-notch--preview .mood-tuner-notch-dot,
+body[data-perf-tier='low'] .mood-tuner-notch--current .mood-tuner-notch-dot {
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.34),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.32),
+    0 0 8px color-mix(in srgb, var(--mood-color) 52%, transparent);
 }
 
 .mood-sr-only {
@@ -992,6 +1050,21 @@ body[data-mood='industrial'].brutalist-minimal .filter-tag:active {
   box-shadow: none;
 }
 
+/* Keep tuner notch controls immune to global industrial button treatment. */
+body[data-mood='industrial'].brutalist-full .mood-tuner-notch,
+body[data-mood='industrial'].brutalist-moderate .mood-tuner-notch,
+body[data-mood='industrial'].brutalist-minimal .mood-tuner-notch {
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+body[data-mood='industrial'].brutalist-full .mood-tuner-notch:active,
+body[data-mood='industrial'].brutalist-moderate .mood-tuner-notch:active,
+body[data-mood='industrial'].brutalist-minimal .mood-tuner-notch:active {
+  transform: translate(-50%, -50%) !important;
+  box-shadow: none !important;
+}
+
 /* ── Industrial : glitch twitch sur headers — sporadique ── */
 body[data-mood='industrial'] h1,
 body[data-mood='industrial'] h2 {
@@ -1210,7 +1283,8 @@ body[data-perf-tier='low'][data-mood='nightshade']::after {
 .mood-view-transition-active::view-transition-new(root) {
   animation-duration: var(--mood-reveal-duration-ms, 620ms);
   animation-timing-function: cubic-bezier(0.3, 0.1, 0.2, 1);
-}
+    pointer-events: none;
+  }
 
 .mood-view-transition-active::view-transition-old(root) {
   animation-name: none;
