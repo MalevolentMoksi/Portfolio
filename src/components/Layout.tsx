@@ -121,16 +121,45 @@ const pageConfig: Record<string, PageConfigItem> = {
 };
 
 const Layout = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const config = pageConfig[location.pathname] || pageConfig['/'];
   const { mood } = useMood();
   const { settings: accessibilitySettings } = useAccessibility();
+  const [isLanguageTransitioning, setIsLanguageTransitioning] = useState(false);
   const [activeBackgroundSrc, setActiveBackgroundSrc] = useState(config.backgroundSrc);
   const [overlayBackgroundSrc, setOverlayBackgroundSrc] = useState<string | null>(null);
   const [isBackgroundFading, setIsBackgroundFading] = useState(false);
   const transitionTokenRef = useRef(0);
   const overlayCleanupTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setIsLanguageTransitioning(false);
+    };
+
+    i18n.on('languageChanged', handleLanguageChange);
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n]);
+
+  // Listen for language change signal from LanguageButton to start fade
+  useEffect(() => {
+    const handleLanguageChanging = () => {
+      if (accessibilitySettings.noMotion) {
+        return;
+      }
+      setIsLanguageTransitioning(true);
+    };
+
+    window.addEventListener('portfolioLanguageChanging', handleLanguageChanging);
+    return () => {
+      window.removeEventListener('portfolioLanguageChanging', handleLanguageChanging);
+    };
+  }, [accessibilitySettings.noMotion]);
+
+  const moodStageClassName = `mood-stage${isLanguageTransitioning ? ' is-translating-language-text' : ''}`;
 
   useDocumentMeta(t(config.metaTitleKey), t(config.metaDescriptionKey));
   useNavButtonEffects();
@@ -223,7 +252,7 @@ const Layout = () => {
       <a href="#main" className="skip-to-content">
         {t('common.header.skipToContent')}
       </a>
-      <div className="mood-stage" data-mood={mood}>
+      <div className={moodStageClassName} data-mood={mood}>
         <div id="particles-js" aria-hidden="true"></div>
         <img
           src={activeBackgroundSrc}

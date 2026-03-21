@@ -87,7 +87,22 @@ main {
   z-index: var(--z-base);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: opacity 0.6s ease;
+  transition: opacity 0.22s ease;
+}
+
+/* Fade translated text only during language transition */
+.mood-stage :where(h1, h2, h3, h4, h5, h6, p, li, a, span, label, button, strong, em, small, dt, dd, th, td, figcaption, blockquote) {
+  transition: color 0.22s ease, text-shadow 0.22s ease, opacity 0.22s ease;
+}
+
+.mood-stage.is-translating-language-text :where(h1, h2, h3, h4, h5, h6, p, li, a, span, label, button, strong, em, small, dt, dd, th, td, figcaption, blockquote) {
+  color: transparent !important;
+  text-shadow: none !important;
+}
+
+/* Gradient-clipped hero heading in secondary header needs opacity fade. */
+.mood-stage.is-translating-language-text .header--secondary .header--hero :where(h1, h2.header-subheading, h3.header-subheading-alt) {
+  opacity: 0 !important;
 }
 
 /* Opacité réduite quand les particules prennent le devant */

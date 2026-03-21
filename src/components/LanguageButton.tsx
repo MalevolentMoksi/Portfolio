@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip';
 
 const LANGS = ['fr', 'en'] as const;
 type LanguageKey = (typeof LANGS)[number];
+const LANGUAGE_FADE_LEAD_MS = 220;
 
 const LanguageButton = () => {
   const { i18n, t } = useTranslation();
@@ -11,41 +12,27 @@ const LanguageButton = () => {
   const currentLang: LanguageKey = LANGS.includes(resolvedLang as LanguageKey)
     ? (resolvedLang as LanguageKey)
     : 'fr';
-  const [isFading, setIsFading] = useState(false);
-  const fadeTimeoutRef = useRef<number | null>(null);
 
   const handleSelect = useCallback(
     async (lng: LanguageKey) => {
       if (lng === currentLang) {
         return;
       }
-
-      if (fadeTimeoutRef.current !== null) {
-        window.clearTimeout(fadeTimeoutRef.current);
+      // Emit event to trigger fade in parent Layout
+      window.dispatchEvent(new CustomEvent('portfolioLanguageChanging'));
+      const noMotionEnabled = document.body.classList.contains('a11y--no-motion');
+      if (!noMotionEnabled) {
+        await new Promise<void>((resolve) => {
+          window.setTimeout(resolve, LANGUAGE_FADE_LEAD_MS);
+        });
       }
-
-      setIsFading(true);
-      fadeTimeoutRef.current = window.setTimeout(async () => {
-        await i18n.changeLanguage(lng);
-        setIsFading(false);
-        fadeTimeoutRef.current = null;
-      }, 150);
+      await i18n.changeLanguage(lng);
     },
     [currentLang, i18n]
   );
 
-  useEffect(() => {
-    return () => {
-      if (fadeTimeoutRef.current !== null) {
-        window.clearTimeout(fadeTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const wrapperClassName = `language-switcher-wrapper${isFading ? ' is-fading-language' : ''}`;
-
   return (
-    <div className={wrapperClassName}>
+    <div className="language-switcher-wrapper">
       <Tooltip text={t('common.language.tooltip')} position="bottom">
         <div
           className="language-segmented"
