@@ -18,6 +18,9 @@ const MAX_DELAY_MS = 35_000;
 const FIRST_DELAY_MS = 12_000;
 const BUFFER_MS = 1_000;
 const SPAWN_PADDING_PX = 18;
+const MIN_VERTICAL_GAP_PX = 72;
+const TOP_PICK_ATTEMPTS = 16;
+const TOP_SAMPLE_COUNT = 24;
 const RECENT_HISTORY_SIZE = 4;
 
 type CommuterDirection = 'ltr' | 'rtl';
@@ -25,6 +28,7 @@ type CommuterDirection = 'ltr' | 'rtl';
 /* ─── Helpers ─── */
 
 const randomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 const pickRandomDirection = (): CommuterDirection => (Math.random() < 0.5 ? 'ltr' : 'rtl');
 
@@ -62,7 +66,7 @@ const getAdaptiveDelay = (baseDelayMs: number): number => {
   return Math.round(baseDelayMs / getPageDensityFactor());
 };
 
-const pickCommuterTopPx = (): string => {
+const pickCommuterTopPx = (activeTopValues: number[] = []): number => {
   const scrollTop = window.scrollY;
   const viewportHeight = window.innerHeight;
   const viewportBottom = scrollTop + viewportHeight;
@@ -84,10 +88,40 @@ const pickCommuterTopPx = (): string => {
 
   if (maxY <= minY) {
     const fallbackY = scrollTop + Math.max(headerHeight + SPAWN_PADDING_PX, viewportHeight * 0.45);
-    return `${Math.round(fallbackY)}px`;
+    return Math.round(fallbackY);
   }
 
-  return `${Math.round(randomBetween(minY, maxY))}px`;
+  const clampedActiveTopValues = activeTopValues
+    .map((top) => clamp(top, minY, maxY))
+    .filter((top, index, arr) => Number.isFinite(top) && arr.indexOf(top) === index);
+
+  for (let attempt = 0; attempt < TOP_PICK_ATTEMPTS; attempt++) {
+    const candidate = randomBetween(minY, maxY);
+    const tooClose = clampedActiveTopValues.some((activeTop) =>
+      Math.abs(activeTop - candidate) < MIN_VERTICAL_GAP_PX
+    );
+    if (!tooClose) {
+      return Math.round(candidate);
+    }
+  }
+
+  let bestCandidate = randomBetween(minY, maxY);
+  let bestDistance = -1;
+
+  for (let i = 0; i < TOP_SAMPLE_COUNT; i++) {
+    const candidate = randomBetween(minY, maxY);
+    const nearestDistance =
+      clampedActiveTopValues.length === 0
+        ? Number.POSITIVE_INFINITY
+        : Math.min(...clampedActiveTopValues.map((activeTop) => Math.abs(activeTop - candidate)));
+
+    if (nearestDistance > bestDistance) {
+      bestDistance = nearestDistance;
+      bestCandidate = candidate;
+    }
+  }
+
+  return Math.round(bestCandidate);
 };
 
 /* ─── CommuterVehicle sub-component ─── */
@@ -97,16 +131,16 @@ const CommuterVehicle = ({
   duration,
   preview,
   direction,
+  top,
 }: {
   config: CommuterConfig;
   duration: number;
   preview: boolean;
   direction: CommuterDirection;
+  top: number;
 }) => {
   const divRef = useRef<any>(null);
   const [animating, setAnimating] = useState(false);
-
-  const topPx = pickCommuterTopPx();
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
@@ -129,15 +163,15 @@ const CommuterVehicle = ({
       style={
         preview
           ? {
-              top: topPx,
+              top,
               left: '50%',
               opacity: 0.9,
               animation: 'none',
               transform: 'translateX(-50%)',
             }
           : animating
-            ? { top: topPx, animationDuration: `${duration}s` }
-            : { top: topPx }
+            ? { top, animationDuration: `${duration}s` }
+            : { top }
       }
       aria-hidden="true"
     >
@@ -158,6 +192,7 @@ const OccasionalCommuter = () => {
     preview: boolean;
     id: string;
     direction: CommuterDirection;
+    top: number;
   }[]>([]);
   const spawnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const testTimersRef = useRef<number[]>([]);
@@ -217,10 +252,12 @@ const OccasionalCommuter = () => {
         -RECENT_HISTORY_SIZE
       );
 
+      const activeTopValues = vehiclesRef.current.map((vehicle) => vehicle.top);
       const vehicleId = `commuter-${nextIdRef.current++}`;
       const duration = commuterConfig.duration;
       const direction = preview ? 'ltr' : pickRandomDirection();
-      const newVehicle = { config: commuterConfig, duration, preview, id: vehicleId, direction };
+      const top = pickCommuterTopPx(activeTopValues);
+      const newVehicle = { config: commuterConfig, duration, preview, id: vehicleId, direction, top };
       
       setVehicles((prev) => [...prev, newVehicle]);
 
@@ -323,6 +360,7 @@ const OccasionalCommuter = () => {
           duration={vehicle.duration}
           preview={vehicle.preview}
           direction={vehicle.direction}
+          top={vehicle.top}
         />
       ))}
     </>,
