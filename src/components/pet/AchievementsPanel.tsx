@@ -115,6 +115,53 @@ const ACHIEVEMENT_ICONS = {
       <path d="M5 8 Q8 12 11 8" />
     </svg>
   ),
+  'catch-challenge-clear': (
+    <svg
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="8" cy="8" r="5.5" />
+      <path d="M5.2 8.3 L7.2 10.2 L11 6.2" />
+    </svg>
+  ),
+  'catch-hard-clear': (
+    <svg
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 9 L8 2 L13 9" />
+      <path d="M5.5 9 L5.5 13.5" />
+      <path d="M10.5 9 L10.5 13.5" />
+      <path d="M5.5 11.5 L10.5 11.5" />
+    </svg>
+  ),
+  'catch-combo-20': (
+    <svg
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="currentColor"
+      stroke="none"
+      aria-hidden="true"
+    >
+      <path d="M8 1.5 L9.6 6 L14.5 6 L10.5 9 L12 13.5 L8 11 L4 13.5 L5.5 9 L1.5 6 L6.4 6 Z" />
+      <circle cx="12.6" cy="12.3" r="2.1" fill="none" stroke="currentColor" strokeWidth="1.2" />
+    </svg>
+  ),
   sleep: (
     <svg
       viewBox="0 0 16 16"

@@ -315,6 +315,9 @@
           "particles": { "label": "Sensoriel", "desc": "Le robot a repéré les particules", "hint": "Active les particules pendant que le robot se balade" },
           "throw": { "label": "Lancé !", "desc": "Lancé le robot avec élan", "hint": "Fais glisser le robot très rapidement puis relâche-le" },
           "catchGame": { "label": "Baseball", "desc": "Joué au jeu d'attrape", "hint": "Lance une partie via le bouton Jouer dans le HUD du robot" },
+          "catchChallengeClear": { "label": "Challenger", "desc": "Terminé un challenge du jeu d'attrape", "hint": "Lance le mode Challenge et atteins le score objectif" },
+          "catchHardClear": { "label": "Hard Carry", "desc": "Terminé un challenge en difficulté difficile", "hint": "Réussis un challenge en mode Difficile" },
+          "catchCombo20": { "label": "Combo x20", "desc": "Atteint un combo de 20 en challenge", "hint": "Maintiens les retours sans casser la chaîne de combo" },
           "sleep": { "label": "Bonne nuit", "desc": "Le robot s'est endormi", "hint": "Laisse le robot tranquille sans interagir pendant 30 secondes" },
           "combo": { "label": "Combo x3", "desc": "Enchaîné 3 interactions en 7 s", "hint": "Effectue 3 actions différentes sur le robot en moins de 7 s" },
           "rename": { "label": "Rebaptisé", "desc": "Donné un nouveau nom au robot", "hint": "Change le nom du robot depuis le champ en haut du HUD" },
@@ -324,21 +327,73 @@
     },
     "catchGameUI": {
       "title": "🏓 Jeu d'Attrape",
+      "menu": {
+        "title": "Configurer la partie",
+        "subtitle": "Deux rebonds sans interception font perdre 1 vie en challenge.",
+        "modeLabel": "Mode",
+        "modes": {
+          "free": "Partie libre",
+          "challenge": "Challenge"
+        },
+        "difficultyLabel": "Difficulté",
+        "difficulties": {
+          "casual": "Casual",
+          "normal": "Normale",
+          "hard": "Difficile"
+        },
+        "freeHint": "Partie libre: joue sans limite de vies.",
+        "startFree": "Lancer la partie libre",
+        "startChallenge": "Lancer le challenge",
+        "difficultyImpact": "Impact de la difficulté",
+        "traits": {
+          "catchWindow": "Fenêtre d'interception",
+          "comboDecay": "Vitesse de perte du combo",
+          "chargeTime": "Temps de charge max",
+          "returnSpeed": "Vitesse de renvoi du bot",
+          "unpredictability": "Imprévisibilité du bot"
+        }
+      },
       "instructions": {
         "aimStep": "Bouge la souris pour viser",
-        "throwStep": "Clique pour lancer la balle",
-        "returnStep": "Le robot la renvoie — rattrape-la !",
-        "start": "Clique n'importe où pour commencer"
+        "chargeStep": "Maintiens le clic pour charger, relâche pour tirer",
+        "returnStep": "Le robot renvoie la balle: évite 2 rebonds consécutifs",
+        "trajectoryStep": "Utilise les fleches haut/bas pour ajuster la trajectoire"
       },
       "score": {
         "label": "Rallies",
-        "best": "Record : {{score}}"
+        "challengeLabel": "Score",
+        "best": "Record : {{score}}",
+        "bestChallenge": "Record {{score}}"
+      },
+      "challenge": {
+        "objective": "Objectif: {{score}} points avec {{lives}} vies",
+        "difficulty": "Difficulté",
+        "lives": "Vies",
+        "bounces": "Rebonds manqués",
+        "combo": "Combo",
+        "goalShort": "{{score}} / {{target}} pts"
       },
       "stats": {
         "hunger": "Faim",
         "happiness": "Bonheur"
       },
-      "hint": "Bouge la souris pour viser, clique pour lancer",
+      "hint": "Bouge la souris pour viser, clique pour lancer, fleches haut/bas pour ajuster",
+      "missReasons": {
+        "doubleBounce": "Raté: 2 rebonds sans interception"
+      },
+      "charge": {
+        "label": "Charge"
+      },
+      "result": {
+        "title": "Résultat",
+        "victory": "Challenge réussi",
+        "defeat": "Challenge raté",
+        "score": "Score: {{score}}",
+        "rallies": "Rallies: {{rallies}}",
+        "combo": "Combo max: x{{combo}}",
+        "retry": "Rejouer",
+        "changeMode": "Changer de mode"
+      },
       "exitLabel": "Quitter le jeu (ESC)"
     },
     "petHUD": {

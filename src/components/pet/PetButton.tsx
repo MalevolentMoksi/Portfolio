@@ -3,9 +3,11 @@
    ───────────────────────────────────────────────── */
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { useMood } from '../../contexts/MoodContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useAccessibility } from '../../contexts/AccessibilityContext';
+
 import Tooltip from '../Tooltip';
 import {
   LS,
@@ -28,11 +30,13 @@ import WanderingPet from './WanderingPet';
 import { normalizeThought } from './ThoughtBubbleQueue';
 import type { ThoughtItem } from './ThoughtBubbleQueue';
 
+/* ── Type definitions ── */
 type CooldownAction = 'feed' | 'pet' | 'play';
 type InteractionAction = CooldownAction | 'catch';
 type FaceCombo = { eyes: string; mouth: string };
 type MoodTextPool = Record<string, string[]>;
 
+/* ── Component ── */
 const PetButton = () => {
   const { t, i18n } = useTranslation();
   const { mood } = useMood();
@@ -88,6 +92,7 @@ const PetButton = () => {
   // Mood switch flourish
   const [moodSpinActive, setMoodSpinActive] = useState(false);
 
+  /* ── Refs for lifecycle, timers, and state tracking ── */
   const reactionTimer = useRef<any>(null);
   const thoughtIdCounter = useRef(0);
   const decayRef = useRef<any>(null);
@@ -107,26 +112,24 @@ const PetButton = () => {
   // Mood switch tracking
   const prevMoodRef = useRef(mood);
 
+  /* ── Derived state ── */
   const petMood = getMood(stats.hunger, stats.happiness);
   // Sleep takes priority over base mood but yields to temporary reactions
   const expression = reaction || (isSleeping ? 'sleep' : petMood);
   const needsAttention = petMood === 'sad' && isSpawned;
-
   // ── Vitality-derived size and speed ──
   const vitality = clamp((stats.hunger + stats.happiness) / 200, 0, 1);
   const sizeScale = 0.85 + vitality * 0.25; // range 0.85–1.10
   const speedMult = 0.6 + vitality * 0.8; // range 0.6–1.40
 
-  /* ── Persistance ── */
+  /* ── Persistence & initialization ── */
   useEffect(() => {
     localSet(LS.hunger, String(stats.hunger));
     localSet(LS.happiness, String(stats.happiness));
   }, [stats]);
-
   useEffect(() => {
     localSet(LS.spawned, String(isSpawned));
   }, [isSpawned]);
-
   useEffect(() => {
     localSet(LS.name, petName);
   }, [petName]);
@@ -139,7 +142,6 @@ const PetButton = () => {
   useEffect(() => {
     isCatchingRef.current = isCatching;
   }, [isCatching]);
-
   // Migration: remove stale pet-renderer key (SVG is now the only renderer)
   useEffect(() => {
     localRemove('pet-renderer');
@@ -154,7 +156,7 @@ const PetButton = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noMotion]);
 
-  /* ── Réactions temporaires ── */
+  /* ── Temporary reactions ── */
   const triggerReaction = useCallback(
     (r: string) => {
       clearTimeout(reactionTimer.current);
@@ -180,13 +182,12 @@ const PetButton = () => {
     prevSpawnedRef.current = isSpawned;
   }, [isSpawned, triggerReaction]);
 
-  /* ── Onboarding : séquence guidée lors du tout premier spawn ── */
+  /* ── Onboarding sequence ── */
   const onboardingRanRef = useRef(false);
   useEffect(() => {
     if (!isSpawned || onboardingRanRef.current) return;
     if (localGet(LS.onboarded)) return;
     onboardingRanRef.current = true;
-
     const steps: Array<{ delay: number; thought: ThoughtItem }> = [
       {
         delay: 1200,
@@ -226,7 +227,6 @@ const PetButton = () => {
   useEffect(() => {
     isSleepingRef.current = isSleeping;
   }, [isSleeping]);
-
   // Sync faceCombo/hudThought when sleep state changes (no triggerReaction for sleep
   // since we need a persistent expression, not a 2 s auto-clear)
   useEffect(() => {
@@ -237,7 +237,6 @@ const PetButton = () => {
     // When waking up, triggerReaction('woozy') is called which resets the combo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSleeping, moodTextPool]);
-
   // When reaction clears, reset combo to base mood
   useEffect(() => {
     if (reaction === null) {
@@ -248,7 +247,7 @@ const PetButton = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reaction, petMood, moodTextPool]);
 
-  /* ── Dégradation en session (ralentie si thriving) + freeze pendant catch ── */
+  /* ── Stat decay & catch freezing ── */
   // Approche probabiliste : évite les décimales (pas de multiplicateur flottant)
   // Thriving (>85/85) : déclin très ralenti + hunger décline plus lentement que happiness
   useEffect(() => {
@@ -264,13 +263,11 @@ const PetButton = () => {
         });
         return;
       }
-
       setStats((s) => {
         const thriving = s.hunger > 85 && s.happiness > 85;
         // Thriving effect: skip decay with high probability (different rates per stat)
         const hungerSkip = thriving && Math.random() > 0.15; // 85% skip when thriving
         const happinessSkip = thriving && Math.random() > 0.3; // 70% skip when thriving
-
         // Use integer-only deltas sampled probabilistically so values remain integers:
         // - hunger: avg 1.5 when not skipped => choose 1 or 2 with equal chance
         // - happiness: avg 0.75 when not skipped => subtract 1 with 75% chance
@@ -278,7 +275,6 @@ const PetButton = () => {
         if (!hungerSkip) hungerDelta = Math.random() < 0.5 ? 1 : 2;
         let happinessDelta = 0;
         if (!happinessSkip) happinessDelta = Math.random() < 0.75 ? 1 : 0;
-
         const newHunger = clamp(Math.round(s.hunger) - hungerDelta);
         const newHappiness = clamp(Math.round(s.happiness) - happinessDelta);
         return { hunger: newHunger, happiness: newHappiness };
@@ -287,7 +283,7 @@ const PetButton = () => {
     return () => clearInterval(decayRef.current);
   }, [isSpawned]);
 
-  /* ── Idle micro-reactions — occasional autonomous expressions ── */
+  /* ── Idle micro-reactions ── */
   useEffect(() => {
     if (!isSpawned) return;
     const schedule = () => {
@@ -325,7 +321,7 @@ const PetButton = () => {
     };
   }, [isSpawned, triggerReaction]);
 
-  /* ── Neglect escalation — sustained sad triggers dizzy ── */
+  /* ── Neglect escalation ── */
   // Uses petMood (not raw stats) so the interval isn't reset on every decay tick.
   // sadSinceRef records when sad began; crossing the 28 s mark fires dizzy once.
   useEffect(() => {
@@ -345,7 +341,7 @@ const PetButton = () => {
     return () => clearInterval(id);
   }, [isSpawned, petMood, triggerReaction]);
 
-  /* ── Sommeil après inactivité ── */
+  /* ── Sleep on idle ── */
   useEffect(() => {
     if (!isSpawned) return;
     lastActivityRef.current = Date.now();
@@ -374,7 +370,7 @@ const PetButton = () => {
     };
   }, [isSpawned, isSleeping, triggerReaction]);
 
-  /* ── Flourish quand le mood du site change ── */
+  /* ── Mood switch flourish ── */
   useEffect(() => {
     if (prevMoodRef.current !== null && prevMoodRef.current !== mood && isSpawned) {
       triggerReaction('excited');
@@ -385,7 +381,7 @@ const PetButton = () => {
     prevMoodRef.current = mood;
   }, [mood, isSpawned, triggerReaction]);
 
-  /* ── API globale ── */
+  /* ── Global API ── */
   useEffect(() => {
     window.petReact = (r: string) => {
       if (localGet(LS.spawned) === 'false') return;
@@ -407,7 +403,7 @@ const PetButton = () => {
     };
   }, [triggerReaction]);
 
-  /* ── Unlock achievement helper ── */
+  /* ── Achievement unlocking ── */
   const unlockAchievement = useCallback((id: string) => {
     setAchievements((prev) => {
       if (prev.includes(id)) return prev;
@@ -415,7 +411,7 @@ const PetButton = () => {
     });
   }, []);
 
-  /* ── Interactions (depuis le HUD) ── */
+  /* ── User interactions ── */
   const handleInteract = useCallback(
     (action: InteractionAction) => {
       if (action === 'catch') {
@@ -448,7 +444,6 @@ const PetButton = () => {
           break;
       }
       setCdEnds((c) => ({ ...c, [action]: Date.now() + COOLDOWNS[action] }));
-
       // Combo streak bonus — 3 interactions within 7 s → excited burst + happiness bonus
       const now = Date.now();
       const streak = interactionStreakRef.current;
@@ -465,17 +460,15 @@ const PetButton = () => {
     [cdEnds, triggerReaction, unlockAchievement]
   );
 
-  /* ── Thought bubble queue (déclenché depuis WanderingPet ou PetButton) ── */
+  /* ── Thought bubble queue ── */
   const handleThought = useCallback((input: string | ThoughtItem) => {
     const thought = normalizeThought(input);
     const id = ++thoughtIdCounter.current;
     const entry = { ...thought, id };
-
     // Enforce max 3 concurrent bubbles: drop oldest if full
     const next = [...thoughtQueueRef.current, entry].slice(-3);
     thoughtQueueRef.current = next;
     setThoughtQueue([...next]);
-
     // Auto-remove after duration
     thoughtTimersRef.current[id] = setTimeout(() => {
       thoughtQueueRef.current = thoughtQueueRef.current.filter((t) => t.id !== id);
@@ -483,34 +476,37 @@ const PetButton = () => {
       delete thoughtTimersRef.current[id];
     }, thought.duration);
   }, []);
-
   // Cleanup all thought timers on unmount
   useEffect(() => {
     return () =>
       Object.values(thoughtTimersRef.current).forEach((timerId) => clearTimeout(timerId));
   }, []);
 
-  /* ── Hover-pet stat bump (+5 happiness) ── */
+  /* ── Hover interaction ── */
   const handleHoverPet = useCallback(() => {
     setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness) + 5) }));
   }, []);
 
-  /* ── Bot catch success: increase happiness (CatchGame effect) ── */
+  /* ── Catch game interactions ── */
   const handleBotCatchSuccess = useCallback(() => {
     // Random happiness gain between 1 and 10 (inclusive)
-    const gain = 1 + Math.floor(Math.random() * 10);
-    setStats((s) => ({ ...s, happiness: clamp(Math.round(s.happiness) + gain) }));
+    const happinessGain = 1 + Math.floor(Math.random() * 10);
+    // Small hunger increase (physical activity)
+    const hungerGain = 1 + Math.floor(Math.random() * 3); // 1-3 hunger
+    setStats((s) => ({
+      ...s,
+      happiness: clamp(Math.round(s.happiness) + happinessGain),
+      hunger: clamp(Math.round(s.hunger) + hungerGain),
+    }));
     // Small visual feedback: heart thought and numeric label
     handleThought({ type: 'symbol', content: 'heart' });
-    handleThought({ type: 'text', content: `+${gain}`, duration: 900 });
+    handleThought({ type: 'text', content: `+${happinessGain}`, duration: 900 });
   }, [handleThought]);
-
-  /* ── Catch game end ── */
   const handleGameEnd = useCallback(() => {
     setIsCatching(false);
   }, []);
 
-  /* ── Rename callback ── */
+  /* ── Pet renaming ── */
   const handleRename = useCallback(
     (newName: string) => {
       const trimmed = newName.trim().slice(0, 18) || t('common.pet.defaultName');
@@ -526,7 +522,7 @@ const PetButton = () => {
     [unlockAchievement, showToast, t]
   );
 
-  /* ── Toggle spawn (recharge les stats si elles étaient basses) ── */
+  /* ── Spawn toggle ── */
   const toggleSpawn = useCallback(() => {
     // showToast doit être appelé HORS du state updater — React StrictMode
     // invoque les updaters deux fois pour détecter les side effects impurs.
@@ -547,7 +543,6 @@ const PetButton = () => {
   useEffect(() => {
     if (petMood === 'happy') unlockAchievement('thrive');
   }, [petMood, unlockAchievement]);
-
   useEffect(() => {
     if (isSleeping) unlockAchievement('sleep');
   }, [isSleeping, unlockAchievement]);
@@ -663,7 +658,6 @@ const PetButton = () => {
           </span>
         </button>
       </Tooltip>
-
       {/* Robot qui se balade (via portail) */}
       {/* Pas d'AnimatePresence ici — WanderingPet rend via portal sur document.body,
           AnimatePresence ne peut pas mesurer/animer son DOM et injecte un ref
@@ -700,5 +694,4 @@ const PetButton = () => {
     </>
   );
 };
-
 export default PetButton;

@@ -315,6 +315,9 @@
           "particles": { "label": "Sensory", "desc": "Robot noticed particles", "hint": "Enable particles while robot is walking" },
           "throw": { "label": "Thrown!", "desc": "Launched the robot with momentum", "hint": "Drag fast and release" },
           "catchGame": { "label": "Baseball", "desc": "Played catch game", "hint": "Start a game using Play button in HUD" },
+          "catchChallengeClear": { "label": "Challenger", "desc": "Cleared a catch challenge run", "hint": "Start Challenge mode and reach the target score" },
+          "catchHardClear": { "label": "Hard Carry", "desc": "Cleared a challenge on hard difficulty", "hint": "Beat Challenge mode on Hard" },
+          "catchCombo20": { "label": "Combo x20", "desc": "Reached a 20 combo in challenge", "hint": "Keep successful returns going without dropping the combo" },
           "sleep": { "label": "Good night", "desc": "Robot fell asleep", "hint": "Leave robot idle for 30 seconds" },
           "combo": { "label": "Combo x3", "desc": "Chained 3 interactions in 7s", "hint": "Do 3 different actions in under 7s" },
           "rename": { "label": "Renamed", "desc": "Gave robot a new name", "hint": "Change robot name in HUD field" },
@@ -324,21 +327,73 @@
     },
     "catchGameUI": {
       "title": "🏓 Catch Game",
+      "menu": {
+        "title": "Configure match",
+        "subtitle": "Two uncaught bounces in a row cost 1 life in challenge.",
+        "modeLabel": "Mode",
+        "modes": {
+          "free": "Free Play",
+          "challenge": "Challenge"
+        },
+        "difficultyLabel": "Difficulty",
+        "difficulties": {
+          "casual": "Casual",
+          "normal": "Normal",
+          "hard": "Hard"
+        },
+        "freeHint": "Free Play: no life limit.",
+        "startFree": "Start free play",
+        "startChallenge": "Start challenge",
+        "difficultyImpact": "Difficulty impact",
+        "traits": {
+          "catchWindow": "Catch window",
+          "comboDecay": "Combo drain speed",
+          "chargeTime": "Max charge time",
+          "returnSpeed": "Bot return speed",
+          "unpredictability": "Bot unpredictability"
+        }
+      },
       "instructions": {
         "aimStep": "Move mouse to aim",
-        "throwStep": "Click to throw the ball",
-        "returnStep": "Robot returns it — catch it!",
-        "start": "Click anywhere to begin"
+        "chargeStep": "Hold click to charge, release to throw",
+        "returnStep": "The bot returns the ball: avoid 2 uncaught bounces",
+        "trajectoryStep": "Use up/down arrows to adjust trajectory"
       },
       "score": {
         "label": "Rallies",
-        "best": "Best: {{score}}"
+        "challengeLabel": "Score",
+        "best": "Best: {{score}}",
+        "bestChallenge": "Best {{score}}"
+      },
+      "challenge": {
+        "objective": "Objective: {{score}} points with {{lives}} lives",
+        "difficulty": "Difficulty",
+        "lives": "Lives",
+        "bounces": "Missed bounces",
+        "combo": "Combo",
+        "goalShort": "{{score}} / {{target}} pts"
       },
       "stats": {
         "hunger": "Hunger",
         "happiness": "Happiness"
       },
-      "hint": "Move mouse to aim, click to throw",
+      "hint": "Move mouse to aim, click to throw, up/down arrows adjust trajectory",
+      "missReasons": {
+        "doubleBounce": "Miss: 2 uncaught bounces"
+      },
+      "charge": {
+        "label": "Charge"
+      },
+      "result": {
+        "title": "Result",
+        "victory": "Challenge cleared",
+        "defeat": "Challenge failed",
+        "score": "Score: {{score}}",
+        "rallies": "Rallies: {{rallies}}",
+        "combo": "Max combo: x{{combo}}",
+        "retry": "Retry",
+        "changeMode": "Change mode"
+      },
       "exitLabel": "Exit game (ESC)"
     },
     "petHUD": {

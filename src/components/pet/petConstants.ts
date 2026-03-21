@@ -103,6 +103,27 @@ export const ACHIEVEMENTS = [
     hint: 'Lance une partie via le bouton Jouer dans le HUD du robot',
   },
   {
+    id: 'catch-challenge-clear',
+    key: 'catchChallengeClear',
+    label: 'Challenger',
+    desc: 'Terminé un challenge du jeu d\'attrape',
+    hint: 'Lance le mode Challenge et atteins le score objectif',
+  },
+  {
+    id: 'catch-hard-clear',
+    key: 'catchHardClear',
+    label: 'Hard Carry',
+    desc: 'Terminé un challenge en difficulté difficile',
+    hint: 'Réussis un challenge en mode Difficile',
+  },
+  {
+    id: 'catch-combo-20',
+    key: 'catchCombo20',
+    label: 'Combo x20',
+    desc: 'Atteint un combo de 20 en challenge',
+    hint: 'Maintiens les retours sans casser la chaîne de combo',
+  },
+  {
     id: 'sleep',
     key: 'sleep',
     label: 'Bonne nuit',

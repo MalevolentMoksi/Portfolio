@@ -112,6 +112,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
   const petTop = useMotionValue(posRef.current.y - HALF);
   const [facingLeft, setFacingLeft] = useState(false);
   const [hudOpen, setHudOpen] = useState(false);
+  const reopenHudAfterCatchRef = useRef(false);
   const [gaze, setGaze] = useState({ x: 0, y: 0 });
   // speedLevel en ref (stretch visuel subtil, mis à jour au prochain render déclenché par autre chose)
   const speedLevelRef = useRef(0);
@@ -242,6 +243,14 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
   const isCatchingRef = useRef(false);
   useEffect(() => {
     isCatchingRef.current = isCatching;
+  }, [isCatching]);
+
+  // Catch flow UX: closing HUD on launch + auto reopen after game exit.
+  useEffect(() => {
+    if (!isCatching && reopenHudAfterCatchRef.current) {
+      reopenHudAfterCatchRef.current = false;
+      setHudOpen(true);
+    }
   }, [isCatching]);
 
   /* ── Header bounds tracking (for soft avoidance, not collision) ── */
@@ -1767,6 +1776,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
               },
             ].map(({ key, label, title, icon, noCooldown }) => {
               const actionKey = key as 'feed' | 'pet' | 'play' | 'catch';
+              const isCatchAction = actionKey === 'catch';
               const cooldownKey = actionKey === 'catch' ? null : actionKey;
               const cdFull = key === 'play' ? 3000 : 2000;
               const remaining =
@@ -1780,8 +1790,14 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
               return (
                 <Tooltip key={key} text={title}>
                   <button
-                    className={`pet-action-btn${cooling ? ' pet-action-btn--cooling' : ''}`}
-                    onClick={() => onInteract(actionKey)}
+                    className={`pet-action-btn${isCatchAction ? ' pet-action-btn--catch' : ''}${cooling ? ' pet-action-btn--cooling' : ''}`}
+                    onClick={() => {
+                      if (isCatchAction) {
+                        reopenHudAfterCatchRef.current = true;
+                        setHudOpen(false);
+                      }
+                      onInteract(actionKey);
+                    }}
                     disabled={cooling}
                     aria-disabled={cooling}
                   >
@@ -1823,6 +1839,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
           onGameEnd={onGameEnd}
           ballInfoRef={ballInfoRef}
           stats={stats}
+          onUnlockAchievement={onUnlock}
         />
       )}
     </>,
