@@ -4,8 +4,9 @@
  */
 
 import { getAssetPath } from '../utils/assetPath';
-import { isLowTier } from '../utils/performanceTier';
 import { safeLocalGet, safeLocalSet } from '../utils/safeStorage';
+import MusicMetadataManager from './music-player-metadata';
+import MusicPlayerVisualizer from './music-player-visualizer';
 
 interface StorageKeys {
   TRACK_INDEX: string;
@@ -48,22 +49,6 @@ interface MusicPlayerElements {
   visualizerContainer: HTMLDivElement;
 }
 
-interface VisualizerState {
-  initialized: boolean;
-  rafId: number | null;
-  analyser: AnalyserNode | null;
-  audioContext: AudioContext | null;
-  mediaSource: MediaElementAudioSourceNode | null;
-  ctx: CanvasRenderingContext2D | null;
-  bufferLength: number;
-  dataArray: Uint8Array<ArrayBuffer> | null;
-  freqData: Uint8Array<ArrayBuffer> | null;
-  width: number;
-  height: number;
-  reducedMotion: boolean;
-  handleResize?: () => void;
-}
-
 /* ── Inline SVG icons (replaces Font Awesome CDN) ── */
 const ICON_CHEVRON_LEFT =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>';
@@ -90,14 +75,13 @@ class MusicPlayer {
   private savedVolume: number;
   private isQueueOpen: boolean;
   private isRetracted: boolean;
-  private metadataLoaded: boolean;
-  private metadataTracksLoaded: Set<number>;
+  private metadataManager: MusicMetadataManager;
   private savedTime: number;
   private lastSaveTime: number | null;
   private readonly STORAGE_KEYS: StorageKeys;
   private trackMeta: TrackMeta[];
   private elements!: MusicPlayerElements;
-  private visualizer: VisualizerState;
+  private visualizerController: MusicPlayerVisualizer;
 
   constructor(trackFiles: string[]) {
     this.trackFiles = Array.isArray(trackFiles) ? trackFiles : [];
@@ -109,8 +93,6 @@ class MusicPlayer {
     this.savedVolume = 0.7; // Default volume
     this.isQueueOpen = false; // Track queue menu state
     this.isRetracted = false; // Track retract/collapse state
-    this.metadataLoaded = false;
-    this.metadataTracksLoaded = new Set<number>();
     this.savedTime = 0;
     this.lastSaveTime = null;
 
@@ -130,21 +112,28 @@ class MusicPlayer {
     // DOM elements (initialized after render)
     this.elements = {} as MusicPlayerElements;
 
-    // Visualizer state
-    this.visualizer = {
-      initialized: false,
-      rafId: null,
-      analyser: null,
-      audioContext: null,
-      mediaSource: null,
-      ctx: null,
-      bufferLength: 0,
-      dataArray: null,
-      freqData: null,
-      width: 0,
-      height: 0,
-      reducedMotion: false,
-    };
+    this.metadataManager = new MusicMetadataManager({
+      trackFiles: this.trackFiles,
+      trackMeta: this.trackMeta,
+      formatTitle: (filename: string) => this.formatTitle(filename),
+      createFallbackMeta: (filename: string) => this.createFallbackMeta(filename),
+      onTrackMetaUpdated: (trackIndex: number) => {
+        if (trackIndex === this.currentTrackIndex && this.elements.title) {
+          this.updateTrackInfo();
+        }
+
+        if (this.isQueueOpen && this.elements.queueList) {
+          this.populateQueueMenu();
+        }
+      },
+      onAllMetadataLoaded: () => {
+        if (this.isQueueOpen) {
+          this.populateQueueMenu();
+        }
+      },
+    });
+
+    this.visualizerController = new MusicPlayerVisualizer(this.audio);
 
     this.init();
   }
@@ -263,104 +252,11 @@ class MusicPlayer {
   }
 
   private scheduleCurrentTrackMetadataLoad(): void {
-    if (!this.trackFiles.length) return;
-
-    const idleWindow = window as Window & {
-      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
-    };
-
-    const start = () => {
-      if (typeof idleWindow.requestIdleCallback === 'function') {
-        idleWindow.requestIdleCallback(
-          () => this.loadTrackMetadataForIndex(this.currentTrackIndex),
-          {
-            timeout: 2500,
-          }
-        );
-        return;
-      }
-      setTimeout(() => this.loadTrackMetadataForIndex(this.currentTrackIndex), 1200);
-    };
-
-    if (document.readyState === 'complete') {
-      start();
-      return;
-    }
-
-    window.addEventListener('load', start, { once: true });
+    this.metadataManager.scheduleCurrentTrackMetadataLoad(this.currentTrackIndex);
   }
 
   private loadTrackMetadataForIndex(trackIndex: number): void {
-    if (!this.trackFiles.length) return;
-    if (trackIndex < 0 || trackIndex >= this.trackFiles.length) return;
-    if (this.metadataTracksLoaded.has(trackIndex)) return;
-
-    this.metadataTracksLoaded.add(trackIndex);
-
-    const filename = this.trackFiles[trackIndex];
-    const relUrl = getAssetPath(`assets/music/${filename}`);
-    const url = relUrl.startsWith('http') ? relUrl : window.location.origin + relUrl;
-    const maxAttempts = 3;
-
-    const read = async (attempt: number) => {
-      try {
-        const jsmediatags = await import('jsmediatags');
-        jsmediatags.default?.read(url, {
-          onSuccess: (tag: JsMediaTagsResult) => {
-            this.trackMeta[trackIndex].title = tag.tags.title || this.formatTitle(filename);
-            this.trackMeta[trackIndex].artist = tag.tags.artist || 'Unknown Artist';
-
-            if (tag.tags.picture) {
-              const { data, format } = tag.tags.picture;
-              let binary = '';
-              for (let i = 0; i < data.length; i++) {
-                binary += String.fromCharCode(data[i]);
-              }
-              const base64String = window.btoa(binary);
-              this.trackMeta[trackIndex].pictureDataURL = `data:${format};base64,${base64String}`;
-            }
-
-            if (trackIndex === this.currentTrackIndex && this.elements.title) {
-              this.updateTrackInfo();
-            }
-
-            if (this.isQueueOpen && this.elements.queueList) {
-              this.populateQueueMenu();
-            }
-          },
-          onError: (error: { type: string; info: string }) => {
-            if (attempt < maxAttempts - 1) {
-              const retryDelay = (attempt + 1) * 350;
-              window.setTimeout(() => read(attempt + 1), retryDelay);
-              return;
-            }
-
-            console.warn(`Failed to read metadata for ${filename}:`, error);
-            this.trackMeta[trackIndex] = this.createFallbackMeta(filename);
-            if (trackIndex === this.currentTrackIndex && this.elements.title) {
-              this.updateTrackInfo();
-            }
-            if (this.isQueueOpen && this.elements.queueList) {
-              this.populateQueueMenu();
-            }
-          },
-        });
-      } catch (error: unknown) {
-        if (attempt < maxAttempts - 1) {
-          const retryDelay = (attempt + 1) * 350;
-          window.setTimeout(() => read(attempt + 1), retryDelay);
-          return;
-        }
-
-        console.warn(`Failed to initialize metadata reader for ${filename}:`, error);
-        this.trackMeta[trackIndex] = this.createFallbackMeta(filename);
-        if (trackIndex === this.currentTrackIndex && this.elements.title) {
-          this.updateTrackInfo();
-        }
-      }
-    };
-
-    read(0);
+    this.metadataManager.loadTrackMetadataForIndex(trackIndex);
   }
 
   private onLoadStart(): void {
@@ -485,119 +381,7 @@ class MusicPlayer {
   }
 
   private loadAllMetadata(): void {
-    if (this.metadataLoaded || !this.trackFiles.length) {
-      return;
-    }
-
-    // Check if jsmediatags is available
-    this.metadataLoaded = true;
-
-    // jsmediatags.read() accepte une URL directement : il utilise des requêtes
-    // HTTP Range pour ne télécharger que les octets des tags ID3, sans récupérer
-    // l'intégralité du fichier audio.
-
-    const loadTrack = (filename: string, idx: number, attempt = 0): Promise<void> => {
-      if (this.metadataTracksLoaded.has(idx)) {
-        return Promise.resolve();
-      }
-
-      const relUrl = getAssetPath(`assets/music/${filename}`);
-      // jsmediatags XhrFileReader requires an absolute URL (http/https)
-      const url = relUrl.startsWith('http') ? relUrl : window.location.origin + relUrl;
-      const maxAttempts = 3;
-
-      return new Promise<void>(async (resolve) => {
-        try {
-          const jsmediatags = await import('jsmediatags');
-          jsmediatags.default?.read(url, {
-            onSuccess: (tag: JsMediaTagsResult) => {
-              this.trackMeta[idx].title = tag.tags.title || this.formatTitle(filename);
-              this.trackMeta[idx].artist = tag.tags.artist || 'Unknown Artist';
-
-              // Extract album art
-              if (tag.tags.picture) {
-                const { data, format } = tag.tags.picture;
-                let binary = '';
-                for (let i = 0; i < data.length; i++) {
-                  binary += String.fromCharCode(data[i]);
-                }
-                const base64String = window.btoa(binary);
-                this.trackMeta[idx].pictureDataURL = `data:${format};base64,${base64String}`;
-              }
-
-              if (idx === this.currentTrackIndex && this.elements.title) {
-                this.updateTrackInfo();
-              }
-
-              // Refresh queue menu if open to show updated metadata
-              if (this.isQueueOpen && this.elements.queueList) {
-                this.populateQueueMenu();
-              }
-
-              this.metadataTracksLoaded.add(idx);
-
-              resolve();
-            },
-            onError: (error: { type: string; info: string }) => {
-              if (attempt < maxAttempts - 1) {
-                const retryDelay = (attempt + 1) * 350;
-                window.setTimeout(() => {
-                  loadTrack(filename, idx, attempt + 1).then(resolve, resolve);
-                }, retryDelay);
-                return;
-              }
-
-              console.warn(`Failed to read metadata for ${filename}:`, error);
-              this.trackMeta[idx] = this.createFallbackMeta(filename);
-              if (idx === this.currentTrackIndex && this.elements.title) {
-                this.updateTrackInfo();
-              }
-              if (this.isQueueOpen && this.elements.queueList) {
-                this.populateQueueMenu();
-              }
-              this.metadataTracksLoaded.add(idx);
-              resolve();
-            },
-          });
-        } catch (error: unknown) {
-          if (attempt < maxAttempts - 1) {
-            const retryDelay = (attempt + 1) * 350;
-            window.setTimeout(() => {
-              loadTrack(filename, idx, attempt + 1).then(resolve, resolve);
-            }, retryDelay);
-            return;
-          }
-
-          console.warn(`Failed to initialize metadata reader for ${filename}:`, error);
-          this.trackMeta[idx] = this.createFallbackMeta(filename);
-          if (idx === this.currentTrackIndex && this.elements.title) {
-            this.updateTrackInfo();
-          }
-          this.metadataTracksLoaded.add(idx);
-          resolve();
-        }
-      });
-    };
-
-    // Piste courante chargée immédiatement, les autres décalées de 400ms chacune
-    // pour ne pas concurrencer le rendu React et le chargement des assets visuels
-    const metadataPromises: Promise<void>[] = this.trackFiles.map((filename, idx) => {
-      if (idx === this.currentTrackIndex) {
-        return loadTrack(filename, idx);
-      }
-      // Stagger : la 1ère piste non-courante attend 400ms, la 2ème 800ms, etc.
-      const delay = (idx < this.currentTrackIndex ? idx : idx - 1) * 400 + 400;
-      return new Promise<void>((resolve) => {
-        setTimeout(() => loadTrack(filename, idx).then(resolve, resolve), delay);
-      });
-    });
-
-    // Once all metadata completes, refresh queue to show all loaded data
-    Promise.all(metadataPromises).then(() => {
-      if (this.isQueueOpen) {
-        this.populateQueueMenu();
-      }
-    });
+    this.metadataManager.loadAllMetadata(this.currentTrackIndex);
   }
 
   private render(): void {
@@ -876,6 +660,8 @@ class MusicPlayer {
 
     if (this.audio.paused) {
       this.ensureAudioSourceLoaded();
+      // After first explicit play, allow deeper buffering for smooth random seeks.
+      this.audio.preload = 'auto';
       this.loadTrackMetadataForIndex(this.currentTrackIndex);
       this.audio
         .play()
@@ -916,8 +702,29 @@ class MusicPlayer {
     if (!this.trackFiles.length || !this.audio.duration || !isFinite(this.audio.duration)) return;
 
     const rect = this.elements.progressContainer.getBoundingClientRect();
-    const percent = (event.clientX - rect.left) / rect.width;
-    this.audio.currentTime = percent * this.audio.duration;
+    const percent = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+    const targetTime = percent * this.audio.duration;
+    const wasPlaying = !this.audio.paused;
+
+    // Seek often jumps to unbuffered segments; ask browser to buffer more aggressively.
+    this.audio.preload = 'auto';
+
+    if (typeof this.audio.fastSeek === 'function') {
+      try {
+        this.audio.fastSeek(targetTime);
+      } catch {
+        this.audio.currentTime = targetTime;
+      }
+    } else {
+      this.audio.currentTime = targetTime;
+    }
+
+    // Keep playback continuity when seeking while already playing.
+    if (wasPlaying) {
+      this.audio.play().catch(() => {
+        // Playback continuation can still be blocked transiently while buffering.
+      });
+    }
   }
 
   private updateTrackInfo(): void {
@@ -971,165 +778,19 @@ class MusicPlayer {
   }
 
   private setupVisualizer(): void {
-    if (this.visualizer.initialized) return;
-    this.visualizer.reducedMotion =
-      window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
-    this.visualizer.ctx = this.elements.visualizerCanvas.getContext('2d');
-    this.visualizer.initialized = true;
-
-    this.resizeVisualizer();
-    this.renderIdleWave();
-
-    this.visualizer.handleResize = () => this.resizeVisualizer();
-    window.addEventListener('resize', this.visualizer.handleResize);
-  }
-
-  private ensureVisualizerContext(): void {
-    if (this.visualizer.audioContext || this.visualizer.reducedMotion) return;
-
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-
-    this.visualizer.audioContext = new AudioContext();
-    this.visualizer.analyser = this.visualizer.audioContext.createAnalyser();
-    this.visualizer.analyser.fftSize = 2048;
-    this.visualizer.analyser.smoothingTimeConstant = 0.75;
-    this.visualizer.analyser.minDecibels = -90;
-    this.visualizer.analyser.maxDecibels = -5;
-
-    this.visualizer.mediaSource = this.visualizer.audioContext.createMediaElementSource(this.audio);
-    this.visualizer.mediaSource.connect(this.visualizer.analyser);
-    this.visualizer.analyser.connect(this.visualizer.audioContext.destination);
-
-    this.visualizer.bufferLength = this.visualizer.analyser.frequencyBinCount;
-    this.visualizer.dataArray = new Uint8Array(this.visualizer.bufferLength);
-    this.visualizer.freqData = new Uint8Array(this.visualizer.bufferLength);
-  }
-
-  private resizeVisualizer(): void {
-    if (!this.visualizer.ctx || !this.elements.visualizerCanvas) return;
-
-    const rect = this.elements.visualizerCanvas.getBoundingClientRect();
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-    const width = Math.max(1, Math.floor(rect.width));
-    const height = Math.max(1, Math.floor(rect.height));
-
-    this.elements.visualizerCanvas.width = Math.floor(width * pixelRatio);
-    this.elements.visualizerCanvas.height = Math.floor(height * pixelRatio);
-    this.visualizer.ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-
-    this.visualizer.width = width;
-    this.visualizer.height = height;
-    this.renderIdleWave();
-  }
-
-  private getAccentRgb(): string {
-    const rgb = getComputedStyle(document.body).getPropertyValue('--color-primary-rgb').trim();
-    return rgb || '212, 175, 55';
+    this.visualizerController.setup(this.elements.visualizerCanvas);
   }
 
   private renderIdleWave(): void {
-    if (!this.visualizer.ctx) return;
-
-    const { ctx, width, height } = this.visualizer;
-    const rgb = this.getAccentRgb();
-    ctx.clearRect(0, 0, width, height);
-    ctx.strokeStyle = `rgba(${rgb}, 0.45)`;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, height / 2);
-    ctx.lineTo(width, height / 2);
-    ctx.stroke();
+    this.visualizerController.renderIdleWave();
   }
 
   private startVisualizer(): void {
-    if (this.visualizer.reducedMotion) return;
-    if (!this.visualizer.ctx) return;
-
-    this.ensureVisualizerContext();
-    if (!this.visualizer.analyser || !this.visualizer.dataArray || !this.visualizer.freqData)
-      return;
-
-    if (this.visualizer.audioContext?.state === 'suspended') {
-      this.visualizer.audioContext.resume().catch(() => {});
-    }
-
-    if (this.visualizer.rafId) return;
-
-    // Propriétés constantes du contexte canvas — définies une seule fois,
-    // pas à chaque frame (évite des appels inutiles au GPU)
-    const { ctx } = this.visualizer;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    // Sur machines faibles, désactiver le shadow canvas (force software rendering)
-    const useShadow = !isLowTier();
-
-    const draw = () => {
-      const analyser = this.visualizer.analyser;
-      const dataArray = this.visualizer.dataArray;
-      const freqData = this.visualizer.freqData;
-      const ctx = this.visualizer.ctx;
-      if (!analyser || !dataArray || !freqData || !ctx) {
-        this.visualizer.rafId = null;
-        return;
-      }
-
-      this.visualizer.rafId = window.requestAnimationFrame(draw);
-      analyser.getByteTimeDomainData(dataArray);
-      analyser.getByteFrequencyData(freqData);
-
-      const { width, height, bufferLength } = this.visualizer;
-      // Read accent color each frame so mood changes apply live
-      const rgb = this.getAccentRgb();
-      let sum = 0;
-
-      for (let i = 0; i < bufferLength; i++) {
-        sum += freqData[i];
-      }
-
-      const energy = Math.min(1, sum / (bufferLength * 180));
-      const amplitude = height * (0.2 + energy * 0.9);
-
-      ctx.clearRect(0, 0, width, height);
-
-      ctx.lineWidth = 2.2 + energy * 2.2;
-      ctx.strokeStyle = `rgba(${rgb}, ${0.6 + energy * 0.4})`;
-      if (useShadow) {
-        ctx.shadowBlur = 10 + energy * 18;
-        ctx.shadowColor = `rgba(${rgb}, 0.85)`;
-      }
-
-      ctx.beginPath();
-      const sliceWidth = width / bufferLength;
-      let x = 0;
-
-      for (let i = 0; i < bufferLength; i++) {
-        const v = (dataArray[i] - 128) / 128;
-        const y = height / 2 + v * amplitude;
-
-        if (i === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-
-        x += sliceWidth;
-      }
-
-      ctx.stroke();
-      // Réinitialiser le shadow pour ne pas affecter d'autres dessins canvas
-      if (useShadow) ctx.shadowBlur = 0;
-    };
-
-    this.visualizer.rafId = window.requestAnimationFrame(draw);
+    this.visualizerController.start();
   }
 
   private stopVisualizer(): void {
-    if (this.visualizer.rafId) {
-      window.cancelAnimationFrame(this.visualizer.rafId);
-      this.visualizer.rafId = null;
-    }
-    this.renderIdleWave();
+    this.visualizerController.stop();
   }
 
   private onLoadedMetadata(): void {
