@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useMood, MOODS, MOOD_ORDER } from '../contexts/MoodContext';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import Tooltip from './Tooltip';
+import useTunerAudioFeedback from '@/hooks/useTunerAudioFeedback';
 import type { MoodKey } from '@/types';
 
 type SelectorMode = 'dropdown' | 'rotaryCylinder' | 'hexGrid' | 'analogTuner';
@@ -41,6 +42,15 @@ const SWIPE_STEP_MIN_DISTANCE_PX = 28;
 const SWIPE_STEP_MAX_DURATION_MS = 430;
 const SWIPE_STEP_AXIS_LOCK_RATIO = 1.28;
 const COMMIT_FEEDBACK_MS = 280;
+const HAPTIC_NOTCH_THROTTLE_MS = 58;
+const HAPTIC_NOTCH_PATTERN = 10;
+const HAPTIC_COMMIT_PATTERN: number[] = [20, 24, 32];
+const TUNER_OVERSHOOT_DISTANCE = 0.018;
+const TUNER_OVERSHOOT_TRIGGER_ERROR = 0.032;
+const TUNER_OVERSHOOT_TRIGGER_VELOCITY = 0.023;
+const FM_MIN_FREQUENCY = 87.5;
+const FM_MAX_FREQUENCY = 108.0;
+const DISPLAY_TICK_STOPS = Array.from({ length: 17 }, (_, index) => index / 16);
 
 /* ── FM Frequency Mapping (87.5 – 108.0 MHz) ─────────────────────── */
 const MOOD_FM_FREQUENCIES: Record<MoodKey, number> = {
@@ -50,6 +60,15 @@ const MOOD_FM_FREQUENCIES: Record<MoodKey, number> = {
   europa: 98.9,
   industrial: 102.7,
   nightshade: 106.5,
+};
+
+const MOOD_STATION_CODES: Record<MoodKey, string> = {
+  default: 'AURA-875',
+  hacker: 'KRACK-913',
+  vaporwave: 'VAPE-951',
+  europa: 'ECHO-989',
+  industrial: 'FORGE-1027',
+  nightshade: 'NOCT-1065',
 };
 
 interface Point {
@@ -87,6 +106,23 @@ const indexToProgress = (index: number): number => {
 const progressToMoodIndex = (progress: number): number => {
   if (MOOD_ORDER.length <= 1) return 0;
   return Math.round(clamp(progress, 0, 1) * (MOOD_ORDER.length - 1));
+};
+
+const progressToFrequency = (progress: number): number =>
+  FM_MIN_FREQUENCY + clamp(progress, 0, 1) * (FM_MAX_FREQUENCY - FM_MIN_FREQUENCY);
+
+const getApproachStrengthFromProgress = (progress: number): number => {
+  const nearestStopIndex = progressToMoodIndex(progress);
+  const nearestStopProgress = indexToProgress(nearestStopIndex);
+  const distance = Math.abs(progress - nearestStopProgress);
+  return clamp(1 - distance / TUNER_RESISTANCE_RADIUS, 0, 1);
+};
+
+const getSignalStrengthFromProgress = (progress: number): number => {
+  const nearestStopIndex = progressToMoodIndex(progress);
+  const nearestStopProgress = indexToProgress(nearestStopIndex);
+  const distance = Math.abs(progress - nearestStopProgress);
+  return clamp(1 - distance / (TUNER_RESISTANCE_RADIUS * 1.45), 0, 1);
 };
 
 const getElementCenter = (element: Element): Point => {
@@ -152,6 +188,7 @@ const MoodSwitcher = () => {
   const [isNotchSnapping, setIsNotchSnapping] = useState(false);
   const [isCommitFeedbackActive, setIsCommitFeedbackActive] = useState(false);
   const [lastActivatedNotchIndex, setLastActivatedNotchIndex] = useState<number | null>(null);
+  const [hoveredNotchIndex, setHoveredNotchIndex] = useState<number | null>(null);
   const [swipeStepDirection, setSwipeStepDirection] = useState<-1 | 0 | 1>(0);
   const [isVerticalTuner, setIsVerticalTuner] = useState<boolean>(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return false;
@@ -171,10 +208,27 @@ const MoodSwitcher = () => {
   const listOptionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const previewMoodRef = useRef<MoodKey>(mood);
   const dragProgressRef = useRef(dragProgress);
+  const isDraggingRef = useRef(false);
+  const lastHapticNotchIndexRef = useRef<number>(getMoodIndex(mood));
+  const lastNotchHapticAtRef = useRef(0);
+  const activePointerTypeRef = useRef<string | null>(null);
   const [panelPos, setPanelPos] = useState<{ top: number; right: number } | null>(null);
 
   const isContrastMode = a11ySettings.highContrast;
   const isNoMotionMode = a11ySettings.noMotion;
+  const { startSweep, updateSweep, stopSweep, playLockBeep } = useTunerAudioFeedback({
+    enabled: false,
+  });
+
+  const triggerHaptic = useCallback(
+    (pattern: number | number[]) => {
+      if (isNoMotionMode || typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') {
+        return;
+      }
+      navigator.vibrate(pattern);
+    },
+    [isNoMotionMode]
+  );
 
   const syncPreviewToMood = useCallback((targetMood: MoodKey) => {
     const nextProgress = indexToProgress(getMoodIndex(targetMood));
@@ -307,17 +361,22 @@ const MoodSwitcher = () => {
     timeoutIdsRef.current = [];
     cancelSettleAnimation();
     clearTransitionOverlays();
-  }, [cancelSettleAnimation, clearTransitionOverlays]);
+    stopSweep();
+  }, [cancelSettleAnimation, clearTransitionOverlays, stopSweep]);
 
   const closePanel = useCallback(() => {
     cancelSettleAnimation();
     setIsDragging(false);
+    isDraggingRef.current = false;
     setIsSettling(false);
     setIsNotchSnapping(false);
+    setHoveredNotchIndex(null);
     setSwipeStepDirection(0);
     swipeStartRef.current = null;
+    activePointerTypeRef.current = null;
+    stopSweep();
     setIsOpen(false);
-  }, [cancelSettleAnimation]);
+  }, [cancelSettleAnimation, stopSweep]);
 
   const commitMood = useCallback(
     (newMood: MoodKey, options?: CommitMoodOptions) => {
@@ -327,7 +386,10 @@ const MoodSwitcher = () => {
 
       const runCommit = () => {
         if (newMood !== mood) {
+          stopSweep();
           triggerCommitFeedback(newMood);
+          playLockBeep(MOOD_FM_FREQUENCIES[newMood]);
+          triggerHaptic(HAPTIC_COMMIT_PATTERN);
 
           const shouldSkipTransitions =
             isNoMotionMode ||
@@ -380,13 +442,16 @@ const MoodSwitcher = () => {
       getFallbackOrigin,
       isNoMotionMode,
       mood,
+      playLockBeep,
       registerTransitionOverlay,
       removeTransitionOverlay,
       resolveTransitionMode,
       runViewCircleTransition,
       schedule,
       setMood,
+      stopSweep,
       t,
+      triggerHaptic,
       triggerCommitFeedback,
     ]
   );
@@ -483,6 +548,10 @@ const MoodSwitcher = () => {
   }, [dragProgress]);
 
   useEffect(() => {
+    isDraggingRef.current = isDragging;
+  }, [isDragging]);
+
+  useEffect(() => {
     previewMoodRef.current = previewMood;
   }, [previewMood]);
 
@@ -490,9 +559,13 @@ const MoodSwitcher = () => {
     if (!isOpen) return;
     syncPreviewToMood(mood);
     setIsDragging(false);
+    isDraggingRef.current = false;
     setIsSettling(false);
     setIsNotchSnapping(false);
+    setHoveredNotchIndex(null);
     setSwipeStepDirection(0);
+    lastHapticNotchIndexRef.current = getMoodIndex(mood);
+    activePointerTypeRef.current = null;
     swipeStartRef.current = null;
   }, [isOpen, mood, syncPreviewToMood]);
 
@@ -556,7 +629,8 @@ const MoodSwitcher = () => {
 
   const setTunerProgress = useCallback((nextProgress: number) => {
     const clampedProgress = clamp(nextProgress, 0, 1);
-    const nextIndex = progressToMoodIndex(clampedProgress);
+    const nearestIndex = progressToMoodIndex(clampedProgress);
+    const nextIndex = nearestIndex;
     const nextMood = MOOD_ORDER[nextIndex];
     const previousProgress = dragProgressRef.current;
     const progressDelta = Math.abs(clampedProgress - previousProgress);
@@ -569,7 +643,20 @@ const MoodSwitcher = () => {
     dragProgressRef.current = clampedProgress;
     setPreviewMood(nextMood);
     previewMoodRef.current = nextMood;
-  }, []);
+
+    updateSweep(progressToFrequency(clampedProgress), getSignalStrengthFromProgress(clampedProgress));
+
+    const isTouchLikePointer =
+      activePointerTypeRef.current === 'touch' || activePointerTypeRef.current === 'pen';
+    if (isDraggingRef.current && isTouchLikePointer && nearestIndex !== lastHapticNotchIndexRef.current) {
+      const now = performance.now();
+      if (now - lastNotchHapticAtRef.current >= HAPTIC_NOTCH_THROTTLE_MS) {
+        triggerHaptic(HAPTIC_NOTCH_PATTERN);
+        lastNotchHapticAtRef.current = now;
+      }
+    }
+    lastHapticNotchIndexRef.current = nearestIndex;
+  }, [triggerHaptic, updateSweep]);
 
   const getTunerOrigin = useCallback(
     (progress: number): Point => {
@@ -604,21 +691,47 @@ const MoodSwitcher = () => {
       let progress = dragProgressRef.current;
       let velocity = velocityRef.current;
       const startedAt = performance.now();
+      let settleTarget = targetProgress;
+      let hasOvershot = false;
+      let returningFromOvershoot = false;
 
       const step = (time: number) => {
         const elapsed = time - startedAt;
-        const error = targetProgress - progress;
+        const error = settleTarget - progress;
 
         velocity = velocity * TUNER_FRICTION + error * TUNER_SPRING;
         velocity = clamp(velocity, -TUNER_MAX_VELOCITY, TUNER_MAX_VELOCITY);
         progress = clamp(progress + velocity, 0, 1);
 
+        if (
+          !hasOvershot &&
+          elapsed > 70 &&
+          Math.abs(targetProgress - progress) <= TUNER_OVERSHOOT_TRIGGER_ERROR &&
+          Math.abs(velocity) <= TUNER_OVERSHOOT_TRIGGER_VELOCITY
+        ) {
+          const direction = Math.sign(targetProgress - progress || velocity || 1);
+          settleTarget = clamp(targetProgress + direction * TUNER_OVERSHOOT_DISTANCE, 0, 1);
+          velocity += direction * 0.013;
+          hasOvershot = true;
+        } else if (
+          hasOvershot &&
+          !returningFromOvershoot &&
+          Math.abs(progress - settleTarget) <= 0.008
+        ) {
+          settleTarget = targetProgress;
+          velocity *= 0.72;
+          returningFromOvershoot = true;
+        }
+
         setTunerProgress(progress);
+
+        const finalError = targetProgress - progress;
 
         const hasSettled =
           elapsed >= TUNER_SETTLE_MAX_MS ||
-          (Math.abs(error) < TUNER_SETTLE_MIN_ERROR &&
-            Math.abs(velocity) < TUNER_SETTLE_MIN_VELOCITY);
+          (Math.abs(finalError) < TUNER_SETTLE_MIN_ERROR &&
+            Math.abs(velocity) < TUNER_SETTLE_MIN_VELOCITY &&
+            (!hasOvershot || returningFromOvershoot));
 
         if (hasSettled) {
           setTunerProgress(targetProgress);
@@ -650,10 +763,14 @@ const MoodSwitcher = () => {
       // Some synthetic or browser edge pointer flows may not support capture.
     }
     setIsDragging(true);
+    isDraggingRef.current = true;
     setIsSettling(false);
     velocityRef.current = 0;
+    activePointerTypeRef.current = event.pointerType;
 
     const nextProgress = getProgressFromPointer(event.clientX, event.clientY);
+    const nearestIndex = progressToMoodIndex(nextProgress);
+    lastHapticNotchIndexRef.current = nearestIndex;
     pointerSampleRef.current = { progress: nextProgress, time: performance.now() };
     swipeStartRef.current = {
       x: event.clientX,
@@ -662,6 +779,7 @@ const MoodSwitcher = () => {
       pointerType: event.pointerType,
       startIndex: getMoodIndex(previewMoodRef.current),
     };
+    startSweep(progressToFrequency(nextProgress), getSignalStrengthFromProgress(nextProgress));
     setTunerProgress(nextProgress);
   };
 
@@ -694,7 +812,9 @@ const MoodSwitcher = () => {
     if (!isDragging) return;
 
     setIsDragging(false);
+    isDraggingRef.current = false;
     setIsNotchSnapping(false);
+    activePointerTypeRef.current = null;
 
     const swipeDirection = getSwipeStepDirection(event);
     const previewIndex = getMoodIndex(previewMoodRef.current);
@@ -737,13 +857,17 @@ const MoodSwitcher = () => {
     }
 
     setIsDragging(false);
+    isDraggingRef.current = false;
     setIsSettling(false);
     setIsNotchSnapping(false);
+    setHoveredNotchIndex(null);
     setSwipeStepDirection(0);
     velocityRef.current = 0;
     pointerSampleRef.current = null;
     swipeStartRef.current = null;
     cancelSettleAnimation();
+    activePointerTypeRef.current = null;
+    stopSweep();
     syncPreviewToMood(mood);
   };
 
@@ -756,9 +880,11 @@ const MoodSwitcher = () => {
     velocityRef.current = 0;
     pointerSampleRef.current = null;
     setIsDragging(false);
+    isDraggingRef.current = false;
     setIsSettling(true);
     setIsNotchSnapping(true);
     setLastActivatedNotchIndex(index);
+    startSweep(progressToFrequency(progress), 1);
 
     schedule(() => {
       setIsNotchSnapping(false);
@@ -943,10 +1069,13 @@ const MoodSwitcher = () => {
 
     const previewIndex = getMoodIndex(previewMood);
     const previewMoodLabel = t(`common.mood.names.${previewMood}`);
+    const stationCode = MOOD_STATION_CODES[previewMood];
+    const stationLabel = t(`common.mood.stations.${previewMood}`);
+    const liveFrequency = progressToFrequency(dragProgress);
+    const liveFrequencyLabel = `${liveFrequency.toFixed(1)} MHz`;
     const nearestIndex = progressToMoodIndex(dragProgress);
-    const nearestProgress = indexToProgress(nearestIndex);
-    const distanceToNearest = Math.abs(dragProgress - nearestProgress);
-    const approachStrength = clamp(1 - distanceToNearest / TUNER_RESISTANCE_RADIUS, 0, 1);
+    const approachStrength = getApproachStrengthFromProgress(dragProgress);
+    const signalStrength = getSignalStrengthFromProgress(dragProgress);
     const tunerStateLabel = isDragging
       ? t('common.mood.tunerStateAiming')
       : isSettling
@@ -960,7 +1089,12 @@ const MoodSwitcher = () => {
           <span className="mood-panel-title-sub">{t('common.mood.tunerSubtitle')}</span>
         </div>
 
-        <div className="mood-tuner-shell" style={{ '--mood-color': MOODS[previewMood].color } as CSSProperties}>
+        <div
+          className={`mood-tuner-shell${isDragging || isSettling ? ' mood-tuner-shell--active' : ''}${
+            isCommitFeedbackActive ? ' mood-tuner-shell--lock-flare' : ''
+          }`}
+          style={{ '--mood-color': MOODS[previewMood].color } as CSSProperties}
+        >
           <div
             className={`mood-tuner-display${isCommitFeedbackActive ? ' mood-tuner-display--commit' : ''}`}
             aria-hidden="true"
@@ -971,19 +1105,48 @@ const MoodSwitcher = () => {
               <span className="mood-tuner-display-state">{tunerStateLabel}</span>
             </div>
             <div className="mood-tuner-display-row mood-tuner-display-row--main">
-              <span className="mood-tuner-display-value">{`${MOOD_FM_FREQUENCIES[previewMood].toFixed(1)} FM`}</span>
+              <span className="mood-tuner-display-value">{liveFrequencyLabel}</span>
               <span className="mood-tuner-display-divider" aria-hidden="true" />
               <span className="mood-tuner-display-mood">
                 {MOODS[previewMood].emoji} {previewMoodLabel}
               </span>
             </div>
+            <div className="mood-tuner-display-row mood-tuner-display-row--meta">
+              <span className="mood-tuner-display-station">{stationCode}</span>
+              <span className="mood-tuner-display-station-name">{stationLabel}</span>
+              <span className="mood-tuner-display-signal-label">{t('common.mood.tunerSignalLabel')}</span>
+              <span className="mood-tuner-display-signal" aria-hidden="true">
+                <span
+                  className="mood-tuner-display-signal-fill"
+                  style={{ transform: `scaleX(${signalStrength})` }}
+                />
+              </span>
+            </div>
             <div className="mood-tuner-display-rail" aria-hidden="true">
+              <span className="mood-tuner-display-ticks">
+                {DISPLAY_TICK_STOPS.map((stop, index) => {
+                  const tickDistance = Math.abs(dragProgress - stop);
+                  return (
+                    <span
+                      key={`tick-${index}`}
+                      className={`mood-tuner-display-tick${index % 4 === 0 ? ' mood-tuner-display-tick--major' : ''}`}
+                      style={
+                        {
+                          '--tick-stop': stop,
+                          '--tick-intensity': clamp(1 - tickDistance / 0.22, 0, 1),
+                        } as CSSProperties
+                      }
+                    />
+                  );
+                })}
+              </span>
               <span
                 className="mood-tuner-display-rail-fill"
                 style={{ transform: `scaleX(${dragProgress})` }}
               />
             </div>
           </div>
+          <span className="mood-tuner-lock-bokeh" aria-hidden="true" />
 
           <div
             ref={tunerRulerRef}
@@ -999,7 +1162,11 @@ const MoodSwitcher = () => {
             aria-valuemin={0}
             aria-valuemax={MOOD_ORDER.length - 1}
             aria-valuenow={previewIndex}
-            aria-valuetext={t('common.mood.tunerValue', { mood: previewMoodLabel })}
+            aria-valuetext={t('common.mood.tunerValueDetailed', {
+              mood: previewMoodLabel,
+              frequency: liveFrequency.toFixed(1),
+              station: stationCode,
+            })}
             tabIndex={0}
             onKeyDown={handleTunerKeyDown}
             onPointerDown={handleTunerPointerDown}
@@ -1022,6 +1189,7 @@ const MoodSwitcher = () => {
               const isCurrent = key === mood;
               const isNearest = index === nearestIndex;
               const isPulse = index === lastActivatedNotchIndex;
+              const isHovered = index === hoveredNotchIndex && !isCurrent;
 
               return (
                 <button
@@ -1031,7 +1199,7 @@ const MoodSwitcher = () => {
                     isCurrent ? ' mood-tuner-notch--current' : ''
                   }${isNearest ? ' mood-tuner-notch--nearest' : ''}${
                     isPulse ? ' mood-tuner-notch--pulse' : ''
-                  }`}
+                  }${isHovered ? ' mood-tuner-notch--hovered' : ''}`}
                   style={
                     {
                       '--tuner-stop': indexToProgress(index),
@@ -1044,6 +1212,20 @@ const MoodSwitcher = () => {
                   onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
                     event.stopPropagation();
                     handleTunerNotchClick(index, event.currentTarget);
+                  }}
+                  onMouseEnter={() => {
+                    if (key === mood) return;
+                    setHoveredNotchIndex(index);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredNotchIndex((previous) => (previous === index ? null : previous));
+                  }}
+                  onFocus={() => {
+                    if (key === mood) return;
+                    setHoveredNotchIndex(index);
+                  }}
+                  onBlur={() => {
+                    setHoveredNotchIndex((previous) => (previous === index ? null : previous));
                   }}
                   tabIndex={-1}
                   aria-label={t('common.mood.tunerNotchAria', {

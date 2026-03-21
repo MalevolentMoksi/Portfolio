@@ -58,13 +58,23 @@
       "tunerHelpSwipe": "Sur mobile, un swipe change d'une ambiance à la fois.",
       "tunerNoMotionFallback": "Mode sans animation : sélection par liste.",
       "tunerValue": "Ambiance ciblée : {{mood}}",
+      "tunerValueDetailed": "Ambiance ciblée : {{mood}}, {{frequency}} MHz, station {{station}}",
       "tunerNotchAria": "Viser l'ambiance {{mood}}",
       "tunerCommitted": "Ambiance {{mood}} sélectionnée",
       "tunerDisplayMode": "SYNTH",
       "tunerStateReady": "PRÊT",
       "tunerStateAiming": "RÉGLAGE",
       "tunerStateSettling": "SYNCHRO",
+      "tunerSignalLabel": "Signal",
       "toastActivated": "{{emoji}}  Ambiance « {{mood}} » activée",
+      "stations": {
+        "default": "Aurore Dorée",
+        "hacker": "Point d'Arrêt Noyau",
+        "vaporwave": "Mirage Néon",
+        "europa": "Orbite Cryo",
+        "industrial": "Pulse Fonderie",
+        "nightshade": "Floraison Nocturne"
+      },
       "names": {
         "default": "Default",
         "hacker": "Terminal",

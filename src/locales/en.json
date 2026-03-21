@@ -58,13 +58,23 @@
       "tunerHelpSwipe": "On mobile, one swipe moves exactly one mood step.",
       "tunerNoMotionFallback": "Reduced motion mode: list selector enabled.",
       "tunerValue": "Target mood: {{mood}}",
+      "tunerValueDetailed": "Target mood: {{mood}}, {{frequency}} MHz, station {{station}}",
       "tunerNotchAria": "Target mood {{mood}}",
       "tunerCommitted": "Mood {{mood}} selected",
       "tunerDisplayMode": "SYNTH",
       "tunerStateReady": "READY",
       "tunerStateAiming": "TUNING",
       "tunerStateSettling": "SYNCING",
+      "tunerSignalLabel": "Signal",
       "toastActivated": "{{emoji}}  \"{{mood}}\" mood enabled",
+      "stations": {
+        "default": "Aurora Gold",
+        "hacker": "Kernel Breakpoint",
+        "vaporwave": "Neon Mirage",
+        "europa": "Cryo Orbit",
+        "industrial": "Foundry Pulse",
+        "nightshade": "Nocturne Bloom"
+      },
       "names": {
         "default": "Default",
         "hacker": "Terminal",
