@@ -155,18 +155,6 @@ Notes:
 
 ## Windows Development Environment
 
-### CRLF Line Endings (CRITICAL)
-All source files must use **CRLF (Windows) line endings**, not LF. This is required for proper tooling operation.
-
-**Why**: Replace tools on Windows expect CRLF. LF files show confusing diffs like `+0 -418` (appears to replace entire file) and can cause edits to fail.
-
-**To convert a file to CRLF**:
-```powershell
-$f = "path/to/file.ts"
-$c = [System.IO.File]::ReadAllText($f)
-[System.IO.File]::WriteAllText($f, ($c -replace "`n", "`r`n"), [System.Text.Encoding]::UTF8)
-```
-
 ### PowerShell CLI Alternatives
 On Windows, use PowerShell cmdlets instead of Unix-style tools:
 - **Instead of `rg` (ripgrep)**: Use `Select-String -Path "**/*.ts" -Pattern "pattern"`
