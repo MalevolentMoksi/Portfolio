@@ -13,9 +13,9 @@ import { COMMUTER_FLEET, CommuterConfig, getRandomCommuter } from './commutersCo
 
 /* ─── Constantes de timing ─── */
 
-const MIN_DELAY_MS = 30_000;
-const MAX_DELAY_MS = 60_000;
-const FIRST_DELAY_MS = 20_000;
+const MIN_DELAY_MS = 15_000;
+const MAX_DELAY_MS = 30_000;
+const FIRST_DELAY_MS = 12_000;
 const BUFFER_MS = 1_000;
 const SPAWN_PADDING_PX = 18;
 
@@ -124,17 +124,19 @@ const CommuterVehicle = ({
 
 const OccasionalCommuter = () => {
   const { mood } = useMood();
-  const [vehicle, setVehicle] = useState<{
+  const [vehicles, setVehicles] = useState<{
     config: CommuterConfig;
     duration: number;
     key: number;
     preview: boolean;
-  } | null>(null);
+    id: string;
+  }[]>([]);
   const spawnTimerRef = useRef<any>(null);
-  const lifetimeTimerRef = useRef<any>(null);
   const testTimersRef = useRef<number[]>([]);
+  const vehicleTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const latestSpawnRef = useRef<(configOverride?: CommuterConfig) => void>(() => {});
   const mountedRef = useRef(true);
+  const nextIdRef = useRef(0);
 
   const clearTestTimers = useCallback(() => {
     testTimersRef.current.forEach((id) => clearTimeout(id));
@@ -143,15 +145,19 @@ const OccasionalCommuter = () => {
 
   const clearAllTimers = useCallback(() => {
     if (spawnTimerRef.current) clearTimeout(spawnTimerRef.current);
-    if (lifetimeTimerRef.current) clearTimeout(lifetimeTimerRef.current);
+    vehicleTimersRef.current.forEach((timer) => clearTimeout(timer));
+    vehicleTimersRef.current.clear();
     spawnTimerRef.current = null;
-    lifetimeTimerRef.current = null;
   }, []);
 
-  const despawnAndSchedule = useCallback(() => {
+  const removeVehicle = useCallback((vehicleId: string) => {
     if (!mountedRef.current) return;
-    setVehicle(null);
-    if (lifetimeTimerRef.current) clearTimeout(lifetimeTimerRef.current);
+    setVehicles((prev) => prev.filter((v) => v.id !== vehicleId));
+    vehicleTimersRef.current.delete(vehicleId);
+  }, []);
+
+  const scheduleNextSpawn = useCallback(() => {
+    if (!mountedRef.current) return;
     const delay = randomBetween(getAdaptiveDelay(MIN_DELAY_MS), getAdaptiveDelay(MAX_DELAY_MS));
     spawnTimerRef.current = setTimeout(() => {
       if (!mountedRef.current) return;
@@ -162,30 +168,37 @@ const OccasionalCommuter = () => {
   const spawnVehicle = useCallback(
     (configOverride?: CommuterConfig, preview = false) => {
       if (!mountedRef.current) return;
-      clearAllTimers();
 
       const commuterConfig = configOverride || getRandomCommuter(mood);
       if (!commuterConfig) {
         console.warn(`No commuters available for mood: ${mood}`);
-        despawnAndSchedule();
+        scheduleNextSpawn();
         return;
       }
 
+      const vehicleId = `commuter-${nextIdRef.current++}`;
       const duration = commuterConfig.duration;
-      setVehicle({ config: commuterConfig, duration, key: Date.now(), preview });
+      const newVehicle = { config: commuterConfig, duration, key: Date.now(), preview, id: vehicleId };
+      
+      setVehicles((prev) => [...prev, newVehicle]);
 
       if (preview) {
-        lifetimeTimerRef.current = setTimeout(() => {
-          setVehicle(null);
+        const timer = setTimeout(() => {
+          removeVehicle(vehicleId);
         }, Math.min(duration * 1000, 2800));
+        vehicleTimersRef.current.set(vehicleId, timer);
         return;
       }
 
-      lifetimeTimerRef.current = setTimeout(() => {
-        despawnAndSchedule();
+      const timer = setTimeout(() => {
+        removeVehicle(vehicleId);
       }, duration * 1000 + BUFFER_MS);
+      vehicleTimersRef.current.set(vehicleId, timer);
+
+      // Schedule next spawn immediately without waiting for this one to finish
+      scheduleNextSpawn();
     },
-    [mood, clearAllTimers, despawnAndSchedule]
+    [mood, removeVehicle, scheduleNextSpawn]
   );
 
   useEffect(() => {
@@ -203,15 +216,15 @@ const OccasionalCommuter = () => {
       mountedRef.current = false;
       clearAllTimers();
     };
-  }, []);
+  }, [spawnVehicle, clearAllTimers]);
 
   // Pet easter egg
   useEffect(() => {
-    if (vehicle) {
+    if (vehicles.length > 0) {
       const t = setTimeout(() => window.petReact?.('excited'), 3000);
       return () => clearTimeout(t);
     }
-  }, [vehicle]);
+  }, [vehicles]);
 
   // Console API: spawn specific commuter
   useEffect(() => {
@@ -248,7 +261,7 @@ const OccasionalCommuter = () => {
 
     (window as any).stopCommuterTest = () => {
       clearTestTimers();
-      setVehicle(null);
+      setVehicles([]);
       console.log('🛑 Commuter preview cycle stopped');
     };
 
@@ -258,15 +271,17 @@ const OccasionalCommuter = () => {
     };
   }, [spawnVehicle, clearAllTimers, clearTestTimers]);
 
-  if (!vehicle) return null;
-
   return createPortal(
-    <CommuterVehicle
-      key={vehicle.key}
-      config={vehicle.config}
-      duration={vehicle.duration}
-      preview={vehicle.preview}
-    />,
+    <>
+      {vehicles.map((vehicle) => (
+        <CommuterVehicle
+          key={vehicle.id}
+          config={vehicle.config}
+          duration={vehicle.duration}
+          preview={vehicle.preview}
+        />
+      ))}
+    </>,
     document.getElementById('ambient-root') || document.body
   );
 };
