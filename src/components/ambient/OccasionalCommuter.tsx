@@ -2,26 +2,48 @@
  * OccasionalCommuter — Mood-specific commuters
  * Dynamically selects from 30+ commuters based on active mood
  * 
- * Spawns every 30s-60s with visual mood matching
+ * Spawns every 15s-35s (adaptive by page density) with visual mood matching
  * Supports test mode: window.testAllCommuters()
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { COMMUTER_FLEET, CommuterConfig, getRandomCommuter } from './commutersConfig';
+import { COMMUTER_FLEET, CommuterConfig } from './commutersConfig';
 
 /* ─── Constantes de timing ─── */
 
 const MIN_DELAY_MS = 15_000;
-const MAX_DELAY_MS = 30_000;
+const MAX_DELAY_MS = 35_000;
 const FIRST_DELAY_MS = 12_000;
 const BUFFER_MS = 1_000;
 const SPAWN_PADDING_PX = 18;
+const RECENT_HISTORY_SIZE = 4;
+
+type CommuterDirection = 'ltr' | 'rtl';
 
 /* ─── Helpers ─── */
 
 const randomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
+
+const pickRandomDirection = (): CommuterDirection => (Math.random() < 0.5 ? 'ltr' : 'rtl');
+
+const pickCommuterWithVariety = (
+  mood: string,
+  activeCommuterNames: Set<string>,
+  recentCommuterNames: string[]
+): CommuterConfig | null => {
+  const fleet = COMMUTER_FLEET[mood];
+  if (!fleet || fleet.length === 0) return null;
+
+  const nonActivePool = fleet.filter((commuter) => !activeCommuterNames.has(commuter.name));
+  const activeAwarePool = nonActivePool.length > 0 ? nonActivePool : fleet;
+
+  const nonRecentPool = activeAwarePool.filter((commuter) => !recentCommuterNames.includes(commuter.name));
+  const finalPool = nonRecentPool.length > 0 ? nonRecentPool : activeAwarePool;
+
+  return finalPool[Math.floor(Math.random() * finalPool.length)] ?? null;
+};
 
 const getPageDensityFactor = (): number => {
   const viewportHeight = Math.max(window.innerHeight, 1);
@@ -74,10 +96,12 @@ const CommuterVehicle = ({
   config,
   duration,
   preview,
+  direction,
 }: {
   config: CommuterConfig;
   duration: number;
   preview: boolean;
+  direction: CommuterDirection;
 }) => {
   const divRef = useRef<any>(null);
   const [animating, setAnimating] = useState(false);
@@ -97,7 +121,11 @@ const CommuterVehicle = ({
   return (
     <div
       ref={divRef}
-      className={preview ? 'ambient-commuter ambient-commuter--preview' : 'ambient-commuter commuter-spacecraft'}
+      className={
+        preview
+          ? 'ambient-commuter ambient-commuter--preview'
+          : `ambient-commuter commuter-spacecraft ambient-commuter--${direction}`
+      }
       style={
         preview
           ? {
@@ -113,7 +141,7 @@ const CommuterVehicle = ({
       }
       aria-hidden="true"
     >
-      <div className={cssClass}>
+      <div className={`${cssClass} ${direction === 'rtl' ? 'ambient-commuter__payload--rtl' : ''}`.trim()}>
         <SVGComponent />
       </div>
     </div>
@@ -127,16 +155,22 @@ const OccasionalCommuter = () => {
   const [vehicles, setVehicles] = useState<{
     config: CommuterConfig;
     duration: number;
-    key: number;
     preview: boolean;
     id: string;
+    direction: CommuterDirection;
   }[]>([]);
-  const spawnTimerRef = useRef<any>(null);
+  const spawnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const testTimersRef = useRef<number[]>([]);
-  const vehicleTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const vehicleTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const latestSpawnRef = useRef<(configOverride?: CommuterConfig) => void>(() => {});
+  const vehiclesRef = useRef(vehicles);
+  const recentCommuterNamesRef = useRef<string[]>([]);
   const mountedRef = useRef(true);
   const nextIdRef = useRef(0);
+
+  useEffect(() => {
+    vehiclesRef.current = vehicles;
+  }, [vehicles]);
 
   const clearTestTimers = useCallback(() => {
     testTimersRef.current.forEach((id) => clearTimeout(id));
@@ -169,16 +203,24 @@ const OccasionalCommuter = () => {
     (configOverride?: CommuterConfig, preview = false) => {
       if (!mountedRef.current) return;
 
-      const commuterConfig = configOverride || getRandomCommuter(mood);
+      const activeCommuterNames = new Set(vehiclesRef.current.map((vehicle) => vehicle.config.name));
+      const commuterConfig =
+        configOverride ||
+        pickCommuterWithVariety(mood, activeCommuterNames, recentCommuterNamesRef.current);
       if (!commuterConfig) {
         console.warn(`No commuters available for mood: ${mood}`);
         scheduleNextSpawn();
         return;
       }
 
+      recentCommuterNamesRef.current = [...recentCommuterNamesRef.current, commuterConfig.name].slice(
+        -RECENT_HISTORY_SIZE
+      );
+
       const vehicleId = `commuter-${nextIdRef.current++}`;
       const duration = commuterConfig.duration;
-      const newVehicle = { config: commuterConfig, duration, key: Date.now(), preview, id: vehicleId };
+      const direction = preview ? 'ltr' : pickRandomDirection();
+      const newVehicle = { config: commuterConfig, duration, preview, id: vehicleId, direction };
       
       setVehicles((prev) => [...prev, newVehicle]);
 
@@ -261,6 +303,7 @@ const OccasionalCommuter = () => {
 
     (window as any).stopCommuterTest = () => {
       clearTestTimers();
+      clearAllTimers();
       setVehicles([]);
       console.log('🛑 Commuter preview cycle stopped');
     };
@@ -279,6 +322,7 @@ const OccasionalCommuter = () => {
           config={vehicle.config}
           duration={vehicle.duration}
           preview={vehicle.preview}
+          direction={vehicle.direction}
         />
       ))}
     </>,
