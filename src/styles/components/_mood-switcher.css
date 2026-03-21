@@ -383,13 +383,13 @@
 }
 
 .mood-tuner--horizontal .mood-tuner-notch {
-  left: calc(14px + (100% - 28px) * (var(--tuner-stop) / 100));
+  left: calc(14px + (100% - 28px) * var(--tuner-stop));
   top: 50%;
   transform: translate(-50%, -50%);
 }
 
 .mood-tuner--vertical .mood-tuner-notch {
-  top: calc(14px + (100% - 28px) * (var(--tuner-stop) / 100));
+  top: calc(14px + (100% - 28px) * var(--tuner-stop));
   left: 50%;
   transform: translate(-50%, -50%);
 }

@@ -591,9 +591,19 @@ const MoodSwitcher = () => {
 
   const handleTunerNotchClick = (index: number, sourceElement: HTMLButtonElement) => {
     const progress = indexToProgress(index);
+    const targetMood = MOOD_ORDER[index];
+
+    cancelSettleAnimation();
     setTunerProgress(progress);
     velocityRef.current = 0;
-    settleToNotch(index, getElementCenter(sourceElement));
+    pointerSampleRef.current = null;
+    setIsDragging(false);
+    setIsSettling(true);
+
+    schedule(() => {
+      setIsSettling(false);
+      commitMood(targetMood, { origin: getElementCenter(sourceElement) });
+    }, 120);
   };
 
   const handleTunerKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -732,7 +742,7 @@ const MoodSwitcher = () => {
                   }`}
                   style={
                     {
-                      '--tuner-stop': `${indexToProgress(index) * 100}%`,
+                      '--tuner-stop': indexToProgress(index),
                       '--mood-color': m.color,
                     } as CSSProperties
                   }
