@@ -1,0 +1,1345 @@
+/**
+ * Commuter Animation Keyframes
+ * Comprehensive animation library for all 30+ mood-specific commuters
+ * Organized by mood with per-commuter animation classes
+ */
+
+/* ============================================================================
+   DEFAULT MOOD — Elegant, Professional, Timeless
+   ============================================================================ */
+
+/* Airship — dual propeller rotation + gentle bob */
+@keyframes airship-propeller-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes airship-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.commuter-airship .airship-propeller-left {
+  animation: airship-propeller-spin 1.2s linear infinite;
+  transform-origin: center;
+}
+
+.commuter-airship .airship-propeller-right {
+  animation: airship-propeller-spin 1.2s linear infinite reverse;
+  transform-origin: center;
+}
+
+.commuter-airship .airship-bob {
+  animation: airship-bob 3s ease-in-out infinite;
+}
+
+/* Hot Air Balloon — gentle forward lean + envelope puff + basket lag */
+@keyframes balloon-forward-lean {
+  0%, 100% { transform: rotate(2deg) translateY(0); }
+  50% { transform: rotate(4deg) translateY(-1px); }
+}
+
+@keyframes balloon-envelope-puff {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  50% { transform: scaleY(1.04) scaleX(0.985); }
+}
+
+@keyframes balloon-basket-sway {
+  0%, 100% { transform: translateX(-0.8px) rotate(-0.8deg); }
+  50% { transform: translateX(1.2px) rotate(0.9deg); }
+}
+
+.commuter-hot-air-balloon .balloon-rig {
+  animation: balloon-forward-lean 3.6s ease-in-out infinite;
+  transform-origin: 27px 34px;
+  transform-box: fill-box;
+}
+
+.commuter-hot-air-balloon .balloon-envelope {
+  animation: balloon-envelope-puff 2.5s ease-in-out infinite;
+  transform-origin: 27.5px 18px;
+  transform-box: fill-box;
+}
+
+.commuter-hot-air-balloon .balloon-basket {
+  animation: balloon-basket-sway 2.2s ease-in-out infinite;
+  transform-origin: 26px 49px;
+  transform-box: fill-box;
+}
+
+/* Coal-Powered Airship — turbine spin + steam puff + exhaust wave */
+@keyframes coal-turbine-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes coal-steam-release {
+  0%, 100% { opacity: 0; transform: translateY(-3px); }
+  50% { opacity: 0.6; transform: translateY(0); }
+}
+
+@keyframes coal-exhaust-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.commuter-coal-airship .coal-turbine {
+  animation: coal-turbine-spin 1.5s linear infinite;
+  transform-origin: center;
+}
+
+.commuter-coal-airship .coal-steam-vent {
+  animation: coal-steam-release 1.5s ease-out infinite;
+}
+
+.commuter-coal-airship .coal-exhaust {
+  animation: coal-exhaust-pulse 2s ease-in-out infinite;
+}
+
+/* Clockwork Vessel — interlocking gear spin at different speeds + core glow */
+@keyframes clockwork-gear-left-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes clockwork-gear-center-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+@keyframes clockwork-gear-right-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes clockwork-core-pulse {
+  0%, 100% { opacity: 0.6; r: 1.5px; }
+  50% { opacity: 1; r: 2px; }
+}
+
+@keyframes clockwork-ring-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(2deg); }
+  75% { transform: rotate(-2deg); }
+}
+
+.commuter-clockwork .clockwork-gear-left {
+  animation: clockwork-gear-left-spin 2s linear infinite;
+  transform-origin: center;
+}
+
+.commuter-clockwork .clockwork-gear-center {
+  animation: clockwork-gear-center-spin 2.5s linear infinite;
+  transform-origin: center;
+}
+
+.commuter-clockwork .clockwork-gear-right {
+  animation: clockwork-gear-right-spin 1.8s linear infinite;
+  transform-origin: center;
+}
+
+.commuter-clockwork .clockwork-core {
+  animation: clockwork-core-pulse 1.2s ease-in-out infinite;
+}
+
+.commuter-clockwork .clockwork-ring {
+  animation: clockwork-ring-wobble 2.5s ease-in-out infinite;
+}
+
+/* Silk-Sailed Junk — sail flutter + pennant wave + hull bob */
+@keyframes junk-sail-wave {
+  0%, 100% { transform: rotate(0deg) skewY(0deg); }
+  50% { transform: rotate(2deg) skewY(1deg); }
+}
+
+@keyframes junk-pennant-flutter {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(-5deg) translateY(-1px); }
+}
+
+@keyframes junk-hull-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-1.2px) rotate(0.35deg); }
+}
+
+.commuter-silk-junk .junk-sail-1 {
+  animation: junk-sail-wave 1.2s ease-in-out infinite;
+  transform-origin: 24px 10px;
+}
+
+.commuter-silk-junk .junk-sail-2 {
+  animation: junk-sail-wave 1.3s ease-in-out infinite 0.1s;
+  transform-origin: 37px 12px;
+}
+
+.commuter-silk-junk .junk-sail-3 {
+  animation: junk-sail-wave 1.4s ease-in-out infinite 0.2s;
+  transform-origin: 48px 14px;
+}
+
+.commuter-silk-junk .junk-pennant {
+  animation: junk-pennant-flutter 1s ease-in-out infinite;
+}
+
+.commuter-silk-junk .junk-hull {
+  animation: junk-hull-bob 2s ease-in-out infinite;
+  transform-origin: 36px 24px;
+}
+
+/* ============================================================================
+   HACKER MOOD — Terminal, Neon Green, CRT
+   ============================================================================ */
+
+/* Data Stream Beacon — node glow pulse + data node orbit */
+@keyframes beacon-core-throb {
+  0%, 100% { opacity: 0.7; r: 1.5px; }
+  50% { opacity: 1; r: 2.5px; }
+}
+
+@keyframes beacon-node-pulse {
+  0%, 100% { opacity: 0.6; r: 1.2px; }
+  50% { opacity: 1; r: 1.8px; }
+}
+
+@keyframes beacon-data-orbit {
+  0% { opacity: 0.45; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.45; }
+}
+
+@keyframes beacon-orbit-cw {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes beacon-orbit-ccw {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+.commuter-data-beacon .beacon-core {
+  animation: beacon-core-throb 1.2s ease-in-out infinite;
+}
+
+.commuter-data-beacon .beacon-node {
+  animation: beacon-node-pulse 0.8s ease-in-out infinite;
+}
+
+.commuter-data-beacon .beacon-data-node {
+  animation: beacon-data-orbit 4s linear infinite;
+}
+
+.commuter-data-beacon .beacon-orbit-1 {
+  animation: beacon-orbit-cw 7s linear infinite;
+  transform-origin: 27.5px 20px;
+}
+
+.commuter-data-beacon .beacon-orbit-2 {
+  animation: beacon-orbit-ccw 9s linear infinite;
+  transform-origin: 27.5px 20px;
+}
+
+/* Data Cube — planar matrix drift + scanline sweep + vertex glow */
+@keyframes cube-planar-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.2px); }
+}
+
+@keyframes cube-scan-sweep {
+  0% { transform: translateY(-4px); opacity: 0.2; }
+  50% { opacity: 0.7; }
+  100% { transform: translateY(12px); opacity: 0.2; }
+}
+
+@keyframes cube-vertex-glow {
+  0%, 100% { opacity: 0.6; r: 0.8px; }
+  50% { opacity: 1; r: 1.3px; }
+}
+
+.commuter-data-cube .cube-shell {
+  animation: cube-planar-drift 2.8s ease-in-out infinite;
+}
+
+.commuter-data-cube .cube-vertex {
+  animation: cube-vertex-glow 1.1s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.commuter-data-cube .cube-core {
+  animation: beacon-core-throb 1.5s ease-in-out infinite;
+}
+
+.commuter-data-cube .cube-scan {
+  animation: cube-scan-sweep 1.7s ease-in-out infinite;
+}
+
+/* Firewall Shield — grid pulse + lock glow blink */
+@keyframes shield-grid-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes shield-lock-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.commuter-firewall .shield-grid {
+  animation: shield-grid-pulse 1.5s ease-in-out infinite;
+}
+
+.commuter-firewall .shield-lock {
+  animation: shield-lock-glow 1s ease-in-out infinite;
+}
+
+@keyframes firewall-scan {
+  0% { transform: translateY(-4px); opacity: 0.2; }
+  50% { opacity: 0.55; }
+  100% { transform: translateY(8px); opacity: 0.2; }
+}
+
+.commuter-firewall .firewall-scan-line {
+  animation: firewall-scan 1.6s ease-in-out infinite;
+}
+
+/* Loading Bar — stripe scroll + checkpoint glow */
+@keyframes loading-stripe-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(5px); }
+}
+
+@keyframes loading-checkpoint-blink {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.commuter-loading .loading-fill {
+  animation: loading-fill-breathe 1.6s ease-in-out infinite;
+}
+
+.commuter-loading .loading-stripes {
+  animation: loading-stripe-scroll 0.25s linear infinite;
+}
+
+.commuter-loading .loading-checkpoints {
+  animation: loading-checkpoint-blink 0.6s ease-in-out infinite;
+}
+
+@keyframes loading-fill-breathe {
+  0%, 100% { opacity: 0.72; }
+  50% { opacity: 1; }
+}
+
+@keyframes loading-head-blink {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+.commuter-loading .loading-head {
+  animation: loading-head-blink 0.5s ease-in-out infinite;
+}
+
+/* Grid Cube — wireframe perspective + vertex glow wave */
+@keyframes grid-internal-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes grid-vertex-wave {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.22); }
+}
+
+.commuter-grid-cube .grid-internal {
+  animation: grid-internal-pulse 1.6s ease-in-out infinite;
+}
+
+.commuter-grid-cube .grid-shell {
+  animation: cube-planar-drift 3.1s ease-in-out infinite;
+}
+
+.commuter-grid-cube .grid-vertex {
+  animation: grid-vertex-wave 1.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.commuter-grid-cube .grid-core {
+  animation: beacon-core-throb 1.8s ease-in-out infinite;
+}
+
+.commuter-grid-cube .grid-scanline {
+  animation: cube-scan-sweep 1.8s ease-in-out infinite;
+}
+
+/* ============================================================================
+   VAPORWAVE MOOD — Pink/Cyan, Dreamy, Retro
+   ============================================================================ */
+
+/* Holographic Pad — screen glow + scanline sweep */
+@keyframes screen-glow-pulse {
+  0%, 100% { opacity: 0.7; filter: brightness(1); }
+  50% { opacity: 1; filter: brightness(1.2); }
+}
+
+@keyframes scanline-sweep {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes indicator-blink {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes pad-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-2px) rotate(-1deg); }
+}
+
+.commuter-holo-pad .pad-float {
+  animation: pad-float 3.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.commuter-holo-pad .pad-screen {
+  animation: screen-glow-pulse 2s ease-in-out infinite;
+}
+
+.commuter-holo-pad .pad-scanlines {
+  animation: scanline-sweep 0.3s linear infinite;
+}
+
+.commuter-holo-pad .pad-indicator {
+  animation: indicator-blink 1s ease-in-out infinite;
+}
+
+/* Geometric Pyramid — gradient face shift + apex glow + shadow flicker */
+@keyframes pyramid-face-shift {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes pyramid-apex-glow {
+  0%, 100% { opacity: 0.8; r: 1.5px; }
+  50% { opacity: 1; r: 2.5px; }
+}
+
+@keyframes pyramid-shadow-flicker {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.5; }
+}
+
+.commuter-pyramid .pyramid-face-1 {
+  animation: pyramid-face-shift 2s ease-in-out infinite;
+}
+
+.commuter-pyramid .pyramid-face-2 {
+  animation: pyramid-face-shift 2.2s ease-in-out infinite 0.2s;
+}
+
+.commuter-pyramid .pyramid-face-3 {
+  animation: pyramid-face-shift 2.4s ease-in-out infinite 0.4s;
+}
+
+.commuter-pyramid .pyramid-apex {
+  animation: pyramid-apex-glow 1.5s ease-in-out infinite;
+}
+
+.commuter-pyramid .pyramid-shadow {
+  animation: pyramid-shadow-flicker 2s ease-in-out infinite;
+}
+
+/* VHS Cassette — dual reel counter-rotation + tape glitch shimmer */
+@keyframes cassette-reel-left-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+@keyframes cassette-reel-right-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes cassette-glitch {
+  0%, 100% { opacity: 1; }
+  25% { opacity: 0.7; transform: translateX(-1px); }
+  50% { opacity: 0.8; }
+  75% { opacity: 0.7; transform: translateX(1px); }
+}
+
+@keyframes cassette-shell-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+
+.commuter-vhs .cassette-shell {
+  animation: cassette-shell-float 2.6s ease-in-out infinite;
+}
+
+.commuter-vhs .cassette-reel-left {
+  animation: cassette-reel-left-spin 2s linear infinite;
+  transform-origin: center;
+}
+
+.commuter-vhs .cassette-reel-right {
+  animation: cassette-reel-right-spin 3s linear infinite;
+  transform-origin: center;
+}
+
+.commuter-vhs .cassette-tape {
+  animation: cassette-glitch 0.3s ease-in-out infinite;
+}
+
+/* Synthesizer Keyboard — keys glow sequentially + pitch wheel spin + LED blink + slider move */
+@keyframes synth-key-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes synth-pitch-wheel-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes synth-led-blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes synth-slider-move {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+}
+
+.commuter-synth .synth-keys {
+  animation: synth-key-glow 0.8s ease-in-out infinite;
+}
+
+.commuter-synth .synth-pitch-wheel {
+  animation: synth-pitch-wheel-spin 2s linear infinite;
+}
+
+.commuter-synth .synth-leds {
+  animation: synth-led-blink 0.6s ease-in-out infinite;
+}
+
+.commuter-synth .synth-sliders {
+  animation: synth-slider-move 1.5s ease-in-out infinite;
+}
+
+/* Floating Palm Tree — frond sway multi-layer + aura pulse */
+@keyframes palm-frond-sway-slow {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-2deg); }
+}
+
+@keyframes palm-frond-sway-medium {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(1.4deg); }
+}
+
+@keyframes palm-frond-sway-fast {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-1.2deg); }
+}
+
+@keyframes palm-rig-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-1px) rotate(-0.5deg); }
+}
+
+@keyframes palm-aura-pulse {
+  0%, 100% { opacity: 0.2; r: 16px; }
+  50% { opacity: 0.5; r: 18px; }
+}
+
+.commuter-palm .palm-fronds-top {
+  animation: palm-frond-sway-slow 3.2s ease-in-out infinite;
+  transform-origin: 26px 37px;
+  transform-box: fill-box;
+}
+
+.commuter-palm .palm-fronds-mid {
+  animation: palm-frond-sway-medium 3.4s ease-in-out infinite 0.2s;
+  transform-origin: 26px 37px;
+  transform-box: fill-box;
+}
+
+.commuter-palm .palm-fronds-base {
+  animation: palm-frond-sway-fast 3.8s ease-in-out infinite 0.4s;
+  transform-origin: 26px 38px;
+  transform-box: fill-box;
+}
+
+.commuter-palm .palm-aura {
+  animation: palm-aura-pulse 2.5s ease-in-out infinite;
+}
+
+.commuter-palm .palm-rig {
+  animation: palm-rig-float 3.6s ease-in-out infinite;
+  transform-origin: 26px 40px;
+  transform-box: fill-box;
+}
+
+/* ============================================================================
+   EUROPA MOOD — Cyan, Glacial, Sci-Fi
+   ============================================================================ */
+
+/* Ice Comet — core pulse + particle tail drift */
+@keyframes comet-core-pulse {
+  0%, 100% { opacity: 0.7; r: 2px; }
+  50% { opacity: 1; r: 3px; }
+}
+
+@keyframes comet-tail-drift {
+  0%, 100% { opacity: 0.35; transform: translateX(0) translateY(0); }
+  50% { opacity: 0.7; transform: translateX(-1.8px) translateY(-0.6px); }
+}
+
+@keyframes comet-facet-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
+
+.commuter-comet .comet-core {
+  animation: comet-core-pulse 2.5s ease-in-out infinite;
+}
+
+.commuter-comet .comet-tail {
+  animation: comet-tail-drift 1.1s ease-out infinite;
+  transform-origin: 34px 23px;
+  transform-box: fill-box;
+}
+
+.commuter-comet .comet-facet {
+  animation: comet-facet-glow 1.5s ease-in-out infinite;
+}
+
+/* Crystalline Probe — per-facet refraction pulse + antenna scan + sensor array glow */
+@keyframes probe-facet-refract {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes probe-antenna-scan {
+  0%, 100% { transform: rotate(-30deg); }
+  50% { transform: rotate(30deg); }
+}
+
+@keyframes probe-sensor-pulse {
+  0%, 100% { opacity: 0.4; r: 0.8px; }
+  50% { opacity: 1; r: 1.3px; }
+}
+
+@keyframes probe-panel-crackle {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+.commuter-probe .probe-facet {
+  animation: probe-facet-refract 0.8s ease-in-out infinite;
+}
+
+.commuter-probe .probe-antenna {
+  animation: probe-antenna-scan 1.5s ease-in-out infinite;
+  transform-origin: 25px 8px;
+  transform-box: fill-box;
+}
+
+.commuter-probe .probe-sensor {
+  animation: probe-sensor-pulse 1s ease-in-out infinite;
+}
+
+.commuter-probe .probe-array {
+  animation: probe-sensor-pulse 1.2s ease-in-out infinite 0.1s;
+}
+
+.commuter-probe .probe-panel {
+  animation: probe-panel-crackle 0.45s ease-in-out infinite;
+}
+
+.commuter-probe .probe-core {
+  animation: beacon-core-throb 1.5s ease-in-out infinite;
+}
+
+/* Glacial Rover — leg march staggered + thermal vent puff */
+@keyframes rover-leg-march {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(10deg); }
+}
+
+@keyframes rover-vent-steam {
+  0%, 100% { opacity: 0; transform: translateY(-2px); }
+  50% { opacity: 0.6; transform: translateY(0); }
+}
+
+.commuter-glacial-rover .rover-leg-1 {
+  animation: rover-leg-march 1s ease-in-out infinite;
+  transform-origin: 22px 28px;
+}
+
+.commuter-glacial-rover .rover-leg-2 {
+  animation: rover-leg-march 1s ease-in-out infinite 0.16s;
+  transform-origin: 30px 28px;
+}
+
+.commuter-glacial-rover .rover-leg-3 {
+  animation: rover-leg-march 1s ease-in-out infinite 0.32s;
+  transform-origin: 38px 28px;
+}
+
+.commuter-glacial-rover .rover-leg-4 {
+  animation: rover-leg-march 1s ease-in-out infinite 0.08s;
+  transform-origin: 46px 28px;
+}
+
+.commuter-glacial-rover .rover-leg-5 {
+  animation: rover-leg-march 1s ease-in-out infinite 0.24s;
+  transform-origin: 52px 26px;
+}
+
+.commuter-glacial-rover .rover-leg-6 {
+  animation: rover-leg-march 1s ease-in-out infinite 0.4s;
+  transform-origin: 18px 26px;
+}
+
+.commuter-glacial-rover .rover-vent {
+  animation: rover-vent-steam 1s ease-out infinite;
+}
+
+/* Aurora Wave — undulation per-layer with phase offset + glow + particle scatter */
+@keyframes aurora-wave-undulate {
+  0%, 100% { transform: translateY(0) skewY(0deg); }
+  25% { transform: translateY(-1px) skewY(1deg); }
+  75% { transform: translateY(1px) skewY(-1deg); }
+}
+
+@keyframes aurora-glow-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes aurora-particle-orbit {
+  0% { transform: rotate(0deg) translateX(6px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(6px) rotate(-360deg); }
+}
+
+.commuter-aurora .aurora-layer-1 {
+  animation: aurora-wave-undulate 1.8s ease-in-out infinite;
+}
+
+.commuter-aurora .aurora-layer-2 {
+  animation: aurora-wave-undulate 2.2s ease-in-out infinite 0.2s;
+}
+
+.commuter-aurora .aurora-layer-3 {
+  animation: aurora-wave-undulate 2.6s ease-in-out infinite 0.4s;
+}
+
+.commuter-aurora .aurora-glow {
+  animation: aurora-glow-pulse 2s ease-in-out infinite;
+}
+
+.commuter-aurora .aurora-particles {
+  animation: aurora-particle-orbit 6s linear infinite;
+}
+
+/* Frozen AI Satellite — spike glow pulse + lens rotation + panel crackle */
+@keyframes satellite-spike-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes satellite-lens-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes ice-panel-crackle {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.commuter-satellite .satellite-spike {
+  animation: satellite-spike-pulse 1.3s ease-in-out infinite;
+}
+
+.commuter-satellite .satellite-lens {
+  animation: satellite-lens-rotate 3s linear infinite;
+}
+
+.commuter-satellite .ice-panel {
+  animation: ice-panel-crackle 0.3s ease-in-out infinite;
+}
+
+.commuter-satellite .ice-crackle {
+  animation: ice-panel-crackle 0.4s ease-in-out infinite 0.1s;
+}
+
+/* ============================================================================
+   INDUSTRIAL MOOD — Orange, Factory, Brutalist
+   ============================================================================ */
+
+/* Steam Vent Stack — steam puff release + pressure gauge pulse + heat ripple */
+@keyframes steam-puff-rise {
+  0% { opacity: 0; transform: translateY(0); }
+  50% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(-4px); }
+}
+
+@keyframes pressure-gauge-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes heat-ripple-wave {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.commuter-steam-vent .steam-puff-1 {
+  animation: steam-puff-rise 1.2s ease-out infinite;
+}
+
+.commuter-steam-vent .steam-puff-2 {
+  animation: steam-puff-rise 1.3s ease-out infinite 0.2s;
+}
+
+.commuter-steam-vent .steam-puff-3 {
+  animation: steam-puff-rise 1.5s ease-out infinite 0.4s;
+}
+
+.commuter-steam-vent .vent-outlet-1,
+.commuter-steam-vent .vent-outlet-2,
+.commuter-steam-vent .vent-outlet-3 {
+  animation: pressure-gauge-pulse 1s ease-in-out infinite;
+}
+
+.commuter-steam-vent .heat-ripple {
+  animation: heat-ripple-wave 1.5s ease-out infinite;
+}
+
+/* Mining Drill — drill bit spin + auger bucket vibrate + spark spray */
+@keyframes drill-bit-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes auger-vibrate {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(1px); }
+}
+
+@keyframes drill-spark-spray {
+  0% { opacity: 1; transform: translateX(0) translateY(0); }
+  100% { opacity: 0; transform: translateX(3px) translateY(3px); }
+}
+
+.commuter-drill .drill-bit {
+  animation: drill-bit-spin 0.8s linear infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.commuter-drill .auger-bucket {
+  animation: auger-vibrate 0.24s ease-in-out infinite;
+  transform-origin: 59px 10px;
+  transform-box: fill-box;
+}
+
+.commuter-drill .drill-sparks {
+  animation: drill-spark-spray 0.45s ease-out infinite;
+  transform-origin: 59px 23px;
+  transform-box: fill-box;
+}
+
+/* Rail Thruster — magnetic coil glow + thrust emission pulse + energy ring feedback */
+@keyframes coil-glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes thrust-emission-fire {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes energy-ring-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+
+.commuter-thruster .thruster-coil-1 {
+  animation: coil-glow-pulse 0.8s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.commuter-thruster .thruster-coil-2 {
+  animation: coil-glow-pulse 1s ease-in-out infinite 0.2s;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.commuter-thruster .thruster-emission {
+  animation: thrust-emission-fire 0.3s ease-in-out infinite;
+}
+
+.commuter-thruster .thruster-energy-ring {
+  animation: energy-ring-pulse 1.2s ease-out infinite;
+  transform-origin: 48px 15px;
+  transform-box: fill-box;
+}
+
+/* Robotic Arm — joint power glow + gripper snap */
+@keyframes joint-power-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes gripper-snap {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.9); }
+}
+
+@keyframes arm-segment-1-articulate {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-8deg); }
+}
+
+@keyframes arm-segment-2-articulate {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(6deg); }
+}
+
+@keyframes arm-segment-3-articulate {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-7deg); }
+}
+
+@keyframes arm-segment-4-articulate {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(5deg); }
+}
+
+@keyframes arm-segment-5-articulate {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-9deg); }
+}
+
+.commuter-arm .arm-segment-1 {
+  animation: arm-segment-1-articulate 1.8s ease-in-out infinite;
+  transform-origin: 16px 24px;
+}
+
+.commuter-arm .arm-segment-2 {
+  animation: arm-segment-2-articulate 1.8s ease-in-out infinite 0.14s;
+  transform-origin: 29px 16px;
+}
+
+.commuter-arm .arm-segment-3 {
+  animation: arm-segment-3-articulate 1.8s ease-in-out infinite 0.28s;
+  transform-origin: 43px 19px;
+}
+
+.commuter-arm .arm-segment-4 {
+  animation: arm-segment-4-articulate 1.8s ease-in-out infinite 0.36s;
+  transform-origin: 56px 14px;
+}
+
+.commuter-arm .arm-segment-5 {
+  animation: arm-segment-5-articulate 1.8s ease-in-out infinite 0.5s;
+  transform-origin: 68px 15px;
+}
+
+.commuter-arm .joint-power {
+  animation: joint-power-glow 1s ease-in-out infinite;
+}
+
+.commuter-arm .gripper-claw {
+  animation: gripper-snap 1.2s ease-in-out infinite;
+  transform-origin: 78px 13px;
+}
+
+/* Gear Assembly — interdependent gear spin at physics-accurate ratios + pressure pulse + shaft glow */
+@keyframes gear-large-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes gear-medium-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-540deg); }
+}
+
+@keyframes gear-small-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(720deg); }
+}
+
+@keyframes pressure-pulse-wave {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes shaft-glow-throb {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.commuter-gear .gear-left {
+  animation: gear-large-spin 4s linear infinite;
+  transform-origin: center;
+}
+
+.commuter-gear .gear-center {
+  animation: gear-medium-spin 3s linear infinite;
+  transform-origin: center;
+}
+
+.commuter-gear .gear-right {
+  animation: gear-small-spin 2s linear infinite;
+  transform-origin: center;
+}
+
+.commuter-gear .pressure-pulse {
+  animation: pressure-pulse-wave 1.5s ease-in-out infinite;
+}
+
+.commuter-gear .shaft-glow {
+  animation: shaft-glow-throb 1.2s ease-in-out infinite;
+}
+
+/* Laser Forge — cooling fin vibrate + thermal vent puff + beam fire + heat distortion */
+@keyframes cooling-fins-vibrate {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(0.5px); }
+}
+
+@keyframes forge-vent-steam {
+  0%, 100% { opacity: 0; transform: translateY(-1px); }
+  50% { opacity: 0.5; transform: translateY(0); }
+}
+
+@keyframes forge-beam-fire {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes heat-distortion-ripple {
+  0% { transform: scaleY(1); opacity: 0.8; }
+  100% { transform: scaleY(1.3); opacity: 0; }
+}
+
+.commuter-laser .cooling-fins {
+  animation: cooling-fins-vibrate 0.15s ease-in-out infinite;
+}
+
+.commuter-laser .forge-vent-1,
+.commuter-laser .forge-vent-2 {
+  animation: forge-vent-steam 1s ease-out infinite;
+}
+
+.commuter-laser .forge-steam {
+  animation: forge-vent-steam 1.2s ease-out infinite 0.2s;
+}
+
+.commuter-laser .forge-beam {
+  animation: forge-beam-fire 0.3s ease-in-out infinite;
+}
+
+.commuter-laser .heat-distortion {
+  animation: heat-distortion-ripple 1.5s ease-out infinite;
+}
+
+/* ============================================================================
+   NIGHTSHADE MOOD — Purple, Bioluminescent, Ethereal
+   ============================================================================ */
+
+/* Bioluminescent Flower — petal sway staggered + stamen throb + aura pulse */
+@keyframes petal-sway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-2deg); }
+}
+
+@keyframes stamen-throb {
+  0%, 100% { opacity: 0.6; r: 1.2px; }
+  50% { opacity: 1; r: 2px; }
+}
+
+@keyframes flower-aura-breathe {
+  0%, 100% { opacity: 0.2; r: 12px; }
+  50% { opacity: 0.5; r: 14px; }
+}
+
+.commuter-flower .petal-1 {
+  animation: petal-sway 3s ease-in-out infinite;
+  transform-origin: 25px 24px;
+  transform-box: fill-box;
+}
+
+.commuter-flower .petal-2 {
+  animation: petal-sway 3.2s ease-in-out infinite 0.2s;
+  transform-origin: 24px 24px;
+  transform-box: fill-box;
+}
+
+.commuter-flower .petal-3 {
+  animation: petal-sway 3.4s ease-in-out infinite 0.4s;
+  transform-origin: 26px 24px;
+  transform-box: fill-box;
+}
+
+.commuter-flower .petal-4 {
+  animation: petal-sway 3.6s ease-in-out infinite 0.6s;
+  transform-origin: 24px 22px;
+  transform-box: fill-box;
+}
+
+.commuter-flower .petal-5 {
+  animation: petal-sway 3.8s ease-in-out infinite 0.8s;
+  transform-origin: 26px 22px;
+  transform-box: fill-box;
+}
+
+.commuter-flower .stamen {
+  animation: stamen-throb 1.5s ease-in-out infinite;
+}
+
+.commuter-flower .flower-aura {
+  animation: flower-aura-breathe 2.5s ease-in-out infinite;
+}
+
+/* Phantom Moth — wing flap + shimmer opacity + body bob */
+@keyframes moth-wing-flap {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-15deg); }
+  75% { transform: rotate(15deg); }
+}
+
+@keyframes moth-shimmer {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes moth-body-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+
+.commuter-moth .wing-upper-left {
+  animation: moth-wing-flap 0.5s ease-in-out infinite;
+  transform-origin: 80% 50%;
+}
+
+.commuter-moth .wing-upper-right {
+  animation: moth-wing-flap 0.5s ease-in-out infinite reverse;
+  transform-origin: 20% 50%;
+}
+
+.commuter-moth .wing-lower-left {
+  animation: moth-wing-flap 0.6s ease-in-out infinite 0.1s;
+  transform-origin: 80% 50%;
+}
+
+.commuter-moth .wing-lower-right {
+  animation: moth-wing-flap 0.6s ease-in-out infinite 0.1s reverse;
+  transform-origin: 20% 50%;
+}
+
+.commuter-moth .moth-shimmer {
+  animation: moth-shimmer 0.3s ease-in-out infinite;
+}
+
+.commuter-moth .moth-body {
+  animation: moth-body-bob 1.5s ease-in-out infinite;
+}
+
+/* Ghostly Dragonfly — wing beat staggered + abdomen shimmer + eye glow */
+@keyframes dragonfly-wing-beat {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(45deg); }
+  75% { transform: rotate(-45deg); }
+}
+
+@keyframes abdomen-shimmer {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes eye-glow-pulse {
+  0%, 100% { opacity: 0.5; r: 0.6px; }
+  50% { opacity: 1; r: 1px; }
+}
+
+.commuter-dragonfly .dragonfly-wing-upper-left {
+  animation: dragonfly-wing-beat 0.4s ease-in-out infinite;
+  transform-origin: 39px 22px;
+}
+
+.commuter-dragonfly .dragonfly-wing-upper-right {
+  animation: dragonfly-wing-beat 0.4s ease-in-out infinite reverse;
+  transform-origin: 41px 22px;
+}
+
+.commuter-dragonfly .dragonfly-wing-lower-left {
+  animation: dragonfly-wing-beat 0.5s ease-in-out infinite 0.1s;
+  transform-origin: 39px 26px;
+}
+
+.commuter-dragonfly .dragonfly-wing-lower-right {
+  animation: dragonfly-wing-beat 0.5s ease-in-out infinite 0.1s reverse;
+  transform-origin: 41px 26px;
+}
+
+.commuter-dragonfly .abdomen-shimmer {
+  animation: abdomen-shimmer 0.6s ease-in-out infinite;
+}
+
+.commuter-dragonfly .dragonfly-eye {
+  animation: eye-glow-pulse 1s ease-in-out infinite;
+}
+
+.commuter-dragonfly .dragonfly-trail {
+  animation: aurora-glow-pulse 1.5s ease-in-out infinite;
+}
+
+/* Swirling Spore Cloud — spiral rotation + particle orbit + core glow */
+@keyframes spore-spiral-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spore-spiral-inner-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+@keyframes spore-core-pulse {
+  0%, 100% { opacity: 0.7; r: 2.5px; }
+  50% { opacity: 1; r: 3.5px; }
+}
+
+@keyframes spore-mist-pulse {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.3; }
+}
+
+.commuter-spores .spore-spiral {
+  animation: spore-spiral-rotate 6s linear infinite;
+  transform-origin: 25px 25px;
+}
+
+.commuter-spores .spore-spiral-inner {
+  animation: spore-spiral-inner-rotate 4s linear infinite;
+  transform-origin: 25px 25px;
+}
+
+.commuter-spores .spore-particle {
+  animation: loading-checkpoint-blink 1.1s ease-in-out infinite;
+}
+
+.commuter-spores .spore-core {
+  animation: spore-core-pulse 1.5s ease-in-out infinite;
+}
+
+.commuter-spores .spore-core-inner {
+  animation: spore-core-pulse 1.8s ease-in-out infinite 0.2s;
+}
+
+.commuter-spores .spore-mist {
+  animation: spore-mist-pulse 2s ease-in-out infinite;
+}
+
+/* Glowing Vine Tendril — growth trace + node glow wave + vine sway */
+@keyframes vine-growth-trace {
+  0% { stroke-dashoffset: 120; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes biolume-node-glow {
+  0%, 100% { opacity: 0.5; r: 1.2px; }
+  50% { opacity: 1; r: 1.8px; }
+}
+
+@keyframes wisp-lantern-sway {
+  0%, 100% { transform: rotate(-1deg) translateY(0); }
+  50% { transform: rotate(1.3deg) translateY(-1px); }
+}
+
+@keyframes wisp-chain-drift {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(5deg); }
+}
+
+@keyframes wisp-core-pulse {
+  0%, 100% { opacity: 0.62; r: 1.7px; }
+  50% { opacity: 1; r: 2.3px; }
+}
+
+@keyframes wisp-tail-drift {
+  0%, 100% { transform: translateY(0); opacity: 0.45; }
+  50% { transform: translateY(1.4px); opacity: 0.72; }
+}
+
+@keyframes wisp-mote-orbit {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.45; }
+  50% { transform: translateY(-1.4px) scale(1.15); opacity: 0.85; }
+}
+
+.commuter-vine .wisp-lantern {
+  animation: wisp-lantern-sway 3.2s ease-in-out infinite;
+  transform-origin: 30px 16px;
+  transform-box: fill-box;
+}
+
+.commuter-vine .wisp-chain {
+  animation: wisp-chain-drift 1.8s ease-in-out infinite;
+  transform-origin: 30px 10px;
+  transform-box: fill-box;
+}
+
+.commuter-vine .wisp-shell {
+  animation: probe-facet-refract 1.1s ease-in-out infinite;
+}
+
+.commuter-vine .wisp-core {
+  animation: wisp-core-pulse 1.3s ease-in-out infinite;
+}
+
+.commuter-vine .wisp-tail-1,
+.commuter-vine .wisp-tail-2,
+.commuter-vine .wisp-tail-3 {
+  animation: wisp-tail-drift 1.6s ease-in-out infinite;
+}
+
+.commuter-vine .wisp-tail-2 {
+  animation-delay: 0.2s;
+}
+
+.commuter-vine .wisp-tail-3 {
+  animation-delay: 0.4s;
+}
+
+.commuter-vine .wisp-mote {
+  animation: wisp-mote-orbit 1.4s ease-in-out infinite;
+}
+
+.commuter-vine .mote-2 {
+  animation-delay: 0.2s;
+}
+
+.commuter-vine .mote-3 {
+  animation-delay: 0.4s;
+}
+
+.commuter-vine .mote-4 {
+  animation-delay: 0.6s;
+}
+
+.commuter-vine .wisp-halo {
+  animation: flower-aura-breathe 2.4s ease-in-out infinite;
+}

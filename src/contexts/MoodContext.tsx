@@ -42,7 +42,7 @@ interface MoodContextValue {
   MOODS: MoodMap;
 }
 
-const MoodContext = createContext<MoodContextValue>({
+export const MoodContext = createContext<MoodContextValue>({
   mood: 'default',
   setMood: () => {},
   cycleMood: () => {},
