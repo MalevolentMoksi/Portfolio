@@ -211,6 +211,8 @@ const CatchGame = ({
   const bounceCountRef = useRef(0);
   const missNoticeTimerRef = useRef<any>(null);
   const livesFlashTimerRef = useRef<any>(null);
+  /* ── Replay escalation ── */
+  const replayCountRef = useRef(0);
 
   /* ── DOM refs ── */
   const ballElRef = useRef<any>(null);
@@ -280,6 +282,10 @@ const CatchGame = ({
   const challengeBadgesRef = useRef(challengeBadges);
 
   const preset = DIFFICULTY_PRESETS[difficulty];
+  /* ── Escalating objective: +15% per replay ── */
+  const replayMultiplier = 1 + replayCountRef.current * 0.15;
+  const currentObjective = Math.round(preset.objectiveScore * replayMultiplier);
+
   const difficultyReadout = [
     {
       label: t('common.catchGameUI.menu.traits.catchWindow'),
@@ -301,6 +307,18 @@ const CatchGame = ({
       label: t('common.catchGameUI.menu.traits.unpredictability'),
       value: `x${preset.returnSpreadScale.toFixed(2)}`,
     },
+    {
+      label: t('common.catchGameUI.menu.traits.scoreGoal'),
+      value: currentObjective.toString(),
+    },
+    ...(replayCountRef.current > 0
+      ? [
+          {
+            label: t('common.catchGameUI.menu.traits.difficulty'),
+            value: `Replay ×${replayMultiplier.toFixed(2)}`,
+          },
+        ]
+      : []),
   ];
 
   /* ── Effect hooks ── */
@@ -508,9 +526,15 @@ const CatchGame = ({
 
   const beginRun = useCallback(() => {
     const livesStart = DIFFICULTY_PRESETS[difficulty].lives;
+    // If replaying after a win, increment replay counter for escalating difficulty
+    if (gameOverRef.current && mode === 'challenge') {
+      replayCountRef.current += 1;
+    }
     gameOverRef.current = false;
     setShowSetup(false);
     setGameOver(null);
+    setRallies(0);
+    setScore(0);
     setCombo(0);
     setComboDecayPct(0);
     setLastGain(0);
@@ -527,13 +551,15 @@ const CatchGame = ({
     comboDecayDisplayRef.current = 0;
     bounceCountRef.current = 0;
     resetBallToPlayer();
-  }, [difficulty, resetBallToPlayer]);
+  }, [difficulty, mode, resetBallToPlayer]);
 
   const openModeSetup = useCallback(() => {
     setShowSetup(true);
     setGameOver(null);
     gameOverRef.current = false;
     setShowDifficultyImpact(false);
+    /* ── Reset replay escalation when returning to setup ── */
+    replayCountRef.current = 0;
     setRallies(0);
     setScore(0);
     setCombo(0);
@@ -680,10 +706,10 @@ const CatchGame = ({
   }, [clearHintTimer, showSetup, startHoldTimer]);
   useEffect(() => {
     if (showSetup || mode !== 'challenge' || gameOverRef.current) return;
-    if (score >= preset.objectiveScore) {
+    if (score >= currentObjective) {
       endChallenge(true, 'objective');
     }
-  }, [endChallenge, mode, preset.objectiveScore, score, showSetup]);
+  }, [currentObjective, endChallenge, mode, score, showSetup]);
 
   /* ── Input handlers ── */
   const handleOverlayMouseDown = useCallback(
