@@ -112,6 +112,8 @@
   transition: all var(--transition-base);
   z-index: 9;
   padding: 0;
+  min-width: 48px;
+  min-height: 48px;
 }
 
 .lightbox-nav:hover {
@@ -122,6 +124,8 @@
 
 .lightbox-nav:active {
   transform: translateY(-50%) scale(0.95);
+  background: rgba(212, 175, 55, 0.25);
+  box-shadow: 0 0 12px rgba(var(--color-primary-rgb), 0.4);
 }
 
 .lightbox-prev {

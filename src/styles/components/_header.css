@@ -441,6 +441,21 @@ header.header--main .hamburger-toggle {
   }
 }
 
+/* ---- Smaller phones <= 640px ---- */
+@media (max-width: 640px) {
+  header.header--main {
+    padding: 0.5rem 0.5rem;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .header--controls {
+    gap: 0.25rem;
+  }
+}
+
 /* ---- Mobile <= 480px ---- */
 @media (max-width: 480px) {
   header.header--main {

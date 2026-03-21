@@ -764,6 +764,27 @@ class MusicPlayer {
     this.elements.volumeWrapper.addEventListener('mouseleave', () => {
       this.elements.volumePopup.classList.remove('open');
     });
+
+      // Mobile: Toggle volume popup on mute button click (touch devices)
+      this.elements.muteBtn.addEventListener('click', (e) => {
+        const isTouchDevice = () => {
+          return (('ontouchstart' in window) || (navigator.maxTouchPoints > 0)) || false;
+        };
+
+        if (isTouchDevice()) {
+          e.stopPropagation();
+          this.elements.volumePopup.classList.toggle('open');
+        }
+      });
+
+      // Close volume popup when clicking outside it (mobile)
+      document.addEventListener('click', (e) => {
+        const target = e.target as Element | null;
+        if (target && !this.elements.volumeWrapper.contains(target)) {
+          this.elements.volumePopup.classList.remove('open');
+        }
+      });
+
     this.elements.progressContainer.addEventListener('click', (e) => this.seek(e));
 
     // Close queue menu when clicking outside
