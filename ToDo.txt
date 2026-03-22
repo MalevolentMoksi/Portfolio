@@ -1,46 +1,13 @@
 Tâches manuelles :
 
 Tâches requiert Recherches A faire :
-Reactivate High Perf after low assignment
+
 
 Tâches simples :
 CSS des éléments en chargmenet de page à revoir.
-Contrast forces mood
 
 Tâches moyennes :
-Rendre les boutons du MoodSwitcher personalliés selon le Mood, avec des gradiants très esthétiques
+OccasionalCommuters : sometimes disappear before reaching reaching the other side, seem to still spawn depending on viewport
 
 Tâches lourdes :
 Rendre les pages de projets plus dynamiques (ex: + d'élements spéciaux, animations, interactions, etc.)
-Six-shooter moodSwitcher revamp
-
-3. The 3D Rotary Cylinder (Retro-Futuristic Dial)
-
-Give the user a mechanical, tactile selector that feels like old-school hardware meeting digital UI.
-
-    The Interaction: The menu opens as a 3D rotating cylinder or wheel. The user can scroll their mouse wheel or use arrow keys to spin the cylinder, bringing different moods to the front.
-
-    The Visuals: The active mood is front-and-center, fully lit and scaled up. The other five moods recede into the background, slightly darkened and angled, wrapping around an invisible cylinder.
-
-    Why it works: It perfectly suits the "Industrial" and "Terminal" vibes, giving a satisfying, heavy mechanical feel to a digital action.
-
-4. The Tactical Hex Grid
-
-Six is the magic number for hexagons, which is a staple of high-tech interfaces.
-
-    The Interaction: Clicking the button opens a floating, interconnected honeycomb grid of six hexagons.
-
-    The Visuals: Each hex is stroked with a neon border corresponding to the mood's color. The center is empty until hovered, at which point an energy line "wires" the hovered hex to the center, displaying the text label. When clicked, the chosen hex flashes, and the others collapse into it before triggering your VHS transition.
-
-    Why it works: It feels very deliberate and engineered, looking less like a web menu and more like a video game skill tree or command interface.
-
-
-2. The Analog Frequency Tuner (Leaning into the VHS Vibe)
-
-Since you already have a VHS transition, lean into the analog, retro-tech feel. Instead of clicking from a list, the user "tunes" the website to a new frequency.
-
-    The Reveal: A chunky, skeuomorphic rotary dial or a horizontal radio frequency slider appears.
-
-    The Interaction: As the user drags the dial/slider through the 6 notches, the UI emits subtle, low-opacity static or scanlines. You could even implement "micro-glitches" where the site's CSS variables partially bleed into the hovered mood as they pass over its frequency.
-
-    The Vibe: It feels like tuning an old CRT monitor, a ham radio, or a synthesizer to pick up a transmission from Europa or an Industrial sector.

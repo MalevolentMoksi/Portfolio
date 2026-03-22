@@ -8,6 +8,7 @@ export const HotAirBalloonSVG = () => (
     width="88"
     height="104"
     viewBox="0 0 55 65"
+    overflow="visible"
     fill="none"
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
