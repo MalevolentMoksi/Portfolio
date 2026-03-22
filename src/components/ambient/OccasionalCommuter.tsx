@@ -22,13 +22,13 @@ const MIN_VERTICAL_GAP_PX = 72;
 const TOP_PICK_ATTEMPTS = 16;
 const TOP_SAMPLE_COUNT = 24;
 const RECENT_HISTORY_SIZE = 4;
+const POSITION_HISTORY_SIZE = 2;
 
 type CommuterDirection = 'ltr' | 'rtl';
 
 /* ─── Helpers ─── */
 
 const randomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 const pickRandomDirection = (): CommuterDirection => (Math.random() < 0.5 ? 'ltr' : 'rtl');
 
@@ -91,13 +91,16 @@ const pickCommuterTopPx = (activeTopValues: number[] = []): number => {
     return Math.round(fallbackY);
   }
 
-  const clampedActiveTopValues = activeTopValues
-    .map((top) => clamp(top, minY, maxY))
-    .filter((top, index, arr) => Number.isFinite(top) && arr.indexOf(top) === index);
+  // Only keep obstacles that are within striking distance of the spawn range.
+  // Clamping off-screen vehicles to minY/maxY created phantom obstacles at the
+  // viewport edges and biased spawns away from those edges.
+  const relevantObstacleValues = activeTopValues
+    .filter((top) => Number.isFinite(top) && top >= minY - MIN_VERTICAL_GAP_PX && top <= maxY + MIN_VERTICAL_GAP_PX)
+    .filter((top, index, arr) => arr.indexOf(top) === index);
 
   for (let attempt = 0; attempt < TOP_PICK_ATTEMPTS; attempt++) {
     const candidate = randomBetween(minY, maxY);
-    const tooClose = clampedActiveTopValues.some((activeTop) =>
+    const tooClose = relevantObstacleValues.some((activeTop) =>
       Math.abs(activeTop - candidate) < MIN_VERTICAL_GAP_PX
     );
     if (!tooClose) {
@@ -111,9 +114,9 @@ const pickCommuterTopPx = (activeTopValues: number[] = []): number => {
   for (let i = 0; i < TOP_SAMPLE_COUNT; i++) {
     const candidate = randomBetween(minY, maxY);
     const nearestDistance =
-      clampedActiveTopValues.length === 0
+      relevantObstacleValues.length === 0
         ? Number.POSITIVE_INFINITY
-        : Math.min(...clampedActiveTopValues.map((activeTop) => Math.abs(activeTop - candidate)));
+        : Math.min(...relevantObstacleValues.map((activeTop) => Math.abs(activeTop - candidate)));
 
     if (nearestDistance > bestDistance) {
       bestDistance = nearestDistance;
@@ -200,6 +203,7 @@ const OccasionalCommuter = () => {
   const latestSpawnRef = useRef<(configOverride?: CommuterConfig) => void>(() => {});
   const vehiclesRef = useRef(vehicles);
   const recentCommuterNamesRef = useRef<string[]>([]);
+  const recentSpawnTopValuesRef = useRef<number[]>([]);
   const mountedRef = useRef(true);
   const nextIdRef = useRef(0);
 
@@ -253,10 +257,18 @@ const OccasionalCommuter = () => {
       );
 
       const activeTopValues = vehiclesRef.current.map((vehicle) => vehicle.top);
+      // Merge active vehicles with recently-completed positions so the same
+      // vertical zone isn't reused immediately after a vehicle expires.
+      const obstacleTopValues = preview
+        ? activeTopValues
+        : [...activeTopValues, ...recentSpawnTopValuesRef.current];
       const vehicleId = `commuter-${nextIdRef.current++}`;
       const duration = commuterConfig.duration;
       const direction = preview ? 'ltr' : pickRandomDirection();
-      const top = pickCommuterTopPx(activeTopValues);
+      const top = pickCommuterTopPx(obstacleTopValues);
+      if (!preview) {
+        recentSpawnTopValuesRef.current = [...recentSpawnTopValuesRef.current, top].slice(-POSITION_HISTORY_SIZE);
+      }
       const newVehicle = { config: commuterConfig, duration, preview, id: vehicleId, direction, top };
       
       setVehicles((prev) => [...prev, newVehicle]);
