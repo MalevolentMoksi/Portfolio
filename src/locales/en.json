@@ -178,6 +178,10 @@
         "error": "Unable to load resource.",
         "info": "Mood: Vaporwave enabled.",
         "warning": "Warning: irreversible action."
+      },
+      "performance": {
+        "mid": "Balanced performance mode enabled — visual effects have been reduced to optimise smoothness on this device.",
+        "low": "Economy performance mode enabled — animations and effects have been minimised to ensure a smooth experience on this device."
       }
     },
     "contactForm": {

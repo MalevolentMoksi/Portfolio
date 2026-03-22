@@ -213,3 +213,10 @@ export const isLowTier = (): boolean => getPerformanceTier() === 'low';
 export const isHighTier = (): boolean => getPerformanceTier() === 'high';
 
 export const byTier = <T>(map: Record<PerformanceTier, T>): T => map[getPerformanceTier()];
+
+/**
+ * Returns true if the performance tier was already committed to sessionStorage
+ * before this call (i.e. this is NOT the first detection this session).
+ * Call this BEFORE getPerformanceTier() to test freshness.
+ */
+export const isTierStoredInSession = (): boolean => safeSessionGet(SS_KEY) !== null;

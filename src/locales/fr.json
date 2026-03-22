@@ -178,6 +178,10 @@
         "error": "Impossible de charger la ressource.",
         "info": "Ambiance : Vaporwave activée.",
         "warning": "Attention : action irréversible."
+      },
+      "performance": {
+        "mid": "Mode performance équilibré activé — les effets visuels ont été réduits pour optimiser la fluidité sur cet appareil.",
+        "low": "Mode performance économique activé — les animations et effets ont été minimisés pour assurer une expérience fluide sur cet appareil."
       }
     },
     "contactForm": {
