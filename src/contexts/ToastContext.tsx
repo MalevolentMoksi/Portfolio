@@ -135,6 +135,7 @@ interface ToastItemProps {
 const ToastItem = ({ toast, onDismiss }: ToastItemProps) => {
   const { t } = useTranslation();
   const [exiting, setExiting] = useState(false);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const dismiss = useCallback(() => {
@@ -154,6 +155,22 @@ const ToastItem = ({ toast, onDismiss }: ToastItemProps) => {
     }
     return () => {};
   }, [toast.duration, dismiss]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+
+    const mediaQuery = window.matchMedia('(hover: none) and (pointer: coarse)');
+    const handleChange = () => {
+      setIsCoarsePointer(mediaQuery.matches);
+    };
+
+    handleChange();
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
 
   // Pause timer on hover
   const handleMouseEnter = (): void => {
@@ -178,8 +195,14 @@ const ToastItem = ({ toast, onDismiss }: ToastItemProps) => {
     >
       <span className="toast-icon">{icon}</span>
       <span className="toast-message">{toast.message}</span>
-      <button className="toast-close" onClick={dismiss} aria-label={t('common.toast.close')}>
-        &times;
+      <button
+        className={`toast-close${isCoarsePointer ? ' toast-close--touch' : ''}`}
+        onClick={dismiss}
+        onFocus={handleMouseEnter}
+        onBlur={handleMouseLeave}
+        aria-label={t('common.toast.close')}
+      >
+        {isCoarsePointer ? t('common.toast.dismiss') : '\u00d7'}
       </button>
     </div>
   );

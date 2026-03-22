@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip';
+import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { getAcademicProjects, getPersonalProjects, getAllTags } from '@/data/projects';
 import { discoverMusicTracks } from '@/utils/discoverMusicTracks';
 import { safeLocalGet, safeSessionGet } from '@/utils/safeStorage';
@@ -59,6 +60,61 @@ const DEFAULT_HELP_TEXT = `Commandes disponibles :
 const DEFAULT_ABOUT_TEXT = `Enzo Morello / Étudiant en BUT Informatique à l'IUT2 de Grenoble.
 Passionné par le développement web, les jeux vidéo et la création.
 Parcours Développeur d'applications.`;
+
+const CRT_BOOT_DURATION_MIN_MS = 760;
+const CRT_BOOT_DURATION_MAX_MS = 1480;
+const CRT_BOOT_TICK_MS = 70;
+const CRT_COMMAND_DELAY_MIN_MS = 42;
+const CRT_COMMAND_DELAY_MAX_MS = 118;
+
+type TerminalLineType = 'system' | 'input' | 'error' | 'joke';
+
+interface TerminalLine {
+  type: TerminalLineType;
+  text: string;
+}
+
+interface BootProfile {
+  durationMs: number;
+  modeLabel: string;
+  channelLabel: string;
+  lines: string[];
+}
+
+const DEFAULT_BOOT_LINES = [
+  'init://display.pipeline .. ok',
+  'sync://prompt.engine ..... ok',
+  'mount://portfolio.session  ok',
+  'check://ambient.fx ....... ok',
+  'route://ui.shell ......... ok',
+];
+
+const DEFAULT_BOOT_MODES = ['BOOT', 'SYNC', 'SCAN'];
+const DEFAULT_BOOT_CHANNELS = ['crt://warmup', 'crt://signal', 'crt://vector'];
+
+const randomInt = (min: number, max: number): number =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
+const pickRandomEntry = (items: string[], fallback: string): string => {
+  if (!items.length) return fallback;
+  return items[Math.floor(Math.random() * items.length)] ?? fallback;
+};
+
+const pickRandomLines = (items: string[], minCount: number, maxCount: number): string[] => {
+  if (items.length <= minCount) {
+    return items.slice(0, Math.max(1, items.length));
+  }
+
+  const count = Math.min(items.length, randomInt(minCount, maxCount));
+  const pool = [...items];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = pool[i];
+    pool[i] = pool[j];
+    pool[j] = temp;
+  }
+  return pool.slice(0, count);
+};
 
 /* ── Helpers ───────────────────────────────────────── */
 
@@ -133,6 +189,8 @@ const calculateStats = (t: any, skills: any) => {
 
 const MiniTerminal = () => {
   const { t, i18n } = useTranslation();
+  const { settings: a11ySettings } = useAccessibility();
+  const noMotion = a11ySettings.noMotion;
   const locale = i18n.resolvedLanguage === 'en' ? 'en-US' : 'fr-FR';
   const jokesFromI18n = t('common.terminal.jokes', { returnObjects: true });
   const skillsFromI18n = t('common.terminal.skills', { returnObjects: true });
@@ -143,17 +201,30 @@ const MiniTerminal = () => {
   const PROJECTS = Array.isArray(projectsFromI18n) ? projectsFromI18n : DEFAULT_PROJECTS;
   const HELP_TEXT = t('common.terminal.helpText', { defaultValue: DEFAULT_HELP_TEXT });
   const ABOUT_TEXT = t('common.terminal.aboutText', { defaultValue: DEFAULT_ABOUT_TEXT });
+  const bootProgressLabel = t('common.terminal.boot.progressLabel', { defaultValue: 'Signal' });
 
   const [isOpen, setIsOpen] = useState(false);
   const [snakeMode, setSnakeMode] = useState(false);
-  const [lines, setLines] = useState([{ type: 'system', text: t('common.terminal.welcome') }]);
+  const [lines, setLines] = useState<TerminalLine[]>([
+    { type: 'system', text: t('common.terminal.welcome') },
+  ]);
   const [input, setInput] = useState('');
   const [iconState, setIconState] = useState('idle'); // idle | open
   const [sessionTime, setSessionTime] = useState('0s');
+  const [isBooting, setIsBooting] = useState(false);
+  const [bootProgress, setBootProgress] = useState(0);
+  const [bootProfile, setBootProfile] = useState<BootProfile>(() => ({
+    durationMs: CRT_BOOT_DURATION_MIN_MS,
+    modeLabel: DEFAULT_BOOT_MODES[0],
+    channelLabel: DEFAULT_BOOT_CHANNELS[0],
+    lines: DEFAULT_BOOT_LINES.slice(0, 3),
+  }));
   const outputRef = useRef<any>(null);
   const inputRef = useRef<any>(null);
   const panelRef = useRef<any>(null);
   const panelDivRef = useRef<any>(null);
+  const commandHistoryRef = useRef<string[]>([]);
+  const commandHistoryCursorRef = useRef(-1);
   const [panelPos, setPanelPos] = useState<any>(null);
 
   /* ── Timer session (titlebar) ── */
@@ -186,6 +257,74 @@ const MiniTerminal = () => {
       inputRef.current.focus();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || snakeMode) {
+      setIsBooting(false);
+      setBootProgress(0);
+      return;
+    }
+
+    if (noMotion) {
+      setIsBooting(false);
+      setBootProgress(100);
+      return;
+    }
+
+    const resolvedBootLines = t('common.terminal.boot.lines', {
+      returnObjects: true,
+      defaultValue: DEFAULT_BOOT_LINES,
+    });
+    const resolvedBootModes = t('common.terminal.boot.modes', {
+      returnObjects: true,
+      defaultValue: DEFAULT_BOOT_MODES,
+    });
+    const resolvedBootChannels = t('common.terminal.boot.channels', {
+      returnObjects: true,
+      defaultValue: DEFAULT_BOOT_CHANNELS,
+    });
+
+    const bootLines = Array.isArray(resolvedBootLines)
+      ? resolvedBootLines.filter((value): value is string => typeof value === 'string' && value.length > 0)
+      : DEFAULT_BOOT_LINES;
+    const bootModes = Array.isArray(resolvedBootModes)
+      ? resolvedBootModes.filter((value): value is string => typeof value === 'string' && value.length > 0)
+      : DEFAULT_BOOT_MODES;
+    const bootChannels = Array.isArray(resolvedBootChannels)
+      ? resolvedBootChannels.filter((value): value is string => typeof value === 'string' && value.length > 0)
+      : DEFAULT_BOOT_CHANNELS;
+
+    const durationMs = randomInt(CRT_BOOT_DURATION_MIN_MS, CRT_BOOT_DURATION_MAX_MS);
+    const nextProfile: BootProfile = {
+      durationMs,
+      modeLabel: pickRandomEntry(bootModes, DEFAULT_BOOT_MODES[0]),
+      channelLabel: pickRandomEntry(bootChannels, DEFAULT_BOOT_CHANNELS[0]),
+      lines: pickRandomLines(bootLines, 2, 4),
+    };
+
+    setBootProfile(nextProfile);
+    setIsBooting(true);
+    setBootProgress(0);
+
+    const startAt = performance.now();
+    const intervalId = window.setInterval(() => {
+      const elapsed = performance.now() - startAt;
+      const ratio = Math.min(1, elapsed / durationMs);
+      const jitter = (Math.random() - 0.35) * 0.08;
+      const target = Math.min(99, Math.max(0, Math.round((ratio + jitter) * 100)));
+      setBootProgress((previous) => Math.max(previous, target));
+    }, CRT_BOOT_TICK_MS);
+
+    const timeoutId = window.setTimeout(() => {
+      setBootProgress(100);
+      setIsBooting(false);
+    }, durationMs);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [isOpen, noMotion, snakeMode, t]);
   /* —— Position du panneau (portal → coordonnées viewport) —— */
   useEffect(() => {
     if (!isOpen || !panelRef.current) return;
@@ -258,11 +397,11 @@ const MiniTerminal = () => {
 
   /* ── Commandes ── */
   const processCommand = useCallback(
-    (cmd: any) => {
+    (cmd: string) => {
       const trimmed = cmd.trim().toLowerCase();
       if (!trimmed) return;
 
-      const newLines = [{ type: 'input', text: `$ ${cmd}` }];
+      const newLines: TerminalLine[] = [{ type: 'input', text: `$ ${cmd}` }];
 
       switch (trimmed) {
         case 'help':
@@ -356,9 +495,63 @@ const MiniTerminal = () => {
     [HELP_TEXT, ABOUT_TEXT, DEV_JOKES, PROJECTS, SKILLS, t, locale]
   );
 
+  const queueCommand = useCallback(
+    (command: string) => {
+      const trimmed = command.trim();
+      if (!trimmed) return;
+
+      commandHistoryRef.current = [
+        trimmed,
+        ...commandHistoryRef.current.filter((entry) => entry !== trimmed),
+      ].slice(0, 32);
+      commandHistoryCursorRef.current = -1;
+
+      const run = () => processCommand(command);
+      if (noMotion) {
+        run();
+        return;
+      }
+
+      const delay =
+        CRT_COMMAND_DELAY_MIN_MS +
+        Math.floor(Math.random() * (CRT_COMMAND_DELAY_MAX_MS - CRT_COMMAND_DELAY_MIN_MS));
+      window.setTimeout(run, delay);
+    },
+    [noMotion, processCommand]
+  );
+
   const handleKeyDown = (e: any) => {
+    if (isBooting) {
+      return;
+    }
+
     if (e.key === 'Enter') {
-      processCommand(input);
+      const currentCommand = input;
+      setInput('');
+      queueCommand(currentCommand);
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (commandHistoryRef.current.length === 0) return;
+
+      const nextCursor = Math.min(
+        commandHistoryCursorRef.current + 1,
+        commandHistoryRef.current.length - 1
+      );
+      commandHistoryCursorRef.current = nextCursor;
+      setInput(commandHistoryRef.current[nextCursor]);
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (commandHistoryRef.current.length === 0) return;
+
+      const nextCursor = Math.max(commandHistoryCursorRef.current - 1, -1);
+      commandHistoryCursorRef.current = nextCursor;
+      setInput(nextCursor === -1 ? '' : commandHistoryRef.current[nextCursor]);
     }
   };
 
@@ -412,7 +605,7 @@ const MiniTerminal = () => {
         createPortal(
           <div
             ref={panelDivRef}
-            className={`mini-terminal-panel${snakeMode ? ' mini-terminal-panel--snake' : ''}`}
+            className={`mini-terminal-panel mini-terminal-panel--crt${snakeMode ? ' mini-terminal-panel--snake' : ''}${isBooting ? ' mini-terminal-panel--booting' : ''}`}
             role="dialog"
             aria-label={t('common.terminal.dialogAria')}
             style={
@@ -426,53 +619,98 @@ const MiniTerminal = () => {
                 : {}
             }
           >
+            <div className="mini-terminal-crt-layer" aria-hidden="true">
+              <span className="mini-terminal-crt-glare" />
+              <span className="mini-terminal-crt-scanlines" />
+              <span className="mini-terminal-crt-noise" />
+              <span className="mini-terminal-crt-vignette" />
+            </div>
+
             <div className="mini-terminal-titlebar">
               <span className="mini-terminal-status">
                 <span className="mini-terminal-status-dot" aria-hidden="true" />
-                <span className="mini-terminal-status-label">{t('common.terminal.run')}</span>
+                <span className="mini-terminal-status-label">
+                  {isBooting ? bootProfile.modeLabel : t('common.terminal.run')}
+                </span>
               </span>
-              <span className="mini-terminal-title">enzo@portfolio:~</span>
+              <span className="mini-terminal-title">
+                {isBooting ? bootProfile.channelLabel : 'enzo@portfolio:~'}
+              </span>
+              <span className="mini-terminal-signal" aria-hidden="true">
+                <span className="mini-terminal-signal-bar" />
+                <span className="mini-terminal-signal-bar" />
+                <span className="mini-terminal-signal-bar" />
+              </span>
               <span className="mini-terminal-session">{sessionTime}</span>
             </div>
 
             {snakeMode ? (
               <SnakeGame onClose={closeSnake} />
             ) : (
-              <>
-                <div
-                  className="mini-terminal-output"
-                  ref={outputRef}
-                  aria-live="polite"
-                  aria-relevant="additions"
-                >
-                  {lines.map((line, i) => (
-                    <div key={i} className={`mini-terminal-line mini-terminal-line--${line.type}`}>
-                      {line.text.split('\n').map((segment: any, j: any) => (
-                        <span key={j}>
-                          {segment}
-                          {j < line.text.split('\n').length - 1 && <br />}
-                        </span>
+              <div className={`mini-terminal-screen${isBooting ? ' mini-terminal-screen--booting' : ''}`}>
+                {isBooting ? (
+                  <div className="mini-terminal-boot" aria-live="polite">
+                    {bootProfile.lines
+                      .slice(0, Math.ceil((bootProgress / 100) * bootProfile.lines.length))
+                      .map((line, index) => (
+                        <p key={`${line}-${index}`} className="mini-terminal-boot__line">
+                          {line}
+                        </p>
                       ))}
+                    <div
+                      className="mini-terminal-boot__progress"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={bootProgress}
+                    >
+                      <span style={{ width: `${bootProgress}%` }} />
                     </div>
-                  ))}
-                </div>
+                    <p className="mini-terminal-boot__line">
+                      {bootProgressLabel}: {bootProgress}%
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      className="mini-terminal-output"
+                      ref={outputRef}
+                      aria-live="polite"
+                      aria-relevant="additions"
+                    >
+                      {lines.map((line, i) => {
+                        const segments = line.text.split('\n');
+                        return (
+                          <div key={i} className={`mini-terminal-line mini-terminal-line--${line.type}`}>
+                            {segments.map((segment, j) => (
+                              <span key={j}>
+                                {segment}
+                                {j < segments.length - 1 && <br />}
+                              </span>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
 
-                <div className="mini-terminal-input-row">
-                  <span className="mini-terminal-prompt">$</span>
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    className="mini-terminal-input"
-                    value={input}
-                    onChange={(e: any) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={t('common.terminal.placeholder')}
-                    spellCheck={false}
-                    autoComplete="off"
-                    aria-label={t('common.terminal.inputAria')}
-                  />
-                </div>
-              </>
+                    <div className="mini-terminal-input-row">
+                      <span className="mini-terminal-prompt">$</span>
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        className="mini-terminal-input"
+                        value={input}
+                        onChange={(e: any) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder={t('common.terminal.placeholder')}
+                        spellCheck={false}
+                        autoComplete="off"
+                        aria-label={t('common.terminal.inputAria')}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>,
           document.body

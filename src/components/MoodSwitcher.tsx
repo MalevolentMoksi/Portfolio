@@ -214,7 +214,7 @@ const MoodSwitcher = () => {
   const lastHapticNotchIndexRef = useRef<number>(getMoodIndex(mood));
   const lastNotchHapticAtRef = useRef(0);
   const activePointerTypeRef = useRef<string | null>(null);
-  const [panelPos, setPanelPos] = useState<{ top: number; right: number } | null>(null);
+  const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
 
   const isContrastMode = a11ySettings.highContrast;
   const isNoMotionMode = a11ySettings.noMotion;
@@ -513,24 +513,53 @@ const MoodSwitcher = () => {
   useEffect(() => {
     if (!isOpen || !panelRef.current) return;
 
+    let rafId: number | null = null;
+
     const updatePanelPosition = () => {
       if (!panelRef.current) return;
       const rect = panelRef.current.getBoundingClientRect();
+      const panelWidth = panelDivRef.current?.offsetWidth ?? 0;
+      const panelHeight = panelDivRef.current?.offsetHeight ?? 0;
+      const viewportMargin = 12;
+
+      let top = Math.max(viewportMargin, rect.bottom + 12);
+      if (panelHeight > 0 && top + panelHeight > window.innerHeight - viewportMargin) {
+        const aboveAnchorTop = rect.top - panelHeight - 12;
+        top =
+          aboveAnchorTop >= viewportMargin
+            ? aboveAnchorTop
+            : Math.max(viewportMargin, window.innerHeight - panelHeight - viewportMargin);
+      }
+
+      let left = rect.left;
+      if (panelWidth > 0) {
+        const preferredLeft = rect.right - panelWidth;
+        left = clamp(
+          preferredLeft,
+          viewportMargin,
+          Math.max(viewportMargin, window.innerWidth - panelWidth - viewportMargin)
+        );
+      }
+
       setPanelPos({
-        top: Math.max(12, rect.bottom + 12),
-        right: Math.max(12, window.innerWidth - rect.right),
+        top,
+        left,
       });
     };
 
     updatePanelPosition();
+    rafId = window.requestAnimationFrame(updatePanelPosition);
     window.addEventListener('resize', updatePanelPosition);
     window.addEventListener('scroll', updatePanelPosition, true);
 
     return () => {
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
       window.removeEventListener('resize', updatePanelPosition);
       window.removeEventListener('scroll', updatePanelPosition, true);
     };
-  }, [isOpen]);
+  }, [isNoMotionMode, isOpen, isVerticalTuner]);
 
   useEffect(() => {
     if (!isOpen || !panelDivRef.current) return;
@@ -1091,9 +1120,9 @@ const MoodSwitcher = () => {
         </div>
 
         <div
-          className={`mood-tuner-shell${isDragging || isSettling ? ' mood-tuner-shell--active' : ''}${
-            isCommitFeedbackActive ? ' mood-tuner-shell--lock-flare' : ''
-          }`}
+          className={`mood-tuner-shell${isVerticalTuner ? ' mood-tuner-shell--vertical-layout' : ''}${
+            isDragging || isSettling ? ' mood-tuner-shell--active' : ''
+          }${isCommitFeedbackActive ? ' mood-tuner-shell--lock-flare' : ''}`}
           style={{ '--mood-color': MOODS[previewMood].color } as CSSProperties}
         >
           <div
@@ -1369,7 +1398,9 @@ const MoodSwitcher = () => {
         createPortal(
           <div
             ref={panelDivRef}
-            className={`mood-panel mood-panel--${ACTIVE_SELECTOR_MODE}`}
+            className={`mood-panel mood-panel--${ACTIVE_SELECTOR_MODE}${
+              isVerticalTuner ? ' mood-panel--vertical-layout' : ''
+            }`}
             role="dialog"
             aria-modal="true"
             aria-label={t('common.mood.chooseAria')}
@@ -1379,7 +1410,7 @@ const MoodSwitcher = () => {
               panelPos
                 ? {
                     top: `${panelPos.top}px`,
-                    right: `${panelPos.right}px`,
+                    left: `${panelPos.left}px`,
                   }
                 : {}
             }

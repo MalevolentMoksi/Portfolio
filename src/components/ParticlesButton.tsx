@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip';
 import { useToast } from '../contexts/ToastContext';
@@ -101,6 +102,31 @@ interface EffectSignal {
   _unmounted: boolean;
 }
 
+const WEATHER_EFFECT_META: Record<
+  EffectKey,
+  {
+    energyBase: number;
+    energySwing: number;
+  }
+> = {
+  explode: { energyBase: 68, energySwing: 26 },
+  attract: { energyBase: 56, energySwing: 20 },
+  storm: { energyBase: 74, energySwing: 28 },
+  gravity: { energyBase: 52, energySwing: 24 },
+};
+
+const WEATHER_NODE_LAYOUT = [
+  { x: '50%', y: '8%' },
+  { x: '86%', y: '50%' },
+  { x: '50%', y: '92%' },
+  { x: '14%', y: '50%' },
+] as const;
+
+const CHARGE_MAX_HOLD_MS = 950;
+const CHARGE_DURATION_BOOST_MAX = 0.45;
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
 /* ── Helpers : accès sécurisé à pJS ── */
 const getPJS = () => {
   try {
@@ -110,7 +136,7 @@ const getPJS = () => {
   }
 };
 
-const triggerPetAttract = (x: any, y: any, duration: any) => {
+const triggerPetAttract = (x: any, y: any, duration: number) => {
   const fire = () => window.petAttract?.(x, y, duration);
   fire();
   requestAnimationFrame(fire);
@@ -270,13 +296,13 @@ const smoothRestore = (duration = 1500) => {
  */
 const effects: Record<
   EffectKey,
-  (signal: EffectSignal, tier: PerformanceTier) => { readonly restoreHandle: any }
+  (signal: EffectSignal, tier: PerformanceTier, runtimeDuration: number) => { readonly restoreHandle: any }
 > = {
   /**
    * Explosion : spawn dans les coins supérieurs
    * et projection radiale de toutes les particules.
    */
-  explode(signal: any, tier: PerformanceTier) {
+  explode(signal: any, tier: PerformanceTier, runtimeDuration: number) {
     setParticlesForeground(true);
     const pJS = getPJS();
     if (!pJS) return { restoreHandle: null };
@@ -318,12 +344,13 @@ const effects: Record<
     });
 
     let restoreHandle: any = null;
+    const warmupMs = Math.max(260, Math.round(runtimeDuration * 0.33));
     setTimeout(() => {
       if (!signal.cancelled) {
-        restoreHandle = smoothRestore(1800);
+        restoreHandle = smoothRestore(Math.max(1200, Math.round(runtimeDuration * 0.9)));
         setParticlesForeground(false);
       }
-    }, 600);
+    }, warmupMs);
     window.petReact?.('scared');
     return {
       get restoreHandle() {
@@ -335,10 +362,10 @@ const effects: Record<
   /**
    * Attraction : les particules convergent vers un point en bordure.
    */
-  attract(signal: any) {
+  attract(signal: any, _tier: PerformanceTier, runtimeDuration: number) {
     setParticlesForeground(true);
     const { x: cx, y: cy } = randomEdgePoint();
-    triggerPetAttract(cx, cy, 3000);
+    triggerPetAttract(cx, cy, runtimeDuration);
 
     const pJS = getPJS();
     if (!pJS) return { restoreHandle: null };
@@ -373,10 +400,10 @@ const effects: Record<
     setTimeout(() => {
       signal.cancelled = true; // Arrêter la boucle pull
       if (!signal._unmounted) {
-        restoreHandle = smoothRestore(1500);
+        restoreHandle = smoothRestore(Math.max(1000, Math.round(runtimeDuration * 0.5)));
         setParticlesForeground(false);
       }
-    }, 3000);
+    }, runtimeDuration);
     return {
       get restoreHandle() {
         return restoreHandle;
@@ -387,7 +414,7 @@ const effects: Record<
   /**
    * Tempête : ajoute des particules bonus et uniformise leur vitesse.
    */
-  storm(signal: any, tier: PerformanceTier) {
+  storm(signal: any, tier: PerformanceTier, runtimeDuration: number) {
     setParticlesForeground(true);
     window.petReact?.('dizzy');
 
@@ -432,9 +459,9 @@ const effects: Record<
       if (excess > 0) {
         p2.particles.array.splice(p2.particles.array.length - excess, excess);
       }
-      restoreHandle = smoothRestore(2200);
+      restoreHandle = smoothRestore(Math.max(1300, Math.round(runtimeDuration * 0.72)));
       setParticlesForeground(false);
-    }, 3000);
+    }, runtimeDuration);
     return {
       get restoreHandle() {
         return restoreHandle;
@@ -445,10 +472,10 @@ const effects: Record<
   /**
    * Gravité : les particules tombent et rebondissent.
    */
-  gravity(signal: any) {
+  gravity(signal: any, _tier: PerformanceTier, runtimeDuration: number) {
     setParticlesForeground(true);
     window.petReact?.('dizzy');
-    window.petGravity?.(3000);
+    window.petGravity?.(runtimeDuration);
 
     const pJS = getPJS();
     if (!pJS) return { restoreHandle: null };
@@ -476,10 +503,10 @@ const effects: Record<
     setTimeout(() => {
       signal.cancelled = true; // Arrêter la boucle fall
       if (!signal._unmounted) {
-        restoreHandle = smoothRestore(2000);
+        restoreHandle = smoothRestore(Math.max(1200, Math.round(runtimeDuration * 0.65)));
         setParticlesForeground(false);
       }
-    }, 3000);
+    }, runtimeDuration);
     return {
       get restoreHandle() {
         return restoreHandle;
@@ -496,85 +523,326 @@ const ParticlesButton = () => {
   const tier = usePerformanceTierValue();
   const { settings: a11ySettings } = useAccessibility();
   const noMotion = a11ySettings.noMotion;
+
+  const weatherPanelTitle = t('common.particles.weather.panelTitle');
+  const weatherPanelAria = t('common.particles.weather.panelAria');
+  const weatherHint = t('common.particles.weather.hint');
+  const weatherTriggerLabel = t('common.particles.weather.triggerLabel');
+  const weatherChargeLabel = t('common.particles.weather.chargeLabel');
+  const weatherEnergyLabel = t('common.particles.weather.energyLabel');
+  const weatherCountLabel = t('common.particles.weather.countLabel');
+  const weatherSignatureLabel = t('common.particles.weather.signatureLabel');
+  const weatherReadyStatus = t('common.particles.weather.statusReady');
+  const weatherActiveStatus = t('common.particles.weather.statusActive');
+
   const [effectIndex, setEffectIndex] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [activeEffectKey, setActiveEffectKey] = useState<EffectKey | null>(null);
   const [progress, setProgress] = useState(100);
+  const [isStationOpen, setIsStationOpen] = useState(false);
+  const [isCharging, setIsCharging] = useState(false);
+  const [chargeProgress, setChargeProgress] = useState(0);
+  const [lastCommittedCharge, setLastCommittedCharge] = useState(0);
+  const [particleCount, setParticleCount] = useState(0);
+  const [panelPos, setPanelPos] = useState<{ top: number; right: number } | null>(null);
+
   const cooldownRef = useRef(false);
   const progressIntervalRef = useRef<any>(null);
+
   // Refs pour annuler les effets en cours lors du démontage
   const isMountedRef = useRef(true);
   const effectSignalRef = useRef<any>(null);
   const smoothRestoreHandleRef = useRef<any>(null);
+  const triggerRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const chargeRafRef = useRef<number | null>(null);
+  const isChargingRef = useRef(false);
+  const chargeProgressRef = useRef(0);
+  const skipNextCoreClickRef = useRef(false);
 
   const localizedEffects = EFFECTS.map((effect) => ({
     ...effect,
     label: t(`common.particles.effects.${effect.key}.label`),
     toast: t(`common.particles.effects.${effect.key}.toast`),
+    code: t(`common.particles.weather.codes.${effect.key}`),
+    signature: t(`common.particles.weather.signatures.${effect.key}`),
   }));
 
-  const triggerEffect = useCallback(() => {
-    if (cooldownRef.current) return;
+  const triggerEffect = useCallback(
+    (chargedPercent = 0) => {
+      if (cooldownRef.current) return;
 
-    // Annuler tout smoothRestore précédent encore en cours
-    smoothRestoreHandleRef.current?.cancel();
-    smoothRestoreHandleRef.current = null;
-
-    const effect = localizedEffects[effectIndex];
-
-    // Créer un signal pour cet effet — permet de l'annuler depuis cleanup
-    const signal: EffectSignal = { cancelled: false, _unmounted: false };
-    effectSignalRef.current = signal;
-
-    showToast(effect.toast, {
-      type: 'info',
-      duration: effect.duration,
-      icon: EFFECT_ICONS[effect.key as EffectKey],
-    });
-    const result = effects[effect.key as EffectKey](signal, tier);
-
-    // Intercepter le smoothRestore retourné par l'effet (via getter lazy)
-    // pour pouvoir l'annuler au démontage
-    if (result) {
-      const checkRestore = setInterval(() => {
-        const h = result.restoreHandle;
-        if (h) {
-          smoothRestoreHandleRef.current = h;
-          clearInterval(checkRestore);
-        }
-      }, 200);
-      // Safety : ne pas fuiter l'interval
-      setTimeout(() => clearInterval(checkRestore), 5000);
-    }
-
-    setIsActive(true);
-    setActiveEffectKey(effect.key as EffectKey);
-    setProgress(100);
-    cooldownRef.current = true;
-
-    const duration = effect.duration;
-    const startTime = Date.now();
-
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-    }
-
-    // 100ms au lieu de 50ms — 10 updates/sec suffisent pour un compteur %
-    progressIntervalRef.current = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, duration - elapsed);
-      const progressPercent = (remaining / duration) * 100;
-      setProgress(progressPercent);
-
-      if (progressPercent <= 0) {
-        clearInterval(progressIntervalRef.current);
-        setIsActive(false);
-        setActiveEffectKey(null);
-        cooldownRef.current = false;
-        setEffectIndex((i) => (i + 1) % EFFECTS.length);
+      // Stop any previous effect loop before starting a new one.
+      if (effectSignalRef.current) {
+        effectSignalRef.current.cancelled = true;
+        effectSignalRef.current._unmounted = true;
       }
-    }, 100);
-  }, [effectIndex, localizedEffects, showToast, tier]);
+
+      // Annuler tout smoothRestore précédent encore en cours
+      smoothRestoreHandleRef.current?.cancel();
+      smoothRestoreHandleRef.current = null;
+
+      const effect = localizedEffects[effectIndex];
+      const chargeRatio = clamp(chargedPercent / 100, 0, 1);
+      const runtimeDuration = Math.round(
+        effect.duration * (1 + CHARGE_DURATION_BOOST_MAX * chargeRatio)
+      );
+
+      // Créer un signal pour cet effet — permet de l'annuler depuis cleanup
+      const signal: EffectSignal = { cancelled: false, _unmounted: false };
+      effectSignalRef.current = signal;
+
+      showToast(effect.toast, {
+        type: 'info',
+        duration: runtimeDuration,
+        icon: EFFECT_ICONS[effect.key as EffectKey],
+      });
+      const result = effects[effect.key as EffectKey](signal, tier, runtimeDuration);
+
+      // Intercepter le smoothRestore retourné par l'effet (via getter lazy)
+      // pour pouvoir l'annuler au démontage
+      if (result) {
+        const checkRestore = setInterval(() => {
+          const h = result.restoreHandle;
+          if (h) {
+            smoothRestoreHandleRef.current = h;
+            clearInterval(checkRestore);
+          }
+        }, 200);
+        // Safety : ne pas fuiter l'interval
+        setTimeout(() => clearInterval(checkRestore), 5000);
+      }
+
+      setIsActive(true);
+      setActiveEffectKey(effect.key as EffectKey);
+      setProgress(100);
+      setLastCommittedCharge(Math.round(chargedPercent));
+      cooldownRef.current = true;
+
+      const duration = runtimeDuration;
+      const startTime = Date.now();
+
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+
+      // 100ms au lieu de 50ms — 10 updates/sec suffisent pour un compteur %
+      progressIntervalRef.current = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, duration - elapsed);
+        const progressPercent = (remaining / duration) * 100;
+        setProgress(progressPercent);
+
+        if (progressPercent <= 0) {
+          clearInterval(progressIntervalRef.current);
+          setIsActive(false);
+          setActiveEffectKey(null);
+          cooldownRef.current = false;
+        }
+      }, 100);
+    },
+    [effectIndex, localizedEffects, showToast, tier]
+  );
+
+  const closeStation = useCallback(() => {
+    setIsStationOpen(false);
+    setIsCharging(false);
+    isChargingRef.current = false;
+    chargeProgressRef.current = 0;
+    setChargeProgress(0);
+    if (chargeRafRef.current !== null) {
+      cancelAnimationFrame(chargeRafRef.current);
+      chargeRafRef.current = null;
+    }
+  }, []);
+
+  const finishCharging = useCallback(
+    (shouldTrigger: boolean) => {
+      if (!isChargingRef.current) return;
+
+      isChargingRef.current = false;
+      setIsCharging(false);
+
+      if (chargeRafRef.current !== null) {
+        cancelAnimationFrame(chargeRafRef.current);
+        chargeRafRef.current = null;
+      }
+
+      const chargedPercent = chargeProgressRef.current;
+      chargeProgressRef.current = 0;
+      setChargeProgress(0);
+
+      if (shouldTrigger) {
+        triggerEffect(chargedPercent);
+      }
+    },
+    [triggerEffect]
+  );
+
+  const handleCorePointerDown = useCallback(
+    (event: any) => {
+      if (cooldownRef.current || noMotion) return;
+
+      event.preventDefault();
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // no-op: some synthetic pointer flows can fail capture
+      }
+
+      isChargingRef.current = true;
+      setIsCharging(true);
+      chargeProgressRef.current = 0;
+      setChargeProgress(0);
+
+      if (chargeRafRef.current !== null) {
+        cancelAnimationFrame(chargeRafRef.current);
+      }
+
+      const startTime = performance.now();
+      const tick = (now: number) => {
+        if (!isChargingRef.current || !isMountedRef.current) return;
+
+        const ratio = clamp((now - startTime) / CHARGE_MAX_HOLD_MS, 0, 1);
+        const nextProgress = Math.round(ratio * 100);
+        chargeProgressRef.current = nextProgress;
+        setChargeProgress(nextProgress);
+
+        if (ratio < 1) {
+          chargeRafRef.current = requestAnimationFrame(tick);
+        }
+      };
+
+      chargeRafRef.current = requestAnimationFrame(tick);
+    },
+    [noMotion]
+  );
+
+  const handleCorePointerUp = useCallback(
+    (event: any) => {
+      if (!isChargingRef.current) return;
+
+      skipNextCoreClickRef.current = true;
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        // no-op
+      }
+      finishCharging(true);
+    },
+    [finishCharging]
+  );
+
+  const handleCorePointerCancel = useCallback(() => {
+    finishCharging(false);
+  }, [finishCharging]);
+
+  const handleCoreClick = useCallback(() => {
+    if (skipNextCoreClickRef.current) {
+      skipNextCoreClickRef.current = false;
+      return;
+    }
+    triggerEffect(0);
+  }, [triggerEffect]);
+
+  const handlePanelKeyDown = useCallback(
+    (event: any) => {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        setEffectIndex((prev) => (prev + 1) % EFFECTS.length);
+        return;
+      }
+
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        setEffectIndex((prev) => (prev - 1 + EFFECTS.length) % EFFECTS.length);
+        return;
+      }
+
+      if (event.key === 'Enter' && !isActive) {
+        event.preventDefault();
+        triggerEffect(chargeProgressRef.current);
+      }
+    },
+    [isActive, triggerEffect]
+  );
+
+  const toggleStation = useCallback(() => {
+    if (noMotion) return;
+    setIsStationOpen((prev) => !prev);
+  }, [noMotion]);
+
+  useEffect(() => {
+    if (!isStationOpen || !triggerRef.current) return;
+
+    const updatePosition = () => {
+      if (!triggerRef.current) return;
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPanelPos({
+        top: rect.bottom + 12,
+        right: Math.max(8, window.innerWidth - rect.right),
+      });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [isStationOpen]);
+
+  useEffect(() => {
+    if (!isStationOpen) return;
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (triggerRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      closeStation();
+    };
+
+    const timerId = window.setTimeout(() => {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timerId);
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [closeStation, isStationOpen]);
+
+  useEffect(() => {
+    if (!isStationOpen && !isActive) {
+      setParticleCount(0);
+      return;
+    }
+
+    const updateCount = () => {
+      const p = getPJS();
+      setParticleCount(p?.particles?.array?.length ?? 0);
+    };
+
+    updateCount();
+    const intervalId = window.setInterval(updateCount, 260);
+    return () => window.clearInterval(intervalId);
+  }, [isActive, isStationOpen]);
+
+  useEffect(() => {
+    if (!isStationOpen) return;
+
+    panelRef.current?.focus();
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeStation();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [closeStation, isStationOpen]);
 
   // Cleanup complet au démontage : annuler RAF leaks + intervals
   useEffect(() => {
@@ -592,13 +860,28 @@ const ParticlesButton = () => {
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
+      if (chargeRafRef.current !== null) {
+        cancelAnimationFrame(chargeRafRef.current);
+      }
       // Remettre le foreground à l'état normal
       setParticlesForeground(false);
     };
   }, []);
 
   const currentEffect = localizedEffects[effectIndex];
-  const progressRingPerimeter = 4 * (39 - 2 * 10.5) + 2 * Math.PI * 10.5; // périmètre rect 39×39 rx=10.5
+  const currentEffectKey = currentEffect.key as EffectKey;
+  const weatherMeta = WEATHER_EFFECT_META[currentEffectKey];
+  const activityRatio = isActive ? 1 - progress / 100 : 0;
+  const fieldEnergy = clamp(
+    Math.round(weatherMeta.energyBase + activityRatio * weatherMeta.energySwing + lastCommittedCharge * 0.22),
+    0,
+    100
+  );
+  const observedParticles = Math.max(0, particleCount);
+  const panelStatus = isActive ? weatherActiveStatus : weatherReadyStatus;
+
+  const progressRingRadius = 18;
+  const progressRingPerimeter = 2 * Math.PI * progressRingRadius;
   const progressOffset = progressRingPerimeter * (1 - progress / 100);
 
   // Determine progress class for color transition
@@ -608,91 +891,185 @@ const ParticlesButton = () => {
   else if (progress > 25) progressClass = 'progress-25';
 
   return (
-    <Tooltip
-      text={currentEffect.label}
-      desc={
-        isActive
-          ? t('common.particles.loading', { progress: Math.ceil(progress) })
-          : t('common.particles.clickToTrigger')
-      }
-      position="bottom"
-    >
-      <button
-        className={`header-action-btn particles-btn ${isActive ? 'particles-btn--active' : ''}`}
-        onClick={triggerEffect}
-        aria-label={t('common.particles.ariaLabel', { effect: currentEffect.label })}
-        disabled={isActive || noMotion}
+    <div className="particles-weather-wrapper" ref={triggerRef}>
+      <Tooltip
+        text={currentEffect.label}
+        desc={
+          isActive
+            ? t('common.particles.loading', { progress: Math.ceil(progress) })
+            : weatherHint
+        }
+        position="bottom"
       >
-        {/* Cooldown Progress Ring */}
-        {isActive && (
-          <svg className="particles-progress-ring" viewBox="0 0 40 40" width="40" height="40">
-            <rect
-              className={`particles-progress-ring__circle ${progressClass}`}
-              x="0.5"
-              y="0.5"
-              width="39"
-              height="39"
-              rx="10.5"
-              strokeWidth="2"
-              strokeDasharray={progressRingPerimeter}
-              strokeDashoffset={progressOffset}
-            />
-          </svg>
-        )}
-
-        {/* Effect Icon with Animation */}
-        <svg
-          className={`particles-icon ${activeEffectKey ? `particles-icon--${activeEffectKey}` : ''}`}
-          viewBox="0 0 24 24"
-          width="17"
-          height="17"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
+        <button
+          className={`header-action-btn particles-btn particles-weather-toggle ${isActive ? 'particles-btn--active' : ''}`}
+          onClick={toggleStation}
+          aria-label={t('common.particles.ariaLabel', { effect: currentEffect.label })}
+          aria-expanded={isStationOpen}
+          aria-haspopup="dialog"
+          aria-controls="particles-weather-panel"
+          disabled={noMotion}
         >
-          {/* Étoile / spark central */}
-          <path
-            className="particles-icon__star"
-            d="M12 2 L13.5 8.5 L20 7 L15 12 L20 17 L13.5 15.5 L12 22 L10.5 15.5 L4 17 L9 12 L4 7 L10.5 8.5 Z"
-            fill="currentColor"
-            stroke="none"
-            opacity="0.9"
-          />
-          {/* Rayons dynamiques */}
-          <line
-            className="particles-icon__ray particles-icon__ray--1"
-            x1="12"
-            y1="1"
-            x2="12"
-            y2="4"
-          />
-          <line
-            className="particles-icon__ray particles-icon__ray--2"
-            x1="23"
-            y1="12"
-            x2="20"
-            y2="12"
-          />
-          <line
-            className="particles-icon__ray particles-icon__ray--3"
-            x1="12"
-            y1="23"
-            x2="12"
-            y2="20"
-          />
-          <line
-            className="particles-icon__ray particles-icon__ray--4"
-            x1="1"
-            y1="12"
-            x2="4"
-            y2="12"
-          />
-        </svg>
-      </button>
-    </Tooltip>
+          {isActive && (
+            <svg className="particles-progress-ring" viewBox="0 0 40 40" width="40" height="40">
+              <circle
+                className={`particles-progress-ring__circle ${progressClass}`}
+                cx="20"
+                cy="20"
+                r="18"
+                strokeWidth="2"
+                strokeDasharray={progressRingPerimeter}
+                strokeDashoffset={progressOffset}
+              />
+            </svg>
+          )}
+
+          <svg
+            className={`particles-icon ${activeEffectKey ? `particles-icon--${activeEffectKey}` : ''}`}
+            viewBox="0 0 24 24"
+            width="17"
+            height="17"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              className="particles-icon__star"
+              d="M12 2 L13.5 8.5 L20 7 L15 12 L20 17 L13.5 15.5 L12 22 L10.5 15.5 L4 17 L9 12 L4 7 L10.5 8.5 Z"
+              fill="currentColor"
+              stroke="none"
+              opacity="0.9"
+            />
+            <line className="particles-icon__ray particles-icon__ray--1" x1="12" y1="1" x2="12" y2="4" />
+            <line className="particles-icon__ray particles-icon__ray--2" x1="23" y1="12" x2="20" y2="12" />
+            <line className="particles-icon__ray particles-icon__ray--3" x1="12" y1="23" x2="12" y2="20" />
+            <line className="particles-icon__ray particles-icon__ray--4" x1="1" y1="12" x2="4" y2="12" />
+          </svg>
+
+          <span className="particles-weather-toggle__glyph" aria-hidden="true">
+            {currentEffect.code}
+          </span>
+        </button>
+      </Tooltip>
+
+      {isStationOpen &&
+        panelPos &&
+        createPortal(
+          <div
+            ref={panelRef}
+            id="particles-weather-panel"
+            className={`particles-weather-panel${isActive ? ' particles-weather-panel--active' : ''}`}
+            role="dialog"
+            aria-label={weatherPanelAria}
+            tabIndex={-1}
+            onKeyDown={handlePanelKeyDown}
+            style={{ top: `${panelPos.top}px`, right: `${panelPos.right}px` }}
+          >
+            <div className="particles-weather-panel__header">
+              <p className="particles-weather-panel__title">{weatherPanelTitle}</p>
+              <button
+                type="button"
+                className="particles-weather-panel__close"
+                onClick={closeStation}
+                aria-label={t('common.particles.weather.closeAria')}
+              >
+                x
+              </button>
+            </div>
+
+            <div className="particles-weather-wheel" role="radiogroup" aria-label={weatherPanelTitle}>
+              {localizedEffects.map((effect, index) => {
+                const isSelected = effectIndex === index;
+                const nodePos = WEATHER_NODE_LAYOUT[index];
+
+                return (
+                  <button
+                    key={effect.key}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    aria-label={effect.label}
+                    className={`particles-weather-node${isSelected ? ' particles-weather-node--selected' : ''}`}
+                    style={{ left: nodePos.x, top: nodePos.y }}
+                    onClick={() => setEffectIndex(index)}
+                  >
+                    <span className="particles-weather-node__glyph" aria-hidden="true">
+                      {effect.code}
+                    </span>
+                    <span className="particles-weather-node__label">{effect.label}</span>
+                  </button>
+                );
+              })}
+
+              <button
+                type="button"
+                className={`particles-weather-core${isCharging ? ' particles-weather-core--charging' : ''}`}
+                aria-label={t('common.particles.weather.triggerAria')}
+                onPointerDown={handleCorePointerDown}
+                onPointerUp={handleCorePointerUp}
+                onPointerCancel={handleCorePointerCancel}
+                onPointerLeave={handleCorePointerCancel}
+                onClick={handleCoreClick}
+                disabled={isActive || noMotion}
+              >
+                <span className="particles-weather-core__label">
+                  {isActive ? `${Math.ceil(progress)}%` : weatherTriggerLabel}
+                </span>
+                <span className="particles-weather-core__hint">
+                  {isActive
+                    ? t('common.particles.weather.chargedWithValue', { value: lastCommittedCharge })
+                    : t('common.particles.weather.chargedHint')}
+                </span>
+                {isCharging && (
+                  <svg
+                    className="particles-weather-core__charge"
+                    viewBox="0 0 240 240"
+                    width="240"
+                    height="240"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      className="particles-weather-core__charge-ring"
+                      cx="120"
+                      cy="120"
+                      r="110"
+                      strokeWidth="8"
+                      strokeDasharray={2 * Math.PI * 110}
+                      strokeDashoffset={2 * Math.PI * 110 * (1 - chargeProgress / 100)}
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            <div className="particles-weather-meter" aria-live="polite">
+              <p className="particles-weather-meter__row">
+                <span>{weatherEnergyLabel}</span>
+                <strong>{fieldEnergy}%</strong>
+              </p>
+              <div className="particles-weather-meter__track" aria-hidden="true">
+                <span style={{ width: `${fieldEnergy}%` }} />
+              </div>
+              <p className="particles-weather-meter__row">
+                <span>{weatherCountLabel}</span>
+                <strong>{observedParticles}</strong>
+              </p>
+              <p className="particles-weather-meter__row particles-weather-meter__row--signature">
+                <span>{weatherSignatureLabel}</span>
+                <strong>{currentEffect.signature}</strong>
+              </p>
+              <p className="particles-weather-meter__row particles-weather-meter__row--status">
+                <span>{weatherChargeLabel}</span>
+                <strong>{panelStatus}</strong>
+              </p>
+            </div>
+          </div>,
+          document.body
+        )}
+    </div>
   );
 };
 

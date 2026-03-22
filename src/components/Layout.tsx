@@ -9,6 +9,7 @@ import HamburgerMenu from './HamburgerMenu';
 import LanguageButton from './LanguageButton';
 import MiniTerminal from './MiniTerminal';
 import MoodSwitcher from './MoodSwitcher';
+import { useToast } from '../contexts/ToastContext';
 import { useMood } from '../contexts/MoodContext';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import ParticlesButton from './ParticlesButton';
@@ -21,12 +22,14 @@ import usePortfolioModules from '../hooks/usePortfolioModules';
 import useSessionTracking from '../hooks/useSessionTracking';
 import { getAssetPath } from '../utils/assetPath';
 import { discoverMusicTracks } from '../utils/discoverMusicTracks';
+import { safeSessionGet, safeSessionSet } from '../utils/safeStorage';
 import { ReadingTimeProvider } from '../contexts/ReadingTimeContext';
 const AmbientEffects = lazy(() => import('./ambient/AmbientEffects'));
 const FooterDiorama = lazy(() => import('./ambient/FooterDiorama'));
 
 const trackFiles = discoverMusicTracks();
 const BACKGROUND_TRANSITION_MS = 650;
+const MOBILE_DESKTOP_HINT_SESSION_KEY = 'portfolio-mobile-desktop-hint-shown';
 
 interface PageConfigItem {
   headingKey: string;
@@ -126,6 +129,7 @@ const Layout = () => {
   const config = pageConfig[location.pathname] || pageConfig['/'];
   const { mood } = useMood();
   const { settings: accessibilitySettings } = useAccessibility();
+  const { showToast } = useToast();
   const [isLanguageTransitioning, setIsLanguageTransitioning] = useState(false);
   const [activeBackgroundSrc, setActiveBackgroundSrc] = useState(config.backgroundSrc);
   const [overlayBackgroundSrc, setOverlayBackgroundSrc] = useState<string | null>(null);
@@ -246,6 +250,21 @@ const Layout = () => {
       window.scrollTo(0, 0);
     });
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (safeSessionGet(MOBILE_DESKTOP_HINT_SESSION_KEY) === 'true') return;
+
+    const isMobileViewport = window.matchMedia('(max-width: 900px)').matches;
+    const isTouchPrimary = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (!isMobileViewport || !isTouchPrimary) return;
+
+    safeSessionSet(MOBILE_DESKTOP_HINT_SESSION_KEY, 'true');
+    showToast(t('common.toast.mobileDesktopHint'), {
+      type: 'info',
+      duration: 5200,
+    });
+  }, [showToast, t]);
 
   return (
     <>

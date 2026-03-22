@@ -88,6 +88,34 @@
       "ariaLabel": "Particle effect: {{effect}}",
       "clickToTrigger": "Click to trigger",
       "loading": "Loading {{progress}}%",
+      "weather": {
+        "panelTitle": "Particle Station",
+        "panelAria": "Particle effects control panel",
+        "hint": "Select a mode, hold the core, then release.",
+        "closeAria": "Close particle station",
+        "triggerAria": "Hold and release to trigger the selected effect",
+        "triggerLabel": "TRIGGER",
+        "chargeLabel": "Status",
+        "energyLabel": "Field energy",
+        "countLabel": "Active particles",
+        "signatureLabel": "Signature",
+        "statusReady": "ready",
+        "statusActive": "active",
+        "chargedHint": "Hold to charge, then release.",
+        "chargedWithValue": "Stored charge: {{value}}%",
+        "codes": {
+          "explode": "BURST",
+          "attract": "PULL",
+          "storm": "STRM",
+          "gravity": "GRAV"
+        },
+        "signatures": {
+          "explode": "Radial burst",
+          "attract": "Local convergence",
+          "storm": "Orbital turbulence",
+          "gravity": "Damped descent"
+        }
+      },
       "effects": {
         "explode": {
           "label": "Explosion",
@@ -172,7 +200,9 @@
     },
     "toast": {
       "close": "Close notification",
+      "dismiss": "Dismiss",
       "region": "Notifications",
+      "mobileDesktopHint": "Mobile-optimized mode is active. For the most complete experience, visit the site on a PC too.",
       "debug": {
         "success": "Operation completed successfully!",
         "error": "Unable to load resource.",
@@ -222,6 +252,27 @@
       "openAria": "Open mini terminal",
       "dialogAria": "Mini terminal",
       "run": "RUN",
+      "boot": {
+        "progressLabel": "Signal",
+        "modes": ["BOOT", "SYNC", "SCAN", "PRIME"],
+        "channels": ["crt://warmup", "crt://signal", "crt://retroflux", "crt://phase"],
+        "lines": [
+          "kernel://core.reactor ........... load",
+          "init://cathode.monitor ......... ok",
+          "memory://cache.buffer ......... ready",
+          "device://audio.interface ....... ok",
+          "sync://prompt.engine .......... ok",
+          "route://portfolio.shell ....... ok",
+          "io://input.handler ............ ok",
+          "cache://session.locale ........ ok",
+          "scan://particles.matrix ....... ok",
+          "attach://music.bus ............ ok",
+          "verify://mood.palette ......... ok",
+          "system://graphics.layer ....... ready",
+          "network://async.module ........ ok",
+          "service://accessibility.daemon . ok"
+        ]
+      },
       "placeholder": "Type a command...",
       "inputAria": "Command input",
       "welcome": "Welcome! Type \"help\" for command list.",

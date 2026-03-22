@@ -363,8 +363,8 @@ header.header--main .hamburger-toggle {
 @media (max-width: 768px) {
   header.header--main {
     display: grid;
-    grid-template-columns: auto auto 1fr auto;
-    grid-template-areas: 'brand controls . burger';
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: 'brand controls . mood burger';
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
@@ -387,12 +387,21 @@ header.header--main .hamburger-toggle {
   }
 
   .header--actions {
-    display: none;
+    grid-area: mood;
+    display: flex;
+    align-items: center;
+    justify-self: end;
+    gap: 0.35rem;
+  }
+
+  .header--actions > :not(.mood-switcher-wrapper) {
+    display: none !important;
   }
 
   /* Hamburger occupies the burger slot */
   header.header--main .hamburger-toggle {
     grid-area: burger;
+    justify-self: end;
   }
 
   .header--secondary {
@@ -453,6 +462,10 @@ header.header--main .hamburger-toggle {
 
   .header--controls {
     gap: 0.25rem;
+  }
+
+  .header--actions {
+    gap: 0.2rem;
   }
 }
 

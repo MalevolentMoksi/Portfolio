@@ -88,6 +88,34 @@
       "ariaLabel": "Effet particules : {{effect}}",
       "clickToTrigger": "Cliquer pour déclencher",
       "loading": "Chargement {{progress}}%",
+      "weather": {
+        "panelTitle": "Station Particulaire",
+        "panelAria": "Panneau de contrôle des effets particules",
+        "hint": "Sélectionne un mode, maintiens le coeur, puis relâche.",
+        "closeAria": "Fermer la station particulaire",
+        "triggerAria": "Maintenir puis relâcher pour déclencher l'effet sélectionné",
+        "triggerLabel": "DECLENCHER",
+        "chargeLabel": "Etat",
+        "energyLabel": "Energie de champ",
+        "countLabel": "Particules actives",
+        "signatureLabel": "Signature",
+        "statusReady": "pret",
+        "statusActive": "actif",
+        "chargedHint": "Maintiens pour charger puis relache.",
+        "chargedWithValue": "Charge memorisee : {{value}}%",
+        "codes": {
+          "explode": "BURST",
+          "attract": "PULL",
+          "storm": "STRM",
+          "gravity": "GRAV"
+        },
+        "signatures": {
+          "explode": "Projection radiale",
+          "attract": "Convergence locale",
+          "storm": "Turbulence orbitale",
+          "gravity": "Chute amortie"
+        }
+      },
       "effects": {
         "explode": {
           "label": "Explosion",
@@ -172,7 +200,9 @@
     },
     "toast": {
       "close": "Fermer la notification",
+      "dismiss": "Fermer",
       "region": "Notifications",
+      "mobileDesktopHint": "Version mobile optimisée active. Pour une expérience plus complète, visitez aussi le site sur PC.",
       "debug": {
         "success": "Opération réussie avec succès !",
         "error": "Impossible de charger la ressource.",
@@ -222,6 +252,27 @@
       "openAria": "Ouvrir le mini-terminal",
       "dialogAria": "Mini terminal",
       "run": "RUN",
+      "boot": {
+        "progressLabel": "Signal",
+        "modes": ["BOOT", "SYNC", "SCAN", "PRIME"],
+        "channels": ["crt://warmup", "crt://signal", "crt://retroflux", "crt://phase"],
+        "lines": [
+          "kernel://noyau.reacteur ........ charge",
+          "init://moniteur.cathodique .... ok",
+          "memory://tampon.cache ........ pret",
+          "device://interface.audio ...... ok",
+          "sync://moteur.prompt ......... ok",
+          "route://shell.portfolio ....... ok",
+          "io://gestionnaire.entree ...... ok",
+          "cache://session.locale ....... ok",
+          "scan://particules.matrice .... ok",
+          "attach://musique.bus ......... ok",
+          "verify://mood.palette ........ ok",
+          "system://couche.graphics ...... pret",
+          "network://module.async ........ ok",
+          "service://daemon.accessibilite . ok"
+        ]
+      },
       "placeholder": "Tapez une commande...",
       "inputAria": "Saisie de commande",
       "welcome": "Bienvenue ! Tapez \"help\" pour la liste des commandes.",
