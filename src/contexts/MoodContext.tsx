@@ -72,16 +72,21 @@ export const MoodProvider = ({ children }: MoodProviderProps) => {
     moodStages.forEach((stage) => applyMoodAttributesToElement(stage, m));
 
     // Reconfigurer les particules (physique + couleurs) pour le nouveau mood
-    const tryReconfigure = (): void => {
+    const reconfigureIfAvailable = (): boolean => {
       if (typeof window.reconfigureParticles === 'function') {
         window.reconfigureParticles(m);
+        return true;
       } else if (typeof window.updateParticlesMood === 'function') {
         window.updateParticlesMood(m);
+        return true;
       }
+      return false;
     };
-    tryReconfigure();
-    // Retry si les particules ne sont pas encore chargées
-    setTimeout(tryReconfigure, 500);
+    
+    // Only retry if particles weren't available on first call
+    if (!reconfigureIfAvailable()) {
+      setTimeout(reconfigureIfAvailable, 500);
+    }
   }, []);
 
   const setMood = useCallback(
@@ -110,12 +115,16 @@ export const MoodProvider = ({ children }: MoodProviderProps) => {
 
   /* ── Appliquer le mood initial au montage et respecter les changements d'accessibilité ── */
   useEffect(() => {
+    const currentMoodOnDom = document.body.getAttribute('data-mood') as MoodKey | null;
+    
     // If high contrast is on and current mood is not default, force default
     if (a11ySettings.highContrast && mood !== 'default') {
       setMoodState('default');
       safeLocalSet('portfolio-mood', 'default');
       applyMood('default');
-    } else {
+    } else if (currentMoodOnDom !== mood) {
+      // Only apply mood if it's different from what's already on the DOM
+      // (avoid double-initialization during page load when VisualEffects just set it)
       applyMood(mood);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
