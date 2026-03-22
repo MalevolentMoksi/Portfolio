@@ -18,6 +18,9 @@ const swUrl = `${basePath}sw.js`;
 
 if ('serviceWorker' in navigator && isSecureOrigin) {
   const registerServiceWorker = () => {
+    // Guard: prevent multiple reloads from SW updates
+    let hasReloadedForSwUpdate = false;
+
     navigator.serviceWorker
       .register(swUrl, { scope: basePath })
       .then((registration) => {
@@ -34,10 +37,17 @@ if ('serviceWorker' in navigator && isSecureOrigin) {
           });
         });
 
-        // Handle skip-waiting message from new SW
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          window.location.reload();
-        });
+        // Handle skip-waiting message from new SW — reload only once
+        const handleControllerChange = () => {
+          if (!hasReloadedForSwUpdate) {
+            hasReloadedForSwUpdate = true;
+            // Defer reload to allow SW to fully activate
+            setTimeout(() => {
+              window.location.reload();
+            }, 100);
+          }
+        };
+        navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
 
         // console.log('Service Worker registered:', registration);
       })
