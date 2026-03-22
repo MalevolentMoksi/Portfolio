@@ -10,7 +10,7 @@
 import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 const ICICLE_COUNTS = { high: 32, mid: 16, low: 0 };
 
@@ -25,11 +25,12 @@ const ICE_FILLS = [
 
 const EuropaIcicles = () => {
   const { mood } = useMood();
+  const tier = usePerformanceTierValue();
 
   const icicles = useMemo(() => {
     if (mood !== 'europa') return null;
 
-    const count = ICICLE_COUNTS[getPerformanceTier()] ?? 16;
+    const count = ICICLE_COUNTS[tier] ?? 16;
     if (count === 0) return null;
 
     const items = [];
@@ -71,7 +72,7 @@ const EuropaIcicles = () => {
       );
     }
     return items;
-  }, [mood]);
+  }, [mood, tier]);
 
   if (!icicles) return null;
 

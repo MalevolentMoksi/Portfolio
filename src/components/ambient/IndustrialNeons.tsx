@@ -14,7 +14,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 const SIGN_COUNTS = { high: 3, mid: 2, low: 0 };
 
@@ -209,6 +209,7 @@ const CautionSign = () => (
 
 const IndustrialNeons = () => {
   const { mood } = useMood();
+  const tier = usePerformanceTierValue();
   const [headerEl, setHeaderEl] = useState<any>(null);
 
   useEffect(() => {
@@ -217,7 +218,7 @@ const IndustrialNeons = () => {
 
   if (mood !== 'industrial') return null;
 
-  const count = SIGN_COUNTS[getPerformanceTier()] ?? 2;
+  const count = SIGN_COUNTS[tier] ?? 2;
   if (count === 0) return null;
 
   const ambientRoot = document.getElementById('ambient-root') || document.body;

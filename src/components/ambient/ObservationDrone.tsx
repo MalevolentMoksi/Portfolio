@@ -18,7 +18,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 /* ═══════════════════════════════════════════
    Constantes
@@ -121,7 +121,7 @@ const ScanCone = () => (
    ═══════════════════════════════════════════ */
 
 const ObservationDrone = () => {
-  const tier = getPerformanceTier();
+  const tier = usePerformanceTierValue();
   const containerRef = useRef<any>(null);
   const mainRectRef = useRef<any>(null);
   const timerRef = useRef<any>(null);

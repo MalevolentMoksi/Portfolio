@@ -2,8 +2,9 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip';
 import { useToast } from '../contexts/ToastContext';
-import { getPerformanceTier } from '../utils/performanceTier';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
+import type { PerformanceTier } from '@/types';
 
 /* ── Configuration des effets ─────────────────────── */
 const EFFECT_ICONS = {
@@ -267,12 +268,15 @@ const smoothRestore = (duration = 1500) => {
  * Chaque effet retourne un objet { restoreHandle } pour permettre
  * au composant d'annuler le smoothRestore si besoin.
  */
-const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHandle: any }> = {
+const effects: Record<
+  EffectKey,
+  (signal: EffectSignal, tier: PerformanceTier) => { readonly restoreHandle: any }
+> = {
   /**
    * Explosion : spawn dans les coins supérieurs
    * et projection radiale de toutes les particules.
    */
-  explode(signal: any) {
+  explode(signal: any, tier: PerformanceTier) {
     setParticlesForeground(true);
     const pJS = getPJS();
     if (!pJS) return { restoreHandle: null };
@@ -286,7 +290,7 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
     const headerH = 70;
 
     // Adapter le nombre de particules spawnées au tier + mood
-    const baseSpawnCount = getPerformanceTier() === 'low' ? 8 : 15;
+    const baseSpawnCount = tier === 'low' ? 8 : 15;
     const spawnCount = Math.max(6, Math.round(baseSpawnCount * profile.spawnMult));
 
     for (let i = 0; i < spawnCount; i++) {
@@ -383,7 +387,7 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
   /**
    * Tempête : ajoute des particules bonus et uniformise leur vitesse.
    */
-  storm(signal: any) {
+  storm(signal: any, tier: PerformanceTier) {
     setParticlesForeground(true);
     window.petReact?.('dizzy');
 
@@ -393,8 +397,7 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
 
     const originalCount = pJS.particles.array.length;
     // Adapter le nombre de particules bonus au tier (proportionnel au baseline réduit)
-    const baseMaxBonus =
-      getPerformanceTier() === 'low' ? 20 : getPerformanceTier() === 'mid' ? 40 : 60;
+    const baseMaxBonus = tier === 'low' ? 20 : tier === 'mid' ? 40 : 60;
     const maxBonus = Math.round(baseMaxBonus * profile.stormBonusMult);
     const bonus = Math.min(originalCount, maxBonus);
     const stormSpeed = profile.stormSpeed;
@@ -490,6 +493,7 @@ const effects: Record<EffectKey, (signal: EffectSignal) => { readonly restoreHan
 const ParticlesButton = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
+  const tier = usePerformanceTierValue();
   const { settings: a11ySettings } = useAccessibility();
   const noMotion = a11ySettings.noMotion;
   const [effectIndex, setEffectIndex] = useState(0);
@@ -527,7 +531,7 @@ const ParticlesButton = () => {
       duration: effect.duration,
       icon: EFFECT_ICONS[effect.key as EffectKey],
     });
-    const result = effects[effect.key as EffectKey](signal);
+    const result = effects[effect.key as EffectKey](signal, tier);
 
     // Intercepter le smoothRestore retourné par l'effet (via getter lazy)
     // pour pouvoir l'annuler au démontage
@@ -570,7 +574,7 @@ const ParticlesButton = () => {
         setEffectIndex((i) => (i + 1) % EFFECTS.length);
       }
     }, 100);
-  }, [effectIndex, localizedEffects, showToast]);
+  }, [effectIndex, localizedEffects, showToast, tier]);
 
   // Cleanup complet au démontage : annuler RAF leaks + intervals
   useEffect(() => {

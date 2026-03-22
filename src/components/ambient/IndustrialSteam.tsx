@@ -11,7 +11,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 const VENT_COUNTS = { high: 6, mid: 3, low: 0 };
 const PUFF_INTERVAL_MIN = 2600; // 2.6 s
@@ -78,11 +78,12 @@ let _puffId = 0;
 
 const IndustrialSteam = () => {
   const { mood } = useMood();
+  const tier = usePerformanceTierValue();
   const [puffs, setPuffs] = useState<any[]>([]);
   const [footerEl, setFooterEl] = useState<any>(null);
   const timersRef = useRef<any[]>([]);
 
-  const ventCount = VENT_COUNTS[getPerformanceTier()] ?? 2;
+  const ventCount = VENT_COUNTS[tier] ?? 2;
   const active = mood === 'industrial' && ventCount > 0;
 
   /* Positions aléatoires stables dans la zone centrale du footer */

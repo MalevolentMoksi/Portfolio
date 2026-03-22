@@ -28,7 +28,7 @@ import CatchGame from './CatchGame';
 import AchievementsPanel from './AchievementsPanel';
 import { FOOD_ICONS } from './petData';
 import Tooltip from '../Tooltip';
-import { byTier } from '@utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 import type { ThoughtItem } from './ThoughtBubbleQueue';
 
 interface PetStats {
@@ -64,7 +64,7 @@ interface WanderingPetProps {
 }
 
 // Intercept prediction loop cap — adapté au tier de performance
-const INTERCEPT_STEPS = byTier({ high: 40, mid: 25, low: 15 });
+const INTERCEPT_STEPS_BY_TIER = { high: 40, mid: 25, low: 15 };
 
 // forwardRef permet à AnimatePresence (PetButton) de transmettre sa ref sans warning React.
 // Le portal rend dans document.body donc la ref n'est pas attachée à un DOM node visible.
@@ -98,6 +98,8 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
   _ref
 ) {
   const { t } = useTranslation();
+  const tier = usePerformanceTierValue();
+  const interceptSteps = INTERCEPT_STEPS_BY_TIER[tier] ?? 25;
   const PET_TOP_MIN = HALF;
   // Position initiale aléatoire (calculée une seule fois)
   const posRef = useRef<any>(null);
@@ -504,7 +506,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
               bh = window.innerHeight;
             const ballR = 11; // CATCH_BALL_SIZE / 2
             let bestPt = { x: sx, y: sy };
-            for (let i = 1; i <= INTERCEPT_STEPS; i++) {
+            for (let i = 1; i <= interceptSteps; i++) {
               svy += CATCH_BALL_GRAVITY;
               svx *= 0.997;
               svy *= 0.997;

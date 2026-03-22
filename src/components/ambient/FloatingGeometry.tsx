@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 const SHAPE_TYPES = ['orb', 'diamond', 'triangle', 'ring', 'bar'];
 const SHAPE_COUNT = { high: 5, mid: 3, low: 2 };
@@ -10,7 +10,7 @@ const randomInRange = (min: any, max: any) => min + Math.random() * (max - min);
 
 const FloatingGeometry = () => {
   const { mood } = useMood();
-  const tier = getPerformanceTier();
+  const tier = usePerformanceTierValue();
 
   if (mood !== 'default') return null;
 

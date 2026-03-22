@@ -6,7 +6,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 interface Spore {
   el: HTMLDivElement;
@@ -45,7 +45,7 @@ const SPORE_COLORS = [
 
 const NightshadeSpores = () => {
   const { mood } = useMood();
-  const tier = getPerformanceTier();
+  const tier = usePerformanceTierValue();
   const pointerRef = useRef({ x: 0, y: 0, active: false });
   const rafRef = useRef<number>(0);
   const activeRef = useRef(false);

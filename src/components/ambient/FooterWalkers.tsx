@@ -17,7 +17,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { isLowTier, isHighTier } from '@utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 /* ═══════════════════════════════════════════
    Constantes
@@ -752,6 +752,7 @@ const SingleWalker = ({ id: walkerId, character, startX, phases, footerRef, onDo
    ═══════════════════════════════════════════ */
 
 const FooterWalkers = () => {
+  const tier = usePerformanceTierValue();
   const [walkers, setWalkers] = useState<any[]>([]);
   const footerRef = useRef<any>(null);
   const spawnTimerRef = useRef<any>(null);
@@ -778,7 +779,7 @@ const FooterWalkers = () => {
       spawnTimerRef.current = null;
     }
 
-    const allowDuo = isHighTier();
+    const allowDuo = tier === 'high';
     const script = scriptId
       ? SCRIPTS.find((s) => s.id === scriptId) || pickScript(allowDuo)
       : pickScript(allowDuo);
@@ -814,7 +815,7 @@ const FooterWalkers = () => {
     spawnTimerRef.current = setTimeout(() => {
       if (mountedRef.current) spawnScript();
     }, totalWait);
-  }, []);
+  }, [tier]);
 
   // Premier spawn différé
   useEffect(() => {
@@ -840,7 +841,7 @@ const FooterWalkers = () => {
   }, [spawnScript, walkers]);
 
   // Performance gate : rien sur low tier
-  if (isLowTier()) return null;
+  if (tier === 'low') return null;
 
   const portalTarget = document.getElementById('ambient-root') || document.body;
 

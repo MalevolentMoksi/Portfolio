@@ -12,17 +12,17 @@
 import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 const FLAKE_COUNTS = { high: 20, mid: 10, low: 0 };
 
 const EuropaSnowfall = () => {
   const { mood } = useMood();
+  const tier = usePerformanceTierValue();
 
   const flakes = useMemo(() => {
     if (mood !== 'europa') return null;
 
-    const tier = getPerformanceTier();
     const count = FLAKE_COUNTS[tier] ?? 10;
     if (count === 0) return null;
 
@@ -52,7 +52,7 @@ const EuropaSnowfall = () => {
       );
     }
     return items;
-  }, [mood]);
+  }, [mood, tier]);
 
   if (!flakes) return null;
 

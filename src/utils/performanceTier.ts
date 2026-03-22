@@ -15,6 +15,18 @@ import type { PerformanceTier } from '@/types';
 const SS_KEY = 'perf-tier-v3';
 const SS_FPS_KEY = 'perf-fps-v3';
 
+export const PERFORMANCE_TIER_CHANGE_EVENT = 'portfolio:performance-tier-change';
+
+export interface PerformanceTierChangeDetail {
+  previousTier: PerformanceTier;
+  nextTier: PerformanceTier;
+  reason: 'fps-monitor';
+}
+
+interface NavigatorWithHints extends Navigator {
+  deviceMemory?: number;
+}
+
 // Safe sessionStorage helpers — some environments (privacy extensions)
 // may throw on access to storage. We silently ignore failures.
 const safeSessionGet = (key: string): string | null => {
@@ -33,6 +45,34 @@ const safeSessionSet = (key: string, value: string): void => {
   }
 };
 
+const applyTierAttributes = (tier: PerformanceTier): void => {
+  if (typeof document === 'undefined') return;
+
+  document.body?.setAttribute('data-perf-tier', tier);
+  const moodStages = document.querySelectorAll<HTMLElement>('.mood-stage');
+  moodStages.forEach((stage) => {
+    stage.setAttribute('data-perf-tier', tier);
+  });
+};
+
+const emitTierChange = (detail: PerformanceTierChangeDetail): void => {
+  if (typeof window === 'undefined') return;
+
+  window.dispatchEvent(
+    new CustomEvent<PerformanceTierChangeDetail>(PERFORMANCE_TIER_CHANGE_EVENT, {
+      detail,
+    })
+  );
+};
+
+const getDeviceMemoryGb = (): number | null => {
+  const memory = (navigator as NavigatorWithHints).deviceMemory;
+  if (typeof memory !== 'number' || !Number.isFinite(memory) || memory <= 0) {
+    return null;
+  }
+  return memory;
+};
+
 /* ────────────────────────────────────────────
    Détection synchrone basée sur les hints hardware
    ──────────────────────────────────────────── */
@@ -47,26 +87,46 @@ const isTouchDevice = (): boolean =>
   window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches ?? false;
 
 const detectTierSync = (): PerformanceTier => {
-  // 1. prefers-reduced-motion → forcer 'low' (accessibilité, W3C standard)
-  if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
-    return 'low';
-  }
-
-  // 2. hardwareConcurrency — seul signal hardware retenu
+  const prefersReducedMotion =
+    window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
   const cores = navigator.hardwareConcurrency || 0;
+  const memoryGb = getDeviceMemoryGb();
+  const touch = isTouchDevice();
+  let score = 0;
 
-  if (cores === 0) {
-    // API non disponible (très rare) → prudence
-    return 'mid';
+  // Heuristic designed to keep capable devices on high by default,
+  // and only downgrade when multiple weak signals agree.
+  if (cores > 0) {
+    if (cores <= 2) score -= 3;
+    else if (cores <= 4) score -= 1;
+    else if (cores >= 8) score += 1;
+  } else {
+    // API indisponible (rare): légère prudence.
+    score -= 1;
   }
 
-  // Moins de 4 cœurs logiques → machine clairement faible
-  if (cores < 4) return 'low';
+  if (memoryGb !== null) {
+    if (memoryGb <= 2) score -= 2;
+    else if (memoryGb <= 4) score -= 1;
+    else if (memoryGb >= 8) score += 1;
+  }
 
-  // Sur mobile/tactile, même avec ≥ 4 cœurs, on plafonne à 'mid' :
-  // les téléphones haut de gamme n'ont pas la GPU/batterie d'un desktop
-  // et souffriraient avec les particules + effets haute qualité.
-  if (isTouchDevice()) return 'mid';
+  if (touch) {
+    score -= 1;
+    // High-end mobiles/tablettes restent éligibles au tier high.
+    if (cores >= 8 && (memoryGb === null || memoryGb >= 6)) {
+      score += 1;
+    }
+  }
+
+  // Préférence utilisateur (a11y), pas un benchmark hardware.
+  // On applique un léger abaissement visuel sans forcer low.
+  if (prefersReducedMotion) {
+    score -= 1;
+  }
+
+  if (score <= -3) return 'low';
+  if (score <= -1) return 'mid';
 
   return 'high';
 };
@@ -84,18 +144,43 @@ let _fpsRunning = false;
  * les recalculs à chaque navigation SPA.
  */
 export const getPerformanceTier = (): PerformanceTier => {
-  if (_cached) return _cached;
+  if (_cached) {
+    applyTierAttributes(_cached);
+    return _cached;
+  }
 
   // Vérifier si déjà mesuré/abaissé dans cette session (protéger l'accès)
   const stored = safeSessionGet(SS_KEY);
   if (stored === 'high' || stored === 'mid' || stored === 'low') {
     _cached = stored;
+    applyTierAttributes(_cached);
     return _cached;
   }
 
   _cached = detectTierSync();
   safeSessionSet(SS_KEY, _cached);
+  applyTierAttributes(_cached);
   return _cached;
+};
+
+export const subscribePerformanceTierChanges = (
+  listener: (detail: PerformanceTierChangeDetail) => void
+): (() => void) => {
+  if (typeof window === 'undefined') {
+    return () => {};
+  }
+
+  const handler = (event: Event): void => {
+    const customEvent = event as CustomEvent<PerformanceTierChangeDetail>;
+    if (customEvent.detail) {
+      listener(customEvent.detail);
+    }
+  };
+
+  window.addEventListener(PERFORMANCE_TIER_CHANGE_EVENT, handler as EventListener);
+  return () => {
+    window.removeEventListener(PERFORMANCE_TIER_CHANGE_EVENT, handler as EventListener);
+  };
 };
 
 /* ────────────────────────────────────────────
@@ -110,10 +195,10 @@ interface FpsMonitorOptions {
 }
 
 export const startFpsMonitor = ({
-  sampleFrames = 90,
-  fpsThreshold = 35,
-  delayMs = 5000,
-  warmupFrames = 10,
+  sampleFrames = 120,
+  fpsThreshold = 30,
+  delayMs = 7000,
+  warmupFrames = 20,
 }: FpsMonitorOptions = {}): void => {
   // Ne mesurer qu'une fois par session (flag stocké) — accès protégé
   if (safeSessionGet(SS_FPS_KEY)) return;
@@ -163,20 +248,15 @@ export const startFpsMonitor = ({
           else if (current === 'mid') degraded = 'low';
 
           // Mettre à jour le cache et le sessionStorage (protégé)
-          _cached = degraded;
-          safeSessionSet(SS_KEY, degraded);
-
-          // Notification si dégradation
-          try {
-            if (degraded !== current && (degraded === 'mid' || degraded === 'low')) {
-              if (typeof window !== 'undefined' && typeof window.showToast === 'function') {
-                const msg =
-                  'Performance réduite : une version allégée du site a été activée en raison des capacités de votre appareil. Certaines animations et effets ont été réduits pour améliorer la fluidité.';
-                window.showToast(msg, { type: 'warning', duration: 0 });
-              }
-            }
-          } catch {
-            // ignore errors when showing toast
+          if (degraded !== current) {
+            _cached = degraded;
+            safeSessionSet(SS_KEY, degraded);
+            applyTierAttributes(degraded);
+            emitTierChange({
+              previousTier: current,
+              nextTier: degraded,
+              reason: 'fps-monitor',
+            });
           }
         }
 
@@ -220,3 +300,33 @@ export const byTier = <T>(map: Record<PerformanceTier, T>): T => map[getPerforma
  * Call this BEFORE getPerformanceTier() to test freshness.
  */
 export const isTierStoredInSession = (): boolean => safeSessionGet(SS_KEY) !== null;
+
+export interface PerformanceTierDiagnostics {
+  tier: PerformanceTier;
+  measuredFps: number | null;
+  hardwareConcurrency: number;
+  deviceMemoryGb: number | null;
+  isTouchDevice: boolean;
+  prefersReducedMotion: boolean;
+  isTierStoredInSession: boolean;
+}
+
+export const getPerformanceTierDiagnostics = (): PerformanceTierDiagnostics => {
+  const rawFps = safeSessionGet(SS_FPS_KEY);
+  const parsedFps = rawFps ? Number.parseFloat(rawFps) : Number.NaN;
+
+  return {
+    tier: getPerformanceTier(),
+    measuredFps: Number.isFinite(parsedFps) ? parsedFps : null,
+    hardwareConcurrency: navigator.hardwareConcurrency || 0,
+    deviceMemoryGb: getDeviceMemoryGb(),
+    isTouchDevice: isTouchDevice(),
+    prefersReducedMotion:
+      window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false,
+    isTierStoredInSession: isTierStoredInSession(),
+  };
+};
+
+if (typeof window !== 'undefined') {
+  window.getPerformanceTierDiagnostics = getPerformanceTierDiagnostics;
+}

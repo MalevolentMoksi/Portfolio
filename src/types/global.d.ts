@@ -94,5 +94,8 @@ declare global {
     spawnWalker?: (scriptId?: string) => void;
     spawnCommuter?: (type?: 'spacecraft' | 'satellite' | 'rover') => void;
     getWalkerState?: () => unknown;
+
+    /* Performance-tier diagnostics */
+    getPerformanceTierDiagnostics?: () => unknown;
   }
 }

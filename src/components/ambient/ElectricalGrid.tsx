@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 const ARC_PATHS = [
   'M 6 76 Q 16 60 26 76',
@@ -12,7 +12,7 @@ const ARC_PATHS = [
 
 const ElectricalGrid = () => {
   const { mood } = useMood();
-  const tier = getPerformanceTier();
+  const tier = usePerformanceTierValue();
 
   if (mood !== 'industrial') return null;
 

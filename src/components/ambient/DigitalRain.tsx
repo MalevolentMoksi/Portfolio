@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 // Fewer total columns — long dormant periods in the animation
 // keep only ~2-3 visible at any moment
@@ -49,7 +49,7 @@ const RainColumn = ({ style, initialText }: any) => {
 
 const DigitalRain = () => {
   const { mood } = useMood();
-  const tier = getPerformanceTier();
+  const tier = usePerformanceTierValue();
 
   // Compute count before any early return (hooks ordering)
   const count = mood === 'hacker' ? (COLUMN_COUNT[tier] ?? 0) : 0;

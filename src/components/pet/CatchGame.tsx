@@ -18,7 +18,7 @@ import {
   CATCH_BOT_THROW_SPREAD,
 } from './petConstants';
 
-import { byTier } from '@utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 import { safeLocalGet, safeLocalSet } from '@utils/safeStorage';
 
 /* ── Type definitions ── */
@@ -72,7 +72,7 @@ const BALL_R = CATCH_BALL_SIZE / 2;
 const BOT_CATCH = CATCH_BOT_RADIUS;
 const BALL_TOP_MIN = BALL_R;
 const VEL_HIST_MAX = 6;
-const AIM_STEPS = byTier({ high: 22, mid: 16, low: 10 });
+const AIM_STEPS_BY_TIER = { high: 22, mid: 16, low: 10 };
 const AIM_DT = 2.5;
 const AIM_DIRTY_THRESH = 0.3; // seuil de changement pour recalculer la visée
 const HINT_DELAY_MS = 3000;
@@ -183,6 +183,8 @@ const CatchGame = ({
   stats,
   onUnlockAchievement,
 }: CatchGameProps) => {
+  const tier = usePerformanceTierValue();
+  const aimSteps = AIM_STEPS_BY_TIER[tier] ?? 16;
   const { t } = useTranslation();
   const startX = window.innerWidth / 2;
   const startY = window.innerHeight - 120;
@@ -673,7 +675,7 @@ const CatchGame = ({
       svx = vx,
       svy = vy - getTrajectoryBias(chargeFactor);
     let d = `M${sx.toFixed(1)},${sy.toFixed(1)}`;
-    for (let i = 0; i < AIM_STEPS; i++) {
+    for (let i = 0; i < aimSteps; i++) {
       svy += CATCH_BALL_GRAVITY * AIM_DT;
       svx *= AIR_FRICTION;
       svy *= AIR_FRICTION;

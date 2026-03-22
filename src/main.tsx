@@ -4,6 +4,7 @@ import App from './App';
 import './i18n';
 import { AccessibilityProvider } from './contexts/AccessibilityContext';
 import { MoodProvider } from './contexts/MoodContext';
+import { PerformanceTierProvider } from './contexts/PerformanceTierContext';
 import { ToastProvider } from './contexts/ToastContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import '@styles/main.css';
@@ -43,13 +44,15 @@ if (!root) {
 createRoot(root).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <AccessibilityProvider>
-        <MoodProvider>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
-        </MoodProvider>
-      </AccessibilityProvider>
+      <PerformanceTierProvider>
+        <AccessibilityProvider>
+          <MoodProvider>
+            <ToastProvider>
+              <App />
+            </ToastProvider>
+          </MoodProvider>
+        </AccessibilityProvider>
+      </PerformanceTierProvider>
     </ErrorBoundary>
   </React.StrictMode>
 );

@@ -20,7 +20,7 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 interface Boid {
   x: number;
@@ -109,6 +109,7 @@ const edgeRepulsion = (
 
 const AmbientBoids = () => {
   const { mood } = useMood();
+  const tier = usePerformanceTierValue();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const boidsRef = useRef<Boid[]>([]);
   const mouseRef = useRef({ x: -9999, y: -9999 });
@@ -117,7 +118,6 @@ const AmbientBoids = () => {
   const rafRef = useRef<number | null>(null);
   const sizeRef = useRef({ w: 0, h: 0 });
 
-  const tier = getPerformanceTier();
   const count = BOID_COUNTS[tier] ?? 12;
 
   /* ── Lecture de la couleur mood ── */

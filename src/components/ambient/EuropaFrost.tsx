@@ -14,7 +14,7 @@
 import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 /* ─── Générateur de branches ─── */
 const branch = (ox: any, oy: any, angle: any, len: any) => {
@@ -66,11 +66,11 @@ const CORNERS = [
 
 const EuropaFrost = () => {
   const { mood } = useMood();
+  const tier = usePerformanceTierValue();
 
   const elements = useMemo(() => {
     if (mood !== 'europa') return null;
 
-    const tier = getPerformanceTier();
     if (tier === 'low') return null;
 
     const cornersToRender = tier === 'high' ? CORNERS : [CORNERS[0], CORNERS[3]]; // mid = 2 coins
@@ -104,7 +104,7 @@ const EuropaFrost = () => {
     }
 
     return cornerEls;
-  }, [mood]);
+  }, [mood, tier]);
 
   if (!elements) return null;
 

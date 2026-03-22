@@ -13,7 +13,7 @@
 import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 /* ── Configuration ──────────────────────────────────────────── */
 
@@ -57,7 +57,7 @@ const buildCluster = (rng: any, index: any) => {
 
 const DefaultStarField = () => {
   const { mood } = useMood();
-  const tier = getPerformanceTier();
+  const tier = usePerformanceTierValue();
 
   if (mood !== 'default') return null;
 

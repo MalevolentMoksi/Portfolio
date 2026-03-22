@@ -1,6 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { upsertAnalyticsSession, touchAnalyticsSessionActivity } from '../utils/analyticsSession';
 import { safeLocalGet, safeLocalSet } from '../utils/safeStorage';
+import {
+  getPerformanceTierDiagnostics,
+  subscribePerformanceTierChanges,
+  type PerformanceTierChangeDetail,
+} from '../utils/performanceTier';
 
 /* ── Non-standard Navigator API extensions ─────────────── */
 interface NetworkInformation {
@@ -54,6 +59,7 @@ type ExitReason = 'visibility-hidden' | 'pagehide' | 'route-change';
 
 const GEO_CACHE_KEY = 'portfolio-geo-cache-v2';
 const GEO_CACHE_TTL_MS = 30 * 60 * 1000;
+const PERF_ANALYTICS_SENT_KEY_PREFIX = 'portfolio-analytics-perf-tier-event-v1';
 
 /**
  * Sends enhanced page view analytics to a Discord webhook via Cloudflare Worker proxy.
@@ -141,12 +147,81 @@ const useAnalyticsTracking = (pathname: string): void => {
       });
     };
 
+    const sendPerformanceTierLifecycleEvent = (detail: PerformanceTierChangeDetail): void => {
+      const diagnostics = getPerformanceTierDiagnostics();
+      const sessionStats = getSessionStats(pathname);
+      const eventKey = `${PERF_ANALYTICS_SENT_KEY_PREFIX}-${sessionStats.sessionId}-${detail.previousTier}-${detail.nextTier}-${detail.reason}`;
+
+      try {
+        if (sessionStorage.getItem(eventKey)) return;
+        sessionStorage.setItem(eventKey, '1');
+      } catch {
+        // ignore storage errors and still attempt to send analytics
+      }
+
+      sendPayload(
+        {
+          embeds: [
+            {
+              author: { name: '📊 Portfolio Analytics' },
+              title: 'Performance Tier Changed',
+              color: 0xffb347,
+              fields: [
+                {
+                  name: 'Tier Lifecycle',
+                  value: [
+                    `**Path**: \`${pathname}\``,
+                    `**Change**: ${detail.previousTier} -> ${detail.nextTier}`,
+                    `**Reason**: ${detail.reason}`,
+                    `**Measured FPS**: ${
+                      diagnostics.measuredFps !== null
+                        ? `${diagnostics.measuredFps.toFixed(1)} fps`
+                        : 'n/a'
+                    }`,
+                  ].join('\n'),
+                  inline: false,
+                },
+                {
+                  name: 'Signals',
+                  value: [
+                    `**Touch device**: ${diagnostics.isTouchDevice ? 'yes' : 'no'}`,
+                    `**Reduced motion**: ${diagnostics.prefersReducedMotion ? 'yes' : 'no'}`,
+                    `**CPU Cores**: ${diagnostics.hardwareConcurrency}`,
+                    `**RAM**: ${diagnostics.deviceMemoryGb !== null ? `${diagnostics.deviceMemoryGb} GB` : 'n/a'}`,
+                  ].join('\n'),
+                  inline: true,
+                },
+                {
+                  name: 'Session',
+                  value: [
+                    `**Session ID**: ${sessionStats.sessionId}`,
+                    `**Pages**: ${sessionStats.pages}`,
+                    `**Elapsed**: ${sessionStats.elapsedMinutes} min`,
+                  ].join('\n'),
+                  inline: true,
+                },
+              ],
+              timestamp: new Date().toISOString(),
+              footer: {
+                text: getBrowserTimezone() ?? 'timezone unavailable',
+              },
+            },
+          ],
+        },
+        true
+      );
+    };
+
+    const unsubscribePerformanceTier = subscribePerformanceTierChanges((detail) => {
+      sendPerformanceTierLifecycleEvent(detail);
+    });
     const flushTimeOnPage = (reason: ExitReason, preferBeacon: boolean) => {
       const visibleSeconds = Math.max(1, Math.round(getVisibleTimeMs() / 1000));
       if (visibleSeconds <= lastSentVisibleSecondsRef.current) return;
       lastSentVisibleSecondsRef.current = visibleSeconds;
 
       const sessionStats = getSessionStats(pathname);
+      const diagnostics = getPerformanceTierDiagnostics();
 
       sendPayload(
         {
@@ -173,6 +248,12 @@ const useAnalyticsTracking = (pathname: string): void => {
                     `**Session ID**: ${sessionStats.sessionId}`,
                     `**Pages**: ${sessionStats.pages}`,
                     `**Elapsed**: ${sessionStats.elapsedMinutes} min`,
+                    `**Final perf tier**: ${diagnostics.tier}`,
+                    `**Tier FPS sample**: ${
+                      diagnostics.measuredFps !== null
+                        ? `${diagnostics.measuredFps.toFixed(1)} fps`
+                        : 'n/a'
+                    }`,
                   ].join('\n'),
                   inline: false,
                 },
@@ -205,6 +286,7 @@ const useAnalyticsTracking = (pathname: string): void => {
       const metrics = collectPageMetrics(pageStartTimeRef.current);
       const prefs = collectUserPreferences();
       const pageName = formatPageName(pathname);
+      const diagnostics = getPerformanceTierDiagnostics();
 
       const sendMessage = (geo: GeoLocation | null): void => {
         if (isCancelled) return;
@@ -252,6 +334,12 @@ const useAnalyticsTracking = (pathname: string): void => {
               `**Connection**: ${metrics.connectionType}`,
               `**RAM**: ${metrics.deviceMemory}`,
               `**CPU Cores**: ${metrics.hardwareConcurrency}`,
+              `**Perf Tier**: ${diagnostics.tier}`,
+              `**Tier FPS Sample**: ${
+                diagnostics.measuredFps !== null ? `${diagnostics.measuredFps.toFixed(1)} fps` : 'n/a'
+              }`,
+              `**Touch device**: ${diagnostics.isTouchDevice ? 'yes' : 'no'}`,
+              `**Reduced motion**: ${diagnostics.prefersReducedMotion ? 'yes' : 'no'}`,
               `**Route ready**: ${metrics.routeReadyMs} ms`,
               `**Navigation DOM ready**: ${
                 metrics.domReadyMs !== null ? `${metrics.domReadyMs} ms` : 'n/a'
@@ -377,6 +465,8 @@ const useAnalyticsTracking = (pathname: string): void => {
       if (loadListenerAttached && onLoadHandler) {
         window.removeEventListener('load', onLoadHandler);
       }
+
+      unsubscribePerformanceTier();
 
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pagehide', handlePageHide);

@@ -12,7 +12,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
-import { getPerformanceTier } from '@/utils/performanceTier';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 const MAX_EMBERS = { high: 42, mid: 18, low: 0 };
 const SPAWN_MIN_MS = 550;
@@ -45,10 +45,11 @@ const EMBER_PALETTE = [
 
 const RisingEmbers = () => {
   const { mood } = useMood();
+  const tier = usePerformanceTierValue();
   const [embers, setEmbers] = useState<any[]>([]);
   const timerRef = useRef<any>(null);
 
-  const maxCount = MAX_EMBERS[getPerformanceTier()] ?? 5;
+  const maxCount = MAX_EMBERS[tier] ?? 5;
   const active = mood === 'industrial' && maxCount > 0;
 
   const spawnEmber = useCallback(() => {

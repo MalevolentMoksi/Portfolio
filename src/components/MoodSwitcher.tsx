@@ -13,6 +13,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useMood, MOODS, MOOD_ORDER } from '../contexts/MoodContext';
 import { useAccessibility } from '../contexts/AccessibilityContext';
+import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 import Tooltip from './Tooltip';
 import useTunerAudioFeedback from '@/hooks/useTunerAudioFeedback';
 import type { MoodKey } from '@/types';
@@ -178,6 +179,7 @@ const createVhsOverlay = (newMood: MoodKey): HTMLDivElement => {
 const MoodSwitcher = () => {
   const { t } = useTranslation();
   const { mood, setMood } = useMood();
+  const tier = usePerformanceTierValue();
   const { settings: a11ySettings } = useAccessibility();
   const [isOpen, setIsOpen] = useState(false);
   const [spinKey, setSpinKey] = useState(0);
@@ -281,13 +283,12 @@ const MoodSwitcher = () => {
   }, []);
 
   const resolveTransitionMode = useCallback((): TransitionMode => {
-    const perfTier = document.body.getAttribute('data-perf-tier');
-    if (perfTier === 'low') return 'vhs';
+    if (tier === 'low') return 'vhs';
     if (typeof CSS === 'undefined' || !CSS.supports('clip-path', 'circle(20px at 50% 50%)')) {
       return 'vhs';
     }
     return ACTIVE_TRANSITION_MODE;
-  }, []);
+  }, [tier]);
 
   const runViewCircleTransition = useCallback(
     (newMood: MoodKey, origin: Point): boolean => {
