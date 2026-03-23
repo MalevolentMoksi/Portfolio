@@ -568,9 +568,21 @@ const ParticlesButton = () => {
     signature: t(`common.particles.weather.signatures.${effect.key}`),
   }));
 
+  const triggerHaptic = useCallback(
+    (pattern: number | number[]) => {
+      if (noMotion || typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') {
+        return;
+      }
+      navigator.vibrate(pattern);
+    },
+    [noMotion]
+  );
+
   const triggerEffect = useCallback(
     (chargedPercent = 0) => {
       if (cooldownRef.current) return;
+
+      triggerHaptic([30, 20, 40]);
 
       // Stop any previous effect loop before starting a new one.
       if (effectSignalRef.current) {
@@ -694,6 +706,7 @@ const ParticlesButton = () => {
       setIsCharging(true);
       chargeProgressRef.current = 0;
       setChargeProgress(0);
+      triggerHaptic(20);
 
       if (chargeRafRef.current !== null) {
         cancelAnimationFrame(chargeRafRef.current);
@@ -750,12 +763,14 @@ const ParticlesButton = () => {
       if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
         event.preventDefault();
         setEffectIndex((prev) => (prev + 1) % EFFECTS.length);
+        triggerHaptic(10);
         return;
       }
 
       if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
         event.preventDefault();
         setEffectIndex((prev) => (prev - 1 + EFFECTS.length) % EFFECTS.length);
+        triggerHaptic(10);
         return;
       }
 
@@ -968,6 +983,12 @@ const ParticlesButton = () => {
             onKeyDown={handlePanelKeyDown}
             style={{ top: `${panelPos.top}px`, right: `${panelPos.right}px` }}
           >
+            {/* Industrial Screws */}
+            <div className="particles-weather-panel__screw particles-weather-panel__screw--tl" />
+            <div className="particles-weather-panel__screw particles-weather-panel__screw--tr" />
+            <div className="particles-weather-panel__screw particles-weather-panel__screw--bl" />
+            <div className="particles-weather-panel__screw particles-weather-panel__screw--br" />
+
             <div className="particles-weather-panel__header">
               <p className="particles-weather-panel__title">{weatherPanelTitle}</p>
               <button
@@ -976,7 +997,7 @@ const ParticlesButton = () => {
                 onClick={closeStation}
                 aria-label={t('common.particles.weather.closeAria')}
               >
-                x
+                ×
               </button>
             </div>
 
@@ -994,7 +1015,10 @@ const ParticlesButton = () => {
                     aria-label={effect.label}
                     className={`particles-weather-node${isSelected ? ' particles-weather-node--selected' : ''}`}
                     style={{ left: nodePos.x, top: nodePos.y }}
-                    onClick={() => setEffectIndex(index)}
+                    onClick={() => {
+                      setEffectIndex(index);
+                      triggerHaptic(10);
+                    }}
                   >
                     <span className="particles-weather-node__glyph" aria-hidden="true">
                       {effect.code}
