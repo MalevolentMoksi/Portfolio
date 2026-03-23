@@ -126,24 +126,29 @@
 .commuter-clockwork .clockwork-gear-left {
   animation: clockwork-gear-left-spin 2s linear infinite;
   transform-origin: center;
+  will-change: transform;
 }
 
 .commuter-clockwork .clockwork-gear-center {
   animation: clockwork-gear-center-spin 2.5s linear infinite;
   transform-origin: center;
+  will-change: transform;
 }
 
 .commuter-clockwork .clockwork-gear-right {
   animation: clockwork-gear-right-spin 1.8s linear infinite;
   transform-origin: center;
+  will-change: transform;
 }
 
 .commuter-clockwork .clockwork-core {
   animation: clockwork-core-pulse 1.2s ease-in-out infinite;
+  will-change: opacity, r;
 }
 
 .commuter-clockwork .clockwork-ring {
   animation: clockwork-ring-wobble 2.5s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* Silk-Sailed Junk — sail flutter + pennant wave + hull bob */

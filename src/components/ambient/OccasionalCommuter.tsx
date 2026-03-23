@@ -16,7 +16,6 @@ import { COMMUTER_FLEET, CommuterConfig } from './commutersConfig';
 const MIN_DELAY_MS = 15_000;
 const MAX_DELAY_MS = 35_000;
 const FIRST_DELAY_MS = 12_000;
-const BUFFER_MS = 1_000;
 const SPAWN_PADDING_PX = 18;
 const MIN_VERTICAL_GAP_PX = 72;
 const TOP_PICK_ATTEMPTS = 16;
@@ -67,33 +66,26 @@ const getAdaptiveDelay = (baseDelayMs: number): number => {
 };
 
 const pickCommuterTopPx = (activeTopValues: number[] = []): number => {
-  const scrollTop = window.scrollY;
-  const viewportHeight = window.innerHeight;
-  const viewportBottom = scrollTop + viewportHeight;
+  const pageHeight = Math.max(
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight
+  );
 
   const header = document.querySelector('header');
-  const headerHeight = header instanceof HTMLElement ? header.getBoundingClientRect().height : 0;
-
-  let minY = scrollTop + headerHeight + SPAWN_PADDING_PX;
-  let maxY = viewportBottom - SPAWN_PADDING_PX;
+  const headerHeight = header instanceof HTMLElement ? header.offsetHeight : 0;
 
   const footer = document.querySelector('footer');
-  if (footer instanceof HTMLElement) {
-    const footerRect = footer.getBoundingClientRect();
-    if (footerRect.top < viewportHeight) {
-      const footerTopAbsolute = scrollTop + Math.max(0, footerRect.top);
-      maxY = Math.min(maxY, footerTopAbsolute - SPAWN_PADDING_PX);
-    }
-  }
+  const footerHeight = footer instanceof HTMLElement ? footer.offsetHeight : 0;
+
+  let minY = headerHeight + SPAWN_PADDING_PX;
+  let maxY = pageHeight - footerHeight - SPAWN_PADDING_PX;
 
   if (maxY <= minY) {
-    const fallbackY = scrollTop + Math.max(headerHeight + SPAWN_PADDING_PX, viewportHeight * 0.45);
+    const fallbackY = Math.max(headerHeight + SPAWN_PADDING_PX, pageHeight * 0.5);
     return Math.round(fallbackY);
   }
 
   // Only keep obstacles that are within striking distance of the spawn range.
-  // Clamping off-screen vehicles to minY/maxY created phantom obstacles at the
-  // viewport edges and biased spawns away from those edges.
   const relevantObstacleValues = activeTopValues
     .filter((top) => Number.isFinite(top) && top >= minY - MIN_VERTICAL_GAP_PX && top <= maxY + MIN_VERTICAL_GAP_PX)
     .filter((top, index, arr) => arr.indexOf(top) === index);
@@ -130,17 +122,21 @@ const pickCommuterTopPx = (activeTopValues: number[] = []): number => {
 /* ─── CommuterVehicle sub-component ─── */
 
 const CommuterVehicle = ({
+  id,
   config,
   duration,
   preview,
   direction,
   top,
+  onComplete,
 }: {
+  id: string;
   config: CommuterConfig;
   duration: number;
   preview: boolean;
   direction: CommuterDirection;
   top: number;
+  onComplete: (trigger: string) => void;
 }) => {
   const divRef = useRef<any>(null);
   const [animating, setAnimating] = useState(false);
@@ -158,6 +154,21 @@ const CommuterVehicle = ({
   return (
     <div
       ref={divRef}
+      data-testid={id}
+      onAnimationEnd={(e) => {
+        // Only trigger removal when the main trajectory animation ends
+        const animName = e.animationName || '';
+        if (process.env.NODE_ENV === 'test') {
+          console.log('ANIMATION END FIRED', { animName });
+        }
+        if (
+          animName.startsWith('commuter-fly') ||
+          animName.startsWith('commuter-arc') ||
+          animName === '' // Fallback for test environment where animationName might not be set
+        ) {
+          onComplete('animation_end');
+        }
+      }}
       className={
         preview
           ? 'ambient-commuter ambient-commuter--preview'
@@ -186,6 +197,12 @@ const CommuterVehicle = ({
 };
 
 /* ─── Main component ─── */
+
+const logCommuter = (action: string, data: any) => {
+  if (process.env.NODE_ENV !== 'test') {
+    console.log(`[OccasionalCommuter] ${action}`, data);
+  }
+};
 
 const OccasionalCommuter = () => {
   const { mood } = useMood();
@@ -223,9 +240,15 @@ const OccasionalCommuter = () => {
     spawnTimerRef.current = null;
   }, []);
 
-  const removeVehicle = useCallback((vehicleId: string) => {
+  const removeVehicle = useCallback((vehicleId: string, trigger: string = 'timeout') => {
     if (!mountedRef.current) return;
-    setVehicles((prev) => prev.filter((v) => v.id !== vehicleId));
+    setVehicles((prev) => {
+      const exists = prev.some((v) => v.id === vehicleId);
+      if (exists) {
+        logCommuter('REMOVE', { id: vehicleId, trigger });
+      }
+      return prev.filter((v) => v.id !== vehicleId);
+    });
     vehicleTimersRef.current.delete(vehicleId);
   }, []);
 
@@ -271,19 +294,34 @@ const OccasionalCommuter = () => {
       }
       const newVehicle = { config: commuterConfig, duration, preview, id: vehicleId, direction, top };
       
+      const viewportTop = window.scrollY;
+      const viewportBottom = window.scrollY + window.innerHeight;
+      logCommuter('SPAWN', {
+        id: vehicleId,
+        top,
+        viewport: { top: viewportTop, bottom: viewportBottom },
+        isVisible: top >= viewportTop && top <= viewportBottom,
+        mood,
+        direction,
+        name: commuterConfig.name
+      });
+
       setVehicles((prev) => [...prev, newVehicle]);
 
       if (preview) {
         const timer = setTimeout(() => {
-          removeVehicle(vehicleId);
+          removeVehicle(vehicleId, 'preview_timeout');
         }, Math.min(duration * 1000, 2800));
         vehicleTimersRef.current.set(vehicleId, timer);
         return;
       }
 
+      // We rely primarily on onAnimationEnd for precise removal.
+      // However, we set a generous fallback timeout to prevent memory leaks 
+      // in case the animation is somehow prevented from playing or completing.
       const timer = setTimeout(() => {
-        removeVehicle(vehicleId);
-      }, duration * 1000 + BUFFER_MS);
+        removeVehicle(vehicleId, 'fallback_timeout');
+      }, duration * 1000 + 5000);
       vehicleTimersRef.current.set(vehicleId, timer);
 
       // Schedule next spawn immediately without waiting for this one to finish
@@ -325,10 +363,10 @@ const OccasionalCommuter = () => {
     };
   }, [spawnVehicle]);
 
-  // Console API: test all 30 commuters in sequence
+  // Console API: test all 30+ commuters in sequence
   useEffect(() => {
     (window as any).testAllCommuters = (delayBetweenMs: number = 4000) => {
-      console.log('🎭 Starting commuter test cycle (all 30 commuters)...\n');
+      console.log('🎭 Starting commuter test cycle (all commuters)...\n');
       clearAllTimers();
       clearTestTimers();
       const moods = Object.keys(COMMUTER_FLEET) as string[];
@@ -368,11 +406,13 @@ const OccasionalCommuter = () => {
       {vehicles.map((vehicle) => (
         <CommuterVehicle
           key={vehicle.id}
+          id={vehicle.id}
           config={vehicle.config}
           duration={vehicle.duration}
           preview={vehicle.preview}
           direction={vehicle.direction}
           top={vehicle.top}
+          onComplete={(trigger) => removeVehicle(vehicle.id, trigger)}
         />
       ))}
     </>,

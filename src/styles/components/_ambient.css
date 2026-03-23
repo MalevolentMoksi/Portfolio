@@ -30,6 +30,8 @@
   color: var(--color-primary);
   opacity: 0;
   will-change: transform, opacity;
+  contain: layout paint style;
+  overflow: visible;
 }
 
 /* Spacecraft — straight horizontal high flyby
