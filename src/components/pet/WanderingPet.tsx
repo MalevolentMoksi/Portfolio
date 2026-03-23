@@ -1141,8 +1141,8 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
   // Particles detection — unlock achievement when particles canvas is active
   useEffect(() => {
     const check = setInterval(() => {
-      const el = document.getElementById('particles-js');
-      if (el && el.childElementCount > 0) {
+      const el = document.getElementById('particles-canvas') as HTMLCanvasElement | null;
+      if (el && el.width > 0 && el.height > 0) {
         onUnlock('particles');
         clearInterval(check);
       }

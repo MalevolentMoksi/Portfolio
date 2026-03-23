@@ -193,7 +193,7 @@ body.a11y--reduce-effects::after {
   display: none !important;
 }
 
-body.a11y--reduce-effects #particles-js,
+body.a11y--reduce-effects #particles-canvas,
 body.a11y--reduce-effects .ambient-layers,
 body.a11y--reduce-effects .footer-diorama,
 body.a11y--reduce-effects .mood-vhs-overlay,

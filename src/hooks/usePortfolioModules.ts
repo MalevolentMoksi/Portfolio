@@ -1,10 +1,9 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import MusicPlayer from '../scripts/music-player';
-import VisualEffects from '../scripts/effects';
+import type MusicPlayer from '../scripts/music-player';
+import type VisualEffects from '../scripts/effects';
 import UIEnhancements from '../scripts/ui-enhancements';
-import Lightbox from '../scripts/lightbox';
 import { startFpsMonitor } from '../utils/performanceTier';
 
 let musicPlayerInstance: MusicPlayer | null = null;
@@ -50,23 +49,42 @@ const usePortfolioModules = (trackFiles: string[]): void => {
   const hasHandledInitialLanguageSync = useRef(false);
 
   useEffect(() => {
-    return scheduleWhenPageReady(() => {
-      if (!musicPlayerInstance) {
-        musicPlayerInstance = new MusicPlayer(trackFiles);
-      }
-      if (!visualEffectsInstance) {
-        visualEffectsInstance = new VisualEffects();
-        // Expose globally for accessibility hook
-        (window as any).visualEffectsInstance = visualEffectsInstance;
-      }
+    let cancelled = false;
 
-      // Lancer le monitoring FPS passif (une seule fois par session)
-      // Différé pour ne pas rivaliser avec le premier rendu stylé.
-      startFpsMonitor();
+    const cancelSchedule = scheduleWhenPageReady(() => {
+      void (async () => {
+        const [{ default: MusicPlayerClass }, { default: VisualEffectsClass }] = await Promise.all([
+          import('../scripts/music-player'),
+          import('../scripts/effects'),
+        ]);
+
+        if (cancelled) return;
+
+        if (!musicPlayerInstance) {
+          musicPlayerInstance = new MusicPlayerClass(trackFiles);
+        }
+
+        if (!visualEffectsInstance) {
+          visualEffectsInstance = new VisualEffectsClass();
+          // Expose globally for accessibility hook
+          window.visualEffectsInstance = visualEffectsInstance;
+        }
+
+        // Lancer le monitoring FPS passif (une seule fois par session)
+        // Différé pour ne pas rivaliser avec le premier rendu stylé.
+        startFpsMonitor();
+      })();
     });
+
+    return () => {
+      cancelled = true;
+      cancelSchedule();
+    };
   }, [trackFiles]);
 
   useLayoutEffect(() => {
+    visualEffectsInstance?.pauseForNavigation();
+
     // Annuler immédiatement toute frappe en cours lors d'un changement de route,
     // pour éviter les écritures tardives sur le titre de la nouvelle page.
     uiEnhancementsInstance?.cancelTypingEffect();
@@ -77,12 +95,26 @@ const usePortfolioModules = (trackFiles: string[]): void => {
       uiEnhancementsInstance.reinit();
     }
 
+    let cleanupCancelled = false;
+    let lightboxInstance: { destroy?: () => void } | null = null;
+
     if (document.querySelector('.zoomable')) {
-      new Lightbox();
+      void import('../scripts/lightbox').then(({ default: Lightbox }) => {
+        if (cleanupCancelled) return;
+        lightboxInstance = new Lightbox() as { destroy?: () => void };
+      });
     }
 
+    const resumeRaf = requestAnimationFrame(() => {
+      visualEffectsInstance?.resumeAfterNavigation();
+    });
+
     return () => {
+      cleanupCancelled = true;
+      cancelAnimationFrame(resumeRaf);
+      visualEffectsInstance?.resumeAfterNavigation();
       uiEnhancementsInstance?.cancelTypingEffect();
+      lightboxInstance?.destroy?.();
     };
   }, [location.pathname]);
 

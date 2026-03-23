@@ -54,25 +54,6 @@
     <div id="root"></div>
     <div id="ambient-root"></div>
 
-    <!-- External libraries -->
-    <!-- particles.js — only injected on high-performance devices to avoid jank on low-end/mobile -->
-    <script>
-      (function () {
-        var cores = navigator.hardwareConcurrency || 0;
-        var reduced =
-          window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        // Skip particles on touch/mobile devices — canvas particle systems are a battery/GPU drain
-        // and mouse-based interactivity (grab, push) is irrelevant on touchscreens.
-        var isMobile =
-          window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-        if (!reduced && !isMobile && cores >= 4) {
-          var s = document.createElement('script');
-          s.src = 'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js';
-          document.head.appendChild(s);
-        }
-      })();
-    </script>
-
     <!-- Service Worker registration — deferred to avoid render blocking -->
     <script defer src="%BASE_URL%registerSW.js"></script>
 

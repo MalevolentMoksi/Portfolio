@@ -15,10 +15,27 @@ declare module 'react' {
 }
 
 declare global {
-  /* ── particles.js CDN global ── */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function particlesJS(tagId: string, params: Record<string, any>): void;
+  /* ── Worker-based particles types ── */
+  type ParticleWorkerCommandType =
+    | 'init'
+    | 'resize'
+    | 'mouse'
+    | 'click'
+    | 'updateConfig'
+    | 'pause'
+    | 'resume'
+    | 'destroy';
 
+  interface ParticleWorkerController {
+    pauseForNavigation?: () => void;
+    resumeAfterNavigation?: () => void;
+    setAnimationsEnabled?: (enabled: boolean) => void;
+    updateParticlesMood?: (mood: string) => void;
+    reconfigureParticles?: (mood: string) => void;
+    destroy?: () => void;
+  }
+
+  /* Legacy particles.js shape kept for optional compatibility in existing effects helpers. */
   interface PJSDomEntry {
     pJS: {
       fn: {
@@ -73,8 +90,9 @@ declare global {
     /* Particle effects — exposed by effects.ts for MoodContext */
     reconfigureParticles?: (mood: string) => void;
     updateParticlesMood?: (mood: string) => void;
+    visualEffectsInstance?: ParticleWorkerController;
 
-    /* particles.js CDN DOM array */
+    /* Legacy particles.js CDN DOM array */
     pJSDom?: PJSDomEntry[];
 
     /* jsmediatags CDN — ID3 tag reader (removed: now an npm module) */

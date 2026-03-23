@@ -149,7 +149,7 @@ const triggerPetAttract = (x: any, y: any, duration: number) => {
  * - Réduit l'opacité du main pour laisser les particules visibles
  */
 const setParticlesForeground = (active: any) => {
-  const canvas = document.getElementById('particles-js');
+  const canvas = document.getElementById('particles-canvas');
   const main = document.querySelector('main');
   if (canvas) canvas.classList.toggle('particles-foreground', active);
   if (main) main.classList.toggle('main--particles-active', active);
@@ -581,6 +581,14 @@ const ParticlesButton = () => {
   const triggerEffect = useCallback(
     (chargedPercent = 0) => {
       if (cooldownRef.current) return;
+
+      if (!getPJS()) {
+        showToast('Effets meteo indisponibles avec ce moteur de particules.', {
+          type: 'warning',
+          duration: 2200,
+        });
+        return;
+      }
 
       triggerHaptic([30, 20, 40]);
 

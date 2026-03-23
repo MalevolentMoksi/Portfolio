@@ -82,11 +82,8 @@ export const MoodProvider = ({ children }: MoodProviderProps) => {
       }
       return false;
     };
-    
-    // Only retry if particles weren't available on first call
-    if (!reconfigureIfAvailable()) {
-      setTimeout(reconfigureIfAvailable, 500);
-    }
+
+    reconfigureIfAvailable();
   }, []);
 
   const setMood = useCallback(

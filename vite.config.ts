@@ -158,16 +158,35 @@ export default defineConfig({
       external: ['react-native-fs'],
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules/framer-motion')) {
+          const normalizedId = id.replace(/\\/g, '/');
+
+          if (normalizedId.includes('/node_modules/framer-motion/')) {
             return 'framer';
           }
           if (
-            id.includes('node_modules/react') ||
-            id.includes('node_modules/react-dom') ||
-            id.includes('node_modules/react-router-dom')
+            normalizedId.includes('/node_modules/react/') ||
+            normalizedId.includes('/node_modules/react-dom/') ||
+            normalizedId.includes('/node_modules/react-router-dom/')
           ) {
             return 'vendor';
           }
+
+          if (normalizedId.includes('/src/scripts/ui-enhancements.ts')) {
+            return 'scripts-ui';
+          }
+
+          if (normalizedId.includes('/src/scripts/') || normalizedId.includes('/src/workers/')) {
+            return 'scripts-deferred';
+          }
+
+          if (normalizedId.includes('/src/components/ambient/')) {
+            return 'ambient';
+          }
+
+          if (normalizedId.includes('/src/locales/') || normalizedId.endsWith('/src/i18n.ts')) {
+            return 'i18n';
+          }
+
           return undefined;
         },
       },
@@ -180,6 +199,9 @@ export default defineConfig({
         drop_console: true,
       },
     },
+  },
+  worker: {
+    format: 'es',
   },
 
   resolve: {

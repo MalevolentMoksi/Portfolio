@@ -9,8 +9,7 @@ export const useAccessibilityEffects = () => {
   const { settings } = useAccessibility();
 
   useEffect(() => {
-    // Get the global particlesJS animation control export (if available)
-    const visualEffects = (window as any).visualEffectsInstance;
+    const visualEffects = window.visualEffectsInstance;
 
     if (visualEffects?.setAnimationsEnabled) {
       // noMotion=true means animations disabled, so enabled should be false

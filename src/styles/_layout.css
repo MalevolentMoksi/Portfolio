@@ -54,8 +54,8 @@
   z-index: var(--z-ambient, 2);
 }
 
-/* Particles.js container */
-#particles-js {
+/* Worker-backed particles canvas */
+#particles-canvas {
   position: fixed;
   top: 0;
   left: 0;
@@ -69,7 +69,7 @@
 
 /* Quand un effet particules est actif, le canvas passe devant le main
    mais reste derrière le header (z-header = 10) */
-#particles-js.particles-foreground {
+#particles-canvas.particles-foreground {
   z-index: 5;
 }
 
