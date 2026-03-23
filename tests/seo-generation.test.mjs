@@ -1,5 +1,4 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import { test, expect } from 'vitest';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -30,9 +29,9 @@ test('SEO generator includes legal route and only writes sitemap to requested ou
 
     const sitemap = await readFile(sitemapPath, 'utf8');
 
-    assert.match(sitemap, /https:\/\/example\.test\//);
-    assert.match(sitemap, /https:\/\/example\.test\/informations-legales/);
-    await assert.rejects(readFile(robotsPath, 'utf8'), /ENOENT/);
+    expect(sitemap).toMatch(/https:\/\/example\.test\//);
+    expect(sitemap).toMatch(/https:\/\/example\.test\/informations-legales/);
+    await expect(readFile(robotsPath, 'utf8')).rejects.toThrow(/ENOENT/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
