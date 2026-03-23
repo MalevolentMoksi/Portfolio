@@ -6,6 +6,7 @@ pnpm-lock.yaml
 # Build output
 dist/
 *.local
+coverage/
 
 # Editor directories
 .vscode/
