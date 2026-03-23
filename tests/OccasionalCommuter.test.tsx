@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, act, fireEvent, screen } from '@testing-library/react';
+import { render, act, screen } from '@testing-library/react';
 import OccasionalCommuter from '../src/components/ambient/OccasionalCommuter';
 import * as MoodContext from '@/contexts/MoodContext';
 
