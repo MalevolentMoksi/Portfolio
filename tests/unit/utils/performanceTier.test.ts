@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { getPerformanceTier, PERFORMANCE_TIER_CHANGE_EVENT } from '@/utils/performanceTier';
 
 describe('performanceTier utility', () => {
   const originalNavigator = global.navigator;
