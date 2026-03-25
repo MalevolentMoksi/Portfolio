@@ -453,7 +453,7 @@ function updateGravity(dt: number): void {
     const p = particles[i];
     p.vy += gravityAccel * dt;
     if (p.y >= floor) {
-      p.vy *= Math.pow(gravityDamp, dt);
+      p.vy = Math.abs(p.vy) * gravityDamp; // gravityDamp is negative: reverses and dampens
       p.y = floor;
     }
   }
