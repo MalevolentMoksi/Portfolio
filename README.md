@@ -42,7 +42,7 @@ Le serveur de dev démarre sur `http://localhost:3000`.
 - Vite 8 (`root: src`, sortie dans `dist/`)
 - Framer Motion 12 (animations avancées du pet/robot)
 - i18next + react-i18next + language detector (FR/EN)
-- CSS modulaire (35 fichiers CSS au total) + PostCSS + Autoprefixer
+- CSS modulaire (38 fichiers CSS au total) + PostCSS + Autoprefixer
 - Vite PWA (`vite-plugin-pwa`) + `registerSW.js`
 
 ## Architecture du projet
@@ -55,7 +55,7 @@ src/
   App.tsx                     # Routes + lazy loading
   index.html                  # Template SPA (root Vite)
 
-  components/                 # 43 composants React (dont ambient + pet)
+  components/                 # 47+ composants React (dont ambient + pet)
     ambient/                  # 18 composants d'ambiance
     pet/                      # Sous-système robot interactif
 
@@ -224,7 +224,7 @@ Le projet contient :
 - Composants React : `PascalCase.tsx`
 - Hooks / utils : `camelCase.ts`
 - Styles : `_kebab-case.css`
-- Aliases : `@`, `@styles`, `@components`, `@hooks`, `@pages`, `@contexts`, `@utils`, `@data`
+- Aliases : `@`, `@styles`, `@scripts`, `@components`, `@assets`, `@hooks`, `@pages`, `@contexts`, `@utils`, `@data`
 - Assets frontend : chemins absolus `/assets/...`
 
 ## Dépannage rapide

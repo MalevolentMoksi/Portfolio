@@ -25,6 +25,7 @@ Current architecture (2026): TypeScript React app with React Router v6, legacy T
 - `/projet-SAE3.01`
 - `/about`
 - `/credits`
+- `/informations-legales`
 - `*` (NotFound)
 
 ### Components (`src/components/`)
@@ -38,22 +39,28 @@ Main UI includes:
 - `pet/PetButton.tsx` (entry point for pet subsystem)
 
 ### Ambient Components (`src/components/ambient/`)
-18 components, including:
+22 components, including:
 - `AmbientEffects.tsx` (orchestrator)
-- `FooterDiorama.tsx`
-- `AmbientBoids.tsx`, `DigitalRain.tsx`, `EuropaSnowfall.tsx`, `IndustrialNeons.tsx`, `ElectricalGrid.tsx`, etc.
+- `FooterDiorama.tsx`, `FooterWalkers.tsx`
+- `AmbientBoids.tsx`, `DigitalRain.tsx`, `DefaultStarField.tsx`
+- `EuropaSnowfall.tsx`, `EuropaFrost.tsx`, `EuropaIcicles.tsx`
+- `IndustrialNeons.tsx`, `IndustrialSteam.tsx`, `ElectricalGrid.tsx`, `RisingEmbers.tsx`
+- `NightshadeBioGlow.tsx`, `NightshadeFog.tsx`, `NightshadeIvy.tsx`, `NightshadeSpores.tsx`
+- `FloatingGeometry.tsx`, `DistantSilhouettes.tsx`, `ObservationDrone.tsx`, `OccasionalCommuter.tsx`, `PowerSurge.tsx`
+- Nested SVG commuter characters in `ambient/commuters/` (mood-specific subdirectories)
 
 ### Pages (`src/pages/`)
-12 routed pages:
+13 routed pages:
 - `Home.tsx`, `Projets.tsx`, `ProjetsPersonnels.tsx`
 - `ProjetMEGASAE.tsx`, `ProjetSAE12.tsx`, `ProjetSAE3.tsx`, `ProjetSAE301.tsx`, `ProjetSAE4.tsx`, `ProjetSAE56.tsx`
-- `About.tsx`, `Credits.tsx`, `NotFound.tsx`
+- `About.tsx`, `Credits.tsx`, `Legal.tsx`, `NotFound.tsx`
 
 ### Contexts (`src/contexts/`)
-- `MoodContext.tsx` - visual mood state (`default`, `hacker`, `vaporwave`, `europa`, `industrial`)
+- `MoodContext.tsx` - visual mood state (`default`, `hacker`, `vaporwave`, `europa`, `industrial`, `nightshade`)
 - `ReadingTimeContext.tsx` - reading-time provider
 - `ToastContext.tsx` - toast API (`showToast`) + global bridge for legacy scripts
 - `AccessibilityContext.tsx` - persisted a11y settings
+- `PerformanceTierContext.tsx` - exposes current performance tier to components
 
 ### Hooks (`src/hooks/`)
 - `useDocumentMeta.ts` - sets page `<title>` + meta description
@@ -74,9 +81,9 @@ Main UI includes:
 
 ### Styles (`src/styles/`)
 - `main.css` imports all CSS modules
-- Core: `_variables.css`, `_base.css`, `_layout.css`, `_typography.css`, `_effects.css`
-- Components: 29 files in `src/styles/components/`
-- Total CSS files: 35
+- Core: `_variables.css`, `_base.css`, `_layout.css`, `_typography.css`, `_effects.css`, `deferred.css`
+- Components: 31 files in `src/styles/components/`
+- Total CSS files: 38
 
 ## Toolchain and Build Details
 
@@ -117,7 +124,7 @@ usePortfolioModules(trackFiles);
 ### Mood System
 - Mood is applied via `body[data-mood="..."]`
 - Persisted key: `portfolio-mood`
-- `MoodSwitcher` cycles across 5 moods
+- `MoodSwitcher` cycles across 6 moods: `default`, `hacker`, `vaporwave`, `europa`, `industrial`, `nightshade`
 
 ### Music Player Persistence
 Main localStorage keys:
@@ -138,7 +145,7 @@ Notes:
 - Movement/drag: `WanderingPet.tsx`
 - Face animation: `RobotFace.tsx` (Framer Motion)
 - Thought bubbles: `ThoughtBubbleQueue.tsx`
-- Constants/helpers: `petConstants.ts`, `petData.tsx`
+- Data/helpers: `petData.tsx`
 - Includes achievements and catch mini-game
 - Debug helpers available on `window`: `petReact`, `getPetStats`
 
