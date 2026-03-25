@@ -158,9 +158,6 @@ const CommuterVehicle = ({
       onAnimationEnd={(e) => {
         // Only trigger removal when the main trajectory animation ends
         const animName = e.animationName || '';
-        if (process.env.NODE_ENV === 'test') {
-          console.log('ANIMATION END FIRED', { animName });
-        }
         if (
           animName.startsWith('commuter-fly') ||
           animName.startsWith('commuter-arc') ||
@@ -198,11 +195,7 @@ const CommuterVehicle = ({
 
 /* ─── Main component ─── */
 
-const logCommuter = (action: string, data: any) => {
-  if (process.env.NODE_ENV !== 'test') {
-    console.log(`[OccasionalCommuter] ${action}`, data);
-  }
-};
+const logCommuter = (_action: string, _data: any) => {};
 
 const OccasionalCommuter = () => {
   const { mood } = useMood();
@@ -270,7 +263,6 @@ const OccasionalCommuter = () => {
         configOverride ||
         pickCommuterWithVariety(mood, activeCommuterNames, recentCommuterNamesRef.current);
       if (!commuterConfig) {
-        console.warn(`No commuters available for mood: ${mood}`);
         scheduleNextSpawn();
         return;
       }
@@ -366,7 +358,6 @@ const OccasionalCommuter = () => {
   // Console API: test all 30+ commuters in sequence
   useEffect(() => {
     (window as any).testAllCommuters = (delayBetweenMs: number = 4000) => {
-      console.log('🎭 Starting commuter test cycle (all commuters)...\n');
       clearAllTimers();
       clearTestTimers();
       const moods = Object.keys(COMMUTER_FLEET) as string[];
@@ -376,7 +367,6 @@ const OccasionalCommuter = () => {
         const fleet = COMMUTER_FLEET[m];
         fleet.forEach((config) => {
           const timerId = window.setTimeout(() => {
-            console.log(`  → ${m.toUpperCase().padEnd(12)} — ${config.name.padEnd(18)} (${config.duration}s)`);
             spawnVehicle(config, true);
           }, totalDelay);
           testTimersRef.current.push(timerId);
@@ -384,7 +374,6 @@ const OccasionalCommuter = () => {
         });
       });
 
-      console.log(`\n📊 Cycle will complete in ~${(totalDelay / 1000).toFixed(1)}s`);
       return 'Commuter preview cycle started';
     };
 
@@ -392,7 +381,6 @@ const OccasionalCommuter = () => {
       clearTestTimers();
       clearAllTimers();
       setVehicles([]);
-      console.log('🛑 Commuter preview cycle stopped');
     };
 
     return () => {

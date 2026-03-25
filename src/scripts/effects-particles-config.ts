@@ -50,7 +50,7 @@ export const getParticlesConfig = (mood: string): Record<string, unknown> => {
         line_linked: { enable: true, distance: 80, color: '#7DD3FC', opacity: 0.08, width: 0.3 },
         move: {
           enable: true,
-          speed: byTier({ high: 4, mid: 3, low: 2 }),
+          speed: byTier({ high: 3.2, mid: 2.4, low: 1.6 }),
           direction: 'left',
           random: true,
           straight: true,
@@ -86,7 +86,7 @@ export const getParticlesConfig = (mood: string): Record<string, unknown> => {
         size: {
           value: 4.2,
           random: true,
-          anim: { enable: enableAnims, speed: 1.25, size_min: 1.1, sync: false },
+          anim: { enable: enableAnims, speed: 1.25, size_min: 1.8, sync: false },
         },
         line_linked: {
           enable: true,
@@ -97,7 +97,7 @@ export const getParticlesConfig = (mood: string): Record<string, unknown> => {
         },
         move: {
           enable: true,
-          speed: byTier({ high: 1.35, mid: 1.0, low: 0.65 }),
+          speed: byTier({ high: 1.1, mid: 0.8, low: 0.5 }),
           direction: 'top-right',
           random: true,
           straight: false,
@@ -146,7 +146,7 @@ export const getParticlesConfig = (mood: string): Record<string, unknown> => {
         size: {
           value: 3.6,
           random: true,
-          anim: { enable: enableAnims, speed: 1.05, size_min: 0.9, sync: false },
+          anim: { enable: enableAnims, speed: 1.05, size_min: 1.6, sync: false },
         },
         line_linked: {
           enable: true,
@@ -202,7 +202,7 @@ export const getParticlesConfig = (mood: string): Record<string, unknown> => {
       size: {
         value: 4.8,
         random: true,
-        anim: { enable: enableAnims, speed: 1.5, size_min: 1.2, sync: false },
+        anim: { enable: enableAnims, speed: 1.5, size_min: 2.0, sync: false },
       },
       line_linked: { enable: true, distance: linkDistance, color, opacity: 0.18, width: 0.6 },
       move: {

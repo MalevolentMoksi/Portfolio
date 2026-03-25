@@ -9,7 +9,7 @@ export const useAccessibilityEffects = () => {
   const { settings } = useAccessibility();
 
   useEffect(() => {
-    // Get the global particlesJS animation control export (if available)
+    // Get the global visual effects instance (if available)
     const visualEffects = (window as any).visualEffectsInstance;
 
     if (visualEffects?.setAnimationsEnabled) {

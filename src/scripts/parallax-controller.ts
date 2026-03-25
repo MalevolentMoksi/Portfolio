@@ -31,7 +31,7 @@ class ParallaxController {
     let particlesPosX = 0;
     let particlesPosY = 0;
     const particlesCanvas: HTMLElement | null = parallaxLayersEnabled
-      ? document.getElementById('particles-js')
+      ? document.getElementById('particles-canvas')
       : null;
 
     const updateParallax = (): void => {

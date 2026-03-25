@@ -272,7 +272,7 @@ const Layout = () => {
         {t('common.header.skipToContent')}
       </a>
       <div className={moodStageClassName} data-mood={mood}>
-        <div id="particles-js" aria-hidden="true"></div>
+        <canvas id="particles-canvas" aria-hidden="true"></canvas>
         <img
           src={activeBackgroundSrc}
           alt=""

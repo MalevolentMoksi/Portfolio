@@ -1,14 +1,13 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import MusicPlayer from '../scripts/music-player';
-import VisualEffects from '../scripts/effects';
 import UIEnhancements from '../scripts/ui-enhancements';
-import Lightbox from '../scripts/lightbox';
 import { startFpsMonitor } from '../utils/performanceTier';
 
-let musicPlayerInstance: MusicPlayer | null = null;
-let visualEffectsInstance: VisualEffects | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let musicPlayerInstance: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let visualEffectsInstance: any = null;
 let uiEnhancementsInstance: UIEnhancements | null = null;
 
 const scheduleWhenPageReady = (callback: () => void): (() => void) => {
@@ -50,25 +49,30 @@ const usePortfolioModules = (trackFiles: string[]): void => {
   const hasHandledInitialLanguageSync = useRef(false);
 
   useEffect(() => {
-    return scheduleWhenPageReady(() => {
+    return scheduleWhenPageReady(async () => {
+      // Dynamic imports — loaded after first paint, ~0 cost on TTI
       if (!musicPlayerInstance) {
+        const { default: MusicPlayer } = await import('../scripts/music-player');
         musicPlayerInstance = new MusicPlayer(trackFiles);
       }
       if (!visualEffectsInstance) {
+        const { default: VisualEffects } = await import('../scripts/effects');
         visualEffectsInstance = new VisualEffects();
         // Expose globally for accessibility hook
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).visualEffectsInstance = visualEffectsInstance;
       }
 
       // Lancer le monitoring FPS passif (une seule fois par session)
-      // Différé pour ne pas rivaliser avec le premier rendu stylé.
       startFpsMonitor();
     });
   }, [trackFiles]);
 
   useLayoutEffect(() => {
-    // Annuler immédiatement toute frappe en cours lors d'un changement de route,
-    // pour éviter les écritures tardives sur le titre de la nouvelle page.
+    // Pause particles while React reconciles the new page
+    visualEffectsInstance?.pauseForNavigation?.();
+
+    // Annuler immédiatement toute frappe en cours lors d'un changement de route
     uiEnhancementsInstance?.cancelTypingEffect();
 
     if (!uiEnhancementsInstance) {
@@ -77,9 +81,17 @@ const usePortfolioModules = (trackFiles: string[]): void => {
       uiEnhancementsInstance.reinit();
     }
 
+    // Lazy-load Lightbox only when zoomable images are present
     if (document.querySelector('.zoomable')) {
-      new Lightbox();
+      import('../scripts/lightbox').then(({ default: Lightbox }) => new Lightbox());
     }
+
+    // Resume particles after the browser has painted the new page
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        visualEffectsInstance?.resumeAfterNavigation?.();
+      });
+    });
 
     return () => {
       uiEnhancementsInstance?.cancelTypingEffect();
@@ -93,7 +105,6 @@ const usePortfolioModules = (trackFiles: string[]): void => {
     }
 
     // Language changes update title text outside the typing pipeline; resync
-    // cached fragment so the next route transition erases the correct locale.
     uiEnhancementsInstance?.cancelTypingEffect();
     uiEnhancementsInstance?.syncTypingSnapshotFromDom(i18n.resolvedLanguage || 'fr');
   }, [i18n.resolvedLanguage]);

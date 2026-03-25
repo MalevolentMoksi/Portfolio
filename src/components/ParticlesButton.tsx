@@ -127,14 +127,8 @@ const CHARGE_DURATION_BOOST_MAX = 0.45;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
-/* ── Helpers : accès sécurisé à pJS ── */
-const getPJS = () => {
-  try {
-    return window.pJSDom?.[0]?.pJS ?? null;
-  } catch {
-    return null;
-  }
-};
+/* ── Helpers : accès au worker particules ── */
+const getWorker = (): Worker | null => window.particleWorker ?? null;
 
 const triggerPetAttract = (x: any, y: any, duration: number) => {
   const fire = () => window.petAttract?.(x, y, duration);
@@ -149,7 +143,7 @@ const triggerPetAttract = (x: any, y: any, duration: number) => {
  * - Réduit l'opacité du main pour laisser les particules visibles
  */
 const setParticlesForeground = (active: any) => {
-  const canvas = document.getElementById('particles-js');
+  const canvas = document.getElementById('particles-canvas');
   const main = document.querySelector('main');
   if (canvas) canvas.classList.toggle('particles-foreground', active);
   if (main) main.classList.toggle('main--particles-active', active);
@@ -186,14 +180,6 @@ const randomEdgePoint = () => {
   return { x: band.x(), y: band.y() };
 };
 
-/**
- * Vitesse de base réelle d'une particule : les particules.js initialisent
- * chaque composante à (random - 0.5) * speed / 3, donc la magnitude RMS
- * est environ speed / (3 * sqrt(2)) ≈ speed * 0.235.
- * Avec le mode gentle (speed = 1), le baseline est ~0.22 px/frame.
- */
-const getBaseSpeed = () => (getPJS()?.particles.move.speed ?? 1) * 0.22;
-
 const getCurrentMood = () =>
   document.querySelector('.mood-stage')?.getAttribute('data-mood') ||
   document.body.getAttribute('data-mood') ||
@@ -204,83 +190,49 @@ const getMoodFxProfile = () => {
   if (mood === 'industrial') {
     return {
       spawnMult: 1.9,
-      burstMult: 1.45,
-      pullForce: 0.78,
-      pullCap: 11,
+      burstMult: 1.75,
+      pullForce: 0.95,
+      pullCap: 14,
       stormBonusMult: 2.1,
-      stormSpeed: 7.2,
-      gravityAccel: 0.24,
-      bounceDamp: -0.62,
+      stormSpeed: 8.5,
+      gravityAccel: 0.28,
+      bounceDamp: -0.65,
     };
   }
   if (mood === 'nightshade') {
     return {
       spawnMult: 1.6,
-      burstMult: 1.35,
-      pullForce: 0.66,
-      pullCap: 9.5,
+      burstMult: 1.6,
+      pullForce: 0.82,
+      pullCap: 12,
       stormBonusMult: 1.85,
-      stormSpeed: 6.3,
-      gravityAccel: 0.14,
-      bounceDamp: -0.5,
+      stormSpeed: 7.8,
+      gravityAccel: 0.18,
+      bounceDamp: -0.55,
     };
   }
   return {
     spawnMult: 1,
-    burstMult: 1,
-    pullForce: 0.5,
-    pullCap: 8,
+    burstMult: 1.3,
+    pullForce: 0.7,
+    pullCap: 11,
     stormBonusMult: 1,
-    stormSpeed: 5,
-    gravityAccel: 0.18,
-    bounceDamp: -0.55,
+    stormSpeed: 6.5,
+    gravityAccel: 0.22,
+    bounceDamp: -0.6,
   };
 };
 
 /**
- * Décélération exponentielle smooth : ramène toutes les particules vers
- * baseSpeed sur `duration` ms sans snap brutal.
- * Retourne un handle { cancel() } pour annuler la boucle depuis l'extérieur.
+ * Décélération exponentielle smooth via worker.
+ * Le worker exécute la boucle rAF de restore en interne.
+ * Retourne un handle { cancel() } pour annuler depuis l'extérieur.
  */
 const smoothRestore = (duration = 1500) => {
-  const baseSpeed = getBaseSpeed();
-  const frames = duration * 0.06;
-  const k = Math.pow(0.05, 1 / frames);
-  const start = performance.now();
-  let cancelled = false;
-  let rafId: any = null;
-
-  const frame = () => {
-    if (cancelled) return;
-    const elapsed = performance.now() - start;
-    const done = elapsed >= duration;
-    const p = getPJS();
-    if (!p) return;
-
-    p.particles.array.forEach((pt: any) => {
-      const mag = Math.sqrt(pt.vx * pt.vx + pt.vy * pt.vy);
-      if (mag < 0.001) return;
-
-      let targetMag;
-      if (done) {
-        targetMag = baseSpeed;
-      } else {
-        targetMag = baseSpeed + (mag - baseSpeed) * k;
-      }
-      const ratio = targetMag / mag;
-      pt.vx *= ratio;
-      pt.vy *= ratio;
-    });
-
-    if (!done) rafId = requestAnimationFrame(frame);
-  };
-
-  rafId = requestAnimationFrame(frame);
-
+  getWorker()?.postMessage({ type: 'smooth_restore', duration });
   return {
     cancel() {
-      cancelled = true;
-      if (rafId) cancelAnimationFrame(rafId);
+      getWorker()?.postMessage({ type: 'cancel_smooth_restore' });
     },
   };
 };
@@ -301,46 +253,38 @@ const effects: Record<
   /**
    * Explosion : spawn dans les coins supérieurs
    * et projection radiale de toutes les particules.
+   * Worker handles particle spawning and velocity burst.
    */
   explode(signal: any, tier: PerformanceTier, runtimeDuration: number) {
     setParticlesForeground(true);
-    const pJS = getPJS();
-    if (!pJS) return { restoreHandle: null };
+    const worker = getWorker();
+    if (!worker) return { restoreHandle: null };
     const profile = getMoodFxProfile();
 
     const W = window.innerWidth;
     const H = window.innerHeight;
-    const pxr = pJS.canvas.pxratio ?? 1;
     const zoneW = W * 0.25;
     const zoneH = H * 0.35;
     const headerH = 70;
 
-    // Adapter le nombre de particules spawnées au tier + mood
     const baseSpawnCount = tier === 'low' ? 8 : 15;
     const spawnCount = Math.max(6, Math.round(baseSpawnCount * profile.spawnMult));
 
+    // Collect spawn positions in CSS pixels (worker scales by DPR internally)
+    const positions: Array<{ x: number; y: number }> = [];
     for (let i = 0; i < spawnCount; i++) {
-      pJS.fn.modes.pushParticles(1, {
-        pos_x: Math.random() * zoneW * pxr,
-        pos_y: (headerH + Math.random() * (zoneH - headerH)) * pxr,
-      });
+      positions.push({ x: Math.random() * zoneW, y: headerH + Math.random() * (zoneH - headerH) });
+      positions.push({ x: W - Math.random() * zoneW, y: headerH + Math.random() * (zoneH - headerH) });
     }
-    for (let i = 0; i < spawnCount; i++) {
-      pJS.fn.modes.pushParticles(1, {
-        pos_x: (W - Math.random() * zoneW) * pxr,
-        pos_y: (headerH + Math.random() * (zoneH - headerH)) * pxr,
-      });
-    }
+    worker.postMessage({ type: 'push_particles', positions });
 
-    const cx = (W / 2) * pxr;
-    const cy = (H / 4) * pxr;
-    pJS.particles.array.forEach((pt: any) => {
-      const dx = pt.x - cx;
-      const dy = pt.y - cy;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const burst = (5 + Math.random() * 5) * profile.burstMult;
-      pt.vx = (dx / dist) * burst;
-      pt.vy = (dy / dist) * burst;
+    // Burst: radial velocity away from (W/2, H/4) — CSS pixel origin
+    worker.postMessage({
+      type: 'set_velocity_radial_burst',
+      origin: { x: W / 2, y: H / 4 },
+      burstBase: 7,
+      burstRange: 7,
+      burstMult: profile.burstMult,
     });
 
     let restoreHandle: any = null;
@@ -361,44 +305,23 @@ const effects: Record<
 
   /**
    * Attraction : les particules convergent vers un point en bordure.
+   * Worker runs the continuous pull loop internally.
    */
   attract(signal: any, _tier: PerformanceTier, runtimeDuration: number) {
     setParticlesForeground(true);
+    const worker = getWorker();
+    if (!worker) return { restoreHandle: null };
     const { x: cx, y: cy } = randomEdgePoint();
     triggerPetAttract(cx, cy, runtimeDuration);
-
-    const pJS = getPJS();
-    if (!pJS) return { restoreHandle: null };
-
-    const pxr = pJS.canvas.pxratio ?? 1;
-    const pcx = cx * pxr;
-    const pcy = cy * pxr;
     const { pullForce, pullCap } = getMoodFxProfile();
 
-    const pull = () => {
-      if (signal.cancelled) return;
-      const p = getPJS();
-      if (!p) return;
-      p.particles.array.forEach((pt: any) => {
-        const dx = pcx - pt.x;
-        const dy = pcy - pt.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        pt.vx += (dx / dist) * pullForce;
-        pt.vy += (dy / dist) * pullForce;
-        const spd = Math.sqrt(pt.vx * pt.vx + pt.vy * pt.vy);
-        if (spd > pullCap) {
-          pt.vx = (pt.vx / spd) * pullCap;
-          pt.vy = (pt.vy / spd) * pullCap;
-        }
-      });
-      requestAnimationFrame(pull);
-    };
-
-    requestAnimationFrame(pull);
+    // Worker runs the pull loop internally
+    worker.postMessage({ type: 'start_attract', target: { x: cx, y: cy }, pullForce, pullCap });
 
     let restoreHandle: any = null;
     setTimeout(() => {
-      signal.cancelled = true; // Arrêter la boucle pull
+      signal.cancelled = true;
+      worker.postMessage({ type: 'stop_attract' });
       if (!signal._unmounted) {
         restoreHandle = smoothRestore(Math.max(1000, Math.round(runtimeDuration * 0.5)));
         setParticlesForeground(false);
@@ -413,51 +336,38 @@ const effects: Record<
 
   /**
    * Tempête : ajoute des particules bonus et uniformise leur vitesse.
+   * Worker handles spawning and velocity normalization.
    */
   storm(signal: any, tier: PerformanceTier, runtimeDuration: number) {
     setParticlesForeground(true);
     window.petReact?.('dizzy');
-
-    const pJS = getPJS();
-    if (!pJS) return { restoreHandle: null };
+    const worker = getWorker();
+    if (!worker) return { restoreHandle: null };
     const profile = getMoodFxProfile();
 
-    const originalCount = pJS.particles.array.length;
-    // Adapter le nombre de particules bonus au tier (proportionnel au baseline réduit)
+    // Track original count for trimming later (use cached _particleCount)
+    const originalCount = window._particleCount ?? 0;
+
     const baseMaxBonus = tier === 'low' ? 20 : tier === 'mid' ? 40 : 60;
     const maxBonus = Math.round(baseMaxBonus * profile.stormBonusMult);
-    const bonus = Math.min(originalCount, maxBonus);
-    const stormSpeed = profile.stormSpeed;
-    const pxr = pJS.canvas.pxratio ?? 1;
+    const bonus = Math.min(Math.max(originalCount, 1), maxBonus);
 
+    // Spawn bonus particles at random positions (CSS pixels)
+    const positions: Array<{ x: number; y: number }> = [];
     for (let i = 0; i < bonus; i++) {
-      pJS.fn.modes.pushParticles(1, {
-        pos_x: Math.random() * window.innerWidth * pxr,
-        pos_y: Math.random() * window.innerHeight * pxr,
-      });
+      positions.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight });
     }
+    worker.postMessage({ type: 'push_particles', positions });
 
-    pJS.particles.array.forEach((pt: any) => {
-      const mag = Math.sqrt(pt.vx * pt.vx + pt.vy * pt.vy);
-      if (mag < 0.001) {
-        const angle = Math.random() * Math.PI * 2;
-        pt.vx = Math.cos(angle) * stormSpeed;
-        pt.vy = Math.sin(angle) * stormSpeed;
-      } else {
-        const ratio = stormSpeed / mag;
-        pt.vx *= ratio;
-        pt.vy *= ratio;
-      }
-    });
+    // Uniformize all particle speeds
+    worker.postMessage({ type: 'set_velocity_uniform_speed', speed: profile.stormSpeed });
 
     let restoreHandle: any = null;
     setTimeout(() => {
       if (signal.cancelled) return;
-      const p2 = getPJS();
-      if (!p2) return;
-      const excess = p2.particles.array.length - originalCount;
-      if (excess > 0) {
-        p2.particles.array.splice(p2.particles.array.length - excess, excess);
+      // Trim bonus particles
+      if (originalCount > 0) {
+        worker.postMessage({ type: 'trim_particles', targetCount: originalCount });
       }
       restoreHandle = smoothRestore(Math.max(1300, Math.round(runtimeDuration * 0.72)));
       setParticlesForeground(false);
@@ -471,37 +381,23 @@ const effects: Record<
 
   /**
    * Gravité : les particules tombent et rebondissent.
+   * Worker runs the gravity loop internally.
    */
   gravity(signal: any, _tier: PerformanceTier, runtimeDuration: number) {
     setParticlesForeground(true);
     window.petReact?.('dizzy');
     window.petGravity?.(runtimeDuration);
-
-    const pJS = getPJS();
-    if (!pJS) return { restoreHandle: null };
+    const worker = getWorker();
+    if (!worker) return { restoreHandle: null };
     const { gravityAccel, bounceDamp } = getMoodFxProfile();
 
-    const fall = () => {
-      if (signal.cancelled) return;
-      const p = getPJS();
-      if (!p) return;
-      const floor = p.canvas.h - 4;
-
-      p.particles.array.forEach((pt: any) => {
-        pt.vy += gravityAccel;
-        if (pt.y >= floor) {
-          pt.vy *= bounceDamp;
-          pt.y = floor;
-        }
-      });
-      requestAnimationFrame(fall);
-    };
-
-    requestAnimationFrame(fall);
+    // Worker runs the gravity loop internally
+    worker.postMessage({ type: 'start_gravity', gravityAccel, bounceDamp });
 
     let restoreHandle: any = null;
     setTimeout(() => {
-      signal.cancelled = true; // Arrêter la boucle fall
+      signal.cancelled = true;
+      worker.postMessage({ type: 'stop_gravity' });
       if (!signal._unmounted) {
         restoreHandle = smoothRestore(Math.max(1200, Math.round(runtimeDuration * 0.65)));
         setParticlesForeground(false);
@@ -836,8 +732,14 @@ const ParticlesButton = () => {
     }
 
     const updateCount = () => {
-      const p = getPJS();
-      setParticleCount(p?.particles?.array?.length ?? 0);
+      const worker = getWorker();
+      if (worker) {
+        worker.postMessage({ type: 'get_count' });
+        // Response arrives via window._particleCount (set by worker.onmessage in effects.ts)
+        setParticleCount(window._particleCount ?? 0);
+      } else {
+        setParticleCount(0);
+      }
     };
 
     updateCount();
@@ -869,8 +771,10 @@ const ParticlesButton = () => {
         effectSignalRef.current.cancelled = true;
         effectSignalRef.current._unmounted = true;
       }
-      // Annuler le smoothRestore en cours
+      // Annuler le smoothRestore en cours + arrêter les boucles worker
       smoothRestoreHandleRef.current?.cancel();
+      getWorker()?.postMessage({ type: 'stop_attract' });
+      getWorker()?.postMessage({ type: 'stop_gravity' });
       // Annuler l'interval de progress
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);

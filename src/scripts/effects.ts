@@ -1,170 +1,203 @@
 /**
- * Visual Effects Module
- * Handles particles, parallax background, and cursor effects
+ * Visual Effects Module — Worker-based particle engine + parallax
+ *
+ * Replaces the CDN particles.js library with a Web Worker + OffscreenCanvas
+ * architecture. Physics and rendering run entirely off the main thread.
+ * The main thread only forwards mouse events and config updates.
  */
 
-import {
-  getMoodColor,
-  getParticlesConfig,
-  moodNeedsFullReconfigure,
-} from './effects-particles-config';
+import { getParticlesConfig } from './effects-particles-config';
 import ParallaxController from './parallax-controller';
 
 class VisualEffects {
   private background: HTMLElement | null;
   private parallaxController: ParallaxController | null;
+  private worker: Worker | null;
+  private canvas: HTMLCanvasElement | null;
+  private dpr: number;
+  private mouseMoveHandler: ((e: MouseEvent) => void) | null;
+  private mouseLeaveHandler: (() => void) | null;
+  private clickHandler: ((e: MouseEvent) => void) | null;
+  private resizeHandler: (() => void) | null;
 
   constructor() {
     this.background = document.getElementById('background');
     this.parallaxController = null;
+    this.worker = null;
+    this.canvas = null;
+    this.dpr = 1;
+    this.mouseMoveHandler = null;
+    this.mouseLeaveHandler = null;
+    this.clickHandler = null;
+    this.resizeHandler = null;
     this.init();
   }
 
   private init(): void {
-    this.initParticles();
+    this.initParticlesWorker();
     if (this.background) {
       this.parallaxController = new ParallaxController(this.background);
       this.parallaxController.start();
     }
   }
 
-  private initParticles(): void {
-    // Respecter prefers-reduced-motion : pas de particules
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
+  private initParticlesWorker(): void {
+    // Respect prefers-reduced-motion
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return;
+
+    // Skip on touch/mobile devices
+    if (window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches) return;
+
+    // OffscreenCanvas required for worker-based rendering
+    if (!('OffscreenCanvas' in window)) {
+      console.warn('OffscreenCanvas not supported — particles disabled');
       return;
     }
 
-    // Pas de particules sur mobile/tactile — coût GPU/batterie prohibitif
-    if (window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches) {
+    this.canvas = document.getElementById('particles-canvas') as HTMLCanvasElement | null;
+    if (!this.canvas) return;
+
+    this.dpr = window.devicePixelRatio || 1;
+    const cssW = this.canvas.clientWidth;
+    const cssH = this.canvas.clientHeight;
+
+    // Canvas must have valid dimensions for transferControlToOffscreen.
+    // If dimensions aren't ready, defer initialization.
+    if (cssW === 0 || cssH === 0) {
+      requestAnimationFrame(() => this.initParticlesWorker());
       return;
     }
 
-    // Check if particles.js is loaded
-    if (typeof particlesJS === 'undefined') {
-      console.warn('particles.js not loaded');
-      return;
-    }
-
-    const currentMood: string =
+    const mood =
       document.querySelector('.mood-stage')?.getAttribute('data-mood') ||
       document.body.getAttribute('data-mood') ||
       'default';
-    this._applyParticlesConfig(currentMood);
 
-    // Exposer les fonctions globales pour les composants React
+    const config = getParticlesConfig(mood);
+
+    // Create worker and transfer canvas control
+    this.worker = new Worker(
+      new URL('../workers/particles.worker.ts', import.meta.url),
+      { type: 'module' }
+    );
+
+    try {
+      const offscreen = this.canvas.transferControlToOffscreen();
+      this.worker.postMessage(
+        { type: 'init', canvas: offscreen, cssWidth: cssW, cssHeight: cssH, dpr: this.dpr, config },
+        [offscreen]
+      );
+    } catch (err) {
+      console.error('Failed to initialize particle worker:', err);
+      this.worker.terminate();
+      this.worker = null;
+      return;
+    }
+
+    // Listen for worker responses (particle count updates)
+    this.worker.onmessage = (e) => {
+      if (e.data.type === 'count') {
+        window._particleCount = e.data.value;
+      }
+    };
+
+    // Mouse events: MUST use offsetX/offsetY (canvas-local coords accounting for
+    // CSS parallax transform) — this is exactly what particles.js CDN did.
+    this.mouseMoveHandler = (e: MouseEvent) => {
+      this.worker?.postMessage({ type: 'mouse', x: e.offsetX, y: e.offsetY });
+    };
+    this.mouseLeaveHandler = () => {
+      this.worker?.postMessage({ type: 'mouseleave' });
+    };
+    this.clickHandler = (e: MouseEvent) => {
+      this.worker?.postMessage({ type: 'click', x: e.offsetX, y: e.offsetY });
+    };
+    this.canvas.addEventListener('mousemove', this.mouseMoveHandler);
+    this.canvas.addEventListener('mouseleave', this.mouseLeaveHandler);
+    this.canvas.addEventListener('click', this.clickHandler);
+
+    // Resize: update worker canvas dimensions
+    this.resizeHandler = () => {
+      if (!this.canvas) return;
+      this.dpr = window.devicePixelRatio || 1;
+      this.worker?.postMessage({
+        type: 'resize',
+        cssWidth: this.canvas.clientWidth,
+        cssHeight: this.canvas.clientHeight,
+        dpr: this.dpr,
+      });
+    };
+    window.addEventListener('resize', this.resizeHandler);
+
+    // Expose globals for MoodContext and ParticlesButton
+    window.particleWorker = this.worker;
     window.updateParticlesMood = (mood: string) => this.updateParticlesMood(mood);
     window.reconfigureParticles = (mood: string) => this.reconfigureParticles(mood);
   }
 
   /**
-   * Applique une config particles.js (destroy puis reinit)
-   */
-  private _applyParticlesConfig(mood: string): void {
-    // Détruire l'instance existante
-    try {
-      if (window.pJSDom?.[0]?.pJS) {
-        window.pJSDom[0].pJS.fn.vendors.destroypJS();
-        window.pJSDom = [];
-      }
-    } catch {
-      /* ignore */
-    }
-
-    const config = getParticlesConfig(mood);
-    particlesJS('particles-js', config);
-  }
-
-  /**
-   * Met à jour les couleurs des particules selon le mood actif.
-   * Pour les moods standard (default, hacker, vaporwave) — simple recoloration.
-   * Pour europa/industrial — délègue à reconfigureParticles() car la physique change.
+   * Update particles for a new mood.
+   * Always does a full reconfigure via worker (destroy + reinit).
    */
   updateParticlesMood(mood: string): void {
-    if (moodNeedsFullReconfigure(mood)) {
-      this.reconfigureParticles(mood);
-      return;
-    }
-
-    const color = getMoodColor(mood);
-
-    try {
-      const pJS = window.pJSDom?.[0]?.pJS;
-      if (!pJS) return;
-
-      // Mettre à jour la config pour les futures particules
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pJSAny = pJS as any;
-      pJSAny.particles.color.value = color;
-      pJSAny.particles.line_linked.color = color;
-
-      // Convertir hex en RGB
-      const r: number = parseInt(color.slice(1, 3), 16);
-      const g: number = parseInt(color.slice(3, 5), 16);
-      const b: number = parseInt(color.slice(5, 7), 16);
-      const rgb = { r, g, b };
-
-      // Mettre à jour chaque particule existante
-      pJSAny.particles.array.forEach(
-        (p: { color: { value: string; rgb: { r: number; g: number; b: number } } }) => {
-          p.color.value = color;
-          p.color.rgb = rgb;
-        }
-      );
-
-      // Mettre à jour la couleur de la config line_linked pour le rendu
-      pJSAny.particles.line_linked.color_rgb_line = rgb;
-    } catch (e) {
-      console.warn('Impossible de mettre à jour les couleurs des particules:', e);
-    }
+    const config = getParticlesConfig(mood);
+    this.worker?.postMessage({ type: 'updateConfig', config });
   }
 
   /**
-   * Reconfigure complètement particles.js pour un mood donné.
-   * Détruit l'instance existante et réinitialise avec la config adaptée.
-   * Nécessaire pour europa (blizzard) et industrial (cendres) qui changent
-   * la physique des particules, pas seulement les couleurs.
+   * Full reconfigure for a mood change.
    */
   reconfigureParticles(mood: string): void {
-    if (typeof particlesJS === 'undefined') return;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return;
-    this._applyParticlesConfig(mood);
+    const config = getParticlesConfig(mood);
+    this.worker?.postMessage({ type: 'updateConfig', config });
   }
 
   /**
-   * Disable/enable all particle animations based on accessibility noMotion setting.
-   * Called when accessibility context's noMotion changes.
+   * Disable/enable all particle animations (accessibility noMotion).
    */
   setAnimationsEnabled(enabled: boolean): void {
-    if (typeof particlesJS === 'undefined') return;
-    try {
-      const pJS = (window as any).pJSDOM?.[0]?.pJS;
-      if (!pJS) return;
-
-      // Disable/enable animations across all particle properties
-      if (pJS.particles?.opacity?.anim) {
-        pJS.particles.opacity.anim.enable = enabled;
-      }
-      if (pJS.particles?.size?.anim) {
-        pJS.particles.size.anim.enable = enabled;
-      }
-      if (pJS.particles?.color?.anim) {
-        pJS.particles.color.anim.enable = enabled;
-      }
-      if (pJS.particles?.move) {
-        pJS.particles.move.enable = enabled;
-      }
-    } catch (e) {
-      console.warn('Could not update particle animations:', e);
-    }
+    this.worker?.postMessage({ type: 'setAnimationsEnabled', enabled });
   }
 
   /**
-   * Nettoie toutes les ressources (RAF, listeners).
-   * Appelé lors du démontage du hook usePortfolioModules.
+   * Pause the particle RAF loop during React route transitions.
+   */
+  pauseForNavigation(): void {
+    this.worker?.postMessage({ type: 'pause' });
+  }
+
+  /**
+   * Resume the particle RAF loop after route transition completes.
+   */
+  resumeAfterNavigation(): void {
+    this.worker?.postMessage({ type: 'resume' });
+  }
+
+  /**
+   * Cleanup all resources (worker, RAF, event listeners).
+   * Called on hook unmount via usePortfolioModules.
    */
   destroy(): void {
+    if (this.canvas) {
+      if (this.mouseMoveHandler) {
+        this.canvas.removeEventListener('mousemove', this.mouseMoveHandler);
+      }
+      if (this.mouseLeaveHandler) {
+        this.canvas.removeEventListener('mouseleave', this.mouseLeaveHandler);
+      }
+      if (this.clickHandler) {
+        this.canvas.removeEventListener('click', this.clickHandler);
+      }
+    }
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
+    this.worker?.postMessage({ type: 'destroy' });
+    this.worker?.terminate();
+    this.worker = null;
     this.parallaxController?.destroy();
     this.parallaxController = null;
+    delete window.particleWorker;
   }
 }
 

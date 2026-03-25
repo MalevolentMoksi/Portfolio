@@ -168,6 +168,16 @@ export default defineConfig({
           ) {
             return 'vendor';
           }
+          // Separate cacheable chunks for heavy deferred subsystems
+          if (id.includes('/src/scripts/') && !id.includes('.worker.')) {
+            return 'scripts';
+          }
+          if (id.includes('/src/components/ambient/')) {
+            return 'ambient';
+          }
+          if (id.includes('/src/locales/')) {
+            return 'i18n';
+          }
           return undefined;
         },
       },

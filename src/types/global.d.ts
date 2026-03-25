@@ -15,25 +15,6 @@ declare module 'react' {
 }
 
 declare global {
-  /* ── particles.js CDN global ── */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function particlesJS(tagId: string, params: Record<string, any>): void;
-
-  interface PJSDomEntry {
-    pJS: {
-      fn: {
-        vendors: {
-          destroypJS: () => void;
-        };
-        modes: {
-          pushParticles: (count: number, options?: { pos_x: number; pos_y: number }) => void;
-        };
-      };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [key: string]: any;
-    };
-  }
-
   /* ── jsmediatags CDN global ── */
   interface JsMediaTagsResult {
     tags: {
@@ -74,8 +55,9 @@ declare global {
     reconfigureParticles?: (mood: string) => void;
     updateParticlesMood?: (mood: string) => void;
 
-    /* particles.js CDN DOM array */
-    pJSDom?: PJSDomEntry[];
+    /* Particle worker — exposed by effects.ts for ParticlesButton */
+    particleWorker?: Worker;
+    _particleCount?: number;
 
     /* jsmediatags CDN — ID3 tag reader (removed: now an npm module) */
     // jsmediatags?: JsMediaTags;
