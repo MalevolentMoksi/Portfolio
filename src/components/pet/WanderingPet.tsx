@@ -21,6 +21,7 @@ import {
   CATCH_SEEK_SPEED,
   CATCH_BALL_GRAVITY,
   CATCH_BOT_RADIUS,
+  CATCH_BALL_SIZE,
 } from './petConstants';
 import RobotFace from './RobotFace';
 import ThoughtBubbleQueue from './ThoughtBubbleQueue';
@@ -172,6 +173,10 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
   const prevHudOpenRef = useRef(false);
   // Delta-time: normalises physics to 60 fps regardless of actual refresh rate
   const prevTimeRef = useRef<any>(null);
+  const hudOpenRef = useRef(hudOpen);
+  useEffect(() => {
+    hudOpenRef.current = hudOpen;
+  }, [hudOpen]);
   // Proximity + movement behavior tracking (frame-counted cooldowns)
   const proximityRef = useRef({
     dwellFrames: 0,
@@ -395,7 +400,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
   /* ── Boucle d'animation RAF ── */
   useEffect(() => {
     const tick = (now: any) => {
-      if (hudOpen || isDraggingRef.current) {
+      if (hudOpenRef.current || isDraggingRef.current) {
         lastTickTimeRef.current = Date.now();
         rafRef.current = requestAnimationFrame(tick);
         return;
@@ -449,8 +454,9 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
           v.y = (ady / adist) * speed;
         } else {
           // Close enough — brake (dt-scaled)
-          v.x *= Math.pow(0.7, dt);
-          v.y *= Math.pow(0.7, dt);
+          const damp07 = Math.pow(0.7, dt);
+          v.x *= damp07;
+          v.y *= damp07;
         }
 
         p.x = clamp(p.x + v.x * dt, HALF, vw - HALF);
@@ -504,7 +510,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
             const seekSpd = CATCH_SEEK_SPEED;
             const bw = window.innerWidth,
               bh = window.innerHeight;
-            const ballR = 11; // CATCH_BALL_SIZE / 2
+            const ballR = CATCH_BALL_SIZE / 2;
             let bestPt = { x: sx, y: sy };
             for (let i = 1; i <= interceptSteps; i++) {
               svy += CATCH_BALL_GRAVITY;
@@ -556,12 +562,14 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
           }
         } else if (bi.holder === 'bot-held') {
           // Bot is holding — gentle brake, face toward cursor (dt-scaled)
-          v.x *= Math.pow(0.85, dt);
-          v.y *= Math.pow(0.85, dt);
+          const damp085 = Math.pow(0.85, dt);
+          v.x *= damp085;
+          v.y *= damp085;
         } else {
           // Ball held by player or returning — gentle wander with reduced speed (dt-scaled)
-          v.x *= Math.pow(0.92, dt);
-          v.y *= Math.pow(0.92, dt);
+          const damp092a = Math.pow(0.92, dt);
+          v.x *= damp092a;
+          v.y *= damp092a;
           const dv = desiredVRef.current;
           v.x += (dv.x * 0.3 - v.x) * 0.02 * dt;
           v.y += (dv.y * 0.3 - v.y) * 0.02 * dt;
@@ -612,12 +620,14 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
           // Steer strongly toward rest target (dt-scaled)
           v.x += (rdx / rdist) * 0.18 * dt;
           v.y += (rdy / rdist) * 0.18 * dt;
-          v.x *= Math.pow(0.92, dt);
-          v.y *= Math.pow(0.92, dt);
+          const damp092b = Math.pow(0.92, dt);
+          v.x *= damp092b;
+          v.y *= damp092b;
         } else {
           // Arrived — stop and emit zzz thought once (dt-scaled)
-          v.x *= Math.pow(0.8, dt);
-          v.y *= Math.pow(0.8, dt);
+          const damp08 = Math.pow(0.8, dt);
+          v.x *= damp08;
+          v.y *= damp08;
           if (!hasRestThoughtRef.current) {
             hasRestThoughtRef.current = true;
             onThought('zzz');
@@ -638,8 +648,9 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
 
       // ── Sleeping: near-zero drift, no cursor interaction ──
       if (sleeping && !attractTargetRef.current) {
-        v.x *= Math.pow(0.96, dt);
-        v.y *= Math.pow(0.96, dt);
+        const damp096 = Math.pow(0.96, dt);
+        v.x *= damp096;
+        v.y *= damp096;
         if (frameRef.current % 50 === 0) {
           const dv = desiredVRef.current;
           dv.x = (Math.random() - 0.5) * 0.1;
@@ -896,7 +907,7 @@ const WanderingPet = forwardRef<unknown, WanderingPetProps>(function WanderingPe
       cancelAnimationFrame(rafRef.current);
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [hudOpen]);
+  }, []);
 
   /* ── Fermer le HUD au clic extérieur ── */
   useEffect(() => {

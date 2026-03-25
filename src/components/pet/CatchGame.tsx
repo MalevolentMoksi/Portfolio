@@ -70,6 +70,7 @@ interface DifficultyPreset {
 /* ── Constants ── */
 const BALL_R = CATCH_BALL_SIZE / 2;
 const BOT_CATCH = CATCH_BOT_RADIUS;
+const BOT_CATCH_SQ = BOT_CATCH * BOT_CATCH;
 const BALL_TOP_MIN = BALL_R;
 const VEL_HIST_MAX = 6;
 const AIM_STEPS_BY_TIER = { high: 22, mid: 16, low: 10 };
@@ -230,6 +231,7 @@ const CatchGame = ({
   const isChargingRef = useRef(false);
   const chargeStartedAtRef = useRef(0);
   const chargePctRef = useRef(0);
+  const prevRenderedChargePctRef = useRef(0); // last chargePct sent to React state — avoids stale closure dep in RAF
   /* ── Score/combo refs for RAF-safe mutations ── */
   const scoreRef = useRef(0);
   const comboRef = useRef(0);
@@ -381,6 +383,7 @@ const CatchGame = ({
       prevAimOriginRef.current = { x: -9999, y: -9999 };
       isChargingRef.current = false;
       chargePctRef.current = 0;
+      prevRenderedChargePctRef.current = 0;
       bounceCountRef.current = 0;
       setBounceCount(0);
       setChargePct(0);
@@ -800,7 +803,10 @@ const CatchGame = ({
           const elapsed = performance.now() - chargeStartedAtRef.current;
           const nextPct = Math.max(CHARGE_MIN, Math.min(1, elapsed / preset.chargeMs));
           chargePctRef.current = nextPct;
-          if (Math.abs(nextPct - chargePct) > 0.015) setChargePct(nextPct);
+          if (Math.abs(nextPct - prevRenderedChargePctRef.current) > 0.015) {
+            prevRenderedChargePctRef.current = nextPct;
+            setChargePct(nextPct);
+          }
         }
         const t = targetVel();
         const sv = smoothVelRef.current;
@@ -935,8 +941,9 @@ const CatchGame = ({
       const prevY = bp.y;
       // Integrate forces using dt so physics are wall-clock consistent
       bv.y += CATCH_BALL_GRAVITY * dt;
-      bv.x *= AIR_FRICTION ** dt;
-      bv.y *= AIR_FRICTION ** dt;
+      const frictionDt = AIR_FRICTION ** dt;
+      bv.x *= frictionDt;
+      bv.y *= frictionDt;
       bp.x += bv.x * dt;
       bp.y += bv.y * dt;
       // Wall bounces
@@ -965,8 +972,7 @@ const CatchGame = ({
         const hit = closestPointOnSegment(prevX, prevY, bp.x, bp.y, bot.x, bot.y);
         const hx = hit.x - bot.x;
         const hy = hit.y - bot.y;
-        const hitDist = Math.sqrt(hx * hx + hy * hy);
-        if (hitDist < BOT_CATCH) {
+        if (hx * hx + hy * hy < BOT_CATCH_SQ) {
           onBotCatch();
           bp.x = bot.x;
           bp.y = bot.y;
@@ -993,7 +999,7 @@ const CatchGame = ({
           cy = cursorRef.current.y;
         const dx = bp.x - cx,
           dy = bp.y - cy;
-        if (Math.sqrt(dx * dx + dy * dy) < preset.playerCatchRadius) {
+        if (dx * dx + dy * dy < preset.playerCatchRadius * preset.playerCatchRadius) {
           if (
             mode === 'challenge' &&
             holderRef.current === 'returning' &&
@@ -1031,7 +1037,6 @@ const CatchGame = ({
   }, [
     ballInfoRef,
     botPosRef,
-    chargePct,
     clearHintTimer,
     mode,
     onBotCatch,
