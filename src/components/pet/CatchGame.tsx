@@ -417,8 +417,8 @@ const CatchGame = ({
         unlockChallengeBadge('clear');
         if (difficulty === 'hard') unlockChallengeBadge('hard');
       }
-      // Combo achievement unlocks whenever combo reached 20, success or failure
-      if (maxComboRef.current >= 20) {
+      // Combo achievement unlocks whenever combo reached 5, success or failure
+      if (maxComboRef.current >= 5) {
         unlockChallengeBadge('combo20');
       }
       setGameOver({

@@ -119,8 +119,8 @@ export const ACHIEVEMENTS = [
   {
     id: 'catch-combo-20',
     key: 'catchCombo20',
-    label: 'Combo x20',
-    desc: 'Atteint un combo de 20 en challenge',
+    label: 'Combo x5',
+    desc: 'Atteint un combo de 5 en challenge',
     hint: 'Maintiens les retours sans casser la chaîne de combo',
   },
   {

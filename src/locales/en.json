@@ -402,7 +402,7 @@
           "catchGame": { "label": "Baseball", "desc": "Played catch game", "hint": "Start a game using Play button in HUD" },
           "catchChallengeClear": { "label": "Challenger", "desc": "Cleared a catch challenge run", "hint": "Start Challenge mode and reach the target score" },
           "catchHardClear": { "label": "Hard Carry", "desc": "Cleared a challenge on hard difficulty", "hint": "Beat Challenge mode on Hard" },
-          "catchCombo20": { "label": "Combo x20", "desc": "Reached a 20 combo in challenge", "hint": "Keep successful returns going without dropping the combo" },
+          "catchCombo20": { "label": "Combo x5", "desc": "Reached a 5 combo in challenge", "hint": "Keep successful returns going without dropping the combo" },
           "sleep": { "label": "Good night", "desc": "Robot fell asleep", "hint": "Leave robot idle for 30 seconds" },
           "combo": { "label": "Combo x3", "desc": "Chained 3 interactions in 7s", "hint": "Do 3 different actions in under 7s" },
           "rename": { "label": "Renamed", "desc": "Gave robot a new name", "hint": "Change robot name in HUD field" },

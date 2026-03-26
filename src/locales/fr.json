@@ -402,7 +402,7 @@
           "catchGame": { "label": "Baseball", "desc": "Joué au jeu d'attrape", "hint": "Lance une partie via le bouton Jouer dans le HUD du robot" },
           "catchChallengeClear": { "label": "Challenger", "desc": "Terminé un challenge du jeu d'attrape", "hint": "Lance le mode Challenge et atteins le score objectif" },
           "catchHardClear": { "label": "Hard Carry", "desc": "Terminé un challenge en difficulté difficile", "hint": "Réussis un challenge en mode Difficile" },
-          "catchCombo20": { "label": "Combo x20", "desc": "Atteint un combo de 20 en challenge", "hint": "Maintiens les retours sans casser la chaîne de combo" },
+          "catchCombo20": { "label": "Combo x5", "desc": "Atteint un combo de 5 en challenge", "hint": "Maintiens les retours sans casser la chaîne de combo" },
           "sleep": { "label": "Bonne nuit", "desc": "Le robot s'est endormi", "hint": "Laisse le robot tranquille sans interagir pendant 30 secondes" },
           "combo": { "label": "Combo x3", "desc": "Enchaîné 3 interactions en 7 s", "hint": "Effectue 3 actions différentes sur le robot en moins de 7 s" },
           "rename": { "label": "Rebaptisé", "desc": "Donné un nouveau nom au robot", "hint": "Change le nom du robot depuis le champ en haut du HUD" },
