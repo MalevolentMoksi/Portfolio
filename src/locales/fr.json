@@ -107,13 +107,17 @@
           "explode": "BURST",
           "attract": "PULL",
           "storm": "STRM",
-          "gravity": "GRAV"
+          "gravity": "GRAV",
+          "vortex": "VTX",
+          "crystal": "CRY"
         },
         "signatures": {
           "explode": "Projection radiale",
           "attract": "Convergence locale",
           "storm": "Turbulence orbitale",
-          "gravity": "Chute amortie"
+          "gravity": "Chute amortie",
+          "vortex": "Spirale orbitale",
+          "crystal": "Gel et éclatement"
         }
       },
       "effects": {
@@ -132,6 +136,14 @@
         "gravity": {
           "label": "Gravité",
           "toast": "Gravité - les particules chutent !"
+        },
+        "vortex": {
+          "label": "Vortex",
+          "toast": "Vortex - spirale en formation !"
+        },
+        "crystal": {
+          "label": "Cristal",
+          "toast": "Cristallisation - gel instantané !"
         }
       }
     },

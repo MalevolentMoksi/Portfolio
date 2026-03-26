@@ -9,6 +9,45 @@ import type { PerformanceTier } from '@/types';
 
 /* ── Configuration des effets ─────────────────────── */
 const EFFECT_ICONS = {
+  vortex: (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 2 C17.5 2 22 6.5 22 12 C22 16 19.5 19 16 20.5" />
+      <path d="M16 20.5 C13.5 21.5 10.5 21 8 19.5 C5 17.5 4 14 5 11" />
+      <path d="M5 11 C6 8 8.5 6.5 11 7 C13 7.5 14 9 13.5 11" />
+      <path d="M13.5 11 C13 12.5 11.5 13.5 10 13 C9 12.5 8.5 11.5 9 10.5" />
+      <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  crystal: (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="12" y1="2"  x2="12" y2="22" />
+      <line x1="2"  y1="12" x2="22" y2="12" />
+      <line x1="4.9" y1="4.9" x2="19.1" y2="19.1" />
+      <line x1="19.1" y1="4.9" x2="4.9" y2="19.1" />
+      <circle cx="12" cy="12" r="3.5" fill="currentColor" fillOpacity="0.18" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" fillOpacity="0.5" stroke="none" />
+    </svg>
+  ),
   explode: (
     <svg
       viewBox="0 0 24 24"
@@ -91,8 +130,10 @@ const EFFECT_ICONS = {
 const EFFECTS = [
   { key: 'explode', duration: 1800 },
   { key: 'attract', duration: 3000 },
-  { key: 'storm', duration: 3000 },
+  { key: 'storm',   duration: 3000 },
   { key: 'gravity', duration: 3000 },
+  { key: 'vortex',  duration: 3200 },
+  { key: 'crystal', duration: 2400 },
 ] as const;
 
 type EffectKey = (typeof EFFECTS)[number]['key'];
@@ -111,15 +152,19 @@ const WEATHER_EFFECT_META: Record<
 > = {
   explode: { energyBase: 68, energySwing: 26 },
   attract: { energyBase: 56, energySwing: 20 },
-  storm: { energyBase: 74, energySwing: 28 },
+  storm:   { energyBase: 74, energySwing: 28 },
   gravity: { energyBase: 52, energySwing: 24 },
+  vortex:  { energyBase: 64, energySwing: 30 },
+  crystal: { energyBase: 48, energySwing: 22 },
 };
 
 const WEATHER_NODE_LAYOUT = [
-  { x: '50%', y: '8%' },
-  { x: '86%', y: '50%' },
-  { x: '50%', y: '92%' },
-  { x: '14%', y: '50%' },
+  { x: '50%', y: '5%'  },  // 12 o'clock
+  { x: '88%', y: '27%' },  // 2 o'clock
+  { x: '88%', y: '73%' },  // 4 o'clock
+  { x: '50%', y: '95%' },  // 6 o'clock
+  { x: '12%', y: '73%' },  // 8 o'clock
+  { x: '12%', y: '27%' },  // 10 o'clock
 ] as const;
 
 const CHARGE_MAX_HOLD_MS = 950;
@@ -189,37 +234,43 @@ const getMoodFxProfile = () => {
   const mood = getCurrentMood();
   if (mood === 'industrial') {
     return {
-      spawnMult: 1.9,
-      burstMult: 1.75,
-      pullForce: 0.95,
-      pullCap: 14,
-      stormBonusMult: 2.1,
-      stormSpeed: 8.5,
-      gravityAccel: 0.28,
-      bounceDamp: -0.65,
+      spawnMult: 1.9, burstMult: 1.75, pullForce: 0.95, pullCap: 14,
+      stormBonusMult: 2.1, stormSpeed: 8.5, gravityAccel: 0.28, bounceDamp: -0.65,
+      vortexAngularForce: 1.1, vortexInward: 0.07, vortexMaxSpeed: 16,
     };
   }
   if (mood === 'nightshade') {
     return {
-      spawnMult: 1.6,
-      burstMult: 1.6,
-      pullForce: 0.82,
-      pullCap: 12,
-      stormBonusMult: 1.85,
-      stormSpeed: 7.8,
-      gravityAccel: 0.18,
-      bounceDamp: -0.55,
+      spawnMult: 1.6, burstMult: 1.6, pullForce: 0.82, pullCap: 12,
+      stormBonusMult: 1.85, stormSpeed: 7.8, gravityAccel: 0.18, bounceDamp: -0.55,
+      vortexAngularForce: 0.8, vortexInward: 0.09, vortexMaxSpeed: 12,
+    };
+  }
+  if (mood === 'vaporwave') {
+    return {
+      spawnMult: 1.4, burstMult: 1.5, pullForce: 0.75, pullCap: 11,
+      stormBonusMult: 1.5, stormSpeed: 7.0, gravityAccel: 0.14, bounceDamp: -0.5,
+      vortexAngularForce: 0.85, vortexInward: 0.06, vortexMaxSpeed: 11,
+    };
+  }
+  if (mood === 'europa') {
+    return {
+      spawnMult: 0.8, burstMult: 1.0, pullForce: 0.55, pullCap: 8,
+      stormBonusMult: 0.7, stormSpeed: 4.5, gravityAccel: 0.10, bounceDamp: -0.35,
+      vortexAngularForce: 0.6, vortexInward: 0.12, vortexMaxSpeed: 8,
+    };
+  }
+  if (mood === 'hacker') {
+    return {
+      spawnMult: 1.5, burstMult: 1.9, pullForce: 0.9, pullCap: 15,
+      stormBonusMult: 2.0, stormSpeed: 10.0, gravityAccel: 0.30, bounceDamp: -0.7,
+      vortexAngularForce: 1.2, vortexInward: 0.05, vortexMaxSpeed: 18,
     };
   }
   return {
-    spawnMult: 1,
-    burstMult: 1.3,
-    pullForce: 0.7,
-    pullCap: 11,
-    stormBonusMult: 1,
-    stormSpeed: 6.5,
-    gravityAccel: 0.22,
-    bounceDamp: -0.6,
+    spawnMult: 1, burstMult: 1.3, pullForce: 0.7, pullCap: 11,
+    stormBonusMult: 1, stormSpeed: 6.5, gravityAccel: 0.22, bounceDamp: -0.6,
+    vortexAngularForce: 0.9, vortexInward: 0.08, vortexMaxSpeed: 13,
   };
 };
 
@@ -403,6 +454,86 @@ const effects: Record<
         setParticlesForeground(false);
       }
     }, runtimeDuration);
+    return {
+      get restoreHandle() {
+        return restoreHandle;
+      },
+    };
+  },
+
+  /**
+   * Vortex : les particules tourbillonnent en spirale autour du centre.
+   * Worker runs the vortex loop internally.
+   */
+  vortex(signal: any, _tier: PerformanceTier, runtimeDuration: number) {
+    setParticlesForeground(true);
+    const worker = getWorker();
+    if (!worker) return { restoreHandle: null };
+    const profile = getMoodFxProfile();
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+
+    worker.postMessage({
+      type: 'start_vortex',
+      cx,
+      cy,
+      angularForce: profile.vortexAngularForce,
+      inward: profile.vortexInward,
+      maxSpeed: profile.vortexMaxSpeed,
+    });
+
+    let restoreHandle: any = null;
+    setTimeout(() => {
+      signal.cancelled = true;
+      worker.postMessage({ type: 'stop_vortex' });
+      if (!signal._unmounted) {
+        restoreHandle = smoothRestore(Math.max(1100, Math.round(runtimeDuration * 0.55)));
+        setParticlesForeground(false);
+      }
+    }, runtimeDuration);
+    return {
+      get restoreHandle() {
+        return restoreHandle;
+      },
+    };
+  },
+
+  /**
+   * Cristal : les particules se figent puis se projettent en éclats.
+   * Uses only existing worker messages (no new worker code needed).
+   */
+  crystal(signal: any, _tier: PerformanceTier, runtimeDuration: number) {
+    setParticlesForeground(true);
+    window.petReact?.('scared');
+    const worker = getWorker();
+    if (!worker) return { restoreHandle: null };
+    const profile = getMoodFxProfile();
+
+    // Phase 1: near-freeze
+    worker.postMessage({ type: 'set_velocity_uniform_speed', speed: 0.04 });
+
+    let restoreHandle: any = null;
+    const freezeDuration = Math.round(runtimeDuration * 0.38);
+
+    setTimeout(() => {
+      if (signal.cancelled) return;
+      // Phase 2: shatter
+      worker.postMessage({
+        type: 'set_velocity_radial_burst',
+        origin: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+        burstBase: 5,
+        burstRange: 8,
+        burstMult: profile.burstMult,
+      });
+      setTimeout(() => {
+        if (!signal._unmounted) {
+          restoreHandle = smoothRestore(Math.max(1400, Math.round(runtimeDuration * 0.75)));
+          setParticlesForeground(false);
+        }
+        signal.cancelled = true;
+      }, runtimeDuration - freezeDuration);
+    }, freezeDuration);
+
     return {
       get restoreHandle() {
         return restoreHandle;
@@ -775,6 +906,7 @@ const ParticlesButton = () => {
       smoothRestoreHandleRef.current?.cancel();
       getWorker()?.postMessage({ type: 'stop_attract' });
       getWorker()?.postMessage({ type: 'stop_gravity' });
+      getWorker()?.postMessage({ type: 'stop_vortex' });
       // Annuler l'interval de progress
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
@@ -906,6 +1038,24 @@ const ParticlesButton = () => {
             </div>
 
             <div className="particles-weather-wheel" role="radiogroup" aria-label={weatherPanelTitle}>
+              <svg
+                className="particles-weather-wheel__connectors"
+                aria-hidden="true"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+              >
+                <polygon
+                  points="50,5 88,27 88,73 50,95 12,73 12,27"
+                  fill="none"
+                  stroke="rgba(var(--weather-rgb),0.12)"
+                  strokeWidth="0.4"
+                />
+                <line x1="50" y1="5"  x2="50" y2="95" stroke="rgba(var(--weather-rgb),0.07)" strokeWidth="0.3" />
+                <line x1="88" y1="27" x2="12" y2="73" stroke="rgba(var(--weather-rgb),0.07)" strokeWidth="0.3" />
+                <line x1="88" y1="73" x2="12" y2="27" stroke="rgba(var(--weather-rgb),0.07)" strokeWidth="0.3" />
+              </svg>
+
               {localizedEffects.map((effect, index) => {
                 const isSelected = effectIndex === index;
                 const nodePos = WEATHER_NODE_LAYOUT[index];

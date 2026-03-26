@@ -148,6 +148,13 @@ let smoothRestoreDuration = 0;
 let smoothRestoreK = 0;
 let smoothRestoreBaseSpeed = 0;
 
+let vortexActive = false;
+let vortexCX = 0;
+let vortexCY = 0;
+let vortexAngularForce = 0;
+let vortexInward = 0;
+let vortexMaxSpeed = 0;
+
 /* ══════════════════════════════════════════════
    Utilities
    ══════════════════════════════════════════════ */
@@ -415,6 +422,7 @@ function update(dt: number): void {
   // --- Active effects ---
   if (attractActive) updateAttract(dt);
   if (gravityActive) updateGravity(dt);
+  if (vortexActive) updateVortex(dt);
   if (smoothRestoreActive) updateSmoothRestore(dt);
 
   // --- Interactivity: repulse / bubble (per-frame, hover-based) ---
@@ -496,6 +504,25 @@ function updateSmoothRestore(dt: number): void {
       p.vy = Math.sin(angle) * smoothRestoreBaseSpeed;
     }
     smoothRestoreActive = false;
+  }
+}
+
+function updateVortex(dt: number): void {
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    const dx = p.x - vortexCX;
+    const dy = p.y - vortexCY;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    // Tangential unit vector (perpendicular to radial, CCW)
+    const tx = -dy / dist;
+    const ty = dx / dist;
+    p.vx += (tx * vortexAngularForce - (dx / dist) * vortexInward) * dt;
+    p.vy += (ty * vortexAngularForce - (dy / dist) * vortexInward) * dt;
+    const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+    if (spd > vortexMaxSpeed) {
+      p.vx = (p.vx / spd) * vortexMaxSpeed;
+      p.vy = (p.vy / spd) * vortexMaxSpeed;
+    }
   }
 }
 
@@ -719,6 +746,7 @@ self.onmessage = (e: MessageEvent<any>) => {
       // Reset any active effects
       attractActive = false;
       gravityActive = false;
+      vortexActive = false;
       smoothRestoreActive = false;
       if (!running) startLoop();
       break;
@@ -744,6 +772,10 @@ self.onmessage = (e: MessageEvent<any>) => {
       ctx = null;
       canvas = null;
       config = null;
+      attractActive = false;
+      gravityActive = false;
+      vortexActive = false;
+      smoothRestoreActive = false;
       break;
 
     case 'setAnimationsEnabled':
@@ -852,6 +884,19 @@ self.onmessage = (e: MessageEvent<any>) => {
 
     case 'stop_gravity':
       gravityActive = false;
+      break;
+
+    case 'start_vortex':
+      vortexActive = true;
+      vortexCX = msg.cx * dpr;
+      vortexCY = msg.cy * dpr;
+      vortexAngularForce = msg.angularForce;
+      vortexInward = msg.inward;
+      vortexMaxSpeed = msg.maxSpeed;
+      break;
+
+    case 'stop_vortex':
+      vortexActive = false;
       break;
 
     case 'smooth_restore': {
