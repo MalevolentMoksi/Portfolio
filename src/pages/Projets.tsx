@@ -70,13 +70,16 @@ const Projets = () => {
                 </div>
               )}
 
-              <Link
-                to={project.path}
-                className="btn"
-                aria-label={t('projets.learnMoreAria', { title: project.title })}
-              >
-                {t('projets.learnMore')}
-              </Link>
+              <footer className="project-footer">
+                <Link
+                  to={project.path}
+                  className="btn"
+                  aria-label={t('projets.learnMoreAria', { title: project.title })}
+                >
+                  {t('projets.learnMore')}
+                  <span className="btn-arrow" aria-hidden="true">→</span>
+                </Link>
+              </footer>
             </article>
 
             {index < academicProjects.length - 1 && <hr aria-hidden="true" />}
