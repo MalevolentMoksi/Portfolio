@@ -944,11 +944,13 @@ const ParticlesButton = () => {
   return (
     <div className="particles-weather-wrapper" ref={triggerRef}>
       <Tooltip
-        text={currentEffect.label}
+        text={noMotion ? t('common.particles.disabledLabel') : currentEffect.label}
         desc={
-          isActive
-            ? t('common.particles.loading', { progress: Math.ceil(progress) })
-            : weatherHint
+          noMotion
+            ? t('common.particles.disabledHint')
+            : isActive
+              ? t('common.particles.loading', { progress: Math.ceil(progress) })
+              : weatherHint
         }
         position="bottom"
       >

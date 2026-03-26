@@ -88,6 +88,8 @@
       "ariaLabel": "Effet particules : {{effect}}",
       "clickToTrigger": "Cliquer pour déclencher",
       "loading": "Chargement {{progress}}%",
+      "disabledLabel": "Effets désactivés",
+      "disabledHint": "Activer les animations dans les options d'accessibilité",
       "weather": {
         "panelTitle": "Station Particulaire",
         "panelAria": "Panneau de contrôle des effets particules",

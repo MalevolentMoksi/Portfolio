@@ -88,6 +88,8 @@
       "ariaLabel": "Particle effect: {{effect}}",
       "clickToTrigger": "Click to trigger",
       "loading": "Loading {{progress}}%",
+      "disabledLabel": "Effects disabled",
+      "disabledHint": "Enable animations in accessibility options",
       "weather": {
         "panelTitle": "Particle Station",
         "panelAria": "Particle effects control panel",
