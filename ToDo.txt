@@ -7,7 +7,6 @@ Tâches simples :
 CSS des éléments en chargmenet de page à revoir.
 
 Tâches moyennes :
-OccasionalCommuters : sometimes disappear before reaching reaching the other side, seem to still spawn depending on viewport
 
 Tâches lourdes :
 Rendre les pages de projets plus dynamiques (ex: + d'élements spéciaux, animations, interactions, etc.)
