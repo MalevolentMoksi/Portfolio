@@ -9,12 +9,25 @@ import Home from './pages/Home';
 
 // Retry wrapper: if a lazy chunk fails to load (e.g. after a new deploy),
 // force a page reload so the browser fetches the updated index.html.
+// A sessionStorage guard prevents infinite reload loops (one reload per session).
+const CHUNK_RELOAD_KEY = 'chunk-reload-v1';
+const PERF_TOAST_KEY = 'perf-tier-initial-toast-v1';
+ 
 function retryLazy<T extends ComponentType<Record<string, never>>>(
   importFn: () => Promise<{ default: T }>
 ) {
   return lazy<T>(() =>
     importFn().catch(() => {
-      window.location.reload();
+      try {
+        if (!sessionStorage.getItem(CHUNK_RELOAD_KEY)) {
+          sessionStorage.setItem(CHUNK_RELOAD_KEY, '1');
+          // Clear performance toast guard so it re-shows after the reload
+          sessionStorage.removeItem(PERF_TOAST_KEY);
+          window.location.reload();
+        }
+      } catch {
+        // sessionStorage unavailable — skip reload to avoid infinite loop
+      }
       return { default: Loading } as unknown as { default: T };
     })
   );

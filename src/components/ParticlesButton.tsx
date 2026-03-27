@@ -864,13 +864,20 @@ const ParticlesButton = () => {
 
     const updateCount = () => {
       const worker = getWorker();
-      if (worker) {
-        worker.postMessage({ type: 'get_count' });
-        // Response arrives via window._particleCount (set by worker.onmessage in effects.ts)
-        setParticleCount(window._particleCount ?? 0);
-      } else {
+      if (!worker) {
         setParticleCount(0);
+        return;
       }
+      // Listen for the async count response from the worker.
+      // Using addEventListener so it coexists with the onmessage handler in effects.ts.
+      const handleCountResponse = (e: MessageEvent) => {
+        if (e.data?.type === 'count') {
+          worker.removeEventListener('message', handleCountResponse);
+          setParticleCount(e.data.value as number);
+        }
+      };
+      worker.addEventListener('message', handleCountResponse);
+      worker.postMessage({ type: 'get_count' });
     };
 
     updateCount();
