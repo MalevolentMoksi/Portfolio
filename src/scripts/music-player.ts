@@ -313,6 +313,7 @@ class MusicPlayer {
   }
 
   private seekRelative(seconds: number): void {
+    if (!isFinite(this.audio.duration)) return;
     this.audio.currentTime = Math.max(
       0,
       Math.min(this.audio.duration, this.audio.currentTime + seconds)
