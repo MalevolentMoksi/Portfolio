@@ -84,6 +84,7 @@ const STOP_THRESH = 0.5;
 const CHARGE_MIN = 0.08;
 /** ms after a click/tap during which a catch is valid (generous for all input speeds) */
 const CATCH_GRACE_MS = 140;
+const STOP_THRESH_SQ = STOP_THRESH * STOP_THRESH;
 
 const LS_BEST_RALLIES = 'catch-best-rallies';
 const LS_BEST_BY_DIFF = 'catch-best-by-difficulty';
@@ -236,6 +237,15 @@ const CatchGame = ({
   const aimPathRef = useRef<SVGPathElement | null>(null);
   /** Catch-zone ring element — positioned via RAF, not React state */
   const catchZoneElRef = useRef<HTMLDivElement | null>(null);
+  /** Ripple element — always mounted, animation restarted via class toggle */
+  const rippleElRef = useRef<HTMLDivElement | null>(null);
+  /** Score value element — flash animation triggered directly, no React state */
+  const scoreValueElRef = useRef<HTMLDivElement | null>(null);
+  /** Cached viewport size — avoids layout-flushing window.innerWidth/Height in RAF */
+  const vpWRef = useRef(window.innerWidth);
+  const vpHRef = useRef(window.innerHeight);
+  /** Tracks last catch-zone ready state to skip redundant classList mutations */
+  const catchZoneReadyRef = useRef(false);
   /* Dirty flags for aim-path rebuild — avoid SVG work every frame */
   const prevAimAngleRef = useRef(-999);
   const prevAimChargeRef = useRef(-1);
@@ -277,7 +287,6 @@ const CatchGame = ({
   const [livesFlash, setLivesFlash] = useState(false);
   const [showDifficultyImpact, setShowDifficultyImpact] = useState(false);
   const [gameOver, setGameOver] = useState<GameOverSummary | null>(null);
-  const [catchRipple, setCatchRipple] = useState<{ x: number; y: number } | null>(null);
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* ── Persistence state ── */
@@ -344,6 +353,28 @@ const CatchGame = ({
   /* ── Hint timer ── */
   const clearHintTimer = useCallback(() => {
     if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+  }, []);
+
+  /**
+   * Fire the catch-ripple animation and score-pop at a given position.
+   * Pure DOM manipulation — zero React re-renders.
+   * Uses the rAF remove→add trick to reliably restart CSS animations.
+   */
+  const triggerRipple = useCallback((x: number, y: number) => {
+    const el = rippleElRef.current;
+    if (el) {
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      el.classList.remove('catch-ripple--active');
+      requestAnimationFrame(() => rippleElRef.current?.classList.add('catch-ripple--active'));
+    }
+    const sv = scoreValueElRef.current;
+    if (sv) {
+      sv.classList.remove('catch-game-score-value--flash');
+      requestAnimationFrame(() =>
+        scoreValueElRef.current?.classList.add('catch-game-score-value--flash')
+      );
+    }
   }, []);
 
   const startHoldTimer = useCallback(() => {
@@ -584,11 +615,14 @@ const CatchGame = ({
     };
   }, []);
 
-  /* ── SVG viewBox sync on resize ── */
+  /* ── SVG viewBox sync + viewport cache on resize ── */
   useEffect(() => {
     const sync = () => {
+      const w = window.innerWidth, h = window.innerHeight;
+      vpWRef.current = w;
+      vpHRef.current = h;
       if (aimSvgRef.current)
-        aimSvgRef.current.setAttribute('viewBox', `0 0 ${window.innerWidth} ${window.innerHeight}`);
+        aimSvgRef.current.setAttribute('viewBox', `0 0 ${w} ${h}`);
     };
     sync();
     window.addEventListener('resize', sync);
@@ -696,8 +730,14 @@ const CatchGame = ({
         const home = ballHomeRef.current;
         ballPosRef.current.x = home.x;
         ballPosRef.current.y = home.y;
-        if (ballInfoRef)
+        /* Mutate in-place — avoids allocating a new object every frame */
+        if (ballInfoRef?.current) {
+          ballInfoRef.current.x = home.x; ballInfoRef.current.y = home.y;
+          ballInfoRef.current.vx = 0;     ballInfoRef.current.vy = 0;
+          ballInfoRef.current.holder = 'player';
+        } else if (ballInfoRef) {
           ballInfoRef.current = { x: home.x, y: home.y, vx: 0, vy: 0, holder: 'player' };
+        }
         rafRef.current = requestAnimationFrame(tick);
         return;
       }
@@ -708,13 +748,17 @@ const CatchGame = ({
         : Math.min((now - prevTimeRef.current) / (1000 / 60), 3);
       prevTimeRef.current = now;
 
-      const vw = window.innerWidth, vh = window.innerHeight;
+      /* Single Date.now() call per frame — reused for all wall-clock comparisons */
+      const frameNow = Date.now();
+
+      /* Viewport from cache — avoids layout-flush from window.innerWidth/Height */
+      const vw = vpWRef.current, vh = vpHRef.current;
       const bp = ballPosRef.current, bv = ballVelRef.current;
       const holder = holderRef.current;
 
       /* ── Combo decay (challenge, player holding) ── */
       if (mode === 'challenge' && comboRef.current > 0 && comboDecayEndsAtRef.current > 0 && holder === 'player') {
-        const remaining = comboDecayEndsAtRef.current - Date.now();
+        const remaining = comboDecayEndsAtRef.current - frameNow;
         if (remaining <= 0) {
           comboDecayEndsAtRef.current = 0;
           comboDecayDisplayRef.current = 0;
@@ -732,8 +776,14 @@ const CatchGame = ({
       if (catchCooldownRef.current > 0)
         catchCooldownRef.current = Math.max(0, catchCooldownRef.current - dt);
 
-      if (ballInfoRef)
+      /* Mutate ballInfoRef in-place — no per-frame object allocation */
+      if (ballInfoRef?.current) {
+        ballInfoRef.current.x = bp.x; ballInfoRef.current.y = bp.y;
+        ballInfoRef.current.vx = bv.x; ballInfoRef.current.vy = bv.y;
+        ballInfoRef.current.holder = holder;
+      } else if (ballInfoRef) {
         ballInfoRef.current = { x: bp.x, y: bp.y, vx: bv.x, vy: bv.y, holder };
+      }
 
       /* ══ Player holds ball — stationary at home, aim toward cursor ══ */
       if (holder === 'player') {
@@ -741,10 +791,9 @@ const CatchGame = ({
         bp.x = home.x;
         bp.y = home.y;
 
-        /* Charge progression */
+        /* Charge progression — use rAF `now` (same timeline as performance.now(), already available) */
         if (isChargingRef.current) {
-          const elapsed = performance.now() - chargeStartedAtRef.current;
-          const nextPct = Math.max(CHARGE_MIN, Math.min(1, elapsed / preset.chargeMs));
+          const nextPct = Math.max(CHARGE_MIN, Math.min(1, (now - chargeStartedAtRef.current) / preset.chargeMs));
           chargePctRef.current = nextPct;
           if (Math.abs(nextPct - prevRenderedChargePctRef.current) > 0.015) {
             prevRenderedChargePctRef.current = nextPct;
@@ -842,7 +891,7 @@ const CatchGame = ({
             style === 'curve' || style === 'fake'
               ? (Math.random() > 0.5 ? 1 : -1) * preset.curveForce
               : 0;
-          botThrowAtRef.current = Date.now();
+          botThrowAtRef.current = frameNow;
           throwAgeRef.current = 0;
           catchCooldownRef.current = 18;
           holderRef.current = 'returning';
@@ -860,12 +909,14 @@ const CatchGame = ({
 
       if (holder === 'returning' && Math.abs(returnCurveRef.current) > 1e-5) {
         bv.x += returnCurveRef.current * dt;
-        returnCurveRef.current *= Math.pow(0.985, dt);
+        /* Linear approximation of 0.985**dt — negligible error for dt near 1 */
+        returnCurveRef.current *= 1 - 0.015 * dt;
       }
 
       const prevX = bp.x, prevY = bp.y;
       bv.y += CATCH_BALL_GRAVITY * dt;
-      const frictionDt = AIR_FRICTION ** dt;
+      /* Linear approximation of AIR_FRICTION**dt — error < 0.0001 for dt ∈ [0,3] */
+      const frictionDt = 1 - (1 - AIR_FRICTION) * dt;
       bv.x *= frictionDt;
       bv.y *= frictionDt;
       bp.x += bv.x * dt;
@@ -899,8 +950,7 @@ const CatchGame = ({
           registerSuccessfulReturn();
           bounceCountRef.current = 0;
           setBounceCount(0);
-          setCatchRipple({ x: bot.x, y: bot.y });
-          setTimeout(() => setCatchRipple(null), 450);
+          triggerRipple(bot.x, bot.y);
         }
       }
 
@@ -911,26 +961,24 @@ const CatchGame = ({
         const inRange = dx * dx + dy * dy < preset.playerCatchRadius * preset.playerCatchRadius;
 
         if (mode === 'challenge') {
-          /* Active catch: requires a click/tap within the grace window */
+          /* Active catch: requires click/tap within grace window — use rAF `now` */
           if (
             inRange &&
             catchAttemptTimeRef.current > 0 &&
-            performance.now() - catchAttemptTimeRef.current < CATCH_GRACE_MS
+            now - catchAttemptTimeRef.current < CATCH_GRACE_MS
           ) {
             catchAttemptTimeRef.current = 0;
-            if (holderRef.current === 'returning' && Date.now() - botThrowAtRef.current <= 260) {
+            if (holderRef.current === 'returning' && frameNow - botThrowAtRef.current <= 260) {
               setScore((prev) => prev + 35);
               setLastGain(35);
             }
-            setCatchRipple({ x: cx, y: cy });
-            setTimeout(() => setCatchRipple(null), 450);
+            triggerRipple(cx, cy);
             resetBallToPlayer();
           }
         } else {
           /* Free mode: passive proximity catch */
           if (inRange) {
-            setCatchRipple({ x: cx, y: cy });
-            setTimeout(() => setCatchRipple(null), 450);
+            triggerRipple(cx, cy);
             resetBallToPlayer();
           }
         }
@@ -944,10 +992,10 @@ const CatchGame = ({
         if (mode === 'challenge' && nextBounces >= 2) registerMiss('doubleBounce');
       }
 
-      /* ── Safety net: auto-reset when ball stops ── */
+      /* ── Safety net: auto-reset when ball stops (squared comparison avoids sqrt) ── */
       if (
         (holderRef.current === 'flying' || holderRef.current === 'returning') &&
-        Math.sqrt(bv.x * bv.x + bv.y * bv.y) < STOP_THRESH
+        bv.x * bv.x + bv.y * bv.y < STOP_THRESH_SQ
       ) {
         resetBallToPlayer();
       }
@@ -956,7 +1004,7 @@ const CatchGame = ({
       if (ballElRef.current)
         ballElRef.current.style.transform = `translate(${bp.x - BALL_R}px,${bp.y - BALL_R}px)`;
 
-      /* ── Catch zone: position + ready state (challenge only) ── */
+      /* ── Catch zone: position + ready state (only mutate classList when state changes) ── */
       if (catchZoneElRef.current && holderRef.current !== 'player' && holderRef.current !== 'bot-held') {
         const cx = cursorRef.current.x, cy = cursorRef.current.y;
         const r = preset.playerCatchRadius;
@@ -965,11 +1013,18 @@ const CatchGame = ({
         catchZoneElRef.current.style.transform = `translate(${cx - r}px,${cy - r}px)`;
         if (showZone) {
           const dx = bp.x - cx, dy = bp.y - cy;
-          catchZoneElRef.current.classList.toggle('catch-zone--ready', dx * dx + dy * dy < r * r);
+          const ready = dx * dx + dy * dy < r * r;
+          if (ready !== catchZoneReadyRef.current) {
+            catchZoneReadyRef.current = ready;
+            catchZoneElRef.current.classList.toggle('catch-zone--ready', ready);
+          }
         }
       } else if (catchZoneElRef.current) {
         catchZoneElRef.current.style.opacity = '0';
-        catchZoneElRef.current.classList.remove('catch-zone--ready');
+        if (catchZoneReadyRef.current) {
+          catchZoneReadyRef.current = false;
+          catchZoneElRef.current.classList.remove('catch-zone--ready');
+        }
       }
 
       rafRef.current = requestAnimationFrame(tick);
@@ -992,6 +1047,7 @@ const CatchGame = ({
     registerSuccessfulReturn,
     resetBallToPlayer,
     showSetup,
+    triggerRipple,
   ]);
 
   /* ══ Render ══ */

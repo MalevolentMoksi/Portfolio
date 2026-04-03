@@ -1343,13 +1343,11 @@ body[data-mood='industrial'] .pet-robot {
 .catch-game-overlay {
   position: fixed;
   inset: 0;
-  /* z-index < .pet-wanderer--catching → le blur ne touche pas le robot */
+  /* z-index < .pet-wanderer--catching → le robot reste devant */
   z-index: calc(var(--z-lightbox) + 3);
   cursor: crosshair;
-  background: rgba(0, 0, 0, 0.12);
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-  transition: background 0.15s ease;
+  /* backdrop-filter supprimé — forçait un recompositing GPU plein écran à chaque frame */
+  background: rgba(0, 0, 0, 0.18);
 }
 
 /* Flash bref quand le bot catch la balle — uniquement pulse score, pas d'overlay */
@@ -1374,8 +1372,14 @@ body[data-mood='industrial'] .pet-robot {
   border: 2.5px solid var(--color-primary);
   pointer-events: none;
   z-index: calc(var(--z-lightbox) + 6);
-  animation: catch-ripple-expand 0.42s cubic-bezier(0.2, 0.8, 0.5, 1) forwards;
   will-change: transform, opacity;
+  /* Hidden by default — animation class activates it */
+  opacity: 0;
+  animation: none;
+}
+
+.catch-ripple--active {
+  animation: catch-ripple-expand 0.42s cubic-bezier(0.2, 0.8, 0.5, 1) forwards;
 }
 
 /* ── Active catch zone indicator (challenge mode) ── */
@@ -1387,7 +1391,7 @@ body[data-mood='industrial'] .pet-robot {
   border: 2px dashed rgba(255, 255, 255, 0.22);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.18s ease, border-color 0.12s ease, background-color 0.12s ease;
+  /* No transition — updated every frame in RAF, transitions only add jank */
   z-index: calc(var(--z-lightbox) + 5);
   will-change: transform, opacity;
 }
@@ -1590,12 +1594,17 @@ body[data-catching='true'] .pet-thought--reaction {
   font-size: 2.4rem;
   font-weight: 800;
   line-height: 1;
-  transition: transform 0.15s ease;
 }
 
-/* Animation de pulse sur le score au catch */
-.catch-game-overlay--flash .catch-game-score-value {
-  transform: scale(1.15);
+/* Score pop on catch — DOM-managed animation, no React re-render */
+@keyframes catch-score-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+.catch-game-score-value--flash {
+  animation: catch-score-pop 0.28s ease;
 }
 
 .catch-game-score-best {
