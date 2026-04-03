@@ -439,10 +439,9 @@
         }
       },
       "instructions": {
-        "aimStep": "Bouge la souris pour viser",
-        "chargeStep": "Maintiens le clic pour charger, relâche pour tirer",
-        "returnStep": "Le robot renvoie la balle: évite 2 rebonds consécutifs",
-        "trajectoryStep": "Utilise les fleches haut/bas pour ajuster la trajectoire"
+        "aimStep": "Pointe ta souris vers la cible — la balle partira dans cette direction",
+        "chargeStep": "Maintiens le clic pour charger la puissance, relâche pour lancer",
+        "returnStep": "Clique quand la balle revient pour la rattraper (mode libre : approche-toi)"
       },
       "score": {
         "label": "Rallies",
@@ -462,7 +461,7 @@
         "hunger": "Faim",
         "happiness": "Bonheur"
       },
-      "hint": "Bouge la souris pour viser, clique pour lancer, fleches haut/bas pour ajuster",
+      "hint": "Pointe vers la cible, maintiens le clic pour charger, relâche pour lancer",
       "missReasons": {
         "doubleBounce": "Raté: 2 rebonds sans interception"
       },

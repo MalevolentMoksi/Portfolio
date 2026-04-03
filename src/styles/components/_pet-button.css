@@ -1378,6 +1378,27 @@ body[data-mood='industrial'] .pet-robot {
   will-change: transform, opacity;
 }
 
+/* ── Active catch zone indicator (challenge mode) ── */
+.catch-zone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease, border-color 0.12s ease, background-color 0.12s ease;
+  z-index: calc(var(--z-lightbox) + 5);
+  will-change: transform, opacity;
+}
+
+.catch-zone--ready {
+  border-style: solid;
+  border-color: rgba(110, 230, 110, 0.65);
+  background-color: rgba(110, 230, 110, 0.07);
+  box-shadow: 0 0 14px 2px rgba(110, 230, 110, 0.18);
+}
+
 /* ── Écran d'instructions initial ── */
 .catch-game-intro {
   position: fixed;

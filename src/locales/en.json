@@ -439,10 +439,9 @@
         }
       },
       "instructions": {
-        "aimStep": "Move mouse to aim",
-        "chargeStep": "Hold click to charge, release to throw",
-        "returnStep": "The bot returns the ball: avoid 2 uncaught bounces",
-        "trajectoryStep": "Use up/down arrows to adjust trajectory"
+        "aimStep": "Point your cursor at the target — the ball launches in that direction",
+        "chargeStep": "Hold click to charge power, release to throw",
+        "returnStep": "Click when the ball comes back to catch it (free mode: just get close)"
       },
       "score": {
         "label": "Rallies",
@@ -462,7 +461,7 @@
         "hunger": "Hunger",
         "happiness": "Happiness"
       },
-      "hint": "Move mouse to aim, click to throw, up/down arrows adjust trajectory",
+      "hint": "Point at the target, hold click to charge, release to throw",
       "missReasons": {
         "doubleBounce": "Miss: 2 uncaught bounces"
       },
