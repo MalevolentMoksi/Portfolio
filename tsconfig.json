@@ -21,8 +21,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    /* Path aliases — mirrors vite.config.ts resolve.alias */
-    "baseUrl": ".",
+    /* Path aliases — modern TypeScript (5.4+) path resolution without baseUrl */
     "paths": {
       "@/*": ["./src/*"],
       "@styles/*": ["./src/styles/*"],
