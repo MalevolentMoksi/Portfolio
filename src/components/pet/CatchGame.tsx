@@ -249,6 +249,15 @@ const CatchGame = ({
   /* Dirty flags for aim-path rebuild — avoid SVG work every frame */
   const prevAimAngleRef = useRef(-999);
   const prevAimChargeRef = useRef(-1);
+  /** Overlay div — flash class toggled via DOM on catch, avoids React re-render */
+  const overlayElRef = useRef<HTMLDivElement | null>(null);
+  /** Charge bar fill + text — scaleX/textContent updated via RAF direct DOM writes */
+  const chargeBarFillRef = useRef<HTMLDivElement | null>(null);
+  const chargeBarTextRef = useRef<HTMLDivElement | null>(null);
+  /** Combo decay fill — scaleX updated via RAF direct DOM write */
+  const comboFillRef = useRef<HTMLDivElement | null>(null);
+  /** Bounce count text span — textContent updated via RAF direct DOM write */
+  const bounceCountTextRef = useRef<HTMLSpanElement | null>(null);
 
   /* ── Charge refs ── */
   const isChargingRef = useRef(false);
@@ -274,15 +283,12 @@ const CatchGame = ({
   const [showSetup, setShowSetup] = useState(true);
   const [isHeld, setIsHeld] = useState(true);
   const [isCharging, setIsCharging] = useState(false);
-  const [chargePct, setChargePct] = useState(0);
   const [rallies, setRallies] = useState(0);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [lives, setLives] = useState(DIFFICULTY_PRESETS[initialDifficulty].lives);
-  const [comboDecayPct, setComboDecayPct] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [lastGain, setLastGain] = useState(0);
-  const [bounceCount, setBounceCount] = useState(0);
   const [missNotice, setMissNotice] = useState<MissReason | null>(null);
   const [livesFlash, setLivesFlash] = useState(false);
   const [showDifficultyImpact, setShowDifficultyImpact] = useState(false);
@@ -368,6 +374,11 @@ const CatchGame = ({
       el.classList.remove('catch-ripple--active');
       requestAnimationFrame(() => rippleElRef.current?.classList.add('catch-ripple--active'));
     }
+    const ov = overlayElRef.current;
+    if (ov) {
+      ov.classList.remove('catch-game-overlay--flash');
+      requestAnimationFrame(() => overlayElRef.current?.classList.add('catch-game-overlay--flash'));
+    }
     const sv = scoreValueElRef.current;
     if (sv) {
       sv.classList.remove('catch-game-score-value--flash');
@@ -401,8 +412,9 @@ const CatchGame = ({
       prevAimAngleRef.current = -999;
       prevAimChargeRef.current = -1;
       bounceCountRef.current = 0;
-      setBounceCount(0);
-      setChargePct(0);
+      if (bounceCountTextRef.current) bounceCountTextRef.current.textContent = '0';
+      if (chargeBarFillRef.current) chargeBarFillRef.current.style.transform = `scaleX(${CHARGE_MIN})`;
+      if (chargeBarTextRef.current) chargeBarTextRef.current.textContent = '0%';
       setIsCharging(false);
       setIsHeld(true);
       if (aimPathRef.current) aimPathRef.current.setAttribute('d', '');
@@ -448,7 +460,7 @@ const CatchGame = ({
       if (mode !== 'challenge') {
         setCombo(0);
         comboDecayEndsAtRef.current = 0;
-        setComboDecayPct(0);
+        if (comboFillRef.current) comboFillRef.current.style.transform = 'scaleX(0)';
         resetBallToPlayer();
         return;
       }
@@ -458,11 +470,11 @@ const CatchGame = ({
       comboDecayEndsAtRef.current = 0;
       comboDecayDisplayRef.current = 0;
       setCombo(0);
-      setComboDecayPct(0);
+      if (comboFillRef.current) comboFillRef.current.style.transform = 'scaleX(0)';
       setLastGain(-preset.missPenalty);
       setScore((prev) => Math.max(0, prev - preset.missPenalty));
       bounceCountRef.current = 0;
-      setBounceCount(0);
+      if (bounceCountTextRef.current) bounceCountTextRef.current.textContent = '0';
       if (livesFlashTimerRef.current) clearTimeout(livesFlashTimerRef.current);
       setLivesFlash(true);
       livesFlashTimerRef.current = setTimeout(() => setLivesFlash(false), 550);
@@ -490,7 +502,7 @@ const CatchGame = ({
     });
     comboDecayEndsAtRef.current = Date.now() + preset.comboDecayMs;
     comboDecayDisplayRef.current = 1;
-    setComboDecayPct(1);
+    if (comboFillRef.current) comboFillRef.current.style.transform = 'scaleX(1)';
   }, [mode, preset.pointsPerCatch, preset.comboDecayMs]);
 
   /**
@@ -521,7 +533,8 @@ const CatchGame = ({
       isChargingRef.current = false;
       chargePctRef.current = 0;
       catchAttemptTimeRef.current = 0;
-      setChargePct(0);
+      if (chargeBarFillRef.current) chargeBarFillRef.current.style.transform = `scaleX(${CHARGE_MIN})`;
+      if (chargeBarTextRef.current) chargeBarTextRef.current.textContent = '0%';
       setIsCharging(false);
       setIsHeld(false);
       setShowHint(false);
@@ -545,9 +558,9 @@ const CatchGame = ({
     setRallies(0);
     setScore(0);
     setCombo(0);
-    setComboDecayPct(0);
+    if (comboFillRef.current) comboFillRef.current.style.transform = 'scaleX(0)';
     setLastGain(0);
-    setBounceCount(0);
+    if (bounceCountTextRef.current) bounceCountTextRef.current.textContent = '0';
     setMissNotice(null);
     setLivesFlash(false);
     setShowDifficultyImpact(false);
@@ -572,9 +585,9 @@ const CatchGame = ({
     setRallies(0);
     setScore(0);
     setCombo(0);
-    setComboDecayPct(0);
+    if (comboFillRef.current) comboFillRef.current.style.transform = 'scaleX(0)';
     setLastGain(0);
-    setBounceCount(0);
+    if (bounceCountTextRef.current) bounceCountTextRef.current.textContent = '0';
     setMissNotice(null);
     setLivesFlash(false);
     setLives(DIFFICULTY_PRESETS[difficulty].lives);
@@ -644,7 +657,7 @@ const CatchGame = ({
 
   /* ── Aim trajectory preview ── */
   const buildAim = (fromX: number, fromY: number, vx: number, vy: number) => {
-    const vw = window.innerWidth, vh = window.innerHeight;
+    const vw = vpWRef.current, vh = vpHRef.current;
     let sx = fromX, sy = fromY, svx = vx, svy = vy;
     let d = `M${sx.toFixed(1)},${sy.toFixed(1)}`;
     for (let i = 0; i < aimSteps; i++) {
@@ -689,7 +702,8 @@ const CatchGame = ({
         isChargingRef.current = true;
         chargeStartedAtRef.current = performance.now();
         chargePctRef.current = 0;
-        setChargePct(0);
+        if (chargeBarFillRef.current) chargeBarFillRef.current.style.transform = `scaleX(${CHARGE_MIN})`;
+        if (chargeBarTextRef.current) chargeBarTextRef.current.textContent = '0%';
         setIsCharging(true);
         setShowHint(false);
         clearHintTimer();
@@ -763,12 +777,12 @@ const CatchGame = ({
           comboDecayEndsAtRef.current = 0;
           comboDecayDisplayRef.current = 0;
           setCombo(0);
-          setComboDecayPct(0);
+          if (comboFillRef.current) comboFillRef.current.style.transform = 'scaleX(0)';
         } else {
           const nextPct = remaining / preset.comboDecayMs;
           if (Math.abs(nextPct - comboDecayDisplayRef.current) > 0.03) {
             comboDecayDisplayRef.current = nextPct;
-            setComboDecayPct(nextPct);
+            if (comboFillRef.current) comboFillRef.current.style.transform = `scaleX(${nextPct})`;
           }
         }
       }
@@ -797,7 +811,8 @@ const CatchGame = ({
           chargePctRef.current = nextPct;
           if (Math.abs(nextPct - prevRenderedChargePctRef.current) > 0.015) {
             prevRenderedChargePctRef.current = nextPct;
-            setChargePct(nextPct);
+            if (chargeBarFillRef.current) chargeBarFillRef.current.style.transform = `scaleX(${nextPct})`;
+            if (chargeBarTextRef.current) chargeBarTextRef.current.textContent = `${Math.round(nextPct * 100)}%`;
           }
         }
 
@@ -949,7 +964,7 @@ const CatchGame = ({
           setRallies((r) => r + 1);
           registerSuccessfulReturn();
           bounceCountRef.current = 0;
-          setBounceCount(0);
+          if (bounceCountTextRef.current) bounceCountTextRef.current.textContent = '0';
           triggerRipple(bot.x, bot.y);
         }
       }
@@ -988,7 +1003,7 @@ const CatchGame = ({
       if (bouncedThisFrame && holderRef.current !== 'player' && holderRef.current !== 'bot-held') {
         const nextBounces = bounceCountRef.current + 1;
         bounceCountRef.current = nextBounces;
-        setBounceCount(nextBounces);
+        if (bounceCountTextRef.current) bounceCountTextRef.current.textContent = String(Math.min(2, nextBounces));
         if (mode === 'challenge' && nextBounces >= 2) registerMiss('doubleBounce');
       }
 
@@ -1053,7 +1068,8 @@ const CatchGame = ({
   /* ══ Render ══ */
   return createPortal(
     <div
-      className={`catch-game-overlay${catchRipple ? ' catch-game-overlay--flash' : ''}`}
+      ref={overlayElRef}
+      className="catch-game-overlay"
       onMouseDown={handlePointerDown}
       onMouseUp={handlePointerUp}
       onMouseLeave={handlePointerUp}
@@ -1062,9 +1078,8 @@ const CatchGame = ({
       onTouchCancel={handlePointerUp}
       onContextMenu={(e: any) => e.preventDefault()}
     >
-      {catchRipple && (
-        <div className="catch-ripple" style={{ left: catchRipple.x, top: catchRipple.y }} />
-      )}
+      {/* Ripple — always mounted, animation restarted via catch-ripple--active class toggle */}
+      <div ref={rippleElRef} className="catch-ripple" aria-hidden="true" />
 
       {/* ── Setup panel ── */}
       {showSetup && (
@@ -1166,7 +1181,7 @@ const CatchGame = ({
                 ? t('common.catchGameUI.score.challengeLabel')
                 : t('common.catchGameUI.score.label')}
             </div>
-            <div className="catch-game-score-value">{mode === 'challenge' ? score : rallies}</div>
+            <div ref={scoreValueElRef} className="catch-game-score-value">{mode === 'challenge' ? score : rallies}</div>
           </div>
           <div className="catch-game-score-best">
             {mode === 'challenge'
@@ -1187,7 +1202,7 @@ const CatchGame = ({
               </div>
               <div className="catch-game-challenge-row">
                 <span>{t('common.catchGameUI.challenge.bounces')}</span>
-                <span>{Math.min(2, bounceCount)}/2</span>
+                <span><span ref={bounceCountTextRef}>0</span>/2</span>
               </div>
               <div className="catch-game-challenge-row">
                 <span>{t('common.catchGameUI.challenge.combo')}</span>
@@ -1195,8 +1210,9 @@ const CatchGame = ({
               </div>
               <div className="catch-game-combo-track">
                 <div
+                  ref={comboFillRef}
                   className="catch-game-combo-fill"
-                  style={{ transform: `scaleX(${Math.max(0, Math.min(1, comboDecayPct))})` }}
+                  style={{ transform: 'scaleX(0)' }}
                 />
               </div>
               <div className="catch-game-objective-track">
@@ -1289,11 +1305,12 @@ const CatchGame = ({
           <div className="catch-game-charge-label">{t('common.catchGameUI.charge.label')}</div>
           <div className="catch-game-charge-track">
             <div
+              ref={chargeBarFillRef}
               className={`catch-game-charge-fill${isCharging ? ' catch-game-charge-fill--active' : ''}`}
-              style={{ transform: `scaleX(${Math.max(CHARGE_MIN, chargePct)})` }}
+              style={{ transform: `scaleX(${CHARGE_MIN})` }}
             />
           </div>
-          <div className="catch-game-charge-value">{Math.round(chargePct * 100)}%</div>
+          <div ref={chargeBarTextRef} className="catch-game-charge-value">0%</div>
         </div>
       )}
 
