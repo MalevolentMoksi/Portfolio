@@ -1,0 +1,502 @@
+CatchGame.tsx
+What can be improved to make the game feel a lot more butter smooth in terms of ball movement and gameplay for the CatchGame?
+
+I feel it's laggy even on machines that wildly surpass the requirements of a WEBSITE
+The user is experiencing lag/jankiness in the CatchGame. Let me analyze the current code carefully to identify performance bottlenecks. Let me read the full current CatchGame.tsx to understand what's happening.
+
+Key areas to look at:
+
+RAF loop efficiency
+React state updates from within RAF
+DOM manipulation
+CSS will-change / compositing
+setTimeout calls inside RAF
+catch zone DOM manipulation
+Let me read the file to do a thorough analysis.
+
+Read CatchGame.tsx
+Read CatchGame.tsx (lines 101-220)
+Read CatchGame.tsx (lines 221-340)
+Read CatchGame.tsx (lines 661-860)
+Read CatchGame.tsx (lines 859-1008)
+Now I have a complete picture of the performance issues. Let me do a thorough analysis.
+
+Key Performance Problems I Can Identify:
+
+setCatchRipple + setTimeout(() => setCatchRipple(null), 450) called inside the RAF loop
+
+Lines 902-903, 925-926, 932-933: Every time a catch happens, setCatchRipple triggers a React re-render, AND a setTimeout that triggers another re-render 450ms later.
+This is inside the RAF loop, so it causes React renders during animation frames
+The full component re-render from setCatchRipple is expensive and blocks the physics loop
+Multiple state updates (setScore, setLastGain, setRallies, setBounceCount, setCombo, setComboDecayPct) fired from within RAF
+
+These are scattered throughout the physics loop at lines 722, 727, 751, 898, 900, 901, 921-923, 943 and elsewhere
+Even though React 18 batches setState calls, calling them frequently from RAF still forces re-renders that interrupt the animation frame timing
+The component re-renders while the physics loop is running, causing visible jank
+Storing ball state in ballInfoRef.current...
+
+Creating a fresh object every frame with the current position and velocity values puts constant pressure on garbage collection
+Should reuse the same object and mutate its properties instead
+Reading window.innerWidth and window.innerHeight every frame
+
+These layout reads can trigger layout thrashing in certain browsers
+Better to cache these values and only update them when the window actually resizes
+Computing AIR_FRICTION ** dt every frame
+
+This exponentiation is redundant since the result is nearly identical at 60fps, so it could be pre-calculated for common frame rates
+Though honestly, it's a cheap enough operation that it's not a major concern
+Expensive SVG path string construction in buildAim
+
+The function calls .toFixed(1) twenty-two times and concatenates strings, which allocates memory and triggers SVG reflow
+The dirty check throttles how often this runs, but the string operations themselves are still costly when they do fire
+Could optimize by pre-allocating the string or using a different rendering approach
+classList.toggle being called every frame
+
+Still examining where this is happening and whether it's necessary every single frame
+Should track the previous class state in a ref and only toggle when it actually changes
+Multiple opacity writes happening per frame
+
+The code is setting style.opacity in several places, which causes style recalculations
+Need to cache the last opacity value and only update the DOM when it actually changes
+catchRipple state triggering unnecessary re-renders
+
+Using React state for this causes a full component re-render every time the catch ripple fires
+In free mode especially, this could happen constantly when the ball is near the cursor
+Should move this to a DOM ref instead to avoid React's re-render overhead
+setCharg state updates
+
+Looking at where charge state is being set and whether it's causing performance issues during the charging animation
+setComboDecayPct being called too frequently
+
+This state setter is triggered whenever the combo decay changes, potentially multiple times per second
+Creating new objects for ballInfoRef every frame
+
+Instead of assigning a fresh object each frame, should mutate the existing ref properties directly to avoid unnecessary allocations
+The tick function gets recreated whenever dependencies change
+
+The effect has a long dependency array that likely changes frequently, forcing the entire animation loop to be recreated and missing frames in the process
+Several of those dependencies like the success/miss callbacks could be memoized to stabilize the effect
+Inconsistent timing between Date.now() and performance.now()
+
+The combo decay logic uses one timing method while the RAF loop uses another, which could cause drift
+Unnecessary Math.sqrt calculation in the stop velocity check
+
+Should compare squared magnitudes directly instead of computing the square root every frame
+The setCatchRipple with setTimeout is the worst culprit
+
+Triggering a React render just to show a visual ripple effect, then another render 450ms later when clearing it
+This should be pure DOM manipulation through a ref instead
+ballInfoRef.current gets recreated as a new object every frame
+
+Should mutate in place to avoid unnecessary object allocations
+Now I'm prioritizing which fixes will have the biggest impact: replacing the ripple state with direct DOM manipulation, caching window dimensions and only updating on resize, stabilizing the RAF dependencies, mutating the ball info object in place, and using squared comparisons for the velocity threshold check.
+
+The core issue causing the lag is React state updates firing from inside the RAF loop — especially the catch ripple triggering renders mid-frame. The cascade is that catching the ball calls setCatchRipple, which schedules a re-render, and then the setTimeout clears it 450ms later with another re-render.
+
+Even the charge percentage with its 0.015 threshold fires about 67 times during a normal charge, each one forcing React to re-render. The real solution is moving all these continuous visual updates — catch ripple, charge bar, combo decay bar — directly to DOM refs instead of React state, keeping state only for structural changes like game over or score that don't happen at 60fps.
+
+Looking at how these state values are actually used in the JSX, the charge percentage drives the fill bar's scaleX transform and the percentage text, both of which can be updated via DOM refs. The combo decay percentage similarly just controls a scaleX transform. For the catch ripple, it's triggering an overlay flash and a CSS-animated ripple div, which can also be handled through direct DOM manipulation.
+
+Setting up refs to handle the ripple effect directly...
+
+Implementing the ripple animation... pattern for CSS animations that need to restart. I'm creating a ripple effect by dynamically inserting DOM elements that animate and clean themselves up after 450ms, which avoids React re-renders since catches happen roughly a second apart anyway.
+
+For the charge bar, I'm updating the DOM directly through refs instead of state—scaling the bar width and updating the percentage text in the RAF loop, which eliminates the setChargePct state setter entirely while keeping setIsCharging to control visibility.
+
+The key insight is that isHeld can stay as state since it changes infrequently, but isCharging and chargePct should be refs and DOM writes instead, since they're either CSS-class-only or continuously updating during gameplay.
+
+Adding/removing the active class directly...
+
+Caching viewport dimensions... I'm pre-computing the squared stop threshold to avoid repeated multiplication checks, then caching the catch-zone opacity and ready state in refs to prevent unnecessary DOM updates when values haven't changed.
+
+For the path building, I'm switching from string concatenation to an array-join approach since it's faster in V8 when constructing the SVG path data.
+
+The AIR_FRICTION ** dt calculation happens frequently, but since dt varies at runtime, pre-computing for a fixed value won't help much—I'll skip that optimization.
+
+The ripple flash effect currently triggers a React re-render through the catchRipple state, so I'm considering moving that animation to the DOM instead to avoid unnecessary component updates. Writing the ripple handler... Still writing the ripple logic...
+
+Now I'm mapping out the full optimization strategy—converting the React state updates that fire during the game loop into direct DOM mutations instead. The key targets are the ripple effect, charge percentage, combo decay, and charging animation state, plus caching window dimensions and the catch-zone element to avoid redundant lookups. I also need to square the stop threshold and batch the score, rally, and combo updates that are currently triggering re-renders every frame.
+
+The bounce counter is the real culprit though—it updates constantly during rapid bounces and only feeds the HUD display, so I can move that to direct DOM text updates as well, capping the display at 2 bounces while tracking the actual count internally.
+
+The three biggest wins are eliminating the ripple effect renders on catch, stopping the continuous charge percentage updates during the hold phase, and cutting out the combo decay percentage updates that fire multiple times per second. The charge threshold of 0.015 is already filtering some updates, but over a typical 1.2-second charge it still triggers around 67 re-renders, which adds up even if each one is individually fast.
+
+Let me implement these three changes and handle the other state optimizations.
+
+Actually, I'm realizing isCharging is only being set during pointer events and ball launch, not in the RAF loop, so those re-renders are already infrequent and not the bottleneck. The real culprits are the RAF-driven state updates for charge and combo decay. That's acceptable.
+
+The RAF only calls setChargePct (the continuous update). The isCharging React state changes are event-driven.
+
+OK so setIsCharging is fine to keep. Just setChargePct and setComboDecayPct and setCatchRipple are the continuous RAF-driven ones.
+
+For setChargePct:
+
+Used for: style={{ transform: scaleX(${Math.max(CHARGE_MIN, chargePct)}) }} on the fill bar
+And: {Math.round(chargePct * 100)}% as text
+Both can be done via DOM refs.
+
+For setComboDecayPct:
+
+Used for: style={{ transform: scaleX(${Math.max(0, Math.min(1, comboDecayPct))}) }} on the combo fill bar
+Can be done via DOM ref.
+
+For setCatchRipple:
+
+Creates a visual element + flashes the overlay
+Pure DOM work, no need for React state
+Now looking at setBounceCount — it's called whenever the ball bounces off a wall during flight, which could happen multiple times per second at high speeds. But with the 3-value display format and bounces only occurring during specific game phases, the frequency might be manageable.
+
+Still, updating React state for a simple counter display is unnecessary overhead. I should add bounce count to the DOM ref optimization list.
+
+My implementation plan is to use DOM refs for all these continuous visual updates: the ripple effect, charge percentage bar and text, combo decay fill, bounce count display, and overlay flash. I'll also cache viewport dimensions via refs with a resize listener, and keep the in-place ball info ref updates.
+
+Now I'm thinking through the charge percentage refactor more carefully. I need to remove the React state for charge percentage entirely, keep the existing ref that tracks the value, and add DOM element refs for the bar fill and text display. During the animation frame, I'll update both DOM elements directly instead of triggering re-renders, then attach those refs in the JSX and remove charge percentage from any expressions there.
+
+For the initial display values, I'll set static fallbacks in the JSX—the charge bar starts at the minimum scale and the text shows a default percentage—since the RAF will immediately update them once charging begins anyway. The same approach applies to the combo fill bar, which also gets its transform updated directly by the animation loop rather than through React state.
+
+For the bounce count display, I need to add a ref to the span containing just the numeric value so I can update it via RAF when bounces occur, keeping the label text separate.
+
+Since bounceCount is only used for display, I can eliminate it as state entirely and manage the value through the ref's textContent instead, updating it directly when bounces happen.
+
+I also need to handle the overlay flash effect—currently tied to catchRipple state, but I should use a ref to the overlay element and update its class directly.
+
+Building the ripple trigger function... Writing the ripple effect function...
+
+Now I have a full picture of the current code. Let me identify every performance issue:
+
+Performance Issues Found
+1. window.innerWidth / window.innerHeight called every frame inside the RAF loop
+Line 711: const vw = window.innerWidth, vh = window.innerHeight;
+This is called on every frame. window.innerWidth/Height causes a layout flush (style recalculation) to get the up-to-date value. This is a significant jank source, especially since the game overlay covers the full screen. These values should be cached and only updated on resize.
+
+2. Multiple setCatchRipple + setTimeout calls from inside the RAF loop
+Lines 902-904, 925-927, 932-934 are triggering React state updates and re-renders from within the animation loop, which breaks the smooth frame timing. The ripple effect should be handled with pure DOM manipulation and CSS animations instead of relying on React state changes.
+
+3. AIR_FRICTION
+The exponentiation operation on line 868 runs every frame and is computationally expensive. Since dt varies per frame, I could optimize the common case where dt ≈ 1 by skipping the exponentiation entirely, or use a linear approximation instead of the full power calculation.
+
+For the curve decay on line 863, the same optimization applies—I can replace Math.pow(0.985, dt) with a simpler linear approximation that's accurate enough for typical frame times.
+
+I'm also noticing the square root calculation on line 950 could be optimized by comparing squared magnitudes instead, avoiding the expensive square root operation entirely.
+
+The DOM mutation with classList.toggle happening every frame is wasteful—I should track whether the catch zone state has actually changed and only update the DOM when needed.
+
+Finally, there are several React state updates being triggered from inside the RAF loop (setCombo, setComboDecayPct, setChargePct), and even with dirty checks in place, each one still forces a re-render.  The setChargePct update is particularly problematic since it fires frequently while the user is charging, causing the entire component to re-render during a critical moment and creating visible jank.
+
+I'm also seeing unnecessary object allocations happening every frame when updating the ball info reference, and Date.now() is being called multiple times...
+
+Actually, looking at the performance calls, there are redundant performance.now() invocations scattered throughout when the RAF callback already provides a timestamp parameter that should be reused instead. The physics calculation for air friction is also worth revisiting since the exponential approximation might not be optimal for the frame delta times we're dealing with. For non-standard frame rates, the approximation works fine. So I can just precompute the friction value at 60fps and use that as a constant.
+
+Now looking at the ripple effect—it's currently managed through React state, which triggers a full component re-render every time the ripple starts or ends. That's wasteful for what should just be a CSS animation. Better to create the ripple as a real DOM element and toggle its visibility with a class, letting CSS handle the animation without touching React.
+
+The className logic for the flash effect also causes unnecessary re-renders. And there's a pattern of accessing botPosRef.current that could be optimized.
+
+Looking at the bigger picture, the most critical issues are the layout flushes from checking window dimensions inside the animation loop, the React state updates triggering re-renders on every catch, and calling performance.now() multiple times instead of using the timestamp passed to requestAnimationFrame. There's also unnecessary object allocation happening each frame that puts pressure on garbage collection.
+
+The fixes are straightforward: cache viewport dimensions and only update them on resize events, replace the ripple state with direct DOM manipulation using a ref and CSS animations, and pass the rAF timestamp through to all the calculations that currently make their own time calls. For the remaining issues like the distance check and decay calculations, I can optimize by using squared distances instead of square roots and pre-computing the decay factor. edAtRef and catchAttemptTimeRef, they're set with performance.now(). The rAF now is a DOMHighResTimeStamp identical to performance.now() but without the call. However, there's a subtle difference: the charge starts on mousedown (not in RAF), so chargeStartedAtRef uses real performance.now(). The now in RAF is accurate — we can use now for the elapsed comparison.
+
+Mutate ballInfoRef instead of allocating — check if it exists and mutate: if (ballInfoRef?.current) { ballInfoRef.current.x = bp.x; ... }
+
+Track catch zone ready state — don't toggle classList every frame; track the last value and only update DOM when it changes.
+
+Use squared comparison for stop check — STOP_THRESH_SQ = STOP_THRESH * STOP_THRESH.
+
+Linearize friction for small dt — since AIR_FRICTION = 0.997 is very close to 1, I can approximate the exponential decay with a linear formula that's negligibly different from the actual calculation.
+
+Cache Date.now() per frame — performance.now() and Date.now() use different timebases, so I can't swap them directly, but I can call Date.now() once at the start of each frame and reuse that value throughout.
+
+Now I'm checking the CSS for the ball element to see if will-change is applied and what transitions might be affecting performance.
+
+Now I have the full picture. Let me check the CSS for the ball and overlay:
+
+Grep "catch-ball|catch-game-overlay|catch-aim" (in /users/info/etu-2a/morelloe/Portfolio/Portfolio/src/styles/components/_pet-button.css)
+43 lines of output
+Grep "catch-game-overlay\s*\{|catch-game-overlay--flash\s*\{" (in /users/info/etu-2a/morelloe/Portfolio/Portfolio/src/styles/components/_pet-button.css)
+21 lines of output
+Found the BIGGEST culprit: backdrop-filter: blur(3px) on the overlay.
+
+backdrop-filter: blur() is extremely expensive — it triggers a separate compositing layer for the entire viewport. On every frame, the GPU has to blur the entire content behind the overlay. On a 1440p+ screen this is brutal. Even on high-end machines, backdrop-filter: blur has significant CPU/GPU cost when the content behind it is animating.
+
+This explains the "laggy even on machines that surpass requirements" symptom perfectly.
+
+Other issues I found:
+
+Calling window.innerWidth/Height inside the RAF loop every frame instead of caching it
+setCatchRipple state changes triggering re-renders from within RAF, which breaks the animation loop
+Redundant performance.now() calls when the rAF timestamp is already available
+Creating a new object for ballInfoRef.current every frame instead of mutating it
+Using classList.toggle every frame without tracking state
+Using Math.sqrt for distance checks instead of comparing squared values
+The Math.pow(0.985, dt) decay curve could be linearized
+I should also look at the transition: filter 0.15s ease on the ball element — CSS transitions might be fighting with the RAF updates.
+
+The will-change: transform is already set on the ball, which is good. But the score display and HUD panel are probably re-rendering on every setChargePct call, which adds unnecessary overhead.
+
+The biggest performance killer is the backdrop-filter: blur on the overlay — it's forcing the compositor to blur the entire game area every frame. I should either remove it entirely and use a simple tinted semi-transparent background instead, or drastically reduce the blur amount. For a game overlay, the blur is purely cosmetic and the performance cost isn't worth it.
+
+For the other fixes: I need to cache window.innerWidth/Height at the start of the RAF loop instead of querying it repeatedly, replace the ripple state with direct DOM manipulation using a ref and CSS animation, and use the now timestamp passed to the RAF callback instead of calling performance.now() again — since now is already the current time at frame start, I can use it directly for elapsed time calculations.
+
+For the ball info object, I should mutate the ref directly rather than creating new objects each frame. The ref needs to be initialized as an object first, so I'll set up the initial structure and then update its properties in place.
+
+I can also precompute the squared threshold constant to avoid recalculating it every frame. For viewport dimensions, I'll cache them in a ref and update it on resize so I'm not repeatedly calling window.innerWidth and window.innerHeight during the animation loop.
+
+I need to track whether the catch zone should be in the "ready" state by comparing the distance squared against the radius squared, and only update the DOM classList when that state actually changes. This avoids unnecessary DOM mutations.
+
+For the friction calculation, instead of using exponentiation each frame, I can linearize it—since the friction coefficient is 0.997, I can approximate it as 1 - 0.003 * dt, which gives nearly identical results with much less computation overhead.
+
+The same linearization applies to the curve decay at 0.985, approximating it as 1 - 0.015 * dt.
+
+I should also pull Date.now() out of the RAF loop and call it once per frame, since it's used in multiple places for combo decay and throw timing checks.
+
+The backdrop-filter blur is a performance bottleneck and needs to be replaced with something lighter. I also need to handle the flash state animation properly.
+
+Instead of using React state to trigger the flash class, I can manage the ripple element directly through a ref—toggling CSS classes and updating position without causing re-renders. This keeps the visual effect while eliminating unnecessary state updates.
+
+The challenge with CSS animations is they don't restart when you re-add a class, so I'd need to force a reflow or recreate the element. The cleanest approach is to dynamically create a ripple div on catch, position it, let the CSS animation run, then remove it when the animation completes.
+
+Creating ripple elements dynamically...
+
+For the score pulse, I can toggle a class on the score value itself with a timeout to remove it after the animation duration, keeping everything DOM-based without React state overhead.
+
+Now I need to map out the full implementation plan. I'm ranking these optimizations by impact—removing the backdrop-filter blur is the biggest win, followed by eliminating the ripple state and using direct DOM manipulation instead, then switching to squared distance comparisons to avoid expensive square root calculations. I'm reconsidering the overlay CSS strategy—removing backdrop-filter to eliminate the compositing layer overhead, then compensating with a slightly higher background opacity instead of the blur effect. The overlay itself doesn't need special will-change properties since the ball and catch zone handle their own layer promotion. The HUD's contain property would prevent it from affecting layout calculations elsewhere. The real performance gains come from removing the backdrop-filter, eliminating React state updates tied to the animation frame loop, and caching viewport dimensions. I need to add a ref to the overlay so I can directly manipulate the flash class instead of relying on React state, which means the score value element will also need a ref to toggle its scale animation independently.
+
+My approach is to add an overlay ref, then inside the RAF callback when a catch happens, I'll add the flash class directly to the DOM and remove it after two animation frames to ensure the CSS transition completes. This removes the catchRipple state entirely and prevents unnecessary React re-renders.
+
+Now I'm implementing the changes... I'm verifying the linearization approach for friction calculations—the approximation 1 - 0.003 * dt introduces negligible error for air friction, and while the curve decay approximation has slightly more deviation at larger time steps, it's still acceptable for game performance.
+
+The real bottleneck isn't the exponentiation itself since modern JavaScript engines optimize x ** y well, especially for values close to 1—the layout flushes and React re-renders are the actual performance concerns. I'll keep the linearization as a valid micro-optimization that removes a transcendental function call.
+
+Adding constants...
+
+Now I'm planning the refactoring edits: introducing refs for the viewport and overlay to avoid repeated DOM queries, extracting the ripple trigger into a pure DOM helper function outside the component, removing the catchRipple state entirely, and replacing all the window dimension lookups and expensive calculations with cached ref values.
+
+I'm also noticing a performance issue — the setChargePct call inside the RAF loop triggers a React re-render every time the charge threshold updates, which happens right when the user is actively charging and needs the smoothest interaction.
+
+I can bypass this by updating the charge fill and percentage display directly through refs instead of relying on state, using style.transform for the scaleX animation and textContent for the percentage number. also manage isCharging (which adds catch-game-charge-fill--active class) via direct classList manipulation.
+
+This would eliminate setChargePct and setIsCharging state, removing a significant source of re-renders.
+
+But isCharging state is also used to conditionally render the charge indicator: {!showSetup && isHeld && !gameOver && ...}. If isHeld changes, the indicator shows/hides. This is a React state thing. I can't fully eliminate the state, but I can avoid the per-frame updates.
+
+Let me keep isHeld, isCharging as React state (they trigger on events, not every frame), but eliminate chargePct state. Instead, add refs:
+
+chargeFillRef → update style.transform directly in RAF
+chargeValueRef → update textContent directly in RAF
+The isCharging class toggle happens on mousedown/mouseup events rather than every frame, so that's fine. Since the charge indicator is conditionally rendered based on isHeld, the refs only exist when needed—when the ball is being held. Once it's in flight, the indicator disappears and we stop updating it. So I'll keep isCharging state for the conditional rendering and class toggling, remove chargePct state entirely, and use refs to directly update the fill transform and value text in the animation loop.
+
+Updating refs directly... Writing the optimizations... I'm looking at the JSX structure for the charge UI and need to add refs to both the fill div and the value display so I can update them directly in the animation loop instead of relying on state, which means removing the inline style and text content from the JSX and managing those updates through the DOM refs instead.
+
+The tricky part is handling the initial render — I can keep the initial style prop with scaleX(CHARGE_MIN) in the JSX so the element renders correctly on mount, then imperatively update it via ref in the RAF callback without React re-rendering, which is a valid pattern.
+
+Setting up the refs...
+
+I can apply the same pattern to the combo decay visual—replace the state-driven fill bar with a ref update in the RAF loop. The combo state itself needs to stay since it's used for the HUD display, but the visual fill percentage can be managed directly via DOM refs. Same thinking applies to bounceCount—the display value is currently being set through state updates in the animation frame, but I can switch that to ref-based updates instead.
+
+Now I'm narrowing down the scope to what actually moves the needle: removing the backdrop blur, caching window dimensions, converting the ripple effect to pure DOM, eliminating the charge percentage state, and using the rAF timestamp directly. The other optimizations like ref-ifying the combo decay and bounce count displays are nice-to-haves that add complexity without as much benefit.
+
+When I remove the chargePct state, I need to think through the throttling strategy — the old code used prevRenderedChargePctRef to avoid redundant state updates, but now I can just update the DOM directly in the RAF loop since inline style transforms are cheap and bypass the React render cycle entirely.
+
+For the combo fill, I'm noticing the same pattern — it's another RAF-triggered state update that could be optimized the same way.
+
+Given how many changes are needed across the file, a full rewrite is probably cleaner than scattered edits. Let me map out the key modifications: removing the backdrop filter from CSS, adding a few new refs and constants to handle the charge and combo fills directly, and refactoring the RAF loop to update DOM properties instead of triggering re-renders. I'm working through the refactoring plan — converting display-only state variables into refs to reduce re-renders, consolidating the ripple trigger logic into a single function, and caching viewport dimensions to avoid repeated window property lookups during animation frames.
+
+Found the biggest culprits:
+
+backdrop-filter: blur(3px) on the full-screen overlay — This is the MASSIVE performance killer. backdrop-filter: blur() on a full-screen element creates a separate GPU layer and applies a blurring effect to everything underneath. This is EXTREMELY expensive on most browsers/GPUs, especially when:
+The overlay covers the entire screen
+There's content moving underneath (the page itself)
+It forces GPU compositing for ALL underlying content
+It triggers repaint every frame as the underlying content (ball, etc.) moves
+This single CSS property is almost certainly the primary cause of perceived lag.
+
+transition: filter 0.15s ease on .catch-ball — The ball has a drop-shadow filter with a transition, and while will-change: transform correctly promotes it to its own GPU layer, the filter transition itself causes re-compositing during the animation between held and not-held states. However, the drop-shadow on the GPU layer is actually fine performance-wise.
+
+backdrop-filter on the overlay — This is the main culprit and needs to be removed or significantly reduced.
+
+width: 100vw; height: 100vh on the SVG — Using viewport units can trigger layout recalculations; switching to 100% or inset: 0 positioning would be better.
+
+window.innerWidth/Height called in the RAF loop — These should be cached outside the loop to avoid triggering style recalculations every frame.
+
+setCatchRipple React state updates from RAF — This causes unnecessary re-renders on every animation frame.
+
+Object allocation in the RAF loop — Creating new objects every frame adds garbage collection pressure.
+
+Multiple performance.now() calls — Should use the timestamp parameter that RAF already provides instead.
+
+classList.toggle every frame — Better to track the state and only update when it actually changes.
+
+Math.sqrt for distance checks — Can optimize by comparing squared distances instead.
+
+The critical fixes are removing or reducing the backdrop-filter blur effect on the overlay, and caching viewport dimensions so they're not recalculated every frame.
+
+I also need to eliminate the catchRipple React state and instead manage the ripple animation through DOM manipulation with a ref. Using the now parameter from the RAF callback will eliminate redundant performance.now() calls, and I should mutate the ball info object in place rather than creating new ones each frame. For the medium-priority fixes, I'll remove the class toggle for the flash effect since it's tied to the ripple animation.
+
+Now I'm prioritizing the biggest wins: removing or conditionalizing the backdrop-filter effect, caching window dimensions, eliminating object allocations, properly using the rAF timestamp, and removing React state for the ripple. I should also examine the CSS more carefully, particularly how filter: drop-shadow interacts with will-change: transform.
+
+The issue is that filter forces the browser to render the element as a single texture, which can interfere with GPU optimization from will-change: transform and potentially push rendering back to the CPU. But the backdrop-filter is likely the main performance bottleneck. I'm also checking whether the score HUD has any animating transforms or filters that might be contributing to the issue.
+
+The .catch-game-score-value has a transform transition that scales it up when the ripple triggers, which causes layout and composite operations every time the ripple state changes. I'm going to refactor this by removing the ripple state entirely and replacing it with DOM-based ripple effects, eliminating the CSS-triggered animations. I'll also optimize the ball tracking by using the rAF timestamp directly, mutating refs in-place, and introducing constants for threshold calculations.
+
+Implementing the fixes... Refining the ripple animation trigger...
+
+I'm considering using animation: none followed by a requestAnimationFrame to reset the animation without forcing a layout reflow, which would be more performant than the offsetWidth trick.
+
+For the score flash effect, I could keep it as a simple class toggle on a ref instead of re-rendering the whole component, which would be cleaner and avoid unnecessary updates.
+
+So my plan is to remove the catchRipple state entirely and replace it with direct DOM manipulation through refs—I'll add refs for the ripple element, score value, viewport dimensions, and a flag to track the previous catch zone state. Then I'll create two functions: one to trigger the ripple animation at specific coordinates and another to flash the score value, both using class toggles and timeouts instead of state changes.
+
+For the score flash effect specifically, I'm keeping the CSS transition that scales the score up when the flash class is applied, then removes it after a short delay—this way the animation plays purely through DOM class manipulation without any React re-renders.
+
+Actually, a cleaner approach would be to use a CSS keyframe animation that handles the pop effect automatically, so I can just add the flash class and let the animation run without needing a setTimeout at all. Now I'm refactoring the CatchGame component to remove the ripple state entirely and replace it with direct DOM refs and class toggles instead. I'm working through the ripple animation trigger logic—using requestAnimationFrame to force a reflow so the animation can restart properly. The issue is that the keyframes are set to forwards, which means the element stays at its final state (opacity 0 if it fades out), so I need to check what the actual keyframe values are to understand why the ripple isn't visible after the animation completes.
+
+I'm considering a few approaches: either remove and restore the animation property in the next frame, use a CSS custom property to control visibility independently, or keep the ripple element always in the DOM with display: none by default and toggle it when triggered. The simplest solution that avoids layout thrashing would be to manage visibility through a display property rather than conditional rendering.
+
+Setting up the ripple with an inactive state by default, then using a class toggle with requestAnimationFrame to force a repaint between removing and re-adding the animation class so it restarts cleanly.
+
+I can apply the same pattern to the score flash effect—defining a pop animation that scales the number up and back down, then triggering it the same way by removing and re-adding the animation class with a frame delay in between.
+
+Actually, I'm reconsidering whether the score flash is worth the extra complexity. It requires another ref and adds a re-render cycle, so I'll skip it for now and keep the focus on getting the ripple effect working smoothly.
+
+For the resize handler, I'm caching the viewport dimensions in refs so I can access them directly in the RAF loop without calling window.innerWidth repeatedly, and I'm updating the SVG viewBox whenever the window resizes.
+
+Optimizing the RAF loop to use cached viewport values... Ref.current works because both now and performance.now() are on the same timeline, so I can use the rAF timestamp directly for elapsed time calculations on catchAttemptTimeRef as well.
+
+Now I'm prioritizing the changes by impact: removing the backdrop-filter CSS is the biggest win, followed by caching viewport dimensions to avoid layout flushes each frame, then replacing the catchRipple state with direct DOM manipulation to cut down re-renders, using the rAF now parameter, mutating ballInfoRef to reduce garbage collection pressure, caching Date.now() once per frame, and tracking catchZone readiness to prevent redundant DOM updates. The linear friction approximation is a micro-optimization I'll skip for now.
+
+Writing the optimized code... Now I'm planning the implementation changes. I need to remove the React state-based ripple and score flash effects, replacing them with DOM refs and direct function calls that trigger CSS animations instead. In the component, I'll set up refs for the ripple element, score value, viewport dimensions, and catch zone state, then create functions to directly manipulate the DOM and trigger animations. The RAF loop will use these refs to avoid re-renders, and I'll update the resize handler to keep viewport dimensions current. In the styles, I'm removing the blur filter that's causing performance issues and adding CSS animations for both the ripple expansion and score pop effect.
+
+I'm also checking the ball's drop-shadow filter and transition—it looks fine since it only animates twice per rally when the held state changes. Let me verify if the catch zone has any transitions that might conflict.
+
+The catch zone has opacity, border-color, and background-color transitions, but the opacity one is GPU-friendly since it only happens at state changes. The border and background color transitions are controlled by...
+
+Actually, I should remove the CSS transitions on the catch zone entirely since the state toggles can happen frequently when the ball oscillates near the edge, which could cause performance issues. The will-change property for transform and opacity is already there, which is good.
+
+Now I need to handle the ripple effect CSS...
+
+Defining the ripple styles... I'm settling on a straightforward approach: add and remove the animation class with a requestAnimationFrame delay to ensure the browser registers the state change. I'll style the ripple element to stay mounted but inactive by default, then trigger the expand animation when needed.
+
+Writing the CSS styles...
+
+Now I'm planning the surgical changes to CatchGame.tsx — I need to add refs for viewport dimensions, ripple and score elements, and a catch zone ready flag, then remove the catchRipple state and replace it with a triggerRipple callback. The RAF loop gets refactored to use refs for performance, track timing with now, mutate ballInfoRef directly, and leverage the new ripple trigger while monitoring catch zone state with a squared distance threshold. I'm organizing a series of targeted edits across the component—adding new constants and refs for the ripple effect, replacing the catchRipple state with a triggerRipple callback, updating the resize effect to cache viewport dimensions, and refactoring the RAF loop to use those cached values while removing the overlay flash and integrating the scoreValueElRef. Continuing with the ripple implementation, I need to handle the DOM approach for the flash effect rather than relying on JSX state, which means managing the element directly and checking if there are other CSS references I need to update.
+
+Grep "overlay--flash|catch-ripple-expand|catch-ripple\b" (in /users/info/etu-2a/morelloe/Portfolio/Portfolio/src/styles/components/_pet-button.css)
+39 lines of output
+Read _pet-button.css (lines 1359-1368)
+Now I have a complete picture. Let me identify all the performance issues and implement fixes:
+
+Performance Issues Found (by severity):
+CRITICAL
+backdrop-filter: blur(3px) on full-screen overlay — Forces GPU to re-composite the entire page every frame. On most browsers, this creates a separate backing store for everything behind the overlay, causing a huge performance hit.
+
+window.innerWidth/Height called inside RAF every frame (line 711) — Forces style recalculation / layout flush on every animation frame.
+
+HIGH
+setCatchRipple(...) React state from inside RAF loop — Causes React re-render on every catch (happens via setCatchRipple({ x, y }) and then setTimeout(() => setCatchRipple(null), 450)).
+This gets triggered 2-3 times per rally between the bot catch, player catch, and possible ripple effect, so each one forces a full component re-render.
+
+catch-game-overlay--flash class tied to catchRipple state — Every time catchRipple changes, the overlay's className changes, triggering yet more style recalculation.
+
+performance.now() called multiple times inside RAF — The rAF already provides now as a parameter (DOMHighResTimeStamp). Using it avoids extra function calls.
+
+MEDIUM
+ballInfoRef.current = { ... } object allocation every frame — Creates a new object every single frame instead of reusing the same reference.
+
+catchZoneElRef.classList.toggle(...) called every frame — DOM classList mutations are expensive even when the value hasn't changed, so I need to track the previous state.
+
+Multiple Date.now() calls per frame — Should call it once and reuse the value instead of calling it multiple times.
+
+Distance comparison using square root — Comparing squared values would be more efficient than calculating the square root.
+
+LOW
+Exponentiation operations on floats every frame — Could use linear approximation instead for values close to 1.
+
+Math.pow() for decay calculations — Same optimization applies here.
+
+String template allocation — Generating new strings every frame creates unnecessary garbage.
+
+Now I'm mapping out the implementation strategy. The biggest win is removing the backdrop-filter effect and replacing it with a more opaque background. I'll cache viewport dimensions in refs and update them on resize, then use those cached values in the animation loop. For the ripple and score flash effects, I'll keep the DOM elements mounted and toggle classes instead of mounting and unmounting. I'll also mutate the ball info object directly rather than creating new ones, use the rAF timestamp for timing instead of calling Date.now() repeatedly, track the catchZone ready state to avoid unnecessary classList operations, and add a squared threshold constant to avoid square root calculations.
+
+Now I'm implementing these changes. Setting up new refs for the ripple element, score display, cached viewport dimensions, and catchZone ready state...
+
+Removing the catchRipple state and replacing it with a triggerRipple callback that directly manipulates the DOM to position and animate the ripple effect, plus triggering a flash animation on the score value...
+
+Updating the resize effect to sync viewport dimensions and the SVG viewBox whenever the window resizes...
+
+Continuing with the RAF loop changes... I'm updating the ball state tracking to use the cached frame time instead of repeated Date.now() calls, and consolidating viewport dimensions into local variables for cleaner access throughout the tick function. Still writing refactor logic... I'm laying out the JSX structure with refs for the ripple and score elements, then updating the CSS to remove the backdrop filter, hide the ripple by default, and move the flash animation to the score value itself. Now I'm wondering about the timing of those requestAnimationFrame calls in the ripple trigger function — whether they execute on the same frame or consecutive frames. I'm realizing the timing might actually be problematic — when triggerRipple schedules its animation frame callback inside the main tick() function, both that callback and the next tick() call will execute on frame N+1, and the execution order depends on which was scheduled first, which could cause the animation restart to fail. So the timing works out: triggerRipple schedules its callback before the final requestAnimationFrame(tick) call at line 975, meaning on frame N+1 the ripple class gets added first, then the next tick runs. Now I need to think through what happens with the triggerRipple function itself and how it interacts with the rest of the animation loop.
+
+Since triggerRipple only uses refs and doesn't depend on any state that changes, I can safely use an empty dependency array for the useCallback. But I do need to add triggerRipple to the RAF loop's useEffect dependencies since it's being called inside that effect. Let me trace through all the edits I need to make, starting from the top to avoid any conflicts.
+
+Actually, I'm realizing there are quite a few changes scattered throughout the file. I could do a full rewrite, but the file is long enough that targeted edits make more sense. Let me group these changes into batches — first the constants, then the refs, and so on — so I can apply them systematically without creating conflicts. Adding the ripple div and scoreValueElRef to the JSX. I'm thinking through whether calling triggerRipple inside the RAF loop is safe—it schedules its own separate rAF callback just to add a CSS class, which is cheap and only fires once per catch, so there's no risk of cascading animation frames. Now I need to decide if triggerRipple should be wrapped in useCallback or kept as a regular function.
+
+Storing the function in a ref...
+
+Actually, useCallback with empty dependencies is cleaner since the function only uses refs, which are stable anyway. I'm defining the trigger function to handle positioning the ripple element and adding the flash animation classes to both the ripple and score value elements.
+
+Now I need to handle the ballInfoRef mutation more efficiently—instead of creating a new object every frame, I should mutate the existing object in place if it's already initialized. I'm planning out the edits systematically—adding the new constant for the stopping threshold, updating the refs and state, then replacing the entire RAF loop with the optimized physics simulation, and finally updating the JSX to wire everything together.
+
+Now I have the complete picture. Here are the performance killers I found:
+
+backdrop-filter: blur(3px) on the full-screen overlay — the single biggest culprit. Forces the GPU to recomposite every pixel behind the overlay on every frame.
+window.innerWidth/Height called inside the RAF loop every frame — triggers layout flush each tick.
+setCatchRipple(...) React state from inside RAF — causes a full re-render on every catch (plus the setTimeout for another re-render 450ms later).
+catch-game-overlay--flash class tied to catchRipple state — re-render triggers style recalculation on the whole overlay.
+ballInfoRef.current = { ... } object allocation every frame — GC pressure.
+performance.now() called multiple times when now is already passed by rAF — free timestamp ignored.
+classList.toggle every frame without tracking whether the value actually changed.
+Math.sqrt for stop-check instead of squared comparison.
+Multiple Date.now() calls per frame — should be cached once.
+Update Todos
+
+Remove backdrop-filter from overlay CSS + add STOP_THRESH_SQ constant
+
+Cache viewport dimensions via refs (avoid window.innerWidth/Height in RAF)
+
+Replace catchRipple React state with DOM-managed animation
+
+Optimize RAF loop: frameNow, now param, mutate ballInfoRef, track catchZone state
+
+Run typecheck
+First, the CSS — the most impactful single change:
+
+Read _pet-button.css (lines 1344-1359)
+Read _pet-button.css (lines 1586-1605)
+Edit _pet-button.css
+Removed 2 lines
+Now replace the score flash (class-based → CSS animation, no React re-render needed) and update the ripple to support DOM-managed restart:
+
+Edit _pet-button.css
+Added 6 lines
+Edit _pet-button.css
+Added 5 lines
+Also remove the transition from catch-zone (it's updated every frame so transitions only add jank):
+
+Edit _pet-button.css
+Modified
+Update Todos
+
+Remove backdrop-filter from overlay CSS + ripple/score CSS fixes
+
+Cache viewport dimensions via refs + ripple DOM approach + RAF optimizations
+Now the TypeScript — all the optimizations together. I'll replace key sections with targeted edits:
+
+Edit CatchGame.tsx
+Added 1 line
+Edit CatchGame.tsx
+Added 9 lines
+Edit CatchGame.tsx
+Removed 1 line
+Now add triggerRipple callback right after clearHintTimer:
+
+Edit CatchGame.tsx
+Added 22 lines
+Update the resize effect to also cache viewport dimensions:
+
+Edit CatchGame.tsx
+Added 3 lines
+Now replace the entire RAF useEffect with the optimized version:
+
+Now replace the entire physics loop with the optimized version:
+
+Edit CatchGame.tsx
+Added 22 lines
+You've hit your limit · resets 9pm (Europe/Paris)
