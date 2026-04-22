@@ -6,34 +6,17 @@
     </filter>
   </defs>
   <style>
-    .bg     { fill: #080600; }
-    .ring   { fill: none; stroke: #d4af37; stroke-width: 1.2; opacity: .45; }
-    .e-halo { fill: #ffe17e; opacity: .35; }
-    .e-core { fill: #d4af37; }
-    .c-halo { fill: #ffe17e; opacity: .3; }
-    .c-core { fill: #ffe17e; }
-    .orbit-outer { transform-origin: 32px 32px; animation: cw  7s linear     infinite; }
-    .orbit-inner { transform-origin: 32px 32px; animation: ccw 4s linear     infinite; }
-    .center-grp  { transform-origin: 32px 32px; animation: pls 1.8s ease-in-out infinite; }
-    @keyframes cw  { to { transform: rotate( 360deg); } }
-    @keyframes ccw { to { transform: rotate(-360deg); } }
-    @keyframes pls { 0%,100% { transform: scale(.75); opacity: .75; } 50% { transform: scale(1.25); opacity: 1; } }
+    .bg{fill:#080600}.ring{fill:none;stroke:#d4af37;stroke-width:1.2;opacity:.45}.e-halo{fill:#ffe17e;opacity:.35}.e-core{fill:#d4af37}.c-halo{fill:#ffe17e;opacity:.3}.c-core{fill:#ffe17e}
   </style>
   <circle cx="32" cy="32" r="30" class="bg"/>
   <circle cx="32" cy="32" r="24" class="ring"/>
   <circle cx="32" cy="32" r="14" class="ring"/>
-  <g class="orbit-outer">
-    <circle cx="32" cy="8"  r="6"   class="e-halo" filter="url(#glow)"/>
-    <circle cx="32" cy="8"  r="3.5" class="e-core"/>
-    <circle cx="32" cy="56" r="4"   class="e-halo" opacity=".15"/>
-    <circle cx="32" cy="56" r="2"   class="e-core" opacity=".45"/>
-  </g>
-  <g class="orbit-inner">
-    <circle cx="32" cy="18" r="5" class="e-halo" filter="url(#glow)"/>
-    <circle cx="32" cy="18" r="3" class="e-core"/>
-  </g>
-  <g class="center-grp">
-    <circle cx="32" cy="32" r="8"   class="c-halo" filter="url(#glow)"/>
-    <circle cx="32" cy="32" r="4.5" class="c-core"/>
-  </g>
+  <circle cx="47.4" cy="15.2" r="6" class="e-halo" filter="url(#glow)"/>
+  <circle cx="47.4" cy="15.2" r="3.5" class="e-core"/>
+  <circle cx="16.5" cy="46.8" r="5" class="e-halo" filter="url(#glow)"/>
+  <circle cx="16.5" cy="46.8" r="3" class="e-core"/>
+  <circle cx="41.8" cy="50.1" r="4" class="e-halo" opacity=".15"/>
+  <circle cx="41.8" cy="50.1" r="2" class="e-core" opacity=".45"/>
+  <circle cx="32" cy="32" r="8" class="c-halo" filter="url(#glow)"/>
+  <circle cx="32" cy="32" r="4.5" class="c-core"/>
 </svg>

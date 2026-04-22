@@ -8,6 +8,9 @@ dist/
 *.local
 coverage/
 
+# Archived assets
+public/assets/images/archived/
+
 # Editor directories
 .vscode/
 .idea/
