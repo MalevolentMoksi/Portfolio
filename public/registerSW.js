@@ -20,6 +20,8 @@ if ('serviceWorker' in navigator && isSecureOrigin) {
   const registerServiceWorker = () => {
     // Guard: prevent multiple reloads from SW updates
     let hasReloadedForSwUpdate = false;
+    // Only reload on update, not on first installation (first visit has no existing controller)
+    const hasExistingController = !!navigator.serviceWorker.controller;
 
     navigator.serviceWorker
       .register(swUrl, { scope: basePath })
@@ -37,9 +39,9 @@ if ('serviceWorker' in navigator && isSecureOrigin) {
           });
         });
 
-        // Handle skip-waiting message from new SW — reload only once
+        // Handle skip-waiting message from new SW — reload only once, and only if updating (not on first install)
         const handleControllerChange = () => {
-          if (!hasReloadedForSwUpdate) {
+          if (!hasReloadedForSwUpdate && hasExistingController) {
             hasReloadedForSwUpdate = true;
             // Defer reload to allow SW to fully activate
             setTimeout(() => {
