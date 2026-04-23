@@ -594,7 +594,8 @@
       "descriptionSuffix": "Passionné par l'alliance entre logique technique et ergonomie visuelle, j'espère pouvoir mettre ma curiosité et ma méthode au service de projets innovants.",
       "badgesAria": "Informations clés",
       "year": "2ème année",
-      "school": "IUT2 de Grenoble"
+      "school": "IUT2 de Grenoble",
+      "internship": "Stage G-SCOP"
     },
       "skills": {
       "title": "Compétences",
@@ -608,8 +609,14 @@
     },
     "timeline": {
       "title": "Mon parcours",
-      "aria": "Parcours scolaire",
+      "aria": "Parcours scolaire et professionnel",
       "items": [
+        {
+          "year": "2025 - présent",
+          "title": "Stage - Laboratoire G-SCOP de l'INP",
+          "place": "INP Grenoble, Grenoble",
+          "desc": "Stage en recherche et développement au laboratoire de Génie des Systèmes, Conception et Optimisation Productique."
+        },
         {
           "year": "2024 - présent",
           "title": "BUT Informatique - Développement d'Applications",

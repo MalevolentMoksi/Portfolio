@@ -594,7 +594,8 @@
       "descriptionSuffix": "Passionate about combining technical logic and visual ergonomics, I aim to contribute my curiosity and method to innovative projects.",
       "badgesAria": "Key information",
       "year": "2nd year",
-      "school": "IUT2 Grenoble"
+      "school": "IUT2 Grenoble",
+      "internship": "G-SCOP Internship"
     },
     "skills": {
       "title": "Skills",
@@ -608,8 +609,14 @@
     },
     "timeline": {
       "title": "My journey",
-      "aria": "Academic timeline",
+      "aria": "Academic and professional timeline",
       "items": [
+        {
+          "year": "2025 - present",
+          "title": "Internship - G-SCOP Laboratory at INP",
+          "place": "INP Grenoble, Grenoble",
+          "desc": "Research and development internship at the Engineering Systems, Design and Production Optimization laboratory."
+        },
         {
           "year": "2024 - present",
           "title": "Computer Science BUT - Application Development",

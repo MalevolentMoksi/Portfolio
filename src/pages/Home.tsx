@@ -543,6 +543,12 @@ const Home = () => {
   const { t } = useTranslation();
   const [activeSkillTab, setActiveSkillTab] = useState(DEFAULT_SKILL_TAB);
   const [expandedSkillNodes, setExpandedSkillNodes] = useState(DEFAULT_EXPANDED_SKILL_NODES);
+  const timelineItems = t('home.timeline.items', { returnObjects: true }) as Array<{
+    year: string;
+    title: string;
+    place: string;
+    desc: string;
+  }>;
   useDocumentMeta(t('home.metaTitle'), t('home.metaDescription'));
 
   const skillCategories = [
@@ -797,6 +803,21 @@ const Home = () => {
               </svg>
               {t('home.about.specialization')}
             </span>
+            <span className="about-badge" role="listitem">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              {t('home.about.internship')}
+            </span>
           </div>
         </article>
       </section>
@@ -812,22 +833,16 @@ const Home = () => {
       <section id="achievements" aria-labelledby="achievements-title">
         <h2 id="achievements-title">{t('home.timeline.title')}</h2>
         <ol className="timeline" aria-label={t('home.timeline.aria')}>
-          <li className="timeline-item">
-            <span className="timeline-year">{t('home.timeline.items.0.year')}</span>
-            <div className="timeline-content">
-              <strong>{t('home.timeline.items.0.title')}</strong>
-              <span className="timeline-place">{t('home.timeline.items.0.place')}</span>
-              <p>{t('home.timeline.items.0.desc')}</p>
-            </div>
-          </li>
-          <li className="timeline-item">
-            <span className="timeline-year">{t('home.timeline.items.1.year')}</span>
-            <div className="timeline-content">
-              <strong>{t('home.timeline.items.1.title')}</strong>
-              <span className="timeline-place">{t('home.timeline.items.1.place')}</span>
-              <p>{t('home.timeline.items.1.desc')}</p>
-            </div>
-          </li>
+          {timelineItems.map((item, index) => (
+            <li key={`${item.year}-${index}`} className="timeline-item">
+              <span className="timeline-year">{item.year}</span>
+              <div className="timeline-content">
+                <strong>{item.title}</strong>
+                <span className="timeline-place">{item.place}</span>
+                <p>{item.desc}</p>
+              </div>
+            </li>
+          ))}
         </ol>
       </section>
 
