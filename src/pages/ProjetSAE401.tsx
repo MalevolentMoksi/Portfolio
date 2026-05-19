@@ -405,6 +405,7 @@ etat_recherche   (etat, descriptif)`}
                 <img
                   src={getAssetPath('/assets/images/projects/SAE401AvantApresMobile.png')}
                   alt="Mobile redesign: before and after"
+                  className="zoomable"
                   loading="lazy"
                   width="1200"
                   height="600"
@@ -416,6 +417,7 @@ etat_recherche   (etat, descriptif)`}
                   <img
                     src={getAssetPath('/assets/images/projects/SAE401AvantBackOffice.png')}
                     alt="Back-office before redesign"
+                    className="zoomable"
                     loading="lazy"
                     width="800"
                     height="500"
@@ -426,6 +428,7 @@ etat_recherche   (etat, descriptif)`}
                   <img
                     src={getAssetPath('/assets/images/projects/SAE401ApresBackOffice.png')}
                     alt="Back-office after redesign"
+                    className="zoomable"
                     loading="lazy"
                     width="800"
                     height="500"
@@ -845,6 +848,7 @@ etat_recherche   (etat, descriptif)`}
               <img
                 src={getAssetPath('/assets/images/projects/SAE401AvantApresMobile.png')}
                 alt="Refonte mobile : avant et après"
+                className="zoomable"
                 loading="lazy"
                 width="1200"
                 height="600"
@@ -856,6 +860,7 @@ etat_recherche   (etat, descriptif)`}
                 <img
                   src={getAssetPath('/assets/images/projects/SAE401AvantBackOffice.png')}
                   alt="Back-office avant la refonte"
+                  className="zoomable"
                   loading="lazy"
                   width="800"
                   height="500"
@@ -866,6 +871,7 @@ etat_recherche   (etat, descriptif)`}
                 <img
                   src={getAssetPath('/assets/images/projects/SAE401ApresBackOffice.png')}
                   alt="Back-office après la refonte"
+                  className="zoomable"
                   loading="lazy"
                   width="800"
                   height="500"

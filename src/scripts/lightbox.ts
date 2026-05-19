@@ -39,11 +39,11 @@ class Lightbox {
     overlay.innerHTML = `
       <button id="lightbox-close" aria-label="Fermer la lightbox" class="lightbox-close-btn">&times;</button>
       <button id="lightbox-prev" aria-label="Image pr\u00e9c\u00e9dente" class="lightbox-nav lightbox-prev">
-        <i class="fa-solid fa-chevron-left"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <img id="lightbox-img" src="" alt="">
       <button id="lightbox-next" aria-label="Image suivante" class="lightbox-nav lightbox-next">
-        <i class="fa-solid fa-chevron-right"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
       <p id="lightbox-caption"></p>
     `;
