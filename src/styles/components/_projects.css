@@ -228,6 +228,51 @@
   transition: transform 0.1s linear;
 }
 
+/* Project page — visual demo gallery */
+.project-demo {
+  margin: var(--space-lg) 0;
+  display: grid;
+  gap: var(--space-md);
+}
+
+.project-demo figure {
+  margin: 0;
+}
+
+.project-demo figcaption {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  opacity: 0.72;
+  margin-top: var(--space-xs);
+  font-style: italic;
+}
+
+.project-demo img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.22);
+  display: block;
+  transition: box-shadow var(--transition-base);
+}
+
+.project-demo img:hover {
+  box-shadow: 0 0 18px rgba(var(--color-primary-rgb), 0.3);
+}
+
+.project-demo-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 600px) {
+  .project-demo-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* No projects message (when filtering returns no results) */
 .no-projects-message {
   text-align: center;
