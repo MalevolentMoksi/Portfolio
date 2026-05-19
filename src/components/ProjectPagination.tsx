@@ -13,6 +13,7 @@ const projects = [
   { path: '/projet-SAE56', titleKey: 'common.pagination.projectTitles.sae56' },
   { path: '/projet-SAE3', titleKey: 'common.pagination.projectTitles.sae3' },
   { path: '/projet-SAE12', titleKey: 'common.pagination.projectTitles.sae12' },
+  { path: '/projet-SAE401', titleKey: 'common.pagination.projectTitles.sae401' },
   { path: '/projet-SAE4', titleKey: 'common.pagination.projectTitles.sae4' },
 ];
 

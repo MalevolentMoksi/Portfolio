@@ -187,6 +187,7 @@
         "sae56": "SAE 5-6 - Institutional website",
         "sae3": "SAE 3 - Dev workstation setup",
         "sae12": "SAE 1.2 - Client need implementation",
+        "sae401": "SAE 4.01 - Application improvement",
         "sae4": "SAE 4 - Database creation"
       }
     },
@@ -949,6 +950,10 @@
         "algorithms": "Algorithms",
         "postgresql": "PostgreSQL",
         "database": "Database",
+        "android": "Android",
+        "symfony": "Symfony",
+        "docker": "Docker",
+        "cypress": "Cypress",
         "discord": "Discord",
         "python": "Python",
         "ai": "AI",
@@ -994,6 +999,13 @@
           "category": "SAE 1.2",
           "description": "Coding, studying and comparing efficiency between several comparison algorithms in Java.",
           "teamSize": "Pair project"
+        },
+        "sae401": {
+          "type": "SAE Project",
+          "title": "Quality improvement and optimization of an existing application",
+          "category": "SAE 4.01",
+          "description": "Improved an Android student app and a Symfony back-office for internship tracking: security, architecture, UX, tests, and Docker containerization.",
+          "teamSize": "Team of 6"
         },
         "sae4": {
           "type": "SAE Project",

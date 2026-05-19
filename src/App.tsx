@@ -42,6 +42,7 @@ const ProjetSAE3 = retryLazy(() => import('./pages/ProjetSAE3'));
 const ProjetSAE4 = retryLazy(() => import('./pages/ProjetSAE4'));
 const ProjetSAE56 = retryLazy(() => import('./pages/ProjetSAE56'));
 const ProjetSAE301 = retryLazy(() => import('./pages/ProjetSAE301'));
+const ProjetSAE401 = retryLazy(() => import('./pages/ProjetSAE401'));
 const About = retryLazy(() => import('./pages/About'));
 const Credits = retryLazy(() => import('./pages/Credits'));
 const Legal = retryLazy(() => import('./pages/Legal'));
@@ -65,6 +66,7 @@ const AppContent = () => {
           <Route path="projet-SAE4" element={<ProjetSAE4 />} />
           <Route path="projet-SAE56" element={<ProjetSAE56 />} />
           <Route path="projet-SAE3.01" element={<ProjetSAE301 />} />
+          <Route path="projet-SAE401" element={<ProjetSAE401 />} />
           <Route path="about" element={<About />} />
           <Route path="credits" element={<Credits />} />
           <Route path="informations-legales" element={<Legal />} />

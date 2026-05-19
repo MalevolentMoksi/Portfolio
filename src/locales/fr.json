@@ -187,6 +187,7 @@
         "sae56": "SAE 5-6 - Site web institutionnel",
         "sae3": "SAE 3 - Installation poste développement",
         "sae12": "SAE 1.2 - Implémentation besoin client",
+        "sae401": "SAE 4.01 - Amélioration d'une application",
         "sae4": "SAE 4 - Création base de données"
       }
     },
@@ -949,6 +950,10 @@
         "algorithms": "Algorithmes",
         "postgresql": "PostgreSQL",
         "database": "Base de données",
+        "android": "Android",
+        "symfony": "Symfony",
+        "docker": "Docker",
+        "cypress": "Cypress",
         "discord": "Discord",
         "python": "Python",
         "ai": "IA",
@@ -994,6 +999,13 @@
           "category": "SAE 1.2",
           "description": "Codage, étude et comparaison d'efficacité entre divers algorithmes de comparaisons en Java.",
           "teamSize": "En binôme"
+        },
+        "sae401": {
+          "type": "Projet SAE",
+          "title": "Amélioration de la qualité et optimisation d'une application existante",
+          "category": "SAE 4.01",
+          "description": "Amélioration d'une application Android et d'un back-office Symfony de gestion de recherche de stage : sécurité, architecture, ergonomie, tests et Docker.",
+          "teamSize": "En équipe de 6"
         },
         "sae4": {
           "type": "Projet SAE",
