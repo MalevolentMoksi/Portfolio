@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Layout from './components/Layout';
 import Loading from './components/Loading';
+import ErrorFallback from './components/ErrorFallback';
 import useAnalyticsTracking from './hooks/useAnalyticsTracking';
 import Home from './pages/Home';
 
@@ -18,17 +19,25 @@ function retryLazy<T extends ComponentType<Record<string, never>>>(
 ) {
   return lazy<T>(() =>
     importFn().catch(() => {
+      let shouldReload = false;
       try {
         if (!sessionStorage.getItem(CHUNK_RELOAD_KEY)) {
           sessionStorage.setItem(CHUNK_RELOAD_KEY, '1');
           // Clear performance toast guard so it re-shows after the reload
           sessionStorage.removeItem(PERF_TOAST_KEY);
-          window.location.reload();
+          shouldReload = true;
         }
       } catch {
-        // sessionStorage unavailable — skip reload to avoid infinite loop
+        // sessionStorage unavailable — don't reload (avoid loop); show the error UI.
       }
-      return { default: Loading } as unknown as { default: T };
+      if (shouldReload) {
+        // First failure: reload once so the browser fetches the updated index.html.
+        window.location.reload();
+        return { default: Loading } as unknown as { default: T };
+      }
+      // Second failure (reload already happened) or storage unavailable: show an
+      // actionable error with a manual retry instead of a permanent spinner.
+      return { default: ErrorFallback } as unknown as { default: T };
     })
   );
 }
