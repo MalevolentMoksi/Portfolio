@@ -3,6 +3,7 @@
  * Handles persistent background music with localStorage state management
  */
 
+import type { i18n as I18nInstance } from 'i18next';
 import { getAssetPath } from '../utils/assetPath';
 import { safeLocalGet, safeLocalSet } from '../utils/safeStorage';
 import MusicMetadataManager from './music-player-metadata';
@@ -91,8 +92,11 @@ class MusicPlayer {
   private boundVolumeOutsideClick?: (e: MouseEvent) => void;
   private boundQueueOutsideClick?: (e: MouseEvent) => void;
   private moodObserver?: MutationObserver;
+  private i18n?: I18nInstance;
+  private boundLanguageChanged?: () => void;
 
-  constructor(trackFiles: string[]) {
+  constructor(trackFiles: string[], i18n?: I18nInstance) {
+    this.i18n = i18n;
     this.trackFiles = Array.isArray(trackFiles) ? trackFiles : [];
     this.currentTrackIndex = this.getPreferredDefaultTrackIndex();
     this.audio = new Audio();
@@ -171,6 +175,52 @@ class MusicPlayer {
     this.scheduleCurrentTrackMetadataLoad();
     this.attachEventListeners();
     this.setupMoodListener();
+
+    // Re-apply translated labels when the language changes (this legacy module lives
+    // outside React, so it can't use useTranslation/<Trans>).
+    this.boundLanguageChanged = () => this.applyI18nLabels();
+    this.i18n?.on('languageChanged', this.boundLanguageChanged);
+  }
+
+  /** Translate a key via the injected i18n instance, falling back to the key. */
+  private t(key: string, options?: Record<string, unknown>): string {
+    const value = this.i18n?.t(key, options);
+    return typeof value === 'string' ? value : key;
+  }
+
+  /**
+   * Re-apply all translated aria-labels / titles / static text to the already-rendered
+   * player DOM. Called on languageChanged so the persistent player (present on every
+   * route) updates live without a full re-render.
+   */
+  private applyI18nLabels(): void {
+    const e = this.elements;
+    if (!e || !e.container) return;
+    e.container.setAttribute('aria-label', this.t('common.musicPlayer.region'));
+    e.albumArt?.setAttribute('alt', this.t('common.musicPlayer.albumArtAlt'));
+    e.queueBtn?.setAttribute('aria-label', this.t('common.musicPlayer.queueToggle'));
+    e.queueBtn?.setAttribute('title', this.t('common.musicPlayer.queueTitle'));
+    e.playPauseBtn?.setAttribute('aria-label', this.t('common.musicPlayer.playPause'));
+    e.nextBtn?.setAttribute('aria-label', this.t('common.musicPlayer.next'));
+    e.muteBtn?.setAttribute('aria-label', this.t('common.musicPlayer.mute'));
+    e.volumeSlider?.setAttribute('aria-label', this.t('common.musicPlayer.volume'));
+    e.queueList?.setAttribute('aria-label', this.t('common.musicPlayer.trackList'));
+    e.progressContainer?.setAttribute('aria-label', this.t('common.musicPlayer.progress'));
+    e.peekBtn?.setAttribute('aria-label', this.t('common.musicPlayer.expand'));
+    e.peekBtn?.setAttribute('title', this.t('common.musicPlayer.expand'));
+    if (e.retractBtn) {
+      // The retract button's label depends on the collapsed/expanded state.
+      const expandLabel = this.t('common.musicPlayer.expand');
+      e.retractBtn.setAttribute('aria-label', this.isRetracted ? expandLabel : this.t('common.musicPlayer.retract'));
+      e.retractBtn.setAttribute('title', this.isRetracted ? expandLabel : this.t('common.musicPlayer.retractShort'));
+    }
+    const loadingText = e.container.querySelector('.loading-text');
+    if (loadingText) loadingText.textContent = this.t('common.musicPlayer.loading');
+    // Empty-state text lives in the dynamically-built queue / title; refresh them.
+    if (this.isQueueOpen) this.populateQueueMenu();
+    if (!this.trackFiles.length && e.title) {
+      e.title.textContent = this.t('common.musicPlayer.empty');
+    }
   }
 
   private loadState(): void {
@@ -401,14 +451,14 @@ class MusicPlayer {
     const container = document.createElement('div');
     container.id = 'music-player';
     container.setAttribute('role', 'region');
-    container.setAttribute('aria-label', 'Lecteur de musique');
+    container.setAttribute('aria-label', this.t('common.musicPlayer.region'));
 
     container.innerHTML = `
-      <button id="player-retract-btn" aria-label="R\u00e9duire le lecteur" title="R\u00e9duire">
+      <button id="player-retract-btn" aria-label="${this.t('common.musicPlayer.retract')}" title="${this.t('common.musicPlayer.retractShort')}">
         ${ICON_CHEVRON_LEFT}
       </button>
       <div class="player-main">
-        <img class="album-art" src="" alt="Pochette de l'album" width="60" height="60" />
+        <img class="album-art" src="" alt="${this.t('common.musicPlayer.albumArtAlt')}" width="60" height="60" />
         <div class="track-info">
           <div class="text-wrapper">
             <span class="title"></span>
@@ -418,7 +468,7 @@ class MusicPlayer {
           </div>
           <div class="loading-indicator" style="display: none;">
             <span class="loading-spinner"></span>
-            <span class="loading-text">Chargement...</span>
+            <span class="loading-text">${this.t('common.musicPlayer.loading')}</span>
           </div>
         </div>
       </div>
@@ -426,10 +476,10 @@ class MusicPlayer {
         <canvas class="music-visualizer"></canvas>
       </div>
       <div class="controls">
-        <button id="queue-btn" aria-label="Afficher la file de lecture" class="icon-btn" title="File de lecture">
+        <button id="queue-btn" aria-label="${this.t('common.musicPlayer.queueToggle')}" class="icon-btn" title="${this.t('common.musicPlayer.queueTitle')}">
           ${ICON_LIST}
         </button>
-        <button id="play-pause-btn" aria-label="Lecture/Pause" class="icon-btn">
+        <button id="play-pause-btn" aria-label="${this.t('common.musicPlayer.playPause')}" class="icon-btn">
           <svg class="play-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M8 5v14l11-7z"/>
           </svg>
@@ -437,11 +487,11 @@ class MusicPlayer {
             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
           </svg>
         </button>
-        <button id="next-btn" aria-label="Piste suivante" class="icon-btn">
+        <button id="next-btn" aria-label="${this.t('common.musicPlayer.next')}" class="icon-btn">
           ${ICON_FORWARD_STEP}
         </button>
         <div class="volume-wrapper">
-          <button id="mute-btn" aria-label="Couper le son" class="icon-btn">
+          <button id="mute-btn" aria-label="${this.t('common.musicPlayer.mute')}" class="icon-btn">
             ${ICON_VOLUME_HIGH}
             ${ICON_VOLUME_LOW}
             ${ICON_VOLUME_MUTED}
@@ -449,18 +499,18 @@ class MusicPlayer {
           <div class="volume-popup">
             <div class="volume-popup-track">
               <div class="volume-popup-fill"></div>
-              <input type="range" id="volume-slider" class="volume-slider-vertical" min="0" max="100" value="70" orient="vertical" aria-label="Volume">
+              <input type="range" id="volume-slider" class="volume-slider-vertical" min="0" max="100" value="70" orient="vertical" aria-label="${this.t('common.musicPlayer.volume')}">
             </div>
           </div>
         </div>
       </div>
       <div class="queue-menu" style="display: none;">
-        <div class="queue-list" role="listbox" aria-label="Liste des pistes">
+        <div class="queue-list" role="listbox" aria-label="${this.t('common.musicPlayer.trackList')}">
           <!-- Populated dynamically -->
         </div>
       </div>
       <div class="time-display"><span class="current-time">0:00</span> / <span class="duration">0:00</span></div>
-      <div class="progress-container" role="progressbar" aria-label="Progression de la piste">
+      <div class="progress-container" role="progressbar" aria-label="${this.t('common.musicPlayer.progress')}">
         <div class="progress"></div>
       </div>
     `;
@@ -475,8 +525,8 @@ class MusicPlayer {
     // Peek tab — separate fixed element shown when player is retracted
     const peekBtn = document.createElement('button');
     peekBtn.id = 'player-peek-btn';
-    peekBtn.setAttribute('aria-label', 'Afficher le lecteur');
-    peekBtn.setAttribute('title', 'Afficher le lecteur');
+    peekBtn.setAttribute('aria-label', this.t('common.musicPlayer.expand'));
+    peekBtn.setAttribute('title', this.t('common.musicPlayer.expand'));
     peekBtn.innerHTML = ICON_CHEVRON_RIGHT;
     document.body.appendChild(peekBtn);
 
@@ -516,7 +566,7 @@ class MusicPlayer {
     // Sync peek-btn and retract-btn visuals with initial retracted state
     if (this.isRetracted) {
       this.elements.peekBtn.classList.add('visible');
-      this.elements.retractBtn.setAttribute('aria-label', 'Afficher le lecteur');
+      this.elements.retractBtn.setAttribute('aria-label', this.t('common.musicPlayer.expand'));
       this.elements.retractBtn.innerHTML = ICON_CHEVRON_RIGHT;
     }
   }
@@ -647,6 +697,9 @@ class MusicPlayer {
     }
     this.moodObserver?.disconnect();
     this.moodObserver = undefined;
+    if (this.boundLanguageChanged) {
+      this.i18n?.off('languageChanged', this.boundLanguageChanged);
+    }
 
     try {
       this.saveState();
@@ -791,7 +844,7 @@ class MusicPlayer {
     }
 
     if (!this.trackFiles.length) {
-      this.elements.title.textContent = 'Aucune piste disponible';
+      this.elements.title.textContent = this.t('common.musicPlayer.empty');
       this.elements.artist.textContent =
         'Ajoutez des fichiers .m4a ou .mp3 dans /public/assets/music';
       this.elements.albumArt.src = getAssetPath('assets/images/favicon.svg');
@@ -931,8 +984,9 @@ class MusicPlayer {
     }
 
     if (!this.trackFiles.length) {
-      this.elements.queueList.innerHTML =
-        '<div role="note" style="padding: 12px 10px; opacity: 0.8;">Aucune piste disponible</div>';
+      this.elements.queueList.innerHTML = `<div role="note" style="padding: 12px 10px; opacity: 0.8;">${this.t(
+        'common.musicPlayer.empty'
+      )}</div>`;
       return;
     }
 
@@ -1040,7 +1094,7 @@ class MusicPlayer {
     this.isRetracted = true;
     this.elements.container.classList.add('retracted');
     this.elements.peekBtn.classList.add('visible');
-    this.elements.retractBtn.setAttribute('aria-label', 'Afficher le lecteur');
+    this.elements.retractBtn.setAttribute('aria-label', this.t('common.musicPlayer.expand'));
     this.elements.retractBtn.innerHTML = ICON_CHEVRON_RIGHT;
     safeLocalSet(this.STORAGE_KEYS.RETRACTED, 'true');
     // Close queue if open while retracting
@@ -1051,7 +1105,7 @@ class MusicPlayer {
     this.isRetracted = false;
     this.elements.container.classList.remove('retracted');
     this.elements.peekBtn.classList.remove('visible');
-    this.elements.retractBtn.setAttribute('aria-label', 'R\u00e9duire le lecteur');
+    this.elements.retractBtn.setAttribute('aria-label', this.t('common.musicPlayer.retract'));
     this.elements.retractBtn.innerHTML = ICON_CHEVRON_LEFT;
     safeLocalSet(this.STORAGE_KEYS.RETRACTED, 'false');
   }

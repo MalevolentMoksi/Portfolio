@@ -58,7 +58,7 @@ const usePortfolioModules = (trackFiles: string[]): void => {
       if (!musicPlayerInstance) {
         const { default: MusicPlayer } = await import('../scripts/music-player');
         if (cancelled) return;
-        musicPlayerInstance = new MusicPlayer(trackFiles);
+        musicPlayerInstance = new MusicPlayer(trackFiles, i18n);
       }
       if (!visualEffectsInstance) {
         const { default: VisualEffects } = await import('../scripts/effects');

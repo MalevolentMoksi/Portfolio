@@ -1,6 +1,7 @@
 import '@styles/components/_snake-game.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { TouchEvent as ReactTouchEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import Tooltip from './Tooltip';
 import { safeLocalGet, safeLocalSet } from '@/utils/safeStorage';
 
@@ -51,6 +52,7 @@ const hsColor = (i: number, len: number): string => {
 
 /* ── Composant SnakeGame ─────────────────────────────── */
 const SnakeGame = ({ onClose }: SnakeGameProps) => {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const gRef = useRef<GameState | null>(null); // état de jeu mutable
   const rafRef = useRef<number | null>(null); // id requestAnimationFrame
@@ -394,20 +396,24 @@ const SnakeGame = ({ onClose }: SnakeGameProps) => {
       {/* HUD */}
       <div className="snake-game__hud">
         <span className="snake-game__score">
-          <span className="snake-game__label">Score</span>
+          <span className="snake-game__label">{t('common.snakeGame.score')}</span>
           <span className="snake-game__value" aria-live="polite" aria-atomic="true">
             {ui.score}
           </span>
         </span>
         <span className="snake-game__score">
-          <span className="snake-game__label">Best</span>
+          <span className="snake-game__label">{t('common.snakeGame.best')}</span>
           <span className="snake-game__value" aria-live="polite" aria-atomic="true">
             {ui.hs}
           </span>
         </span>
         <div className="snake-game__close-wrap">
-          <Tooltip text="Fermer" desc="ESC" position="bottom">
-            <button className="snake-game__close-btn" onClick={onClose} aria-label="Fermer le jeu">
+          <Tooltip text={t('common.snakeGame.close')} desc="ESC" position="bottom">
+            <button
+              className="snake-game__close-btn"
+              onClick={onClose}
+              aria-label={t('common.snakeGame.closeAria')}
+            >
               ✕
             </button>
           </Tooltip>
@@ -427,7 +433,7 @@ const SnakeGame = ({ onClose }: SnakeGameProps) => {
           height={H}
           className="snake-game__canvas"
           role="img"
-          aria-label="Jeu Snake — utilisez les touches directionnelles pour jouer"
+          aria-label={t('common.snakeGame.canvasAria')}
         />
 
         {ui.status !== 'playing' && (
@@ -458,13 +464,18 @@ const SnakeGame = ({ onClose }: SnakeGameProps) => {
               <div className="snake-game__go">
                 <span className="snake-game__overlay-title">GAME OVER</span>
                 <div className="snake-game__go-scores">
-                  <span className="snake-game__overlay-score">Score : {ui.score}</span>
+                  <span className="snake-game__overlay-score">
+                    {t('common.snakeGame.scoreLine', { score: ui.score })}
+                  </span>
                   {ui.score > 0 && ui.score >= ui.hs && (
-                    <span className="snake-game__overlay-hs">🏆 Nouveau record !</span>
+                    <span className="snake-game__overlay-hs">
+                      {t('common.snakeGame.newRecord')}
+                    </span>
                   )}
                 </div>
                 <span className="snake-game__overlay-hint">
-                  <kbd>R</kbd> Rejouer &nbsp;·&nbsp; <kbd>ESC</kbd> Quitter
+                  <kbd>R</kbd> {t('common.snakeGame.replay')} &nbsp;·&nbsp; <kbd>ESC</kbd>{' '}
+                  {t('common.snakeGame.quit')}
                 </span>
               </div>
             )}
@@ -474,7 +485,8 @@ const SnakeGame = ({ onClose }: SnakeGameProps) => {
               <div className="snake-game__go">
                 <span className="snake-game__overlay-title">PAUSE</span>
                 <span className="snake-game__overlay-hint">
-                  <kbd>P</kbd> Reprendre &nbsp;·&nbsp; <kbd>R</kbd> Recommencer
+                  <kbd>P</kbd> {t('common.snakeGame.resume')} &nbsp;·&nbsp; <kbd>R</kbd>{' '}
+                  {t('common.snakeGame.restart')}
                 </span>
               </div>
             )}
@@ -484,8 +496,9 @@ const SnakeGame = ({ onClose }: SnakeGameProps) => {
 
       {/* Barre de contrôles */}
       <div className="snake-game__controls">
-        ↑↓←→ · ZQSD · WASD &nbsp;·&nbsp; <kbd>P</kbd> pause &nbsp;·&nbsp; <kbd>R</kbd> restart
-        &nbsp;·&nbsp; <kbd>ESC</kbd> quitter
+        ↑↓←→ · ZQSD · WASD &nbsp;·&nbsp; <kbd>P</kbd> {t('common.snakeGame.controlsPause')}
+        &nbsp;·&nbsp; <kbd>R</kbd> {t('common.snakeGame.controlsRestart')} &nbsp;·&nbsp;{' '}
+        <kbd>ESC</kbd> {t('common.snakeGame.controlsQuit')}
       </div>
     </div>
   );

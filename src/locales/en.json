@@ -202,6 +202,42 @@
       "gitlabAria": "GitLab profile",
       "clockAria": "Clock"
     },
+    "backToTop": {
+      "aria": "Back to top"
+    },
+    "snakeGame": {
+      "score": "Score",
+      "best": "Best",
+      "close": "Close",
+      "closeAria": "Close the game",
+      "canvasAria": "Snake game — arrows, WASD/ZQSD or swipe to play",
+      "scoreLine": "Score: {{score}}",
+      "newRecord": "🏆 New record!",
+      "replay": "Replay",
+      "quit": "Quit",
+      "resume": "Resume",
+      "restart": "Restart",
+      "controlsPause": "pause",
+      "controlsRestart": "restart",
+      "controlsQuit": "quit"
+    },
+    "musicPlayer": {
+      "region": "Music player",
+      "retract": "Collapse the player",
+      "retractShort": "Collapse",
+      "expand": "Show the player",
+      "albumArtAlt": "Album cover",
+      "loading": "Loading...",
+      "queueToggle": "Show the play queue",
+      "queueTitle": "Play queue",
+      "playPause": "Play/Pause",
+      "next": "Next track",
+      "mute": "Mute",
+      "volume": "Volume",
+      "trackList": "Track list",
+      "progress": "Track progress",
+      "empty": "No track available"
+    },
     "footerWidget": {
       "widgetLabel": "Footer information widget",
       "stateSelector": "Widget state selector",

@@ -24,6 +24,20 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, State> {
 
   render() {
     if (this.state.hasError) {
+      // This boundary sits above the i18n React context (and a crash may even be in
+      // i18n), so we can't use useTranslation/t() here. Pick copy from <html lang>
+      // synchronously instead, defaulting to French (the site default).
+      const lang =
+        typeof document !== 'undefined' ? document.documentElement.lang || 'fr' : 'fr';
+      const isEnglish = lang.toLowerCase().startsWith('en');
+      const title = isEnglish
+        ? 'Oops, something went wrong.'
+        : 'Oops, une erreur est survenue.';
+      const message = isEnglish
+        ? 'Please refresh the page or try again later.'
+        : 'Veuillez rafraîchir la page ou réessayer plus tard.';
+      const refresh = isEnglish ? 'Refresh the page' : 'Rafraîchir la page';
+
       return (
         <div
           role="alert"
@@ -38,12 +52,8 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, State> {
             fontFamily: 'sans-serif',
           }}
         >
-          <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
-            Oops, une erreur est survenue.
-          </h1>
-          <p style={{ marginBottom: '1.5rem', opacity: 0.7 }}>
-            Veuillez rafraîchir la page ou réessayer plus tard.
-          </p>
+          <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{title}</h1>
+          <p style={{ marginBottom: '1.5rem', opacity: 0.7 }}>{message}</p>
           <button
             onClick={() => window.location.reload()}
             style={{
@@ -56,7 +66,7 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, State> {
               color: 'inherit',
             }}
           >
-            Rafraîchir la page
+            {refresh}
           </button>
         </div>
       );
