@@ -49,14 +49,20 @@ const usePortfolioModules = (trackFiles: string[]): void => {
   const hasHandledInitialLanguageSync = useRef(false);
 
   useEffect(() => {
-    return scheduleWhenPageReady(async () => {
-      // Dynamic imports — loaded after first paint, ~0 cost on TTI
+    let cancelled = false;
+    const cancelSchedule = scheduleWhenPageReady(async () => {
+      // Dynamic imports — loaded after first paint, ~0 cost on TTI. The callback is
+      // async, so an await can span an unmount; re-check `cancelled` after every await
+      // before creating module-level singletons / writing globals.
+      if (cancelled) return;
       if (!musicPlayerInstance) {
         const { default: MusicPlayer } = await import('../scripts/music-player');
+        if (cancelled) return;
         musicPlayerInstance = new MusicPlayer(trackFiles);
       }
       if (!visualEffectsInstance) {
         const { default: VisualEffects } = await import('../scripts/effects');
+        if (cancelled) return;
         visualEffectsInstance = new VisualEffects();
         // Expose globally for accessibility hook
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,6 +72,16 @@ const usePortfolioModules = (trackFiles: string[]): void => {
       // Lancer le monitoring FPS passif (une seule fois par session)
       startFpsMonitor();
     });
+
+    return () => {
+      cancelled = true;
+      cancelSchedule();
+      // Tear down the persistent music player so its document/window listeners and
+      // MutationObserver don't accumulate across StrictMode re-mounts / HMR reloads.
+      // Null it so it is cleanly re-created if the hook re-runs.
+      musicPlayerInstance?.destroy?.();
+      musicPlayerInstance = null;
+    };
   }, [trackFiles]);
 
   useLayoutEffect(() => {

@@ -82,6 +82,15 @@ class MusicPlayer {
   private trackMeta: TrackMeta[];
   private elements!: MusicPlayerElements;
   private visualizerController: MusicPlayerVisualizer;
+  // Stored handler/observer references so destroy() can remove the document/window
+  // listeners and the MutationObserver (anonymous handlers couldn't be removed,
+  // leaking and multiplying across StrictMode re-mounts / HMR reloads).
+  private boundKeydownHandler?: (e: KeyboardEvent) => void;
+  private boundBeforeUnload?: () => void;
+  private boundAutoplayClick?: () => void;
+  private boundVolumeOutsideClick?: (e: MouseEvent) => void;
+  private boundQueueOutsideClick?: (e: MouseEvent) => void;
+  private moodObserver?: MutationObserver;
 
   constructor(trackFiles: string[]) {
     this.trackFiles = Array.isArray(trackFiles) ? trackFiles : [];
@@ -227,14 +236,17 @@ class MusicPlayer {
     this.audio.addEventListener('ended', () => this.nextTrack());
     this.audio.addEventListener('error', () => this.onError());
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+    // Keyboard shortcuts (stored so destroy() can remove it)
+    this.boundKeydownHandler = (e) => this.handleKeyboardShortcuts(e);
+    document.addEventListener('keydown', this.boundKeydownHandler);
 
     // Save state before unload
-    window.addEventListener('beforeunload', () => this.saveState());
+    this.boundBeforeUnload = () => this.saveState();
+    window.addEventListener('beforeunload', this.boundBeforeUnload);
 
     // Auto-unmute on user interaction
-    document.addEventListener('click', () => this.attemptAutoplay(), { once: true });
+    this.boundAutoplayClick = () => this.attemptAutoplay();
+    document.addEventListener('click', this.boundAutoplayClick, { once: true });
   }
 
   private getCurrentTrackUrl(): string {
@@ -535,7 +547,6 @@ class MusicPlayer {
     this.elements.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
     this.elements.nextBtn.addEventListener('click', () => this.nextTrack());
     this.elements.queueBtn.addEventListener('click', () => this.toggleQueue());
-    this.elements.muteBtn.addEventListener('click', () => this.toggleMute());
     this.elements.volumeSlider.addEventListener('input', (e) => {
       const target = e.target as HTMLInputElement | null;
       if (!target) return;
@@ -550,35 +561,40 @@ class MusicPlayer {
       this.elements.volumePopup.classList.remove('open');
     });
 
-      // Mobile: Toggle volume popup on mute button click (touch devices)
-      this.elements.muteBtn.addEventListener('click', (e) => {
-        const isTouchDevice = () => {
-          return (('ontouchstart' in window) || (navigator.maxTouchPoints > 0)) || false;
-        };
+    // Single mute-button handler. On touch there is no hover to reveal the volume
+    // popup, so a tap opens the popup (whose slider also covers mute-by-zero) instead
+    // of toggling mute on the same tap; on pointer devices it toggles mute and the
+    // popup is shown on hover (above). Previously two separate click handlers both
+    // fired on a touch tap — muting AND toggling the popup at once.
+    this.elements.muteBtn.addEventListener('click', (e) => {
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      if (isTouchDevice) {
+        e.stopPropagation();
+        this.elements.volumePopup.classList.toggle('open');
+        return;
+      }
+      this.toggleMute();
+    });
 
-        if (isTouchDevice()) {
-          e.stopPropagation();
-          this.elements.volumePopup.classList.toggle('open');
-        }
-      });
-
-      // Close volume popup when clicking outside it (mobile)
-      document.addEventListener('click', (e) => {
-        const target = e.target as Element | null;
-        if (target && !this.elements.volumeWrapper.contains(target)) {
-          this.elements.volumePopup.classList.remove('open');
-        }
-      });
+    // Close volume popup when clicking outside it (mobile) — stored for destroy()
+    this.boundVolumeOutsideClick = (e) => {
+      const target = e.target as Element | null;
+      if (target && !this.elements.volumeWrapper.contains(target)) {
+        this.elements.volumePopup.classList.remove('open');
+      }
+    };
+    document.addEventListener('click', this.boundVolumeOutsideClick);
 
     this.elements.progressContainer.addEventListener('click', (e) => this.seek(e));
 
-    // Close queue menu when clicking outside
-    document.addEventListener('click', (e) => {
+    // Close queue menu when clicking outside — stored for destroy()
+    this.boundQueueOutsideClick = (e) => {
       const target = e.target as Element | null;
       if (this.isQueueOpen && target && !target.closest('#music-player')) {
         this.closeQueue();
       }
-    });
+    };
+    document.addEventListener('click', this.boundQueueOutsideClick);
 
     // Retract controls
     this.elements.retractBtn.addEventListener('click', (e) => {
@@ -590,22 +606,63 @@ class MusicPlayer {
 
   private setupMoodListener(): void {
     // Watch for mood changes on body element and update visualizer in real-time
-    const observer = new MutationObserver(() => {
+    this.moodObserver = new MutationObserver(() => {
       this.onMoodChange();
     });
 
-    observer.observe(document.body, {
+    this.moodObserver.observe(document.body, {
       attributes: true,
       attributeFilter: ['data-mood'],
     });
 
     const moodStage = document.querySelector('.mood-stage');
     if (moodStage) {
-      observer.observe(moodStage, {
+      this.moodObserver.observe(moodStage, {
         attributes: true,
         attributeFilter: ['data-mood'],
       });
     }
+  }
+
+  /**
+   * Tear down everything this instance attached to document/window so it can be
+   * safely discarded (StrictMode re-mounts, HMR, or app teardown) without leaking
+   * listeners or leaving a duplicate player in the DOM.
+   */
+  destroy(): void {
+    if (this.boundKeydownHandler) {
+      document.removeEventListener('keydown', this.boundKeydownHandler);
+    }
+    if (this.boundBeforeUnload) {
+      window.removeEventListener('beforeunload', this.boundBeforeUnload);
+    }
+    if (this.boundAutoplayClick) {
+      document.removeEventListener('click', this.boundAutoplayClick);
+    }
+    if (this.boundVolumeOutsideClick) {
+      document.removeEventListener('click', this.boundVolumeOutsideClick);
+    }
+    if (this.boundQueueOutsideClick) {
+      document.removeEventListener('click', this.boundQueueOutsideClick);
+    }
+    this.moodObserver?.disconnect();
+    this.moodObserver = undefined;
+
+    try {
+      this.saveState();
+    } catch {
+      /* ignore */
+    }
+    try {
+      this.audio.pause();
+    } catch {
+      /* ignore */
+    }
+    this.visualizerController?.destroy();
+
+    // Remove the player DOM so a re-created instance doesn't leave a duplicate.
+    this.elements?.container?.remove();
+    this.elements?.peekBtn?.remove();
   }
 
   private onMoodChange(): void {
