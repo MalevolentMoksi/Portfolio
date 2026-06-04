@@ -250,13 +250,30 @@ const Layout = () => {
     };
   }, [accessibilitySettings.noMotion, activeBackgroundSrc, config.backgroundSrc]);
 
-  // Scroll to top when route changes
+  // Scroll handling on navigation. When the location carries a #hash (e.g. the footer
+  // "contact" bubble linking to /#contact), scroll that element into view instead of
+  // resetting to the top — React Router doesn't do fragment scrolling on its own, and
+  // the previous unconditional scrollTo(0,0) would have overridden it anyway.
   useEffect(() => {
-    // Use requestAnimationFrame to defer until browser is ready
+    if (location.hash) {
+      const targetId = decodeURIComponent(location.hash.slice(1));
+      // Double rAF: defer past the route commit + paint so the target exists.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const el = document.getElementById(targetId);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            window.scrollTo(0, 0);
+          }
+        });
+      });
+      return;
+    }
     requestAnimationFrame(() => {
       window.scrollTo(0, 0);
     });
-  }, [location.pathname]);
+  }, [location.pathname, location.hash]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

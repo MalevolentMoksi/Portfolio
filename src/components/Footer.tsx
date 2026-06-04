@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import FooterWidget from './FooterWidget';
@@ -71,7 +71,7 @@ const Footer = ({ diorama }: FooterProps) => {
               height="22"
             />
           </a>
-          <a href="/#contact" className="bubble" aria-label={t('common.footer.emailAria')}>
+          <Link to="/#contact" className="bubble" aria-label={t('common.footer.emailAria')}>
             <svg
               width="22"
               height="22"
@@ -88,7 +88,7 @@ const Footer = ({ diorama }: FooterProps) => {
                 strokeLinejoin="round"
               />
             </svg>
-          </a>
+          </Link>
           <a
             href="https://gricad-gitlab.univ-grenoble-alpes.fr/morelloe"
             className="bubble"
