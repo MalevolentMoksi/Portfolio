@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  type ReactNode,
+} from 'react';
 import { safeLocalGet, safeLocalSet } from '@/utils/safeStorage';
 import { useAccessibility } from './AccessibilityContext';
 import type { MoodKey, MoodMap } from '@/types';
@@ -130,11 +138,15 @@ export const MoodProvider = ({ children }: MoodProviderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [a11ySettings.highContrast]);
 
-  return (
-    <MoodContext.Provider value={{ mood, setMood, cycleMood, MOODS }}>
-      {children}
-    </MoodContext.Provider>
+  // Memoize so consumers (Layout, every ambient layer, MoodSwitcher, useDynamicFavicon…)
+  // don't re-render on unrelated provider re-renders. setMood/cycleMood are already
+  // useCallback-stable and MOODS is a module constant, so this only changes on `mood`.
+  const value = useMemo(
+    () => ({ mood, setMood, cycleMood, MOODS }),
+    [mood, setMood, cycleMood]
   );
+
+  return <MoodContext.Provider value={value}>{children}</MoodContext.Provider>;
 };
 
 export default MoodContext;

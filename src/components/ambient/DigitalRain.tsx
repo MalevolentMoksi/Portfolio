@@ -203,10 +203,32 @@ const DigitalRain = () => {
       rafRef.current = requestAnimationFrame(tick);
     };
 
-    rafRef.current = requestAnimationFrame(tick);
+    const startLoop = () => {
+      if (rafRef.current === null) {
+        // Reset the clock so the long hidden gap doesn't produce a giant dt.
+        prevTime = performance.now();
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+    const stopLoop = () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+    // Pause the canvas loop entirely while the tab is hidden (it's purely decorative);
+    // the animation phase is driven by absolute time, so it resumes seamlessly.
+    const handleVisibility = () => {
+      if (document.hidden) stopLoop();
+      else startLoop();
+    };
+
+    startLoop();
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      stopLoop();
+      document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('resize', resize);
     };
   }, [mood, count, tier, columns]);

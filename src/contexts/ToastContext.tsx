@@ -3,6 +3,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useMemo,
   useRef,
   useEffect,
   type ReactNode,
@@ -268,8 +269,14 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
     };
   }, [showToast, t]);
 
+  // showToast/dismissToast are useCallback-stable, so this value is created once and
+  // never changes identity — useToast consumers no longer re-render on every toast
+  // add/remove. `children` keeps its element reference across toast-state updates, so
+  // React already skips re-rendering the app subtree; only <ToastContainer> updates.
+  const value = useMemo(() => ({ showToast, dismissToast }), [showToast, dismissToast]);
+
   return (
-    <ToastContext.Provider value={{ showToast, dismissToast }}>
+    <ToastContext.Provider value={value}>
       {children}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </ToastContext.Provider>

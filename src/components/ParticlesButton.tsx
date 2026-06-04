@@ -862,27 +862,41 @@ const ParticlesButton = () => {
       return;
     }
 
-    const updateCount = () => {
-      const worker = getWorker();
-      if (!worker) {
-        setParticleCount(0);
-        return;
-      }
-      // Listen for the async count response from the worker.
-      // Using addEventListener so it coexists with the onmessage handler in effects.ts.
-      const handleCountResponse = (e: MessageEvent) => {
-        if (e.data?.type === 'count') {
-          worker.removeEventListener('message', handleCountResponse);
-          setParticleCount(e.data.value as number);
-        }
-      };
-      worker.addEventListener('message', handleCountResponse);
-      worker.postMessage({ type: 'get_count' });
-    };
+    const worker = getWorker();
+    if (!worker) {
+      setParticleCount(0);
+      return;
+    }
 
-    updateCount();
-    const intervalId = window.setInterval(updateCount, 260);
-    return () => window.clearInterval(intervalId);
+    // One persistent listener for the lifetime of the panel/effect, instead of
+    // attaching+detaching a fresh one on every poll. Incoming counts are coalesced
+    // through a ref + a single rAF, and we bail out of the state update when the value
+    // is unchanged, so the display refreshes without per-poll listener churn or
+    // redundant re-renders. (addEventListener coexists with the onmessage in effects.ts.)
+    let rafId: number | null = null;
+    let pendingCount = -1;
+    const flush = () => {
+      rafId = null;
+      setParticleCount((prev) => (prev === pendingCount ? prev : pendingCount));
+    };
+    const handleCountResponse = (e: MessageEvent) => {
+      if (e.data?.type === 'count') {
+        pendingCount = e.data.value as number;
+        if (rafId === null) rafId = requestAnimationFrame(flush);
+      }
+    };
+    worker.addEventListener('message', handleCountResponse);
+
+    worker.postMessage({ type: 'get_count' });
+    const intervalId = window.setInterval(() => {
+      worker.postMessage({ type: 'get_count' });
+    }, 260);
+
+    return () => {
+      window.clearInterval(intervalId);
+      worker.removeEventListener('message', handleCountResponse);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, [isActive, isStationOpen]);
 
   useEffect(() => {

@@ -22,6 +22,10 @@ class MusicPlayerVisualizer {
   private visualizer: VisualizerState;
   private hasUserGesture: boolean;
   private userGestureHandler: (() => void) | null;
+  // Cached accent color. getComputedStyle is expensive, so we read it only when the
+  // mood actually changes (observed below) instead of on every animation frame.
+  private accentRgb = '212, 175, 55';
+  private moodObserver: MutationObserver | null = null;
 
   private static readonly USER_GESTURE_EVENTS: ReadonlyArray<keyof DocumentEventMap> = [
     'pointerdown',
@@ -63,11 +67,20 @@ class MusicPlayerVisualizer {
     this.visualizer.ctx = canvas.getContext('2d');
     this.visualizer.initialized = true;
 
+    this.refreshAccentRgb();
     this.resize();
     this.renderIdleWave();
 
     this.visualizer.handleResize = () => this.resize();
     window.addEventListener('resize', this.visualizer.handleResize);
+
+    // The accent color is driven by body[data-mood]; refresh the cache only when
+    // the mood attribute changes rather than calling getComputedStyle every frame.
+    this.moodObserver = new MutationObserver(() => this.refreshAccentRgb());
+    this.moodObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-mood'],
+    });
   }
 
   start(): void {
@@ -106,7 +119,7 @@ class MusicPlayerVisualizer {
       analyser.getByteFrequencyData(freqData);
 
       const { width, height, bufferLength } = this.visualizer;
-      const rgb = this.getAccentRgb();
+      const rgb = this.accentRgb;
       let sum = 0;
 
       for (let i = 0; i < bufferLength; i++) {
@@ -161,7 +174,7 @@ class MusicPlayerVisualizer {
     if (!this.visualizer.ctx) return;
 
     const { ctx, width, height } = this.visualizer;
-    const rgb = this.getAccentRgb();
+    const rgb = this.accentRgb;
     ctx.clearRect(0, 0, width, height);
     ctx.strokeStyle = `rgba(${rgb}, 0.45)`;
     ctx.lineWidth = 2;
@@ -177,6 +190,10 @@ class MusicPlayerVisualizer {
     if (this.visualizer.handleResize) {
       window.removeEventListener('resize', this.visualizer.handleResize);
       this.visualizer.handleResize = undefined;
+    }
+    if (this.moodObserver) {
+      this.moodObserver.disconnect();
+      this.moodObserver = null;
     }
   }
 
@@ -225,9 +242,9 @@ class MusicPlayerVisualizer {
     this.renderIdleWave();
   }
 
-  private getAccentRgb(): string {
+  private refreshAccentRgb(): void {
     const rgb = getComputedStyle(document.body).getPropertyValue('--color-primary-rgb').trim();
-    return rgb || '212, 175, 55';
+    this.accentRgb = rgb || '212, 175, 55';
   }
 
   private canStartAudioContext(): boolean {

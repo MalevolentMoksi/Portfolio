@@ -19,6 +19,7 @@ class VisualEffects {
   private mouseLeaveHandler: (() => void) | null;
   private clickHandler: ((e: MouseEvent) => void) | null;
   private resizeHandler: (() => void) | null;
+  private visibilityHandler: (() => void) | null;
 
   constructor() {
     this.background = document.getElementById('background');
@@ -30,6 +31,7 @@ class VisualEffects {
     this.mouseLeaveHandler = null;
     this.clickHandler = null;
     this.resizeHandler = null;
+    this.visibilityHandler = null;
     this.init();
   }
 
@@ -129,6 +131,15 @@ class VisualEffects {
     };
     window.addEventListener('resize', this.resizeHandler);
 
+    // Pause the worker simulation while the tab is hidden. The worker double-guards
+    // (running && !paused), clamps dt to [0,3], and resets its frame clock on resume,
+    // so this is jump-free. Route-transition pause/resume only happens while visible,
+    // so the two pause sources don't meaningfully conflict.
+    this.visibilityHandler = () => {
+      this.worker?.postMessage({ type: document.hidden ? 'pause' : 'resume' });
+    };
+    document.addEventListener('visibilitychange', this.visibilityHandler);
+
     // Expose globals for MoodContext and ParticlesButton
     window.particleWorker = this.worker;
     window.updateParticlesMood = (mood: string) => this.updateParticlesMood(mood);
@@ -191,6 +202,10 @@ class VisualEffects {
     }
     if (this.resizeHandler) {
       window.removeEventListener('resize', this.resizeHandler);
+    }
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+      this.visibilityHandler = null;
     }
     this.worker?.postMessage({ type: 'destroy' });
     this.worker?.terminate();

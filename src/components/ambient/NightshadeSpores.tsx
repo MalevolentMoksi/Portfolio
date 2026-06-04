@@ -191,11 +191,30 @@ const NightshadeSpores = () => {
       }
       rafRef.current = requestAnimationFrame(tick);
     };
-    rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
+    const startLoop = () => {
+      if (!activeRef.current) {
+        activeRef.current = true;
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+    const stopLoop = () => {
       activeRef.current = false;
       cancelAnimationFrame(rafRef.current);
+    };
+    // Animation is frame-based (life++, no elapsed-time math), so pausing while the
+    // tab is hidden and resuming is seamless — it simply stops the per-frame DOM
+    // writes on up to 68 nodes while nobody can see them.
+    const handleVisibility = () => {
+      if (document.hidden) stopLoop();
+      else startLoop();
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      stopLoop();
+      document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('mousemove', handlePointerMove);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('mouseleave', handlePointerLeave);
