@@ -100,7 +100,7 @@ class ParallaxController {
         ticking = true;
       }
     };
-    window.addEventListener('mousemove', this.mouseMoveHandler);
+    window.addEventListener('mousemove', this.mouseMoveHandler, { passive: true });
 
     this.running = true;
     this.rafId = requestAnimationFrame(updateParallax);

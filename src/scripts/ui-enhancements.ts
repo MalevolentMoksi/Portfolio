@@ -263,15 +263,19 @@ class UIEnhancements {
 
     // Throttled scroll listener
     let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          toggleVisibility();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    });
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            toggleVisibility();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      },
+      { passive: true }
+    );
 
     // Scroll to top (using CSS scroll-behavior: smooth for global smoothing)
     button.addEventListener('click', () => {

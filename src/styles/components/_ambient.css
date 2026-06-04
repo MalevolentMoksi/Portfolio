@@ -1243,6 +1243,10 @@ body[data-mood='europa'] footer::before {
   z-index: var(--z-ambient, 0);
   opacity: 0;
   animation: neon-appear 1s ease-out forwards;
+  /* Promote to its own compositor layer so the (static) drop-shadow glow is
+     rasterized once into a texture and merely re-blitted while the page scrolls,
+     instead of being re-rasterized every scroll frame. */
+  transform: translateZ(0);
 }
 
 .industrial-neon-sign--hazard {
@@ -1902,22 +1906,18 @@ body[data-mood='industrial'] footer {
    Nightshade — Spores
    ──────────────────────────────────────────── */
 
-.nightshade-spores-wrapper {
+/* Single full-viewport canvas holding every spore (see NightshadeSpores.tsx).
+   The spores are drawn with additive ('lighter') compositing INSIDE the canvas,
+   so on the dark nightshade backdrop they read as glows without a layer-level
+   blend mode. We deliberately avoid mix-blend-mode:screen here: it would force
+   the compositor to read+blend the whole viewport backdrop every frame, a cost
+   that scales with page content (it made the heavy /projets page swing wildly,
+   19→112fps). Plain source-over keeps this layer as cheap as the hacker rain. */
+.nightshade-spores-canvas {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: calc(var(--z-ambient, 0) + 1);
-  overflow: hidden;
-}
-
-.nightshade-spore {
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  will-change: transform, opacity;
 }
 
 /* ────────────────────────────────────────────
@@ -1943,6 +1943,9 @@ body[data-mood='industrial'] footer {
   height: 100%;
   border-radius: 50% 50% 0 0;
   pointer-events: none;
+  /* Promote: these large gradient layers animate transform (fog-drift); caching
+     them as their own compositor layer avoids re-painting the gradient per frame. */
+  will-change: transform;
 }
 
 .nightshade-fog__layer--1 {
@@ -2101,6 +2104,10 @@ body[data-mood='industrial'] footer {
   border-radius: 50%;
   pointer-events: none;
   filter: blur(28px);
+  /* These orbs animate transform (bioglow-pulse) while carrying a 28px blur.
+     Without a promotion hint the compositor re-rasterizes the blur every frame;
+     will-change lets it cache the blurred raster and animate it on the GPU. */
+  will-change: transform;
 }
 
 .nightshade-bioglow__orb--1 {

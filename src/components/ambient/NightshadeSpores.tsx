@@ -2,14 +2,21 @@
  * NightshadeSpores — Tiny glowing orbs drifting upward with a slight lateral sway.
  * Only renders when mood === 'nightshade'.
  * Performance-gated: no-motion and low-tier suppressed.
+ *
+ * Rendering: a SINGLE full-viewport <canvas> (not one DOM node per spore).
+ * Each spore is an additive ('lighter') blit of a pre-rendered radial glow
+ * sprite, which reproduces the old "bright core + soft halo" look (previously a
+ * box-shadow on a mix-blend-mode:screen div) at a fraction of the compositor
+ * cost — 68 individually-composited layers collapse into one canvas layer.
+ * Same approach the hacker DigitalRain already uses (measured ~180fps).
  */
 
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useMood } from '@/contexts/MoodContext';
 import { usePerformanceTierValue } from '@/contexts/PerformanceTierContext';
 
 interface Spore {
-  el: HTMLDivElement;
   x: number;
   y: number;
   vx: number;
@@ -18,83 +25,107 @@ interface Spore {
   maxLife: number;
   phase: number;
   twinkle: number;
+  size: number;
+  colorIdx: number;
 }
 
-const SPORE_COLORS = [
-  {
-    core: 'var(--color-primary)',
-    glow: 'rgba(var(--color-primary-rgb), 0.52)',
-  },
-  {
-    core: 'var(--color-accent-light)',
-    glow: 'rgba(var(--color-accent-light-rgb), 0.42)',
-  },
-  {
-    core: 'var(--color-accent-pale)',
-    glow: 'rgba(var(--color-accent-pale-rgb), 0.4)',
-  },
-  {
-    core: 'color-mix(in srgb, var(--color-primary) 62%, var(--color-accent-pale) 38%)',
-    glow: 'rgba(var(--color-primary-rgb), 0.32)',
-  },
-  {
-    core: 'color-mix(in srgb, var(--color-accent-pale) 56%, var(--color-accent-light) 44%)',
-    glow: 'rgba(var(--color-accent-pale-rgb), 0.34)',
-  },
-];
+/** Fallback RGB triples if the theme custom properties can't be read. */
+const FALLBACK_RGB = ['168, 85, 247', '196, 181, 253', '221, 214, 254'];
+
+/** Build one radial-gradient glow sprite (bright core → soft transparent halo). */
+const buildGlowSprite = (rgb: string): HTMLCanvasElement => {
+  const SPRITE = 64;
+  const c = document.createElement('canvas');
+  c.width = SPRITE;
+  c.height = SPRITE;
+  const g = c.getContext('2d');
+  if (g) {
+    const mid = SPRITE / 2;
+    const grad = g.createRadialGradient(mid, mid, 0, mid, mid, mid);
+    grad.addColorStop(0, `rgba(${rgb}, 1)`);
+    grad.addColorStop(0.18, `rgba(${rgb}, 0.85)`);
+    grad.addColorStop(0.5, `rgba(${rgb}, 0.25)`);
+    grad.addColorStop(1, `rgba(${rgb}, 0)`);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, SPRITE, SPRITE);
+  }
+  return c;
+};
 
 const NightshadeSpores = () => {
   const { mood } = useMood();
   const tier = usePerformanceTierValue();
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const pointerRef = useRef({ x: 0, y: 0, active: false });
   const rafRef = useRef<number>(0);
   const activeRef = useRef(false);
 
-  useEffect(() => {
-    if (mood !== 'nightshade') return;
-    if (tier === 'low') return;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
+  const enabled = mood === 'nightshade' && tier !== 'low' && !reducedMotion;
 
-    const container = document.getElementById('ambient-root') || document.body;
-    const wrapper = document.createElement('div');
-    wrapper.className = 'nightshade-spores-wrapper';
-    container.appendChild(wrapper);
-    activeRef.current = true;
+  useEffect(() => {
+    if (!enabled) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Resolve theme colors → concrete RGB triples for the glow sprites.
+    // Mood palettes are scoped to body[data-mood="…"], NOT :root — so read the
+    // computed values from <body> (reading from documentElement yields the gold
+    // :root defaults instead of nightshade's orchid).
+    const themeStyle = getComputedStyle(document.body);
+    const readRgb = (name: string, fallback: string): string => {
+      const v = themeStyle.getPropertyValue(name).trim();
+      return v || fallback;
+    };
+    const sprites = [
+      buildGlowSprite(readRgb('--color-primary-rgb', FALLBACK_RGB[0])),
+      buildGlowSprite(readRgb('--color-accent-light-rgb', FALLBACK_RGB[1])),
+      buildGlowSprite(readRgb('--color-accent-pale-rgb', FALLBACK_RGB[2])),
+    ];
+
+    // Cap DPR for the spore layer: glows are soft, so extra resolution buys no
+    // visible quality while doubling fill cost on retina/high-tier displays.
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let cssW = window.innerWidth;
+    let cssH = window.innerHeight;
+    const resize = () => {
+      cssW = window.innerWidth;
+      cssH = window.innerHeight;
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      canvas.style.width = `${cssW}px`;
+      canvas.style.height = `${cssH}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener('resize', resize);
 
     const count = tier === 'high' ? 68 : 42;
-    const spores: Spore[] = [];
     const pointerRadius = tier === 'high' ? 180 : 130;
+    const spores: Spore[] = [];
 
-    const createSpore = (x?: number, y?: number): Spore => {
-      const el = document.createElement('div');
-      el.className = 'nightshade-spore';
-      const size = 1.7 + Math.random() * 3.6;
-      const color = SPORE_COLORS[Math.floor(Math.random() * SPORE_COLORS.length)];
-      el.style.cssText = `
-        width: ${size}px;
-        height: ${size}px;
-        background: ${color.core};
-        box-shadow: 0 0 ${size * 4}px ${color.core}, 0 0 ${size * 2}px ${color.glow};
-      `;
-      wrapper.appendChild(el);
-
-      return {
-        el,
-        x: x ?? Math.random() * window.innerWidth,
-        y: y ?? window.innerHeight + 10,
-        vx: (Math.random() - 0.5) * 0.45,
-        vy: -(0.18 + Math.random() * 0.45),
-        life: 0,
-        maxLife: 280 + Math.random() * 360,
-        phase: Math.random() * Math.PI * 2,
-        twinkle: 0.55 + Math.random() * 0.9,
-      };
+    const newSpore = (s?: Spore): Spore => {
+      const sp = s ?? ({} as Spore);
+      sp.x = Math.random() * cssW;
+      sp.y = cssH + 10;
+      sp.vx = (Math.random() - 0.5) * 0.45;
+      sp.vy = -(0.18 + Math.random() * 0.45);
+      sp.life = 0;
+      sp.maxLife = 280 + Math.random() * 360;
+      sp.phase = Math.random() * Math.PI * 2;
+      sp.twinkle = 0.55 + Math.random() * 0.9;
+      sp.size = 1.7 + Math.random() * 3.6;
+      sp.colorIdx = (Math.random() * sprites.length) | 0;
+      return sp;
     };
 
     for (let i = 0; i < count; i++) {
-      const s = createSpore();
-      // Distribute initial positions vertically
-      s.y = Math.random() * window.innerHeight;
+      const s = newSpore();
+      s.y = Math.random() * cssH; // distribute initial positions vertically
       s.life = Math.random() * s.maxLife;
       spores.push(s);
     }
@@ -104,14 +135,12 @@ const NightshadeSpores = () => {
       pointerRef.current.y = e.clientY;
       pointerRef.current.active = true;
     };
-
     const handleTouchMove = (e: TouchEvent) => {
       if (!e.touches.length) return;
       pointerRef.current.x = e.touches[0].clientX;
       pointerRef.current.y = e.touches[0].clientY;
       pointerRef.current.active = true;
     };
-
     const handlePointerLeave = () => {
       pointerRef.current.active = false;
     };
@@ -147,6 +176,10 @@ const NightshadeSpores = () => {
     const tick = () => {
       if (!activeRef.current) return;
       const pointer = pointerRef.current;
+
+      ctx.clearRect(0, 0, cssW, cssH);
+      ctx.globalCompositeOperation = 'lighter';
+
       for (const s of spores) {
         s.life++;
 
@@ -170,27 +203,31 @@ const NightshadeSpores = () => {
         s.x += s.vx + Math.sin(s.life * 0.014 + s.phase) * 0.36;
         s.y += s.vy;
 
-        if (s.life >= s.maxLife || s.y < -16 || s.x < -30 || s.x > window.innerWidth + 30) {
-          // Respawn
-          s.x = Math.random() * window.innerWidth;
-          s.y = window.innerHeight + 10;
-          s.vx = (Math.random() - 0.5) * 0.45;
-          s.vy = -(0.2 + Math.random() * 0.45);
-          s.life = 0;
-          s.maxLife = 280 + Math.random() * 360;
+        if (s.life >= s.maxLife || s.y < -16 || s.x < -30 || s.x > cssW + 30) {
+          newSpore(s); // respawn in place (no allocation)
+          continue; // skip drawing the (now off-screen) respawned spore this frame
         }
 
         const progress = s.life / s.maxLife;
-        const opacity =
+        const fade =
           progress < 0.15 ? progress / 0.15 : progress > 0.85 ? (1 - progress) / 0.15 : 1;
         const twinkle = 0.72 + Math.sin(s.life * 0.03 + s.phase) * 0.28;
         const scale = 0.9 + Math.sin(s.life * 0.02 + s.phase * 1.3) * 0.22;
 
-        s.el.style.transform = `translate3d(${s.x}px, ${s.y}px, 0) scale(${scale})`;
-        s.el.style.opacity = (opacity * twinkle * s.twinkle).toString();
+        const alpha = fade * twinkle * s.twinkle;
+        if (alpha <= 0.01) continue;
+
+        // Glow radius mirrors the old box-shadow spread (~size * 4).
+        const r = s.size * scale * 4;
+        ctx.globalAlpha = Math.min(1, alpha);
+        ctx.drawImage(sprites[s.colorIdx], s.x - r, s.y - r, r * 2, r * 2);
       }
+
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
       rafRef.current = requestAnimationFrame(tick);
     };
+
     const startLoop = () => {
       if (!activeRef.current) {
         activeRef.current = true;
@@ -202,30 +239,40 @@ const NightshadeSpores = () => {
       cancelAnimationFrame(rafRef.current);
     };
     // Animation is frame-based (life++, no elapsed-time math), so pausing while the
-    // tab is hidden and resuming is seamless — it simply stops the per-frame DOM
-    // writes on up to 68 nodes while nobody can see them.
+    // tab is hidden and resuming is seamless — it simply stops drawing while nobody
+    // can see it.
     const handleVisibility = () => {
       if (document.hidden) stopLoop();
       else startLoop();
     };
 
+    activeRef.current = true;
     rafRef.current = requestAnimationFrame(tick);
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       stopLoop();
       document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handlePointerMove);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('mouseleave', handlePointerLeave);
       window.removeEventListener('touchend', handlePointerLeave);
       window.removeEventListener('click', handleClick);
       window.removeEventListener('touchstart', handleTouchStart);
-      wrapper.remove();
     };
-  }, [mood, tier]);
+  }, [enabled, tier]);
 
-  return null;
+  if (!enabled) return null;
+
+  return createPortal(
+    <canvas
+      ref={canvasRef}
+      className="nightshade-spores-canvas"
+      aria-hidden="true"
+    />,
+    document.getElementById('ambient-root') || document.body
+  );
 };
 
 export default NightshadeSpores;

@@ -745,8 +745,12 @@ const ParticlesButton = () => {
 
         const ratio = clamp((now - startTime) / CHARGE_MAX_HOLD_MS, 0, 1);
         const nextProgress = Math.round(ratio * 100);
-        chargeProgressRef.current = nextProgress;
-        setChargeProgress(nextProgress);
+        // Progress is an integer 0–100; many frames yield the same value at
+        // high refresh rates. Only re-render the bar when it actually changes.
+        if (nextProgress !== chargeProgressRef.current) {
+          chargeProgressRef.current = nextProgress;
+          setChargeProgress(nextProgress);
+        }
 
         if (ratio < 1) {
           chargeRafRef.current = requestAnimationFrame(tick);
