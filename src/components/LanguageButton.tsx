@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ensureLanguageLoaded } from '@/i18n';
 import Tooltip from './Tooltip';
 
 const LANGS = ['fr', 'en'] as const;
@@ -26,6 +27,9 @@ const LanguageButton = () => {
           window.setTimeout(resolve, LANGUAGE_FADE_LEAD_MS);
         });
       }
+      // Lazy locale: make sure the target language's bundle is registered before
+      // switching, otherwise the switch would briefly render missing/fallback keys.
+      await ensureLanguageLoaded(lng);
       await i18n.changeLanguage(lng);
     },
     [currentLang, i18n]

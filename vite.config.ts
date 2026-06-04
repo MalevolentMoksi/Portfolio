@@ -100,6 +100,9 @@ export default defineConfig({
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 60,
+                // Gracefully evict instead of throwing if the device hits its storage
+                // quota (these multi-MB images can fill the cache on constrained devices).
+                purgeOnQuotaError: true,
               },
               cacheableResponse: { statuses: [0, 200] },
             },
@@ -112,6 +115,7 @@ export default defineConfig({
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 90,
+                purgeOnQuotaError: true,
               },
               cacheableResponse: { statuses: [0, 200] },
             },
@@ -175,7 +179,10 @@ export default defineConfig({
           if (id.includes('/src/components/ambient/')) {
             return 'ambient';
           }
-          if (id.includes('/src/locales/')) {
+          // Only the eagerly-bundled default locale belongs in the shared i18n chunk.
+          // Other languages are dynamically imported (see src/i18n.ts) and must keep
+          // their own lazy chunks, so a default-language visitor never downloads them.
+          if (id.includes('/src/locales/fr.json')) {
             return 'i18n';
           }
           return undefined;

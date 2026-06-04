@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import './i18n';
+import { i18nReady } from './i18n';
 import { AccessibilityProvider } from './contexts/AccessibilityContext';
 import { MoodProvider } from './contexts/MoodContext';
 import { PerformanceTierProvider } from './contexts/PerformanceTierContext';
@@ -41,18 +41,25 @@ if (!root) {
   throw new Error('Root element "#root" not found');
 }
 
-createRoot(root).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <PerformanceTierProvider>
-        <AccessibilityProvider>
-          <MoodProvider>
-            <ToastProvider>
-              <App />
-            </ToastProvider>
-          </MoodProvider>
-        </AccessibilityProvider>
-      </PerformanceTierProvider>
-    </ErrorBoundary>
-  </React.StrictMode>
-);
+const renderApp = () => {
+  createRoot(root).render(
+    <React.StrictMode>
+      <ErrorBoundary>
+        <PerformanceTierProvider>
+          <AccessibilityProvider>
+            <MoodProvider>
+              <ToastProvider>
+                <App />
+              </ToastProvider>
+            </MoodProvider>
+          </AccessibilityProvider>
+        </PerformanceTierProvider>
+      </ErrorBoundary>
+    </React.StrictMode>
+  );
+};
+
+// Wait until i18n is initialised and the detected language's bundle is loaded before
+// the first render, so a non-default-language visitor never sees a flash of fallback
+// (French) copy. Render anyway if the locale chunk fails so the app is never blank.
+i18nReady.catch(() => {}).then(renderApp);
