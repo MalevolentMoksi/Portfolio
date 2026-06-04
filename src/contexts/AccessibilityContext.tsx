@@ -50,7 +50,14 @@ const readSettings = (): AccessibilitySettings => {
         typeof window !== 'undefined' &&
         (window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches ?? false) &&
         getPerformanceTier() === 'low';
-      settings = { ...DEFAULT_SETTINGS, noMotion: isLowEndMobile };
+      // Honor an OS-level "reduce motion" preference on first visit: it's a strong
+      // accessibility signal, and it also hands those users the lighter (smoother)
+      // render path automatically. Once any setting is saved, the in-app choice
+      // becomes the source of truth, so this never overrides an explicit selection.
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false);
+      settings = { ...DEFAULT_SETTINGS, noMotion: isLowEndMobile || prefersReducedMotion };
     } else {
       const parsed = JSON.parse(raw) as Record<string, unknown>;
       const safeFont = FONT_SIZES.has(parsed.fontSize as FontSize)

@@ -24,6 +24,12 @@
   gap: 12px;
   overflow: visible;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Isolate the player's frequent internal updates (visualizer redraw, progress bar,
+     marquee title) from the page's layout/display list. `layout style` only — NOT
+     `paint`, so the volume popup / queue that overflow the box (overflow: visible)
+     are never clipped; the player is already the fixed containing block for its
+     absolute popups, so positioning is unchanged. */
+  contain: layout style;
 }
 
 /* Retracted state — slide off-screen to the left */
