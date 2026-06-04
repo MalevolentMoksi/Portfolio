@@ -85,8 +85,12 @@ main {
   border: 1px solid var(--mood-border-strong);
   position: relative;
   z-index: var(--z-base);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Intentionally no backdrop-filter here. #background is already blurred
+     (filter: blur(4px)), so a full-viewport backdrop blur on <main> is largely
+     redundant — and because the parallax RAF transforms #background every frame, it
+     forced a full-viewport GPU re-raster per frame, causing multi-second compositing
+     jank on first load / tab-refocus (the main thread sat idle meanwhile). The header
+     and music-player keep their (small, fixed-area) frosting. */
   transition: opacity 0.22s ease;
 }
 
