@@ -8,10 +8,6 @@ declare module 'react' {
   interface CSSProperties {
     [key: `--${string}`]: string | number;
   }
-
-  interface ImgHTMLAttributes<T> {
-    fetchpriority?: 'high' | 'low' | 'auto';
-  }
 }
 
 declare global {

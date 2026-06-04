@@ -303,7 +303,7 @@ const Layout = () => {
           id="background"
           aria-hidden="true"
           loading="eager"
-          fetchpriority="high"
+          fetchPriority="high"
         />
         {overlayBackgroundSrc ? (
           <img
