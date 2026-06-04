@@ -65,7 +65,7 @@ const Footer = ({ diorama }: FooterProps) => {
             aria-label={t('common.footer.githubAria')}
           >
             <img
-              src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/github.svg"
+              src="/assets/images/logos/github.svg"
               alt="GitHub"
               width="22"
               height="22"
@@ -97,7 +97,7 @@ const Footer = ({ diorama }: FooterProps) => {
             aria-label={t('common.footer.gitlabAria')}
           >
             <img
-              src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg"
+              src="/assets/images/logos/gitlab.svg"
               alt="GitLab"
               width="22"
               height="22"

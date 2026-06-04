@@ -24,21 +24,21 @@ const academicProjectsBase: AcademicProjectBase[] = [
     technologies: [
       {
         name: 'React',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/react.svg',
+        icon: '/assets/images/logos/react.svg',
       },
       {
         name: 'Vite',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/vite.svg',
+        icon: '/assets/images/logos/vite.svg',
       },
       {
         name: 'PHP',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/php.svg',
+        icon: '/assets/images/logos/php.svg',
       },
       {
         name: 'SQLite',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/sqlite.svg',
+        icon: '/assets/images/logos/sqlite.svg',
       },
-      { name: 'GitLab', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg' },
+      { name: 'GitLab', icon: '/assets/images/logos/gitlab.svg' },
     ],
   },
   {
@@ -52,17 +52,17 @@ const academicProjectsBase: AcademicProjectBase[] = [
     image: '/assets/images/projects/SAE401AvantApresMobile.png',
     tagKeys: ['android', 'java', 'php', 'symfony', 'postgresql', 'docker', 'cypress', 'git'],
     technologies: [
-      { name: 'Android', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/android.svg' },
+      { name: 'Android', icon: '/assets/images/logos/android.svg' },
       { name: 'Java', icon: '/assets/images/logos/JavaAltLogo.svg' },
-      { name: 'Symfony', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/symfony.svg' },
-      { name: 'PHP', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/php.svg' },
+      { name: 'Symfony', icon: '/assets/images/logos/symfony.svg' },
+      { name: 'PHP', icon: '/assets/images/logos/php.svg' },
       {
         name: 'PostgreSQL',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg',
+        icon: '/assets/images/logos/postgresql.svg',
       },
-      { name: 'Docker', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/docker.svg' },
-      { name: 'Cypress', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/cypress.svg' },
-      { name: 'GitLab', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg' },
+      { name: 'Docker', icon: '/assets/images/logos/docker.svg' },
+      { name: 'Cypress', icon: '/assets/images/logos/cypress.svg' },
+      { name: 'GitLab', icon: '/assets/images/logos/gitlab.svg' },
     ],
   },
   {
@@ -80,15 +80,15 @@ const academicProjectsBase: AcademicProjectBase[] = [
       { name: 'JavaFX', icon: '/assets/images/logos/JavaFXLogo.svg' },
       {
         name: 'Maven',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apachemaven.svg',
+        icon: '/assets/images/logos/apachemaven.svg',
       },
-      { name: 'JUnit 5', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/junit5.svg' },
+      { name: 'JUnit 5', icon: '/assets/images/logos/junit5.svg' },
       {
         name: 'SQLite',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/sqlite.svg',
+        icon: '/assets/images/logos/sqlite.svg',
       },
-      { name: 'GitLab', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg' },
-      { name: 'Figma', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/figma.svg' },
+      { name: 'GitLab', icon: '/assets/images/logos/gitlab.svg' },
+      { name: 'Figma', icon: '/assets/images/logos/figma.svg' },
     ],
   },
   {
@@ -102,14 +102,14 @@ const academicProjectsBase: AcademicProjectBase[] = [
     image: '/assets/images/projects/SopraSteriaIllustration.webp',
     tagKeys: ['html', 'css', 'javascript', 'figma', 'git'],
     technologies: [
-      { name: 'HTML5', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/html5.svg' },
-      { name: 'CSS3', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/css3.svg' },
+      { name: 'HTML5', icon: '/assets/images/logos/html5.svg' },
+      { name: 'CSS3', icon: '/assets/images/logos/css3.svg' },
       {
         name: 'JavaScript',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/javascript.svg',
+        icon: '/assets/images/logos/javascript.svg',
       },
-      { name: 'Figma', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/figma.svg' },
-      { name: 'GitLab', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg' },
+      { name: 'Figma', icon: '/assets/images/logos/figma.svg' },
+      { name: 'GitLab', icon: '/assets/images/logos/gitlab.svg' },
     ],
   },
   {
@@ -123,21 +123,21 @@ const academicProjectsBase: AcademicProjectBase[] = [
     image: '/assets/images/projects/PosteTravailLinux.png',
     tagKeys: ['linux', 'bash', 'git', 'virtualbox'],
     technologies: [
-      { name: 'Linux', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/linux.svg' },
+      { name: 'Linux', icon: '/assets/images/logos/linux.svg' },
       {
         name: 'VirtualBox',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/virtualbox.svg',
+        icon: '/assets/images/logos/virtualbox.svg',
       },
       {
         name: 'VS Code',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/visualstudiocode.svg',
+        icon: '/assets/images/logos/visualstudiocode.svg',
       },
       {
         name: 'IntelliJ IDEA',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/intellijidea.svg',
+        icon: '/assets/images/logos/intellijidea.svg',
       },
-      { name: 'Bash', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gnubash.svg' },
-      { name: 'GitLab', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/gitlab.svg' },
+      { name: 'Bash', icon: '/assets/images/logos/gnubash.svg' },
+      { name: 'GitLab', icon: '/assets/images/logos/gitlab.svg' },
     ],
   },
   {
@@ -155,7 +155,7 @@ const academicProjectsBase: AcademicProjectBase[] = [
       { name: 'Java', icon: '/assets/images/logos/JavaAltLogo.svg' },
       {
         name: 'IntelliJ IDEA',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/intellijidea.svg',
+        icon: '/assets/images/logos/intellijidea.svg',
       },
     ],
   },
@@ -172,11 +172,11 @@ const academicProjectsBase: AcademicProjectBase[] = [
     technologies: [
       {
         name: 'PostgreSQL',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg',
+        icon: '/assets/images/logos/postgresql.svg',
       },
       {
         name: 'SQL',
-        icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/databricks.svg',
+        icon: '/assets/images/logos/databricks.svg',
       },
     ],
   },

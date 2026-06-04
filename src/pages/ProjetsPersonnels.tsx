@@ -6,27 +6,27 @@ import Tooltip from '@/components/Tooltip';
 const discordBotTechnologies = [
   {
     name: 'JavaScript',
-    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/javascript.svg',
+    icon: '/assets/images/logos/javascript.svg',
   },
   {
     name: 'Node.js',
-    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/nodedotjs.svg',
+    icon: '/assets/images/logos/nodedotjs.svg',
   },
   {
     name: 'Discord',
-    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/discord.svg',
+    icon: '/assets/images/logos/discord.svg',
   },
   {
     name: 'PostgreSQL',
-    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/postgresql.svg',
+    icon: '/assets/images/logos/postgresql.svg',
   },
   {
     name: 'Docker',
-    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/docker.svg',
+    icon: '/assets/images/logos/docker.svg',
   },
   {
     name: 'Railway',
-    icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/railway.svg',
+    icon: '/assets/images/logos/railway.svg',
   },
   {
     name: 'OpenRouter',
