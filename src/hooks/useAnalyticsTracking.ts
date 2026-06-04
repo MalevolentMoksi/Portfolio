@@ -62,13 +62,33 @@ const GEO_CACHE_TTL_MS = 30 * 60 * 1000;
 const PERF_ANALYTICS_SENT_KEY_PREFIX = 'portfolio-analytics-perf-tier-event-v1';
 
 /**
+ * Master switch for the Discord/webhook analytics pipeline.
+ *
+ * Currently DISABLED for privacy/GDPR (CNIL) reasons: when enabled this hook sent
+ * per-page-view data — including a persistent pseudonymous visitor id and IP-derived
+ * city/country fetched from third-party services — without prior consent. All of the
+ * implementation below is intentionally preserved; flip this flag back to `true` once
+ * a proper opt-in consent mechanism is in place.
+ *
+ * Note: this only governs analytics. Local session bookkeeping (lifetime visit count,
+ * session stats surfaced in the terminal) is maintained independently by
+ * `useSessionTracking` and is unaffected by this switch.
+ */
+// Typed as `boolean` (not the `false` literal) so the rest of the hook is not
+// flagged as unreachable while the switch is off.
+const ANALYTICS_ENABLED: boolean = false;
+
+/**
  * Sends enhanced page view analytics to a Discord webhook via Cloudflare Worker proxy.
  *
- * Tracks (all GDPR compliant — no personal data, no persistent fingerprinting):
+ * When enabled, tracks:
  * - Page path, UTM parameters, session statistics
  * - Browser, connection type, device memory, viewport category, PWA mode
  * - User preferences: mood, language, accessibility settings, music state
- * - Anonymized geolocation (country/city only) and referrer domain (hostname only)
+ * - Geolocation (country/city, IP sent to a third-party geo API) and referrer hostname
+ * - A persistent pseudonymous visitor id (localStorage)
+ *
+ * These last two are why it is gated behind {@link ANALYTICS_ENABLED} / consent.
  */
 const useAnalyticsTracking = (pathname: string): void => {
   const pageStartTimeRef = useRef<number>(Date.now());
@@ -83,6 +103,11 @@ const useAnalyticsTracking = (pathname: string): void => {
   const geoFetched = useRef(false);
 
   useEffect(() => {
+    // Analytics master switch (see ANALYTICS_ENABLED). When disabled: no webhook
+    // sends, no third-party IP geolocation, no persistent visitor id, no perf-tier
+    // event reporting. Everything below is preserved for easy re-enabling.
+    if (!ANALYTICS_ENABLED) return;
+
     const previousInternalPath = previousPathRef.current;
     previousPathRef.current = pathname;
 
