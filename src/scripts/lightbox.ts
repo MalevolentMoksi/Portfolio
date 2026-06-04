@@ -147,7 +147,10 @@ class Lightbox {
   private open(img: HTMLImageElement): void {
     if (!this.img || !this.caption || !this.overlay || !this.closeBtn) return;
 
-    this.img.src = img.src;
+    // Prefer the full-resolution source (set via data-full) so the grid can use a
+    // lightweight thumbnail while the lightbox still shows the original artwork.
+    this.img.src = img.dataset.full || img.src;
+    this.img.decoding = 'async';
     this.img.alt = img.alt || '';
 
     // Get caption from next element if it exists

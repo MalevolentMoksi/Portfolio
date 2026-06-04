@@ -484,10 +484,12 @@ const ProjetsPersonnels = () => {
             <div className="drawing-item">
               <img
                 className="zoomable"
-                src={getAssetPath('assets/images/drawings/ADA1.jpg')}
-                width="800"
-                height="450"
+                src={getAssetPath('assets/images/drawings/thumbs/ADA1.webp')}
+                data-full={getAssetPath('assets/images/drawings/ADA1.jpg')}
+                width="454"
+                height="800"
                 loading="lazy"
+                decoding="async"
                 alt="ADA-1 de Destiny 2 au crayon"
               />
               <p>{t('projetsPersonnels.drawings.captions.ada1')}</p>
@@ -496,10 +498,12 @@ const ProjetsPersonnels = () => {
             <div className="drawing-item">
               <img
                 className="zoomable"
-                src={getAssetPath('assets/images/drawings/PowerDrawing.png')}
+                src={getAssetPath('assets/images/drawings/thumbs/PowerDrawing.webp')}
+                data-full={getAssetPath('assets/images/drawings/PowerDrawing.png')}
                 width="800"
-                height="450"
+                height="503"
                 loading="lazy"
+                decoding="async"
                 alt="Illustration numérique"
               />
               <p>{t('projetsPersonnels.drawings.captions.power')}</p>
@@ -508,10 +512,12 @@ const ProjetsPersonnels = () => {
             <div className="drawing-item">
               <img
                 className="zoomable"
-                src={getAssetPath('assets/images/drawings/RamattraDrawing.jpg')}
+                src={getAssetPath('assets/images/drawings/thumbs/RamattraDrawing.webp')}
+                data-full={getAssetPath('assets/images/drawings/RamattraDrawing.jpg')}
                 width="800"
-                height="450"
+                height="657"
                 loading="lazy"
+                decoding="async"
                 alt="Illustration au crayon"
               />
               <p>{t('projetsPersonnels.drawings.captions.ramattra')}</p>
@@ -520,10 +526,12 @@ const ProjetsPersonnels = () => {
             <div className="drawing-item">
               <img
                 className="zoomable"
-                src={getAssetPath('assets/images/drawings/CaptainComm.webp')}
+                src={getAssetPath('assets/images/drawings/thumbs/CaptainComm.webp')}
+                data-full={getAssetPath('assets/images/drawings/CaptainComm.webp')}
                 width="800"
-                height="450"
+                height="487"
                 loading="lazy"
+                decoding="async"
                 alt="Illustration numerique"
               />
               <p>{t('projetsPersonnels.drawings.captions.commission')}</p>
@@ -532,10 +540,12 @@ const ProjetsPersonnels = () => {
             <div className="drawing-item">
               <img
                 className="zoomable"
-                src={getAssetPath('assets/images/drawings/GoatLamb.jpg')}
+                src={getAssetPath('assets/images/drawings/thumbs/GoatLamb.webp')}
+                data-full={getAssetPath('assets/images/drawings/GoatLamb.jpg')}
                 width="800"
-                height="450"
+                height="573"
                 loading="lazy"
+                decoding="async"
                 alt="Dessin au stylo"
               />
               <p>{t('projetsPersonnels.drawings.captions.goatLamb')}</p>
@@ -544,10 +554,12 @@ const ProjetsPersonnels = () => {
             <div className="drawing-item">
               <img
                 className="zoomable"
-                src={getAssetPath('assets/images/drawings/ElsiePortrait.webp')}
-                width="800"
-                height="450"
+                src={getAssetPath('assets/images/drawings/thumbs/ElsiePortrait.webp')}
+                data-full={getAssetPath('assets/images/drawings/ElsiePortrait.webp')}
+                width="747"
+                height="733"
                 loading="lazy"
+                decoding="async"
                 alt="Illustration numerique"
               />
               <p>{t('projetsPersonnels.drawings.captions.elsie')}</p>
