@@ -243,6 +243,10 @@ class UIEnhancements {
       ).join('');
 
     this._glitchInterval = setInterval(() => {
+      // Skip the DOM mutation while the tab is hidden — it's a forever-running
+      // text rewrite that would otherwise invalidate the footer's display list
+      // every 400ms in the background for no visible benefit.
+      if (document.hidden) return;
       target.textContent = randomString(GLITCH_LENGTH);
     }, INTERVAL);
   }

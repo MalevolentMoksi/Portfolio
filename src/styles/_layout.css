@@ -126,9 +126,14 @@ main section {
   border-radius: 8px;
   padding: 1.5rem 2rem;
   margin-bottom: 2.5rem;
-  /* backdrop-filter retiré : main porte déjà un blur(8px) qui couvre visuellement
-     l'ensemble, et N couches simultanées forcent N repaints GPU à chaque frame
-     du parallax RAF — coût prohibitif sur GPU bas de gamme. */
+  /* Skip rendering + display-list building for off-screen sections until they
+     approach the viewport. This is the main lever against the load/refocus stall:
+     the profiler showed the cost is "DisplayList building", and the browser was
+     building display items for the whole decorated page at once. No visual change —
+     sections render identically when scrolled into view. `auto` caches the real
+     height after first render so the scrollbar stays accurate. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
 }
 
 section:last-child {

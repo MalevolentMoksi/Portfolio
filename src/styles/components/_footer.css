@@ -12,6 +12,10 @@
   color: var(--text-color);
   font-size: 1rem;
   box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.18);
+  /* The footer (with its animated diorama + glitching email) is always off-screen at
+     load; skip its render/display-list build until scrolled near. No visual change. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 260px;
 }
 
 .footer-inner {

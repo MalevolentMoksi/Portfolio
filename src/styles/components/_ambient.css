@@ -286,6 +286,11 @@
   height: 68px;
   pointer-events: none;
   z-index: 1;
+  /* Scope the diorama's infinite animations (relay dish, radar sweep, blinking
+     lights, tesla arcs…) so their per-frame invalidations rebuild only this
+     container's display list, not the whole page's. Safe: it's already a positioned
+     containing block for its absolute slots. */
+  contain: layout style paint;
 }
 
 .footer-diorama-slot {
