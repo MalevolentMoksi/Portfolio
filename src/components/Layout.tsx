@@ -100,6 +100,13 @@ const pageConfig: Record<string, PageConfigItem> = {
     metaTitleKey: 'pageConfig.projetSae301.metaTitle',
     metaDescriptionKey: 'pageConfig.projetSae301.metaDescription',
   },
+  '/projet-SAE401': {
+    headingKey: 'pageConfig.projetSae401.heading',
+    subheadingKey: 'pageConfig.projetSae401.subheading',
+    backgroundSrc: getAssetPath('assets/images/backgrounds/Destiny2PyramidStation.webp'),
+    metaTitleKey: 'pageConfig.projetSae401.metaTitle',
+    metaDescriptionKey: 'pageConfig.projetSae401.metaDescription',
+  },
   '/about': {
     headingKey: 'pageConfig.about.heading',
     subheadingKey: 'pageConfig.about.subheading',

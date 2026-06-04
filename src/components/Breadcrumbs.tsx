@@ -22,6 +22,7 @@ const Breadcrumbs = () => {
     'projet-SAE4': t('common.breadcrumbs.labels.projetSae4'),
     'projet-SAE56': t('common.breadcrumbs.labels.projetSae56'),
     'projet-SAE3.01': t('common.breadcrumbs.labels.projetSae301'),
+    'projet-SAE401': t('common.breadcrumbs.labels.projetSae401'),
     'informations-legales': t('common.breadcrumbs.labels.legal'),
   };
 

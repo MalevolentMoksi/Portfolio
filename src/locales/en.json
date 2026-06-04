@@ -161,6 +161,7 @@
         "projetSae4": "Database creation",
         "projetSae56": "Institutional website creation",
         "projetSae301": "Web app for caregivers",
+        "projetSae401": "Improving an existing application",
         "legal": "Legal information"
       }
     },
@@ -563,6 +564,12 @@
       "subheading": "A collaborative platform to manage dependent person follow-up",
       "metaTitle": "Aideme - Web application for caregivers",
       "metaDescription": "Enzo Morello Portfolio - SAE 3.01 project: React + PHP full-stack app"
+    },
+    "projetSae401": {
+      "heading": "Project - Improving an internship-tracking application",
+      "subheading": "Quality, performance, security and testing on an existing mobile and web app",
+      "metaTitle": "Improving and optimizing an existing application",
+      "metaDescription": "Enzo Morello Portfolio - SAE 4.01 project: optimizing, securing and testing an Android + Symfony + PostgreSQL application"
     },
     "about": {
       "heading": "About this portfolio",

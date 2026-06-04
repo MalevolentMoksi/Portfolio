@@ -161,6 +161,7 @@
         "projetSae4": "Création d'une base de données",
         "projetSae56": "Création d'un site institutionnel",
         "projetSae301": "Application Web pour les aidants",
+        "projetSae401": "Amélioration d'une application existante",
         "legal": "Informations légales"
       }
     },
@@ -563,6 +564,12 @@
       "subheading": "Une plateforme collaborative pour gérer le suivi des personnes dépendantes",
       "metaTitle": "Aidémé - Application Web pour les aidants",
       "metaDescription": "Portfolio d'Enzo Morello - Projet SAE 3.01 : application full-stack React + PHP"
+    },
+    "projetSae401": {
+      "heading": "Projet - Amélioration d'une application de suivi de stages",
+      "subheading": "Qualité, performance, sécurité et tests sur une application mobile et web existante",
+      "metaTitle": "Amélioration et optimisation d'une application existante",
+      "metaDescription": "Portfolio d'Enzo Morello - Projet SAE 4.01 : optimisation, sécurisation et tests d'une application Android + Symfony + PostgreSQL"
     },
     "about": {
       "heading": "À propos du portfolio",
