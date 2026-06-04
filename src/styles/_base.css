@@ -17,6 +17,10 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: font-size 0.3s ease;
+  /* Remove the default grey/blue tap flash on touch across the whole UI (it clashed
+     with the mood-themed visuals). Inherited, so this one declaration covers every
+     interactive element; :active states still provide tap feedback. */
+  -webkit-tap-highlight-color: transparent;
 }
 
 @media (max-width: 768px) {

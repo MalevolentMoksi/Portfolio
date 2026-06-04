@@ -218,7 +218,7 @@
       "close": "Fermer la notification",
       "dismiss": "Fermer",
       "region": "Notifications",
-      "mobileDesktopHint": "Version mobile optimisée active. Pour une expérience plus complète, visitez aussi le site sur PC.",
+      "mobileDesktopHint": "Version mobile optimisée active. Le compagnon interactif, les effets de particules et le terminal sont sur ordinateur — visitez le site sur PC pour l'expérience complète.",
       "debug": {
         "success": "Opération réussie avec succès !",
         "error": "Impossible de charger la ressource.",

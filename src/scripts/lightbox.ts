@@ -11,6 +11,8 @@ class Lightbox {
   private currentImageIndex = -1;
   private galleryImages: HTMLElement[] = [];
   private _triggerElement: HTMLElement | null = null;
+  private touchStartX = 0;
+  private touchStartY = 0;
 
   constructor() {
     this.init();
@@ -104,6 +106,33 @@ class Lightbox {
           this.close();
         }
       });
+
+      // Touch swipe navigation (mobile): a horizontal swipe pages prev/next, matching
+      // the dominant gallery gesture. Vertical swipes and short taps are ignored.
+      this.overlay.addEventListener(
+        'touchstart',
+        (e: TouchEvent) => {
+          if (e.touches.length !== 1) return;
+          this.touchStartX = e.touches[0].clientX;
+          this.touchStartY = e.touches[0].clientY;
+        },
+        { passive: true }
+      );
+      this.overlay.addEventListener(
+        'touchend',
+        (e: TouchEvent) => {
+          if (!this.overlay || this.overlay.classList.contains('hidden')) return;
+          const touch = e.changedTouches[0];
+          if (!touch) return;
+          const dx = touch.clientX - this.touchStartX;
+          const dy = touch.clientY - this.touchStartY;
+          // Require a clearly horizontal swipe of meaningful length.
+          if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+          if (dx < 0) this.showNext();
+          else this.showPrevious();
+        },
+        { passive: true }
+      );
     }
 
     // Keyboard navigation (ESC, Arrow keys)

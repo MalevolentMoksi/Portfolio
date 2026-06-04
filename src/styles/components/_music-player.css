@@ -4,8 +4,10 @@
 
 #music-player {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
+  /* Offset by the iOS safe area so the player clears the home-indicator / gesture bar
+     (effective now that index.html sets viewport-fit=cover). */
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  left: calc(20px + env(safe-area-inset-left, 0px));
   width: 380px;
   background: linear-gradient(135deg, rgba(26, 26, 26, 0.98) 0%, rgba(40, 40, 40, 0.95) 100%);
   border: 2px solid var(--color-primary);
@@ -64,7 +66,7 @@
 #player-peek-btn {
   position: fixed;
   left: 0;
-  bottom: 60px;
+  bottom: calc(60px + env(safe-area-inset-bottom, 0px));
   width: 26px;
   height: 62px;
   background: linear-gradient(135deg, rgba(26, 26, 26, 0.98) 0%, rgba(40, 40, 40, 0.95) 100%);
@@ -264,7 +266,7 @@
     width: calc(100% - 20px);
     left: 10px;
     right: 10px;
-    bottom: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     padding: 10px;
     gap: 8px;
   }
@@ -279,10 +281,10 @@
   }
 
   .controls button {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     font-size: 12px;
   }
 
@@ -297,7 +299,7 @@
     width: calc(100% - 16px);
     left: 8px;
     right: 8px;
-    bottom: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     padding: 8px;
     gap: 6px;
   }
@@ -813,10 +815,6 @@
   .title {
     font-size: 0.8rem;
   }
-
-  .controls button {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
-  }
+  /* (Removed a duplicate `.controls button { 28px }` rule here — it overrode the 44px
+     WCAG 2.5.5 touch target set above for the smallest phones.) */
 }

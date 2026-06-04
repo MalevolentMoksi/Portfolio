@@ -1,5 +1,6 @@
 import '@styles/components/_snake-game.css';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { TouchEvent as ReactTouchEvent } from 'react';
 import Tooltip from './Tooltip';
 import { safeLocalGet, safeLocalSet } from '@/utils/safeStorage';
 
@@ -55,6 +56,7 @@ const SnakeGame = ({ onClose }: SnakeGameProps) => {
   const rafRef = useRef<number | null>(null); // id requestAnimationFrame
   const cdRef = useRef<ReturnType<typeof setTimeout> | null>(null); // id setTimeout countdown
   const lastTickRef = useRef(0); // timestamp du dernier tick logique
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null); // début de swipe tactile
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -261,6 +263,49 @@ const SnakeGame = ({ onClose }: SnakeGameProps) => {
     cdRef.current = setTimeout(tick, 1000);
   };
 
+  /* ── Entrée de direction partagée (clavier + tactile) ── */
+  // Mirrors the keyboard rules: buffer the first turn during the countdown, block
+  // 180° reversals and duplicate turns, and cap the look-ahead queue.
+  const queueDirection = useCallback((newDir: Direction) => {
+    const g = gRef.current;
+    if (!g) return;
+    if (g.status === 'countdown') {
+      g.dirQueue = [newDir];
+      return;
+    }
+    if (g.status !== 'playing') return;
+    const lastDir = g.dirQueue.length > 0 ? g.dirQueue[g.dirQueue.length - 1] : g.dir;
+    if (newDir.dx === -lastDir.dx && newDir.dy === -lastDir.dy) return;
+    if (newDir.dx === lastDir.dx && newDir.dy === lastDir.dy) return;
+    if (g.dirQueue.length < DIR_QUEUE_MAX) g.dirQueue.push(newDir);
+  }, []);
+
+  /* ── Contrôles tactiles : swipe pour diriger, tap pour rejouer (game over) ── */
+  const handleTouchStart = (e: ReactTouchEvent<HTMLDivElement>) => {
+    const t = e.touches[0];
+    if (t) touchStartRef.current = { x: t.clientX, y: t.clientY };
+  };
+  const handleTouchEnd = (e: ReactTouchEvent<HTMLDivElement>) => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+    // A tap (no meaningful drag) restarts when the round is over; otherwise the
+    // dominant axis of the swipe sets the next direction.
+    if (Math.max(absX, absY) < 24) {
+      if (gRef.current?.status === 'gameover') startGame();
+      return;
+    }
+    queueDirection(
+      absX > absY ? { dx: dx > 0 ? 1 : -1, dy: 0 } : { dx: 0, dy: dy > 0 ? 1 : -1 }
+    );
+  };
+
   /* ── Montage : démarrer, démonter : nettoyer ── */
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -307,24 +352,7 @@ const SnakeGame = ({ onClose }: SnakeGameProps) => {
 
       const newDir = DIR_MAP[e.key as keyof typeof DIR_MAP];
       if (newDir) {
-        if (g.status === 'countdown') {
-          // Pendant le countdown : bufferiser la première direction pour le tick 1
-          g.dirQueue = [newDir];
-          return;
-        }
-        if (g.status !== 'playing') return;
-
-        // Vérifier l'inversion contre la dernière direction enregistrée
-        // (la dernière de la queue, ou la direction actuelle si queue vide)
-        const lastDir = g.dirQueue.length > 0 ? g.dirQueue[g.dirQueue.length - 1] : g.dir;
-        // Bloquer la marche arrière directe
-        if (newDir.dx === -lastDir.dx && newDir.dy === -lastDir.dy) return;
-        // Ignorer la même direction
-        if (newDir.dx === lastDir.dx && newDir.dy === lastDir.dy) return;
-        // Ajouter à la queue (max DIR_QUEUE_MAX)
-        if (g.dirQueue.length < DIR_QUEUE_MAX) {
-          g.dirQueue.push(newDir);
-        }
+        queueDirection(newDir);
         return;
       }
 
@@ -387,7 +415,12 @@ const SnakeGame = ({ onClose }: SnakeGameProps) => {
       </div>
 
       {/* Canvas + overlay */}
-      <div className="snake-game__canvas-wrap">
+      <div
+        className="snake-game__canvas-wrap"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{ touchAction: 'none' }}
+      >
         <canvas
           ref={canvasRef}
           width={W}

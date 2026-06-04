@@ -218,7 +218,7 @@
       "close": "Close notification",
       "dismiss": "Dismiss",
       "region": "Notifications",
-      "mobileDesktopHint": "Mobile-optimized mode is active. For the most complete experience, visit the site on a PC too.",
+      "mobileDesktopHint": "Mobile-optimized mode is active. The interactive pet, particle effects and terminal live on desktop — visit on a PC for the full experience.",
       "debug": {
         "success": "Operation completed successfully!",
         "error": "Unable to load resource.",

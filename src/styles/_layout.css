@@ -189,4 +189,15 @@ hr {
     -webkit-backdrop-filter: none;
     background: var(--mood-shell-bg-strong);
   }
+
+  /* Same rationale as `main`: drop the expensive backdrop blur on the other
+     fixed/sticky surfaces during scroll. Their backgrounds are already near-opaque
+     (mood-shell-bg-strong / 0.98+ gradients), so legibility is unaffected. */
+  header.header--main,
+  #music-player,
+  #player-peek-btn,
+  .queue-menu {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
