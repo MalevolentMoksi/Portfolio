@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, '..');
 const seoScriptPath = resolve(projectRoot, 'scripts/generate-seo-files.mjs');
 
-test('SEO generator includes legal route and only writes sitemap to requested output dir', async () => {
+test('SEO generator writes sitemap (incl. all routes) and robots.txt to the requested dir', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'portfolio-seo-test-'));
 
   try {
@@ -31,7 +31,14 @@ test('SEO generator includes legal route and only writes sitemap to requested ou
 
     expect(sitemap).toMatch(/https:\/\/example\.test\//);
     expect(sitemap).toMatch(/https:\/\/example\.test\/informations-legales/);
-    await expect(readFile(robotsPath, 'utf8')).rejects.toThrow(/ENOENT/);
+    // Route added later must be present so deep pages aren't orphaned from sitemaps.
+    expect(sitemap).toMatch(/https:\/\/example\.test\/projet-SAE401/);
+
+    // robots.txt is now generated and must advertise the sitemap.
+    const robots = await readFile(robotsPath, 'utf8');
+    expect(robots).toMatch(/User-agent: \*/);
+    expect(robots).toMatch(/Allow: \//);
+    expect(robots).toMatch(/Sitemap: https:\/\/example\.test\/sitemap\.xml/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
