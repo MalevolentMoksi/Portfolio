@@ -284,6 +284,10 @@ const CatchGame = ({
   const [isHeld, setIsHeld] = useState(true);
   const [isCharging, setIsCharging] = useState(false);
   const [rallies, setRallies] = useState(0);
+  // Mirror of `rallies` read by endChallenge without listing `rallies` as a dependency.
+  // Listing it cascaded (endChallenge → registerMiss → physics effect deps), restarting
+  // the ball-physics RAF loop on every catch and producing a one-frame stutter.
+  const ralliesRef = useRef(0);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [lives, setLives] = useState(DIFFICULTY_PRESETS[initialDifficulty].lives);
@@ -340,6 +344,7 @@ const CatchGame = ({
   useEffect(() => { livesRef.current = lives; }, [lives]);
 
   useEffect(() => {
+    ralliesRef.current = rallies;
     if (rallies > bestRef.current) {
       bestRef.current = rallies;
       setBestRallies(rallies);
@@ -451,14 +456,14 @@ const CatchGame = ({
         success,
         reason,
         score: scoreRef.current,
-        rallies,
+        rallies: ralliesRef.current,
         maxCombo: maxComboRef.current,
       });
       setShowHint(false);
       setLastGain(0);
       resetBallToPlayer(false);
     },
-    [difficulty, mode, rallies, resetBallToPlayer, unlockChallengeBadge]
+    [difficulty, mode, resetBallToPlayer, unlockChallengeBadge]
   );
 
   const registerMiss = useCallback(
