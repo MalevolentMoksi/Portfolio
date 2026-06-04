@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Initial dark chrome tint; MoodContext updates this per active mood at runtime. -->
+    <meta name="theme-color" content="#050400" />
     <link rel="icon" href="%BASE_URL%assets/images/favicon.svg" type="image/svg+xml" />
 
     <!-- Preload images for high-traffic routes — élimine le délai de chargement au premier accès -->
@@ -47,6 +49,26 @@
     />
   </head>
   <body>
+    <noscript>
+      <div
+        style="max-width: 40rem; margin: 12vh auto; padding: 2rem; font-family: system-ui, sans-serif; color: #e6e6e6; text-align: center; line-height: 1.6"
+      >
+        <h1 style="margin: 0 0 0.5rem">Enzo Morello</h1>
+        <p style="margin: 0 0 1rem">
+          Portfolio — BUT Informatique, IUT2 Grenoble.
+          <br />
+          Ce site nécessite JavaScript pour l'expérience complète. /
+          This site requires JavaScript for the full experience.
+        </p>
+        <p style="margin: 0">
+          <a href="https://github.com/MalevolentMoksi" style="color: #d4af37">GitHub</a>
+          &nbsp;·&nbsp;
+          <a href="https://gricad-gitlab.univ-grenoble-alpes.fr/morelloe" style="color: #d4af37"
+            >GitLab</a
+          >
+        </p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <div id="ambient-root"></div>
 

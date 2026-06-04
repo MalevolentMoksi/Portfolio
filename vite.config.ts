@@ -126,6 +126,7 @@ export default defineConfig({
         name: 'Portfolio — Enzo Morello',
         short_name: 'Portfolio',
         description: 'Portfolio professionnel de développeur web',
+        lang: 'fr',
         theme_color: '#050400',
         background_color: '#050400',
         display: 'browser',

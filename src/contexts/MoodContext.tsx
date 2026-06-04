@@ -79,6 +79,10 @@ export const MoodProvider = ({ children }: MoodProviderProps) => {
     const moodStages = document.querySelectorAll<HTMLElement>('.mood-stage');
     moodStages.forEach((stage) => applyMoodAttributesToElement(stage, m));
 
+    // Tint the mobile browser chrome (theme-color) to match the active mood.
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.setAttribute('content', MOODS[m]?.color ?? '#050400');
+
     // Reconfigurer les particules (physique + couleurs) pour le nouveau mood
     const reconfigureIfAvailable = (): boolean => {
       if (typeof window.reconfigureParticles === 'function') {
