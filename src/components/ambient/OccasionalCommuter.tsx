@@ -65,7 +65,7 @@ const getAdaptiveDelay = (baseDelayMs: number): number => {
   return Math.round(baseDelayMs / getPageDensityFactor());
 };
 
-const pickCommuterTopPx = (activeTopValues: number[] = []): number => {
+export const pickCommuterTopPx = (activeTopValues: number[] = []): number => {
   const pageHeight = Math.max(
     document.documentElement.scrollHeight,
     document.body.scrollHeight

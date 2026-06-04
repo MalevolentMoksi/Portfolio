@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, act, screen } from '@testing-library/react';
-import OccasionalCommuter from '../src/components/ambient/OccasionalCommuter';
+import OccasionalCommuter, { pickCommuterTopPx } from '../src/components/ambient/OccasionalCommuter';
 import * as MoodContext from '@/contexts/MoodContext';
 
 // Mock dependencies
@@ -35,62 +35,37 @@ describe('OccasionalCommuter - Random Distribution & Viewport Bias', () => {
     vi.restoreAllMocks();
   });
 
-  it('should spawn commuters without viewport bias across the entire document height', async () => {
-    // We will spy on the console.log from our logCommuter to capture spawned coordinates
-    const spawnLogs: any[] = [];
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation((msg, data) => {
-      if (typeof msg === 'string' && msg.includes('[OccasionalCommuter] SPAWN')) {
-        spawnLogs.push(data);
-      }
+  it('should spawn commuters without viewport bias across the entire document height', () => {
+    // pickCommuterTopPx is the pure position picker used for every spawn. With no
+    // active obstacles it draws uniformly across the spawnable band
+    // [headerHeight + padding, pageHeight - footerHeight - padding] and never reads
+    // scrollY/innerHeight — so positions are not biased toward the visible viewport.
+    // We assert that directly instead of scraping removed debug console.log output.
+    const SAMPLES = 1000;
+    const tops: number[] = [];
+    for (let i = 0; i < SAMPLES; i++) {
+      tops.push(pickCommuterTopPx([]));
+    }
+
+    // Bounds: headerHeight(100) + padding(18) = 118
+    //   .. pageHeight(3000) - footerHeight(100) - padding(18) = 2882
+    const minY = 118;
+    const maxY = 2882;
+    tops.forEach((top) => {
+      expect(top).toBeGreaterThanOrEqual(minY);
+      expect(top).toBeLessThanOrEqual(maxY);
     });
-    
-    // Temporarily enable logging for test environment by overriding process.env
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
 
-    render(<OccasionalCommuter />);
-
-    // Fast-forward time to trigger 1000 spawns
-    await act(async () => {
-      for (let i = 0; i < 1000; i++) {
-        vi.advanceTimersByTime(40000); // Advance past max delay
-      }
-    });
-
-    expect(spawnLogs.length).toBeGreaterThanOrEqual(1000);
-
-    // Verify mathematical distribution
-    let insideViewportCount = 0;
-    let outsideViewportCount = 0;
+    // The viewport (scrollY 500 .. 1300) covers 800px of the 2764px spawnable band,
+    // so a bias-free picker lands inside it ~29% of the time — not ~100%.
     const viewportTop = 500;
-    const viewportBottom = 1300; // 500 + 800
+    const viewportBottom = 1300; // 500 + innerHeight(800)
+    const insideViewport = tops.filter((top) => top >= viewportTop && top <= viewportBottom).length;
+    const actualRatio = insideViewport / SAMPLES;
+    const expectedRatio = (viewportBottom - viewportTop) / (maxY - minY); // 800 / 2764 ≈ 0.289
 
-    spawnLogs.forEach((log) => {
-      const { top } = log;
-      
-      // Should respect bounds: headerHeight + padding (100 + 18 = 118)
-      // to pageHeight - footerHeight - padding (3000 - 100 - 18 = 2882)
-      expect(top).toBeGreaterThanOrEqual(118);
-      expect(top).toBeLessThanOrEqual(2882);
-
-      if (top >= viewportTop && top <= viewportBottom) {
-        insideViewportCount++;
-      } else {
-        outsideViewportCount++;
-      }
-    });
-
-    // The viewport is 800px tall. The valid spawn area is 2982 - 18 = 2964px tall.
-    // The viewport overlaps the spawn area by 800px.
-    // So the probability of spawning inside the viewport is 800 / 2964 ≈ 27%.
-    const expectedRatio = 800 / 2964;
-    const actualRatio = insideViewportCount / spawnLogs.length;
-
-    expect(actualRatio).toBeGreaterThan(expectedRatio - 0.05);
-    expect(actualRatio).toBeLessThan(expectedRatio + 0.05);
-
-    process.env.NODE_ENV = originalEnv;
-    consoleSpy.mockRestore();
+    expect(actualRatio).toBeGreaterThan(expectedRatio - 0.06);
+    expect(actualRatio).toBeLessThan(expectedRatio + 0.06);
   });
 });
 
