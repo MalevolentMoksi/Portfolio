@@ -17,9 +17,9 @@ const DEFAULT_DEV_JOKES = [
   "Pourquoi les développeurs détestent la nature ? Parce qu'il y a trop de bugs.",
   'Il y a 10 types de personnes : celles qui comprennent le binaire et les autres.',
   'Un développeur ne va jamais boire un café... il va exécuter un Java.',
-  "!false — c'est drôle parce que c'est true.",
+  "!false, c'est drôle parce que c'est true.",
   "Combien de programmeurs faut-il pour changer une ampoule ? Aucun, c'est un problème hardware.",
-  "['hip','hip'] — hip hip array !",
+  "['hip','hip'], hip hip array !",
   'Un SQL query entre dans un bar, voit deux tables et demande : « Je peux joindre ? »',
   "Le Wi-Fi est tombé pendant 5 minutes, j'ai dû parler à ma famille. Ils ont l'air sympa.",
   'La première règle du code : ça marche ? On ne touche plus.',
@@ -46,16 +46,16 @@ const DEFAULT_PROJECTS = [
 ];
 
 const DEFAULT_HELP_TEXT = `Commandes disponibles :
-  help      — afficher cette aide
-  about     — à propos de moi
-  projects  — lister mes projets
-  skills    — compétences techniques
-  stats     — statistiques portfolio & session
-  joke      — une blague de dev
-  date      — date et heure actuelles
-  pet       — état du robot
-  snake     — lancer le jeu Snake 🐍
-  clear     — effacer le terminal`;
+  help      - afficher cette aide
+  about     - à propos de moi
+  projects  - lister mes projets
+  skills    - compétences techniques
+  stats     - statistiques portfolio & session
+  joke      - une blague de dev
+  date      - date et heure actuelles
+  pet       - état du robot
+  snake     - lancer le jeu Snake 🐍
+  clear     - effacer le terminal`;
 
 const DEFAULT_ABOUT_TEXT = `Enzo Morello / Étudiant en BUT Informatique à l'IUT2 de Grenoble.
 Passionné par le développement web, les jeux vidéo et la création.

@@ -82,7 +82,7 @@ const NotFound = () => {
 
       {/* Petit footer discret */}
       <footer className="not-found__footer">
-        <span>Enzo Morello — Portfolio</span>
+        <span>Enzo Morello - Portfolio</span>
       </footer>
     </div>
   );

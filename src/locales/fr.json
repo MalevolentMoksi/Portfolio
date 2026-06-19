@@ -210,7 +210,7 @@
       "best": "Record",
       "close": "Fermer",
       "closeAria": "Fermer le jeu",
-      "canvasAria": "Jeu Snake — flèches, ZQSD/WASD ou glisser pour jouer",
+      "canvasAria": "Jeu Snake, flèches, ZQSD/WASD ou glisser pour jouer",
       "scoreLine": "Score : {{score}}",
       "newRecord": "🏆 Nouveau record !",
       "replay": "Rejouer",
@@ -254,7 +254,7 @@
       "close": "Fermer la notification",
       "dismiss": "Fermer",
       "region": "Notifications",
-      "mobileDesktopHint": "Version mobile optimisée active. Le compagnon interactif, les effets de particules et le terminal sont sur ordinateur — visitez le site sur PC pour l'expérience complète.",
+      "mobileDesktopHint": "Version mobile optimisée active. Le compagnon interactif, les effets de particules et le terminal sont sur ordinateur ; visitez le site sur PC pour l'expérience complète.",
       "debug": {
         "success": "Opération réussie avec succès !",
         "error": "Impossible de charger la ressource.",
@@ -262,8 +262,8 @@
         "warning": "Attention : action irréversible."
       },
       "performance": {
-        "mid": "Mode performance équilibré activé — les effets visuels ont été réduits pour optimiser la fluidité sur cet appareil.",
-        "low": "Mode performance économique activé — les animations et effets ont été minimisés pour assurer une expérience fluide sur cet appareil."
+        "mid": "Mode performance équilibré activé, les effets visuels ont été réduits pour optimiser la fluidité sur cet appareil.",
+        "low": "Mode performance économique activé, les animations et effets ont été minimisés pour assurer une expérience fluide sur cet appareil."
       }
     },
     "contactForm": {
@@ -477,7 +477,7 @@
         }
       },
       "instructions": {
-        "aimStep": "Pointe ta souris vers la cible — la balle partira dans cette direction",
+        "aimStep": "Pointe ta souris vers la cible, la balle partira dans cette direction",
         "chargeStep": "Maintiens le clic pour charger la puissance, relâche pour lancer",
         "returnStep": "Clique quand la balle revient pour la rattraper (mode libre : approche-toi)"
       },
@@ -541,11 +541,11 @@
         "gettingHungry": "Il commence à avoir faim.",
         "needsCuddle": "Un câlin lui ferait du bien.",
         "exploring": "Il explore joyeusement !",
-        "thriving": "En pleine forme ! — déclin ralenti"
+        "thriving": "En pleine forme ! déclin ralenti"
       },
       "ariaLabels": {
         "companion": "Robot compagnon",
-        "companionInteract": "Robot compagnon — cliquer pour interagir",
+        "companionInteract": "Robot compagnon, cliquer pour interagir",
         "hudLabel": "Robot compagnon"
       }
     }

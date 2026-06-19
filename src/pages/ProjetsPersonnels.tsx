@@ -359,7 +359,7 @@ const ProjetsPersonnels = () => {
                     <td>
                       <code>conversation_memories</code>
                     </td>
-                    <td>Historique IA par utilisateur — auto-cleanup après 1000 lignes</td>
+                    <td>Historique IA par utilisateur, auto-cleanup après 1000 lignes</td>
                   </tr>
                   <tr>
                     <td>
@@ -377,7 +377,7 @@ const ProjetsPersonnels = () => {
                     <td>
                       <code>pending_duels</code>
                     </td>
-                    <td>Défis PvP en attente — survit aux redémarrages Docker</td>
+                    <td>Défis PvP en attente, survit aux redémarrages Docker</td>
                   </tr>
                   <tr>
                     <td>
@@ -433,7 +433,7 @@ const ProjetsPersonnels = () => {
                 <li>
                   <span className="bot-flow-step">2</span>
                   <p>
-                    Vérification du solde dans <code>balances</code> — rejet si insuffisant
+                    Vérification du solde dans <code>balances</code>, rejet si insuffisant
                   </p>
                 </li>
                 <li>

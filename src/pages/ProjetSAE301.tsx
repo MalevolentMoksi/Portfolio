@@ -305,8 +305,8 @@ const ProjetSAE301 = () => {
             accessibles et centrés sur l'humain est criant.
           </p>
           <p>
-            C'est de ce constat qu'est né <strong>Aidémé</strong> — contraction d'« Aider » et d'«
-            Aimer » — une application Web permettant à plusieurs aidants de coordonner le suivi
+            C'est de ce constat qu'est né <strong>Aidémé</strong> - contraction d'« Aider » et d'«
+            Aimer » - une application Web permettant à plusieurs aidants de coordonner le suivi
             d'une même personne accompagnée en rendant visible ce <em>travail invisible</em>, en
             allégeant la charge mentale et en préservant le lien affectif (galerie photo pour
             stimuler la mémoire de l'aidé).
@@ -315,15 +315,15 @@ const ProjetSAE301 = () => {
           <h3>Pour qui ?</h3>
           <ul>
             <li>
-              <strong>Claire</strong>, aidante sur place — a besoin de tout centraliser pour ne rien
+              <strong>Claire</strong>, aidante sur place - a besoin de tout centraliser pour ne rien
               oublier entre deux visites.
             </li>
             <li>
-              <strong>Antoine</strong>, aidant à distance (340 km en moyenne) — a besoin de
+              <strong>Antoine</strong>, aidant à distance (340 km en moyenne) - a besoin de
               notifications push et d'un suivi en temps réel depuis son téléphone.
             </li>
             <li>
-              <strong>Delphine &amp; Bruno</strong>, professionnels de santé et aides à domicile —
+              <strong>Delphine &amp; Bruno</strong>, professionnels de santé et aides à domicile -
               ont besoin d'outils simples pour communiquer avec la famille sans compte complexe.
             </li>
           </ul>
@@ -346,37 +346,37 @@ const ProjetSAE301 = () => {
           <h2>Fonctionnalités principales</h2>
           <ul>
             <li>
-              <strong>Authentification &amp; comptes</strong> — inscription, connexion par session
+              <strong>Authentification &amp; comptes</strong> - inscription, connexion par session
               PHP, hachage SHA-256 côté client, mot de passe oublié, photo de profil
             </li>
             <li>
-              <strong>Gestion des aidés</strong> — ajout / modification / suppression de fiches,
+              <strong>Gestion des aidés</strong> - ajout / modification / suppression de fiches,
               sélection de l'aidé actif (persisté en cookie), transfert du rôle de responsable,
               invitation d'autres aidants avec validation
             </li>
             <li>
-              <strong>Contacts</strong> — CRUD de contacts (médecins, proches, intervenants)
+              <strong>Contacts</strong> - CRUD de contacts (médecins, proches, intervenants)
               associés à chaque aidé, liaison aux événements
             </li>
             <li>
-              <strong>Agenda</strong> — événements avec date, heure, durée, lieu ; vues mois /
+              <strong>Agenda</strong> - événements avec date, heure, durée, lieu ; vues mois /
               semaine ; vue mobile dédiée ; tags colorés filtrables ; masquer les événements passés
               / week-ends
             </li>
             <li>
-              <strong>Galerie photo</strong> — upload d'images avec statut « en attente » ;
+              <strong>Galerie photo</strong> - upload d'images avec statut « en attente » ;
               validation ou rejet par le responsable ; suppression et renommage
             </li>
             <li>
-              <strong>Coffre-fort de fichiers</strong> — arborescence hiérarchique de dossiers,
+              <strong>Coffre-fort de fichiers</strong> - arborescence hiérarchique de dossiers,
               upload / téléchargement / renommage / suppression, prévisualisation de documents,
               droits d'accès par utilisateur (<code>auth_fichier</code> / <code>auth_dossier</code>)
             </li>
             <li>
-              <strong>Notifications</strong> — alertes in-app (création, lecture, suppression)
+              <strong>Notifications</strong> - alertes in-app (création, lecture, suppression)
             </li>
             <li>
-              <strong>Accessibilité intégrée</strong> — mode daltonien / contraste élevé, grandes
+              <strong>Accessibilité intégrée</strong> - mode daltonien / contraste élevé, grandes
               polices, mode dyslexie, thème sombre ; réglages persistés en <code>localStorage</code>
             </li>
           </ul>
@@ -400,17 +400,17 @@ const ProjetSAE301 = () => {
           <h3>Psychologie des couleurs</h3>
           <ul>
             <li>
-              <strong>Vert Émeraude (#17BFA3)</strong> — confiance et santé ; casse le bleu froid
+              <strong>Vert Émeraude (#17BFA3)</strong> - confiance et santé ; casse le bleu froid
               des interfaces médicales traditionnelles
             </li>
             <li>
-              <strong>Terre Cuite (#CD5334)</strong> — chaleur humaine, foyer, douceur
+              <strong>Terre Cuite (#CD5334)</strong> - chaleur humaine, foyer, douceur
             </li>
             <li>
-              <strong>Beige</strong> — apaisement, cadre familier
+              <strong>Beige</strong> - apaisement, cadre familier
             </li>
             <li>
-              <strong>Gris Anthracite (#2E282A)</strong> — préféré au noir pur pour reposer les yeux
+              <strong>Gris Anthracite (#2E282A)</strong> - préféré au noir pur pour reposer les yeux
               lors d'une utilisation prolongée
             </li>
           </ul>
@@ -418,25 +418,25 @@ const ProjetSAE301 = () => {
           <h3>Accessibilité (WCAG)</h3>
           <ul>
             <li>
-              <strong>Mode daltonien / contraste élevé</strong> — couleurs primaires saturées,
+              <strong>Mode daltonien / contraste élevé</strong> - couleurs primaires saturées,
               bordures noires épaisses, classe CSS <code>mode-colorblind</code> sur{' '}
               <code>&lt;body&gt;</code>
             </li>
             <li>
-              <strong>Grandes polices</strong> — classe <code>mode-largetext</code> appliquée
+              <strong>Grandes polices</strong> - classe <code>mode-largetext</code> appliquée
               globalement ; tous les éléments héritent de la mise à l'échelle
             </li>
             <li>
-              <strong>Mode dyslexie</strong> — police Verdana (espacement de caractères élargi),
+              <strong>Mode dyslexie</strong> - police Verdana (espacement de caractères élargi),
               augmentation de l'interligne, fond « coquille d'œuf » <code>#FDFCF0</code> pour
               réduire l'éblouissement ; classe <code>mode-dyslexia</code>
             </li>
             <li>
-              <strong>Thème sombre</strong> — toggle complet avec persistance
+              <strong>Thème sombre</strong> - toggle complet avec persistance
               <code>localStorage</code>
             </li>
             <li>
-              <strong>Responsive</strong> — composant <code>MobileAgendaView</code> dédié ;
+              <strong>Responsive</strong> - composant <code>MobileAgendaView</code> dédié ;
               navigation adaptée mobile
             </li>
           </ul>
@@ -455,14 +455,14 @@ const ProjetSAE301 = () => {
               <code>useContext</code>), <code>createBrowserRouter</code>
             </li>
             <li>
-              Vite 7 — bundling, HMR et proxy <code>/api/*</code> → <code>localhost:8000</code>
+              Vite 7 - bundling, HMR et proxy <code>/api/*</code> → <code>localhost:8000</code>
             </li>
             <li>
-              PHP 8.4 — architecture MVC sans framework, routage via <code>index.php</code>, 59
+              PHP 8.4 - architecture MVC sans framework, routage via <code>index.php</code>, 59
               contrôleurs REST
             </li>
             <li>
-              SQLite 3 via PDO — 16 tables, pattern DAO (9 classes modèle/DAO), singleton{' '}
+              SQLite 3 via PDO - 16 tables, pattern DAO (9 classes modèle/DAO), singleton{' '}
               <code>DAL.class.php</code>
             </li>
             <li>
@@ -577,22 +577,22 @@ const ProjetSAE301 = () => {
           <h3>L'équipe Aimédia</h3>
           <ul>
             <li>
-              <strong>Paolo</strong> — Chef de projet, coordination générale
+              <strong>Paolo</strong> - Chef de projet, coordination générale
             </li>
             <li>
-              <strong>Jérémie</strong> — Responsable Qualité
+              <strong>Jérémie</strong> - Responsable Qualité
             </li>
             <li>
-              <strong>Simon</strong> — Référent Technique (back-end)
+              <strong>Simon</strong> - Référent Technique (back-end)
             </li>
             <li>
-              <strong>Enzo</strong> — Responsable IHM &amp; accessibilité (front-end)
+              <strong>Enzo</strong> - Responsable IHM &amp; accessibilité (front-end)
             </li>
             <li>
-              <strong>Macéo</strong> — Communication &amp; Documentation
+              <strong>Macéo</strong> - Communication &amp; Documentation
             </li>
             <li>
-              <strong>Noam</strong> — Réseau &amp; Système, déploiement
+              <strong>Noam</strong> - Réseau &amp; Système, déploiement
             </li>
           </ul>
 
@@ -623,12 +623,12 @@ const ProjetSAE301 = () => {
           </p>
           <ul>
             <li>
-              <strong>Tests qualitatifs « Think Aloud »</strong> — les participants verbalisent
+              <strong>Tests qualitatifs « Think Aloud »</strong> - les participants verbalisent
               leurs actions et blocages en temps réel, sur des <em>scénarios d'usage</em> définis
               (connexion, ajout d'un contact, upload d'un document)
             </li>
             <li>
-              <strong>Méthode SUS</strong> (System Usability Scale) — questionnaire standardisé pour
+              <strong>Méthode SUS</strong> (System Usability Scale) - questionnaire standardisé pour
               mesurer la facilité d'utilisation perçue ; a permis de valider que l'interface restait
               compréhensible pour le persona Bruno (auxiliaire de vie)
             </li>
@@ -645,7 +645,7 @@ const ProjetSAE301 = () => {
         <section id="individual-work">
           <h2>Contributions personnelles</h2>
 
-          <h3>Phase 1 — Recueil des besoins</h3>
+          <h3>Phase 1 - Recueil des besoins</h3>
           <ul>
             <li>
               Enquête terrain et collecte de données qualitatives auprès d'aidants et de
@@ -659,7 +659,7 @@ const ProjetSAE301 = () => {
             </li>
           </ul>
 
-          <h3>Phase 2 — Conception UX &amp; wireframes</h3>
+          <h3>Phase 2 - Conception UX &amp; wireframes</h3>
           <ul>
             <li>
               Conception de l'architecture des écrans et production des{' '}
@@ -678,7 +678,7 @@ const ProjetSAE301 = () => {
             </li>
           </ul>
 
-          <h3>Phase 3 — Développement</h3>
+          <h3>Phase 3 - Développement</h3>
           <ul>
             <li>
               <strong>Développement du front-end en très grande partie</strong> : architecture React
@@ -762,18 +762,18 @@ const ProjetSAE301 = () => {
             <div className="aideme-preview-item--desktop">
               <img
                 src="/assets/images/projects/AidemeApplication.png"
-                alt="Interface principale d'Aidémé — vue bureau"
+                alt="Interface principale d'Aidémé - vue bureau"
                 className="zoomable"
               />
-              <span className="aideme-preview-caption">Vue bureau — thème clair</span>
+              <span className="aideme-preview-caption">Vue bureau - thème clair</span>
             </div>
             <div className="aideme-preview-item--mobile">
               <img
                 src="/assets/images/projects/AidemeAppMobileDarkmode.png"
-                alt="Interface d'Aidémé — vue mobile en mode sombre"
+                alt="Interface d'Aidémé - vue mobile en mode sombre"
                 className="zoomable"
               />
-              <span className="aideme-preview-caption">Vue mobile — thème sombre</span>
+              <span className="aideme-preview-caption">Vue mobile - thème sombre</span>
             </div>
           </div>
         </section>

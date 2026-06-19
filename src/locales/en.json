@@ -210,7 +210,7 @@
       "best": "Best",
       "close": "Close",
       "closeAria": "Close the game",
-      "canvasAria": "Snake game — arrows, WASD/ZQSD or swipe to play",
+      "canvasAria": "Snake game, arrows, WASD/ZQSD or swipe to play",
       "scoreLine": "Score: {{score}}",
       "newRecord": "🏆 New record!",
       "replay": "Replay",
@@ -254,7 +254,7 @@
       "close": "Close notification",
       "dismiss": "Dismiss",
       "region": "Notifications",
-      "mobileDesktopHint": "Mobile-optimized mode is active. The interactive pet, particle effects and terminal live on desktop — visit on a PC for the full experience.",
+      "mobileDesktopHint": "Mobile-optimized mode is active. The interactive pet, particle effects and terminal live on desktop; visit on a PC for the full experience.",
       "debug": {
         "success": "Operation completed successfully!",
         "error": "Unable to load resource.",
@@ -262,8 +262,8 @@
         "warning": "Warning: irreversible action."
       },
       "performance": {
-        "mid": "Balanced performance mode enabled — visual effects have been reduced to optimise smoothness on this device.",
-        "low": "Economy performance mode enabled — animations and effects have been minimised to ensure a smooth experience on this device."
+        "mid": "Balanced performance mode enabled, visual effects have been reduced to optimise smoothness on this device.",
+        "low": "Economy performance mode enabled, animations and effects have been minimised to ensure a smooth experience on this device."
       }
     },
     "contactForm": {
@@ -477,7 +477,7 @@
         }
       },
       "instructions": {
-        "aimStep": "Point your cursor at the target — the ball launches in that direction",
+        "aimStep": "Point your cursor at the target, the ball launches in that direction",
         "chargeStep": "Hold click to charge power, release to throw",
         "returnStep": "Click when the ball comes back to catch it (free mode: just get close)"
       },
@@ -541,11 +541,11 @@
         "gettingHungry": "Getting hungry.",
         "needsCuddle": "Could use a cuddle.",
         "exploring": "Exploring joyfully!",
-        "thriving": "Thriving! — slowed decay"
+        "thriving": "Thriving! slowed decay"
       },
       "ariaLabels": {
         "companion": "Companion robot",
-        "companionInteract": "Companion robot — click to interact",
+        "companionInteract": "Companion robot, click to interact",
         "hudLabel": "Companion robot"
       }
     }

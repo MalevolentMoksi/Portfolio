@@ -249,7 +249,7 @@ const ProjetSAE401 = () => {
               </li>
             </ul>
 
-            <h3>Regular Expressions — Offer Import</h3>
+            <h3>Regular Expressions - Offer Import</h3>
             <p>
               File: <code>src/Data/ImportOffresController.php</code>
             </p>
@@ -350,7 +350,7 @@ const ProjetSAE401 = () => {
               </li>
               <li>
                 Offer keywords extracted to{' '}
-                <code>offre_mot_cle(#id_offre, mot_cle)</code> — 1NF compliant
+                <code>offre_mot_cle(#id_offre, mot_cle)</code>, 1NF compliant
               </li>
               <li>
                 JSON <code>roles</code> column replaced by boolean <code>est_admin</code>
@@ -793,7 +793,7 @@ etat_recherche   (etat, descriptif)`}
               <code>suivi_offre(#numero_ine, #id_offre, est_consultee, est_retenue)</code>
             </li>
             <li>
-              Mots-clés extraits dans <code>offre_mot_cle(#id_offre, mot_cle)</code> — 1FN respectée
+              Mots-clés extraits dans <code>offre_mot_cle(#id_offre, mot_cle)</code>, 1FN respectée
             </li>
             <li>
               Colonne JSON <code>roles</code> remplacée par un booléen <code>est_admin</code>

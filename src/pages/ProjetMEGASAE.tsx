@@ -195,7 +195,7 @@ const ProjetMEGASAE = () => {
               reinforced key lessons: robust planning and risk management are as critical as
               technical skill, clear communication prevents costly delays, and iterative feedback
               loops drive quality. Most importantly, we learned that sustainable success emerges
-              from balancing individual contributions with collective accountability—a principle
+              from balancing individual contributions with collective accountability, a principle
               fundamental to professional software engineering.
             </p>
           </section>
@@ -402,7 +402,7 @@ const ProjetMEGASAE = () => {
             compétences techniques, une communication claire prévient les délais coûteux, et les
             boucles de rétroaction itératives stimulent la qualité. Plus important encore, nous
             avons appris que le succès durable émerge en équilibrant les contributions individuelles
-            avec la responsabilité collective—un principe fondamental de l'ingénierie logicielle
+            avec la responsabilité collective, un principe fondamental de l'ingénierie logicielle
             professionnelle.
           </p>
         </section>
