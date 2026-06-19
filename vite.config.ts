@@ -36,6 +36,10 @@ export default defineConfig({
       injectRegister: false,
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        // Strip the favicon cache-busting `?v=` param when matching precache so the
+        // SW still serves the freshest precached icon (online and offline) despite
+        // the query used to bust the browser's dedicated favicon cache.
+        ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^v$/],
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,

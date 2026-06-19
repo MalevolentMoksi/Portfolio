@@ -11,6 +11,7 @@
     "seo:generate": "node scripts/generate-seo-files.mjs",
     "seo:generate:public": "node scripts/generate-seo-files.mjs --outDir=public",
     "images:generate": "node scripts/generate-image-derivatives.mjs",
+    "favicons:generate": "node scripts/generate-favicons.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

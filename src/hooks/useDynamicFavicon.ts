@@ -7,9 +7,11 @@ import { getAssetPath } from '../utils/assetPath';
  */
 const useDynamicFavicon = (mood: string): void => {
   useEffect(() => {
-    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    // Target the SVG icon specifically so the mood swap never touches the static
+    // raster fallback (favicon-96.png) used by Safari/iOS.
+    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"][type="image/svg+xml"]');
     if (link) {
-      link.href = getAssetPath(`assets/images/favicon-${mood}.svg`);
+      link.href = getAssetPath(`assets/images/favicon-${mood}.svg?v=2`);
     }
   }, [mood]);
 };

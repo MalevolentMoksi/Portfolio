@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <!-- Initial dark chrome tint; MoodContext updates this per active mood at runtime. -->
     <meta name="theme-color" content="#050400" />
-    <link rel="icon" href="%BASE_URL%assets/images/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="%BASE_URL%assets/images/favicon.svg?v=2" type="image/svg+xml" />
+    <!-- Fallback raster : Safari/iOS et anciens navigateurs n'affichent pas les favicons SVG -->
+    <link rel="icon" href="%BASE_URL%favicon-96.png?v=2" sizes="96x96" type="image/png" />
+    <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png?v=2" />
 
     <!-- Preload images for high-traffic routes — élimine le délai de chargement au premier accès -->
     <link
