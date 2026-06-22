@@ -75,6 +75,125 @@
     <div id="root"></div>
     <div id="ambient-root"></div>
 
+    <!--
+      Filet de securite au demarrage (« boot watchdog »).
+      Script classique inline : il s'execute meme si le module applicatif ne
+      demarre pas (chunk hashe manquant apres deploiement, HTML obsolete encore
+      servi par un ancien service worker, etc.). Si #root reste vide trop
+      longtemps alors qu'on est en ligne, on purge le service worker + les caches
+      et on recharge UNE fois pour recuperer une version saine — sans intervention
+      de l'utilisateur. Si l'appli demarre normalement, il ne fait rien.
+    -->
+    <script>
+      (function () {
+        try {
+          var GUARD_KEY = '__boot_recovery_attempted__';
+          var TIMEOUT_MS = 10000; // marge confortable : l'observer annule des le 1er rendu
+          var settled = false;
+          var timer;
+          var observer;
+
+          function appBooted() {
+            var root = document.getElementById('root');
+            return !!root && root.childElementCount > 0;
+          }
+
+          // L'appli a rendu quelque chose -> tout va bien, on desarme le filet.
+          function markHealthy() {
+            if (settled) return;
+            settled = true;
+            if (timer) clearTimeout(timer);
+            if (observer) {
+              try {
+                observer.disconnect();
+              } catch (e) {}
+            }
+            // On efface le verrou pour qu'une panne future puisse de nouveau
+            // declencher une recuperation (une seule par episode, jamais en boucle).
+            try {
+              sessionStorage.removeItem(GUARD_KEY);
+            } catch (e) {}
+          }
+
+          // #root est reste vide : on tente une recuperation unique.
+          function attemptRecovery() {
+            if (settled) return;
+            settled = true;
+
+            // Hors ligne : recharger ne ramenerait rien de frais et viderait le
+            // cache offline utile -> on s'abstient.
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+
+            // Verrou : au plus une recuperation automatique par session.
+            try {
+              if (sessionStorage.getItem(GUARD_KEY) === '1') return;
+              sessionStorage.setItem(GUARD_KEY, '1');
+            } catch (e) {}
+
+            var jobs = [];
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+              jobs.push(
+                navigator.serviceWorker
+                  .getRegistrations()
+                  .then(function (regs) {
+                    return Promise.all(
+                      regs.map(function (r) {
+                        return r.unregister();
+                      })
+                    );
+                  })
+                  .catch(function () {})
+              );
+            }
+            if (window.caches && caches.keys) {
+              jobs.push(
+                caches
+                  .keys()
+                  .then(function (keys) {
+                    return Promise.all(
+                      keys.map(function (k) {
+                        return caches.delete(k);
+                      })
+                    );
+                  })
+                  .catch(function () {})
+              );
+            }
+
+            var reload = function () {
+              window.location.reload();
+            };
+            Promise.all(jobs).then(reload, reload);
+          }
+
+          function startObserver() {
+            var root = document.getElementById('root');
+            if (!root) return false;
+            if (appBooted()) {
+              markHealthy();
+              return true;
+            }
+            observer = new MutationObserver(function () {
+              if (appBooted()) markHealthy();
+            });
+            observer.observe(root, { childList: true });
+            return true;
+          }
+
+          timer = setTimeout(function () {
+            if (appBooted()) markHealthy();
+            else attemptRecovery();
+          }, TIMEOUT_MS);
+
+          if (!startObserver()) {
+            document.addEventListener('DOMContentLoaded', startObserver, { once: true });
+          }
+        } catch (e) {
+          // Le filet de securite ne doit JAMAIS casser la page : on avale tout.
+        }
+      })();
+    </script>
+
     <!-- Service Worker registration — deferred to avoid render blocking -->
     <script defer src="%BASE_URL%registerSW.js"></script>
 
