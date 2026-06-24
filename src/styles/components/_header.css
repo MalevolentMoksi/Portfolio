@@ -356,6 +356,29 @@ header.header--main .hamburger-toggle {
   }
 }
 
+/* Mid-size desktop (1121px–1319px): there isn't enough room for the
+   absolutely-centered nav to clear the left-hand controls (langue +
+   accessibilite), so it would overlap them. Let the nav flow between the
+   controls and the actions instead — centered in the free space. Above 1320px
+   the viewport is wide enough for true centering again (rule further above). */
+@media (min-width: 1121px) and (max-width: 1319px) {
+  .header--nav-desktop {
+    position: static;
+    top: auto;
+    left: auto;
+    transform: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    pointer-events: auto;
+  }
+
+  .header--nav-desktop ul {
+    justify-content: center;
+    width: auto;
+  }
+}
+
 /* =============================================
    RESPONSIVE
    ============================================= */
