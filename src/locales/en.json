@@ -98,7 +98,7 @@
         "triggerAria": "Hold and release to trigger the selected effect",
         "triggerLabel": "TRIGGER",
         "chargeLabel": "Status",
-        "energyLabel": "Field energy",
+        "energyLabel": "Charge",
         "countLabel": "Active particles",
         "signatureLabel": "Signature",
         "statusReady": "ready",

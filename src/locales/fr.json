@@ -98,7 +98,7 @@
         "triggerAria": "Maintenir puis relâcher pour déclencher l'effet sélectionné",
         "triggerLabel": "DECLENCHER",
         "chargeLabel": "Etat",
-        "energyLabel": "Energie de champ",
+        "energyLabel": "Charge",
         "countLabel": "Particules actives",
         "signatureLabel": "Signature",
         "statusReady": "pret",

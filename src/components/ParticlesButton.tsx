@@ -143,21 +143,6 @@ interface EffectSignal {
   _unmounted: boolean;
 }
 
-const WEATHER_EFFECT_META: Record<
-  EffectKey,
-  {
-    energyBase: number;
-    energySwing: number;
-  }
-> = {
-  explode: { energyBase: 68, energySwing: 26 },
-  attract: { energyBase: 56, energySwing: 20 },
-  storm:   { energyBase: 74, energySwing: 28 },
-  gravity: { energyBase: 52, energySwing: 24 },
-  vortex:  { energyBase: 64, energySwing: 30 },
-  crystal: { energyBase: 48, energySwing: 22 },
-};
-
 const WEATHER_NODE_LAYOUT = [
   { x: '50%', y: '5%'  },  // 12 o'clock
   { x: '88%', y: '27%' },  // 2 o'clock
@@ -945,14 +930,15 @@ const ParticlesButton = () => {
   }, []);
 
   const currentEffect = localizedEffects[effectIndex];
-  const currentEffectKey = currentEffect.key as EffectKey;
-  const weatherMeta = WEATHER_EFFECT_META[currentEffectKey];
-  const activityRatio = isActive ? 1 - progress / 100 : 0;
-  const fieldEnergy = clamp(
-    Math.round(weatherMeta.energyBase + activityRatio * weatherMeta.energySwing + lastCommittedCharge * 0.22),
-    0,
-    100
-  );
+  // Charge readiness gauge : 0 au repos, suit la charge en cours pendant le
+  // maintien du noyau, puis fige la charge engagée pendant que l'effet joue.
+  // Pas de baseline arbitraire ni de saut quand on change d'effet — la jauge
+  // explique directement la mécanique « maintenir pour charger ».
+  const fieldEnergy = isCharging
+    ? chargeProgress
+    : isActive
+      ? lastCommittedCharge
+      : 0;
   const observedParticles = Math.max(0, particleCount);
   const panelStatus = isActive ? weatherActiveStatus : weatherReadyStatus;
 
