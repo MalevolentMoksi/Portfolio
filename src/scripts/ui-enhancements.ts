@@ -323,6 +323,33 @@ class UIEnhancements {
         video.pause();
       });
 
+      // Equivalent clavier du survol : lecture au focus, pause au blur.
+      // Lecture restreinte au focus clavier (:focus-visible) : au tap/clic,
+      // le focus precede le click de bascule et jouerait puis pauserait.
+      video.tabIndex = 0;
+      video.addEventListener('focus', () => {
+        if (video.matches(':focus-visible')) {
+          video.play().catch(() => {
+            // Playback failed
+          });
+        }
+      });
+      video.addEventListener('blur', () => {
+        video.pause();
+      });
+      video.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (video.paused) {
+            video.play().catch(() => {
+              // Playback failed
+            });
+          } else {
+            video.pause();
+          }
+        }
+      });
+
       video.addEventListener('loadedmetadata', setProgress);
       video.addEventListener('timeupdate', setProgress);
       video.addEventListener('seeking', setProgress);

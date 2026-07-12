@@ -141,6 +141,12 @@ const SkillsCards = ({ categories }: any) => (
 const SkillsTabs = ({ categories, activeTab, onTabChange, label }: any) => {
   const activeCategory = getActiveSkillCategory(categories, activeTab);
 
+  const selectTab = (categoryId: any) => {
+    onTabChange(categoryId);
+    // Roving tabindex : le focus suit la selection lors de la navigation flechee
+    document.getElementById(`skills-tab-${categoryId}`)?.focus();
+  };
+
   const handleTabKeyDown = (event: any, currentIndex: any) => {
     const lastIndex = categories.length - 1;
 
@@ -151,18 +157,18 @@ const SkillsTabs = ({ categories, activeTab, onTabChange, label }: any) => {
     event.preventDefault();
 
     if (event.key === 'Home') {
-      onTabChange(categories[0].id);
+      selectTab(categories[0].id);
       return;
     }
 
     if (event.key === 'End') {
-      onTabChange(categories[lastIndex].id);
+      selectTab(categories[lastIndex].id);
       return;
     }
 
     const direction = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1;
     const nextIndex = (currentIndex + direction + categories.length) % categories.length;
-    onTabChange(categories[nextIndex].id);
+    selectTab(categories[nextIndex].id);
   };
 
   return (

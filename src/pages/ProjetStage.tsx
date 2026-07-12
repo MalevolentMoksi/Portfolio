@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProjectPagination from '@/components/ProjectPagination';
 import useReadingTimeEstimate from '@/hooks/useReadingTimeEstimate';
@@ -214,9 +214,7 @@ function DiagnosticSimulator({ c }: { c: DiagnosticCopy }) {
                 disabled={cr.base}
               >
                 <span className="stage-sim-chip-label">{cr.label}</span>
-                <span className="stage-sim-chip-pts">
-                  {cr.cycle ? `+${val}` : `+${cr.points}`}
-                </span>
+                <span className="stage-sim-chip-pts">{cr.cycle ? `+${val}` : `+${cr.points}`}</span>
               </button>
             );
           })}
@@ -265,6 +263,30 @@ interface ProfileEntry {
 function ProfileTabs({ profiles, label }: { profiles: ProfileEntry[]; label: string }) {
   const [active, setActive] = useState(0);
   const current = profiles[active];
+
+  const selectTab = (index: number) => {
+    setActive(index);
+    // Roving tabindex : le focus suit la selection lors de la navigation flechee
+    document.getElementById(`stage-profile-tab-${profiles[index].id}`)?.focus();
+  };
+
+  const handleTabKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, currentIndex: number) => {
+    if (!['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+      return;
+    }
+    event.preventDefault();
+    if (event.key === 'Home') {
+      selectTab(0);
+      return;
+    }
+    if (event.key === 'End') {
+      selectTab(profiles.length - 1);
+      return;
+    }
+    const direction = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1;
+    selectTab((currentIndex + direction + profiles.length) % profiles.length);
+  };
+
   return (
     <div className="stage-profiles">
       <div className="stage-profiles-tabs" role="tablist" aria-label={label}>
@@ -273,9 +295,13 @@ function ProfileTabs({ profiles, label }: { profiles: ProfileEntry[]; label: str
             key={p.id}
             type="button"
             role="tab"
+            id={`stage-profile-tab-${p.id}`}
             aria-selected={i === active}
+            aria-controls="stage-profile-panel"
+            tabIndex={i === active ? 0 : -1}
             className={`stage-profile-tab${i === active ? ' is-active' : ''}`}
             onClick={() => setActive(i)}
+            onKeyDown={(event) => handleTabKeyDown(event, i)}
           >
             <span className="stage-profile-tab-tag">{p.tag}</span>
             <span className="stage-profile-tab-name">{p.name}</span>
@@ -283,7 +309,12 @@ function ProfileTabs({ profiles, label }: { profiles: ProfileEntry[]; label: str
         ))}
       </div>
 
-      <div className="stage-profile-panel" role="tabpanel">
+      <div
+        className="stage-profile-panel"
+        role="tabpanel"
+        id="stage-profile-panel"
+        aria-labelledby={`stage-profile-tab-${current.id}`}
+      >
         <div className="stage-profile-copy">
           <p className="stage-profile-role">{current.role}</p>
           <p className="stage-profile-blurb">{current.blurb}</p>
@@ -327,7 +358,10 @@ function Timeline({ phases }: { phases: Phase[] }) {
   return (
     <ol className="stage-timeline">
       {phases.map((p) => (
-        <li className={`stage-timeline-item stage-timeline-item--${p.kind ?? 'plan'}`} key={p.title}>
+        <li
+          className={`stage-timeline-item stage-timeline-item--${p.kind ?? 'plan'}`}
+          key={p.title}
+        >
           <span className="stage-timeline-period">{p.period}</span>
           <div className="stage-timeline-card">
             <span className="stage-timeline-tag">{p.tag}</span>
@@ -520,7 +554,12 @@ const COPY = {
 
     statsKicker: 'Le stage en chiffres (état final, 10 juillet 2026)',
     stats: [
-      { value: 100, suffix: ' %', label: 'du code écrit seul', hint: '0 développeur dans l’encadrement' },
+      {
+        value: 100,
+        suffix: ' %',
+        label: 'du code écrit seul',
+        hint: '0 développeur dans l’encadrement',
+      },
       { value: 137, label: 'endpoints d’API', hint: '11 routeurs' },
       { value: 53, label: 'migrations SQL', hint: '52 tables en base' },
       { value: 8, label: 'langues livrées', hint: 'i18n complète' },
@@ -543,7 +582,11 @@ const COPY = {
       'Le projet est rattaché à la thèse d’Héloïse Dauvillaire, qui porte sur l’amélioration du diagnostic en Repair Café par une collecte structurée des données. Il s’appuie sur un constat de la recherche : les pannes des produits de consommation sont difficiles à diagnostiquer, et les réparateurs raisonnent surtout par analogie, en reconnaissant des cas déjà vus.',
     contextTeamTitle: 'Un encadrement de chercheurs, aucun développeur',
     team: [
-      { name: 'Héloïse Dauvillaire', role: 'Doctorante, contact quotidien', note: 'Projet rattaché à sa thèse' },
+      {
+        name: 'Héloïse Dauvillaire',
+        role: 'Doctorante, contact quotidien',
+        note: 'Projet rattaché à sa thèse',
+      },
       { name: 'El-Haddi Mechekour', role: 'Maître de conférences, tuteur officiel' },
       { name: 'Cédric Masclet', role: 'Professeur des universités' },
       { name: 'Amira Barhoumi', role: 'Tutrice IUT2 Grenoble' },
@@ -585,9 +628,18 @@ const COPY = {
     missionBody:
       'L’objectif fixé par l’équipe : remplacer les tableurs par une base commune et structurée, offrir deux interfaces (saisie et consultation/export), gérer plusieurs cafés avec des accès différenciés par rôle, et proposer cette aide au diagnostic fondée sur l’historique partagé.',
     missionConstraints: [
-      { t: 'Les choix techniques, un livrable', d: 'Le sujet imposait de justifier framework et architecture au regard de l’évolutivité et de la reprise du code après mon départ.' },
-      { t: 'Un code repris par d’autres', d: 'Contrainte forte dès le départ : un code clair, documenté, maintenable, à vocation ouverte (open source assumé, licence à finaliser).' },
-      { t: 'Une architecture préparée', d: 'Monolithe pour maîtriser la complexité, mais exposant des endpoints pour préparer une évolution modulaire ultérieure.' },
+      {
+        t: 'Les choix techniques, un livrable',
+        d: 'Le sujet imposait de justifier framework et architecture au regard de l’évolutivité et de la reprise du code après mon départ.',
+      },
+      {
+        t: 'Un code repris par d’autres',
+        d: 'Contrainte forte dès le départ : un code clair, documenté, maintenable, à vocation ouverte (open source assumé, licence à finaliser).',
+      },
+      {
+        t: 'Une architecture préparée',
+        d: 'Monolithe pour maîtriser la complexité, mais exposant des endpoints pour préparer une évolution modulaire ultérieure.',
+      },
     ],
     reductiveNote:
       'On résume souvent le projet à « six fonctionnalités » (F01 à F06). C’est très réducteur : derrière ces six briques vivent une quarantaine de règles métier formalisées, sept missions bonus documentées, et des dizaines de sous-fonctionnalités apparues en cours de route.',
@@ -597,14 +649,62 @@ const COPY = {
     processLead:
       'J’ai travaillé en cycles courts rythmés par les réunions hebdomadaires, selon un principe « la spécification d’abord » : mettre à jour le cahier des charges avant d’implémenter, puis réaligner diagrammes, wireframes et code. Un même changement métier se propageait ainsi partout.',
     phases: [
-      { period: 'Sem. 1 à 2', tag: 'Analyse', kind: 'plan', title: 'Besoins et cahier des charges', text: 'Entretiens avec les encadrants, visites de Repair Cafés, étude de Repair Monitor, première version du cahier des charges (v8).' },
-      { period: 'Sem. 2 à 3', tag: 'Conception', kind: 'plan', title: 'Modélisation', text: 'Diagrammes de cas d’utilisation, d’activité, d’états et de séquence, plus un diagramme entité-association en notation pied-de-corbeau. Wireframes de la cible UX.' },
-      { period: 'Sem. 3 à 10', tag: 'Développement', kind: 'plan', title: 'Développement de F01 à F06', text: 'Fonctionnalité par fonctionnalité, avec le cahier des charges tenu vivant en parallèle (v9 à v14) et réaligné à chaque évolution.' },
-      { period: 'Fin mai', tag: 'Ajout', kind: 'added', title: 'Audit de sécurité et durcissement', text: 'Mené de ma propre initiative, il chevauche le développement et débouche sur plusieurs lots de correctifs de sécurité.' },
-      { period: 'Fin mai', tag: 'Ajout', kind: 'added', title: 'Audit ergonomique « Delight UX »', text: 'Cinquante-six opportunités d’amélioration priorisées : accessibilité, continuité de navigation, états vides guidés.' },
-      { period: '2 juin', tag: 'IUT', kind: 'iut', title: 'Remise du mémoire de stage', text: 'Rédaction du rapport rendu à l’IUT, appuyé sur des références normatives (ISO 25010, ISO 27002) et académiques.' },
-      { period: '22 juin', tag: 'IUT', kind: 'iut', title: 'Soutenance devant le jury', text: 'Présentation orale, cahier des charges devenu un site web avec diagrammes interactifs.' },
-      { period: 'Juillet', tag: 'Validation', kind: 'added', title: 'Tests d’utilisabilité et déploiement', text: 'Campagne Think Aloud + SUS, correctifs des derniers points de friction, mise en production HTTPS sur une VM du laboratoire.' },
+      {
+        period: 'Sem. 1 à 2',
+        tag: 'Analyse',
+        kind: 'plan',
+        title: 'Besoins et cahier des charges',
+        text: 'Entretiens avec les encadrants, visites de Repair Cafés, étude de Repair Monitor, première version du cahier des charges (v8).',
+      },
+      {
+        period: 'Sem. 2 à 3',
+        tag: 'Conception',
+        kind: 'plan',
+        title: 'Modélisation',
+        text: 'Diagrammes de cas d’utilisation, d’activité, d’états et de séquence, plus un diagramme entité-association en notation pied-de-corbeau. Wireframes de la cible UX.',
+      },
+      {
+        period: 'Sem. 3 à 10',
+        tag: 'Développement',
+        kind: 'plan',
+        title: 'Développement de F01 à F06',
+        text: 'Fonctionnalité par fonctionnalité, avec le cahier des charges tenu vivant en parallèle (v9 à v14) et réaligné à chaque évolution.',
+      },
+      {
+        period: 'Fin mai',
+        tag: 'Ajout',
+        kind: 'added',
+        title: 'Audit de sécurité et durcissement',
+        text: 'Mené de ma propre initiative, il chevauche le développement et débouche sur plusieurs lots de correctifs de sécurité.',
+      },
+      {
+        period: 'Fin mai',
+        tag: 'Ajout',
+        kind: 'added',
+        title: 'Audit ergonomique « Delight UX »',
+        text: 'Cinquante-six opportunités d’amélioration priorisées : accessibilité, continuité de navigation, états vides guidés.',
+      },
+      {
+        period: '2 juin',
+        tag: 'IUT',
+        kind: 'iut',
+        title: 'Remise du mémoire de stage',
+        text: 'Rédaction du rapport rendu à l’IUT, appuyé sur des références normatives (ISO 25010, ISO 27002) et académiques.',
+      },
+      {
+        period: '22 juin',
+        tag: 'IUT',
+        kind: 'iut',
+        title: 'Soutenance devant le jury',
+        text: 'Présentation orale, cahier des charges devenu un site web avec diagrammes interactifs.',
+      },
+      {
+        period: 'Juillet',
+        tag: 'Validation',
+        kind: 'added',
+        title: 'Tests d’utilisabilité et déploiement',
+        text: 'Campagne Think Aloud + SUS, correctifs des derniers points de friction, mise en production HTTPS sur une VM du laboratoire.',
+      },
     ] as Phase[],
     cdcTitle: 'Un cahier des charges vivant',
     cdcBody:
@@ -615,9 +715,18 @@ const COPY = {
     academicLead:
       'En parallèle du développement, le stage est un exercice évalué du BUT Informatique de l’IUT2 de Grenoble (parcours Développement d’applications). Il se conclut par deux livrables devant un double regard : celui de la recherche et celui de l’enseignement.',
     academicItems: [
-      { t: 'Le mémoire de stage', d: 'Un rapport rendu le 2 juin, qui présente le contexte, les choix techniques et les réalisations, et les inscrit dans des normes de qualité et de sécurité (ISO 25010, ISO 27002).' },
-      { t: 'La soutenance', d: 'Une présentation orale le 22 juin devant un jury de trois membres, dont mon tuteur laboratoire et ma tutrice IUT.' },
-      { t: 'Un double public', d: 'J’ai appris à argumenter mes choix devant des chercheurs et devant des utilisateurs finaux, les bénévoles seniors des cafés, avec des registres très différents.' },
+      {
+        t: 'Le mémoire de stage',
+        d: 'Un rapport rendu le 2 juin, qui présente le contexte, les choix techniques et les réalisations, et les inscrit dans des normes de qualité et de sécurité (ISO 25010, ISO 27002).',
+      },
+      {
+        t: 'La soutenance',
+        d: 'Une présentation orale le 22 juin devant un jury de trois membres, dont mon tuteur laboratoire et ma tutrice IUT.',
+      },
+      {
+        t: 'Un double public',
+        d: 'J’ai appris à argumenter mes choix devant des chercheurs et devant des utilisateurs finaux, les bénévoles seniors des cafés, avec des registres très différents.',
+      },
     ],
     academicJury:
       'Jury de soutenance : M. Jean-Pierre Chevallet (IUT), Mme Amira Barhoumi (IUT), M. El-Haddi Mechekour (laboratoire).',
@@ -654,9 +763,18 @@ const COPY = {
     diagRejectedIntro:
       'Avant d’arrêter ce choix, j’ai étudié plusieurs alternatives, et je les ai écartées pour des raisons documentées dans le cahier des charges :',
     diagRejected: [
-      { t: 'Recherche sémantique (pgvector, embeddings)', d: 'Proposée en mission bonus. Corpus initial trop petit, coût d’inférence par saisie, et surtout des résultats opaques, incompatibles avec l’exigence d’explicabilité.' },
-      { t: 'Recherche plein texte native (tsvector)', d: 'Plus légère, mais superflue au vu du faible volume de texte libre réellement comparable.' },
-      { t: 'Trigrammes seuls (pg_trgm)', d: 'Jugés équivalents sans le barème métier, qui reste ce qui apporte le vrai pouvoir discriminant.' },
+      {
+        t: 'Recherche sémantique (pgvector, embeddings)',
+        d: 'Proposée en mission bonus. Corpus initial trop petit, coût d’inférence par saisie, et surtout des résultats opaques, incompatibles avec l’exigence d’explicabilité.',
+      },
+      {
+        t: 'Recherche plein texte native (tsvector)',
+        d: 'Plus légère, mais superflue au vu du faible volume de texte libre réellement comparable.',
+      },
+      {
+        t: 'Trigrammes seuls (pg_trgm)',
+        d: 'Jugés équivalents sans le barème métier, qui reste ce qui apporte le vrai pouvoir discriminant.',
+      },
     ],
     diagLimits:
       'J’assume les limites : un type d’objet jamais saisi ne renvoie rien, et le score ne juge pas si le diagnostic passé était juste, ce que seule une relecture humaine corrige. La calibration empirique des poids sur données réelles fait partie des suites du projet.',
@@ -666,10 +784,22 @@ const COPY = {
     saisieLead:
       'Un même formulaire, alimenté par deux interfaces adaptées au terrain. Toute saisie commence par un rappel de la clause réglementaire : réparation bénévole, sans obligation de résultat, risque de dégradation possible.',
     saisieSteps: [
-      { t: 'Produit et contexte', d: 'Catégorie, type d’objet, marque, modèle, plus l’historique d’usage (âge de l’objet, événements avant la panne).' },
-      { t: 'Symptômes constatés', d: 'Trois zones indépendantes : description de la panne, observations sensorielles, comportement. Au moins une doit être renseignée.' },
-      { t: 'Panne identifiée', d: 'Composant défectueux, défauts constatés classés par famille, et cause probable en texte libre optionnel.' },
-      { t: 'Réparation et résultat', d: 'Actions réalisées, pièces éventuelles, puis résultat : objet fonctionnel, non fonctionnel, ou réparation en attente.' },
+      {
+        t: 'Produit et contexte',
+        d: 'Catégorie, type d’objet, marque, modèle, plus l’historique d’usage (âge de l’objet, événements avant la panne).',
+      },
+      {
+        t: 'Symptômes constatés',
+        d: 'Trois zones indépendantes : description de la panne, observations sensorielles, comportement. Au moins une doit être renseignée.',
+      },
+      {
+        t: 'Panne identifiée',
+        d: 'Composant défectueux, défauts constatés classés par famille, et cause probable en texte libre optionnel.',
+      },
+      {
+        t: 'Réparation et résultat',
+        d: 'Actions réalisées, pièces éventuelles, puis résultat : objet fonctionnel, non fonctionnel, ou réparation en attente.',
+      },
     ],
     saisieWizard: {
       t: 'Le Wizard',
@@ -685,7 +815,8 @@ const COPY = {
       'Génération du PDF du formulaire papier depuis la version de schéma adoptée par le café, pour que papier et numérique restent cohérents.',
     ],
     saisieShotClause: 'Étape de clause : le visiteur est informé avant toute intervention.',
-    saisieShotTableur: 'La vue Tableur : une ligne par intervention, colonnes groupées par bloc métier.',
+    saisieShotTableur:
+      'La vue Tableur : une ligne par intervention, colonnes groupées par bloc métier.',
 
     /* ── Cycle de vie ── */
     lifecycleTitle: 'Le cycle de vie d’une intervention',
@@ -697,7 +828,10 @@ const COPY = {
     ],
     lifecycleOutcomes: [
       { s: 'Résultat final', d: 'Objet fonctionnel ou non fonctionnel.' },
-      { s: 'Réparation en attente', d: 'Pièce à commander ; sa reprise crée une intervention liée.' },
+      {
+        s: 'Réparation en attente',
+        d: 'Pièce à commander ; sa reprise crée une intervention liée.',
+      },
     ],
     lifecycleBranch: 'L’intervention soumise aboutit à l’une des deux issues :',
     lifecycleOr: 'ou',
@@ -720,7 +854,11 @@ const COPY = {
         role: 'Au cœur de la séance',
         blurb:
           'Saisit un cas via le Wizard, reprend une réparation en attente et consulte l’aide au diagnostic pour s’appuyer sur l’expérience de tous les cafés.',
-        can: ['Saisie guidée (Wizard)', 'Aide au diagnostic (F02)', 'Reprise des réparations en attente'],
+        can: [
+          'Saisie guidée (Wizard)',
+          'Aide au diagnostic (F02)',
+          'Reprise des réparations en attente',
+        ],
         image: 'diagnostic',
         alt: 'Écran d’aide au diagnostic avec des cas similaires classés par score',
       },
@@ -809,12 +947,30 @@ const COPY = {
     backLead:
       'L’administration (F05) est utilisée par l’encadrante du laboratoire, pas par un informaticien. J’ai donc remplacé les fenêtres prompt et confirm natives par des modales explicites, ajouté des panneaux d’aide contextuels et une page de guide, et soigné chaque libellé.',
     backFeatures: [
-      { t: 'Demandes de compte', d: 'Flux complet : approuver en créant un café ou en liant à un existant, rejeter avec note, ou rejeter et bannir un e-mail. Domaines jetables bloqués.' },
-      { t: 'Référentiels curatables', d: 'Revue, fusion, alias et masquage des valeurs proposées par les cafés, pour garder un vocabulaire propre.' },
-      { t: 'Formulaire versionné', d: 'Le schéma de saisie est configurable et versionné ; chaque café adopte sa version, et les anciennes saisies gardent leur sens. Génération du PDF papier associé.' },
-      { t: 'Traductions', d: 'Une interface de gestion des traductions, l’i18n couvrant huit langues (mission bonus BM-01 réalisée).' },
-      { t: 'Journal d’audit', d: 'Toute action sensible est journalisée avec son auteur et son sous-profil (ISO 27002), pour la traçabilité et la non-répudiation.' },
-      { t: 'Vue laboratoire', d: 'Une synthèse de l’activité par café, filtrable et exportable, pour l’équipe de recherche.' },
+      {
+        t: 'Demandes de compte',
+        d: 'Flux complet : approuver en créant un café ou en liant à un existant, rejeter avec note, ou rejeter et bannir un e-mail. Domaines jetables bloqués.',
+      },
+      {
+        t: 'Référentiels curatables',
+        d: 'Revue, fusion, alias et masquage des valeurs proposées par les cafés, pour garder un vocabulaire propre.',
+      },
+      {
+        t: 'Formulaire versionné',
+        d: 'Le schéma de saisie est configurable et versionné ; chaque café adopte sa version, et les anciennes saisies gardent leur sens. Génération du PDF papier associé.',
+      },
+      {
+        t: 'Traductions',
+        d: 'Une interface de gestion des traductions, l’i18n couvrant huit langues (mission bonus BM-01 réalisée).',
+      },
+      {
+        t: 'Journal d’audit',
+        d: 'Toute action sensible est journalisée avec son auteur et son sous-profil (ISO 27002), pour la traçabilité et la non-répudiation.',
+      },
+      {
+        t: 'Vue laboratoire',
+        d: 'Une synthèse de l’activité par café, filtrable et exportable, pour l’équipe de recherche.',
+      },
     ],
 
     /* ── Stack ── */
@@ -872,7 +1028,8 @@ const COPY = {
         ],
       },
     ],
-    qualityNorms: 'Normes mobilisées : ISO 25010 (qualité et utilisabilité), ISO 27002 (sécurité de l’information), NIST SP 800-63B et recommandations CNIL/ANSSI (mots de passe), et le standard ORDS pour l’interopérabilité des données de réparation.',
+    qualityNorms:
+      'Normes mobilisées : ISO 25010 (qualité et utilisabilité), ISO 27002 (sécurité de l’information), NIST SP 800-63B et recommandations CNIL/ANSSI (mots de passe), et le standard ORDS pour l’interopérabilité des données de réparation.',
 
     /* ── Eval ── */
     evalTitle: 'L’évaluation par les utilisateurs',
@@ -901,29 +1058,99 @@ const COPY = {
     skillsLead:
       'Un projet web complet, de l’analyse des besoins jusqu’au durcissement avant production, qui a mobilisé et fait progresser des compétences très diverses.',
     skillsGroups: [
-      { t: 'Conception et données', items: ['Modèle relationnel garantissant l’intégrité de données hétérogènes', 'Référentiels extensibles et anti-doublon', 'Nettoyage d’une taxonomie de milliers d’entrées'] },
-      { t: 'Développement fullstack', items: ['TypeScript de bout en bout, types et validation partagés', 'React, Node, Express, PostgreSQL', 'Rendu conditionnel d’un formulaire complexe'] },
-      { t: 'Qualité et industrialisation', items: ['Audit de sécurité et durcissement', 'Suite de tests et CI à gate bloquante', 'Conteneurisation et déploiement, conformité RGPD'] },
-      { t: 'Conduite et communication', items: ['Faire vivre une spécification en cohérence avec le code', 'Argumenter ses choix devant des chercheurs', 'Présenter à un public non technicien et senior'] },
+      {
+        t: 'Conception et données',
+        items: [
+          'Modèle relationnel garantissant l’intégrité de données hétérogènes',
+          'Référentiels extensibles et anti-doublon',
+          'Nettoyage d’une taxonomie de milliers d’entrées',
+        ],
+      },
+      {
+        t: 'Développement fullstack',
+        items: [
+          'TypeScript de bout en bout, types et validation partagés',
+          'React, Node, Express, PostgreSQL',
+          'Rendu conditionnel d’un formulaire complexe',
+        ],
+      },
+      {
+        t: 'Qualité et industrialisation',
+        items: [
+          'Audit de sécurité et durcissement',
+          'Suite de tests et CI à gate bloquante',
+          'Conteneurisation et déploiement, conformité RGPD',
+        ],
+      },
+      {
+        t: 'Conduite et communication',
+        items: [
+          'Faire vivre une spécification en cohérence avec le code',
+          'Argumenter ses choix devant des chercheurs',
+          'Présenter à un public non technicien et senior',
+        ],
+      },
     ],
     closing:
       'Ce stage m’a permis de transformer un savoir jusque-là oral et éparpillé en données fiables, partagées et exploitables, dans un projet pensé pour durer au-delà de mon départ. Il a confirmé mon goût pour le développement web orienté utilisateur, au service d’un usage réel et d’une dimension sociétale.',
 
     /* ── Galerie ── */
     galleryTitle: 'Galerie',
-    galleryLead: 'Quelques écrans supplémentaires, tous issus de captures fraîches du produit livré.',
+    galleryLead:
+      'Quelques écrans supplémentaires, tous issus de captures fraîches du produit livré.',
     gallery: [
-      { name: 'wizard-step', cap: 'Le Wizard en cours de saisie : première étape, produit et contexte.', w: 1600, h: 1000 },
-      { name: 'diagnostic-full', cap: 'L’aide au diagnostic : liste complète des cas similaires trouvés.', w: 1400, h: 875 },
-      { name: 'gestionnaire-tableau', cap: 'Tableau des interventions, filtrable et triable par le gestionnaire.', w: 1600, h: 1000 },
-      { name: 'gestionnaire-export', cap: 'Exports documentés et durables (CSV / JSON).', w: 1600, h: 1000 },
-      { name: 'pending', cap: 'Les réparations en attente, prêtes à être reprises.', w: 1600, h: 1000 },
-      { name: 'admin-guide', cap: 'Page Guide du back-office, pensée pour des administrateurs non techniciens.', w: 1600, h: 1000 },
-      { name: 'admin-traductions', cap: 'Gestion des traductions : l’i18n couvre huit langues.', w: 1600, h: 1000 },
-      { name: 'admin-laboratoire', cap: 'Vue « Laboratoire » : activité par café pour l’équipe de recherche.', w: 1600, h: 1000 },
+      {
+        name: 'wizard-step',
+        cap: 'Le Wizard en cours de saisie : première étape, produit et contexte.',
+        w: 1600,
+        h: 1000,
+      },
+      {
+        name: 'diagnostic-full',
+        cap: 'L’aide au diagnostic : liste complète des cas similaires trouvés.',
+        w: 1400,
+        h: 875,
+      },
+      {
+        name: 'gestionnaire-tableau',
+        cap: 'Tableau des interventions, filtrable et triable par le gestionnaire.',
+        w: 1600,
+        h: 1000,
+      },
+      {
+        name: 'gestionnaire-export',
+        cap: 'Exports documentés et durables (CSV / JSON).',
+        w: 1600,
+        h: 1000,
+      },
+      {
+        name: 'pending',
+        cap: 'Les réparations en attente, prêtes à être reprises.',
+        w: 1600,
+        h: 1000,
+      },
+      {
+        name: 'admin-guide',
+        cap: 'Page Guide du back-office, pensée pour des administrateurs non techniciens.',
+        w: 1600,
+        h: 1000,
+      },
+      {
+        name: 'admin-traductions',
+        cap: 'Gestion des traductions : l’i18n couvre huit langues.',
+        w: 1600,
+        h: 1000,
+      },
+      {
+        name: 'admin-laboratoire',
+        cap: 'Vue « Laboratoire » : activité par café pour l’équipe de recherche.',
+        w: 1600,
+        h: 1000,
+      },
     ],
 
-    cdcLink: 'Le cahier des charges complet (spécification, diagrammes et wireframes) reste consultable en ligne.',
+    cdcLink:
+      'Le cahier des charges complet (spécification, diagrammes et wireframes) reste consultable en ligne.',
     cdcUrl: 'https://malevolentmoksi.github.io/cahier-des-charges-repair-cafe/#cahier',
   },
 
@@ -943,7 +1170,12 @@ const COPY = {
 
     statsKicker: 'The internship in numbers (final state, 10 July 2026)',
     stats: [
-      { value: 100, suffix: ' %', label: 'of the code written solo', hint: '0 developers among supervisors' },
+      {
+        value: 100,
+        suffix: ' %',
+        label: 'of the code written solo',
+        hint: '0 developers among supervisors',
+      },
       { value: 137, label: 'API endpoints', hint: '11 routers' },
       { value: 53, label: 'SQL migrations', hint: '52 tables in the database' },
       { value: 8, label: 'languages shipped', hint: 'full i18n' },
@@ -965,7 +1197,11 @@ const COPY = {
       'The project is attached to Héloïse Dauvillaire’s PhD, on improving diagnosis in Repair Cafés through structured data collection. It builds on a research finding: faults in consumer products are hard to diagnose, and repairers reason mostly by analogy, recognising cases they have seen before.',
     contextTeamTitle: 'Supervised by researchers, not developers',
     team: [
-      { name: 'Héloïse Dauvillaire', role: 'PhD student, day-to-day contact', note: 'Project attached to her thesis' },
+      {
+        name: 'Héloïse Dauvillaire',
+        role: 'PhD student, day-to-day contact',
+        note: 'Project attached to her thesis',
+      },
       { name: 'El-Haddi Mechekour', role: 'Senior lecturer, official tutor' },
       { name: 'Cédric Masclet', role: 'University professor' },
       { name: 'Amira Barhoumi', role: 'IUT2 Grenoble tutor' },
@@ -979,9 +1215,21 @@ const COPY = {
     existingBody:
       'I studied the world reference tool, Repair Monitor (Repair Café International Foundation), which holds about 187,600 repairs across 425 cafés in April 2026. But it describes faults in a free-text field, with no controlled vocabulary, no failing-component level, and no duplicate prevention. Its public dashboard offers eight fixed visualisations. These limits directly shaped three design stances that make the project original:',
     partisPris: [
-      { icon: '◧', title: 'Structured symptoms', text: 'Three distinct zones (fault, sensory observations, usage history) instead of a free-text field.' },
-      { icon: '⚙', title: 'Component-level diagnosis', text: 'The defect is tied to the failing component and classed by family, a granularity absent from the prior art.' },
-      { icon: '⧉', title: 'Active de-duplication', text: 'A referential that stays clean at entry time, the prerequisite for reliable cross-café comparison.' },
+      {
+        icon: '◧',
+        title: 'Structured symptoms',
+        text: 'Three distinct zones (fault, sensory observations, usage history) instead of a free-text field.',
+      },
+      {
+        icon: '⚙',
+        title: 'Component-level diagnosis',
+        text: 'The defect is tied to the failing component and classed by family, a granularity absent from the prior art.',
+      },
+      {
+        icon: '⧉',
+        title: 'Active de-duplication',
+        text: 'A referential that stays clean at entry time, the prerequisite for reliable cross-café comparison.',
+      },
     ],
     monitorStats: [
       { value: 187600, label: 'repairs worldwide' },
@@ -993,9 +1241,18 @@ const COPY = {
     missionBody:
       'The goal set by the team: replace the spreadsheets with a shared, structured database; provide two interfaces (entry and consultation/export); manage several cafés with role-based access; and offer this diagnostic aid drawing on the shared history.',
     missionConstraints: [
-      { t: 'Technical choices as a deliverable', d: 'The brief required justifying framework and architecture against maintainability and code handover after my departure.' },
-      { t: 'Code taken over by others', d: 'A strong constraint from the start: clear, documented, maintainable code, meant to be open (open source assumed, licence to be finalised).' },
-      { t: 'An architecture prepared to grow', d: 'A monolith to master complexity, but exposing endpoints to prepare a later modular evolution.' },
+      {
+        t: 'Technical choices as a deliverable',
+        d: 'The brief required justifying framework and architecture against maintainability and code handover after my departure.',
+      },
+      {
+        t: 'Code taken over by others',
+        d: 'A strong constraint from the start: clear, documented, maintainable code, meant to be open (open source assumed, licence to be finalised).',
+      },
+      {
+        t: 'An architecture prepared to grow',
+        d: 'A monolith to master complexity, but exposing endpoints to prepare a later modular evolution.',
+      },
     ],
     reductiveNote:
       'The project is often reduced to “six features” (F01 to F06). That is very reductive: behind those six bricks live around forty formalised business rules, seven documented bonus missions, and dozens of sub-features that appeared along the way.',
@@ -1004,14 +1261,62 @@ const COPY = {
     processLead:
       'I worked in short cycles paced by weekly meetings, on a “spec first” principle: update the specification before implementing, then realign diagrams, wireframes and code. A single business change thus propagated everywhere.',
     phases: [
-      { period: 'Wk 1 to 2', tag: 'Analysis', kind: 'plan', title: 'Needs and specification', text: 'Interviews with supervisors, Repair Café visits, study of Repair Monitor, first version of the specification (v8).' },
-      { period: 'Wk 2 to 3', tag: 'Design', kind: 'plan', title: 'Modelling', text: 'Use-case, activity, state and sequence diagrams, plus an entity-relationship diagram in crow’s-foot notation. UX target wireframes.' },
-      { period: 'Wk 3 to 10', tag: 'Development', kind: 'plan', title: 'Building F01 to F06', text: 'Feature by feature, with the specification kept alive in parallel (v9 to v14) and realigned at each change.' },
-      { period: 'Late May', tag: 'Added', kind: 'added', title: 'Security audit and hardening', text: 'Run on my own initiative, overlapping development, leading to several security fix batches.' },
-      { period: 'Late May', tag: 'Added', kind: 'added', title: '“Delight UX” ergonomics audit', text: 'Fifty-six prioritised improvement opportunities: accessibility, navigation continuity, guided empty states.' },
-      { period: '2 Jun', tag: 'IUT', kind: 'iut', title: 'Internship report submitted', text: 'Report handed to the IUT, grounded in quality and security standards (ISO 25010, ISO 27002) and academic references.' },
-      { period: '22 Jun', tag: 'IUT', kind: 'iut', title: 'Defense before the jury', text: 'Oral presentation, with the specification turned into a website with interactive diagrams.' },
-      { period: 'July', tag: 'Validation', kind: 'added', title: 'Usability tests and deployment', text: 'Think Aloud + SUS campaign, fixes for the last friction points, HTTPS deployment on a lab VM.' },
+      {
+        period: 'Wk 1 to 2',
+        tag: 'Analysis',
+        kind: 'plan',
+        title: 'Needs and specification',
+        text: 'Interviews with supervisors, Repair Café visits, study of Repair Monitor, first version of the specification (v8).',
+      },
+      {
+        period: 'Wk 2 to 3',
+        tag: 'Design',
+        kind: 'plan',
+        title: 'Modelling',
+        text: 'Use-case, activity, state and sequence diagrams, plus an entity-relationship diagram in crow’s-foot notation. UX target wireframes.',
+      },
+      {
+        period: 'Wk 3 to 10',
+        tag: 'Development',
+        kind: 'plan',
+        title: 'Building F01 to F06',
+        text: 'Feature by feature, with the specification kept alive in parallel (v9 to v14) and realigned at each change.',
+      },
+      {
+        period: 'Late May',
+        tag: 'Added',
+        kind: 'added',
+        title: 'Security audit and hardening',
+        text: 'Run on my own initiative, overlapping development, leading to several security fix batches.',
+      },
+      {
+        period: 'Late May',
+        tag: 'Added',
+        kind: 'added',
+        title: '“Delight UX” ergonomics audit',
+        text: 'Fifty-six prioritised improvement opportunities: accessibility, navigation continuity, guided empty states.',
+      },
+      {
+        period: '2 Jun',
+        tag: 'IUT',
+        kind: 'iut',
+        title: 'Internship report submitted',
+        text: 'Report handed to the IUT, grounded in quality and security standards (ISO 25010, ISO 27002) and academic references.',
+      },
+      {
+        period: '22 Jun',
+        tag: 'IUT',
+        kind: 'iut',
+        title: 'Defense before the jury',
+        text: 'Oral presentation, with the specification turned into a website with interactive diagrams.',
+      },
+      {
+        period: 'July',
+        tag: 'Validation',
+        kind: 'added',
+        title: 'Usability tests and deployment',
+        text: 'Think Aloud + SUS campaign, fixes for the last friction points, HTTPS deployment on a lab VM.',
+      },
     ] as Phase[],
     cdcTitle: 'A living specification',
     cdcBody:
@@ -1021,11 +1326,21 @@ const COPY = {
     academicLead:
       'Alongside development, the internship is a graded exercise of the IUT2 Grenoble Computer Science degree (Application Development track). It concludes with two deliverables before a dual audience: research and teaching.',
     academicItems: [
-      { t: 'The internship report', d: 'A report submitted on 2 June, presenting the context, the technical choices and the achievements, grounded in quality and security standards (ISO 25010, ISO 27002).' },
-      { t: 'The defense', d: 'An oral presentation on 22 June before a three-member jury, including my lab tutor and my IUT tutor.' },
-      { t: 'A dual audience', d: 'I learned to argue my choices before researchers and before end users, the senior café volunteers, in very different registers.' },
+      {
+        t: 'The internship report',
+        d: 'A report submitted on 2 June, presenting the context, the technical choices and the achievements, grounded in quality and security standards (ISO 25010, ISO 27002).',
+      },
+      {
+        t: 'The defense',
+        d: 'An oral presentation on 22 June before a three-member jury, including my lab tutor and my IUT tutor.',
+      },
+      {
+        t: 'A dual audience',
+        d: 'I learned to argue my choices before researchers and before end users, the senior café volunteers, in very different registers.',
+      },
     ],
-    academicJury: 'Defense jury: Mr Jean-Pierre Chevallet (IUT), Ms Amira Barhoumi (IUT), Mr El-Haddi Mechekour (lab).',
+    academicJury:
+      'Defense jury: Mr Jean-Pierre Chevallet (IUT), Ms Amira Barhoumi (IUT), Mr El-Haddi Mechekour (lab).',
 
     diagTitle: 'F02 · The diagnostic aid',
     diagStar: 'The flagship feature',
@@ -1050,15 +1365,26 @@ const COPY = {
     } as DiagnosticCopy,
     diagWeights:
       'The weights reflect each criterion’s discriminating power, not merely its availability. The object type conditions the search (5 points); the impacted function and behaviour describe the fault itself (3 points each); sensory observations add up to 2 points, capped so they do not overwhelm the main symptom; brand, model and component are worth just one point, since two coffee makers of different brands often fail the same way.',
-    diagShotResults: 'Results ranked by relevance: each past case shows its S/Sₘₐₓ ring, its diagnosis and its outcome.',
-    diagShotModal: 'The “Understand the scores” modal: weighted scale and LaTeX formulas, including the Damerau-Levenshtein distance.',
+    diagShotResults:
+      'Results ranked by relevance: each past case shows its S/Sₘₐₓ ring, its diagnosis and its outcome.',
+    diagShotModal:
+      'The “Understand the scores” modal: weighted scale and LaTeX formulas, including the Damerau-Levenshtein distance.',
     diagRejectedTitle: 'Approaches explored, then set aside',
     diagRejectedIntro:
       'Before settling on this design, I studied several alternatives, and rejected them for reasons documented in the specification:',
     diagRejected: [
-      { t: 'Semantic search (pgvector, embeddings)', d: 'Proposed as a bonus mission. Initial corpus too small, per-entry inference cost, and above all opaque results, incompatible with the explainability requirement.' },
-      { t: 'Native full-text search (tsvector)', d: 'Lighter, but superfluous given the low volume of truly comparable free text.' },
-      { t: 'Trigrams alone (pg_trgm)', d: 'Judged equivalent without the business scale, which is what provides the real discriminating power.' },
+      {
+        t: 'Semantic search (pgvector, embeddings)',
+        d: 'Proposed as a bonus mission. Initial corpus too small, per-entry inference cost, and above all opaque results, incompatible with the explainability requirement.',
+      },
+      {
+        t: 'Native full-text search (tsvector)',
+        d: 'Lighter, but superfluous given the low volume of truly comparable free text.',
+      },
+      {
+        t: 'Trigrams alone (pg_trgm)',
+        d: 'Judged equivalent without the business scale, which is what provides the real discriminating power.',
+      },
     ],
     diagLimits:
       'I own the limits: an object type never entered returns nothing, and the score does not judge whether the past diagnosis was correct, which only a human review fixes. Empirically calibrating the weights on real data is part of the project’s follow-ups.',
@@ -1067,20 +1393,39 @@ const COPY = {
     saisieLead:
       'A single form, fed by two field-adapted interfaces. Every entry starts with a reminder of the regulatory clause: volunteer repair, no obligation of result, possible risk of further damage.',
     saisieSteps: [
-      { t: 'Product and context', d: 'Category, object type, brand, model, plus usage history (object age, events before the fault).' },
-      { t: 'Observed symptoms', d: 'Three independent zones: fault description, sensory observations, behaviour. At least one must be filled.' },
-      { t: 'Identified fault', d: 'Faulty component, observed defects classed by family, and an optional free-text probable cause.' },
-      { t: 'Repair and result', d: 'Actions taken, any parts, then the result: object functional, non-functional, or repair pending.' },
+      {
+        t: 'Product and context',
+        d: 'Category, object type, brand, model, plus usage history (object age, events before the fault).',
+      },
+      {
+        t: 'Observed symptoms',
+        d: 'Three independent zones: fault description, sensory observations, behaviour. At least one must be filled.',
+      },
+      {
+        t: 'Identified fault',
+        d: 'Faulty component, observed defects classed by family, and an optional free-text probable cause.',
+      },
+      {
+        t: 'Repair and result',
+        d: 'Actions taken, any parts, then the result: object functional, non-functional, or repair pending.',
+      },
     ],
-    saisieWizard: { t: 'The Wizard', d: 'A step-by-step assistant in four stages, designed for the repairer, with conditional field rendering.' },
-    saisieTableur: { t: 'The Spreadsheet view', d: 'A condensed grid close to the paper form, reserved for the Front-desk profile, to quickly log several objects during a session.' },
+    saisieWizard: {
+      t: 'The Wizard',
+      d: 'A step-by-step assistant in four stages, designed for the repairer, with conditional field rendering.',
+    },
+    saisieTableur: {
+      t: 'The Spreadsheet view',
+      d: 'A condensed grid close to the paper form, reserved for the Front-desk profile, to quickly log several objects during a session.',
+    },
     saisiePoints: [
       'Business rules checked twice: at entry to guide in real time, then revalidated server-side to guarantee integrity (conditional dependencies, e.g. a behaviour required once an impacted function is set).',
       'Local draft saved automatically at each section: nothing is lost if a session is interrupted.',
       'Paper-form PDF generated from the schema version adopted by the café, so paper and digital stay consistent.',
     ],
     saisieShotClause: 'Clause step: the visitor is informed before any intervention.',
-    saisieShotTableur: 'The Spreadsheet view: one row per repair, columns grouped by business block.',
+    saisieShotTableur:
+      'The Spreadsheet view: one row per repair, columns grouped by business block.',
 
     lifecycleTitle: 'The lifecycle of a repair',
     lifecycleLead:
@@ -1111,7 +1456,8 @@ const COPY = {
         tag: 'F01 · F02',
         name: 'Repairer',
         role: 'At the heart of the session',
-        blurb: 'Enters a case via the Wizard, resumes a pending repair, and consults the diagnostic aid to draw on the experience of every café.',
+        blurb:
+          'Enters a case via the Wizard, resumes a pending repair, and consults the diagnostic aid to draw on the experience of every café.',
         can: ['Guided entry (Wizard)', 'Diagnostic aid (F02)', 'Resume pending repairs'],
         image: 'diagnostic',
         alt: 'Diagnostic aid screen with similar cases ranked by score',
@@ -1121,7 +1467,8 @@ const COPY = {
         tag: 'F01',
         name: 'Front desk',
         role: 'Rapid entry',
-        blurb: 'Logs several objects at the start of a session via the Spreadsheet view, closer to the paper form, or via the Wizard depending on preference.',
+        blurb:
+          'Logs several objects at the start of a session via the Spreadsheet view, closer to the paper form, or via the Wizard depending on preference.',
         can: ['Spreadsheet or Wizard', 'Multi-row entry', 'Resume pending cases'],
         image: 'tableur',
         alt: 'Spreadsheet rapid-entry view, one row per repair',
@@ -1131,8 +1478,14 @@ const COPY = {
         tag: 'F03',
         name: 'Manager',
         role: 'Steering',
-        blurb: 'Tracks the café’s activity: statistics, filterable tables, per-session summaries, durable exports and customisable charts. Can correct a repair’s result block and manage the referential values added by their café.',
-        can: ['Dashboard and KPIs', 'Composable charts', 'Documented exports (CSV/JSON)', 'Session summaries and activity log'],
+        blurb:
+          'Tracks the café’s activity: statistics, filterable tables, per-session summaries, durable exports and customisable charts. Can correct a repair’s result block and manage the referential values added by their café.',
+        can: [
+          'Dashboard and KPIs',
+          'Composable charts',
+          'Documented exports (CSV/JSON)',
+          'Session summaries and activity log',
+        ],
         image: 'gestionnaire',
         alt: 'Manager dashboard with indicators and charts',
       },
@@ -1141,7 +1494,8 @@ const COPY = {
         tag: 'F04',
         name: 'Public',
         role: 'The anonymised showcase',
-        blurb: 'A public dashboard, aggregated and fully anonymised (k-anonymity threshold), never revealing repairer identities, with open dataset export.',
+        blurb:
+          'A public dashboard, aggregated and fully anonymised (k-anonymity threshold), never revealing repairer identities, with open dataset export.',
         can: ['Aggregated data', 'Anonymisation (k-anonymity)', 'Open CSV/JSON export'],
         image: 'public',
         alt: 'Anonymised public dashboard with aggregated data',
@@ -1151,8 +1505,14 @@ const COPY = {
         tag: 'F05',
         name: 'Administrator',
         role: 'Governance',
-        blurb: 'The lab’s back-office: accounts, Repair Cafés, referentials, versioned form, translations and audit log, entirely designed for non-technical users.',
-        can: ['Accounts and account requests', 'Referentials and versioned form', 'Translations (8 languages)', 'Audit log (ISO 27002)'],
+        blurb:
+          'The lab’s back-office: accounts, Repair Cafés, referentials, versioned form, translations and audit log, entirely designed for non-technical users.',
+        can: [
+          'Accounts and account requests',
+          'Referentials and versioned form',
+          'Translations (8 languages)',
+          'Audit log (ISO 27002)',
+        ],
         image: 'admin-status',
         alt: 'Administration back-office, system status page',
       },
@@ -1168,8 +1528,14 @@ const COPY = {
     dedupBody:
       'The risk: two volunteers entering “Coffee maker”, “coffeemaker” and “Coffee-maker” as three distinct entries. Each label is normalised (lowercase, no accents or punctuation) into a single reference form. At entry time, a home-grown two-stage fuzzy search suggests the right existing value:',
     dedupSteps: [
-      { t: '1 · Pre-selection', d: 'The database pre-selects candidates by trigram similarity (PostgreSQL’s pg_trgm extension), fast across the whole base.' },
-      { t: '2 · Re-ranking', d: 'A finer ranking combines exact match, prefix, substring, word overlap and Damerau-Levenshtein distance (typos and letter swaps).' },
+      {
+        t: '1 · Pre-selection',
+        d: 'The database pre-selects candidates by trigram similarity (PostgreSQL’s pg_trgm extension), fast across the whole base.',
+      },
+      {
+        t: '2 · Re-ranking',
+        d: 'A finer ranking combines exact match, prefix, substring, word overlap and Damerau-Levenshtein distance (typos and letter swaps).',
+      },
     ],
     dedupOutro:
       'All deterministic, explainable, with no AI, and complemented by synonym management. The object-type referential was also built from an official taxonomy of 4,000+ raw entries, cleaned intensively (OpenRefine and batch processing) down to 14 usable categories.',
@@ -1179,12 +1545,30 @@ const COPY = {
     backLead:
       'The administration (F05) is used by the lab supervisor, not by an IT engineer. So I replaced native prompt and confirm windows with explicit modals, added contextual help panels and a guide page, and polished every label.',
     backFeatures: [
-      { t: 'Account requests', d: 'Full flow: approve by creating a café or linking to an existing one, reject with a note, or reject and ban an email. Disposable domains blocked.' },
-      { t: 'Curatable referentials', d: 'Review, merge, alias and hide the values proposed by cafés, to keep a clean vocabulary.' },
-      { t: 'Versioned form', d: 'The entry schema is configurable and versioned; each café adopts its version, and old entries keep their meaning. Associated paper-form PDF generation.' },
-      { t: 'Translations', d: 'A translation management interface, i18n covering eight languages (bonus mission BM-01 delivered).' },
-      { t: 'Audit log', d: 'Every sensitive action is logged with its author and sub-profile (ISO 27002), for traceability and non-repudiation.' },
-      { t: 'Laboratory view', d: 'A per-café activity summary, filterable and exportable, for the research team.' },
+      {
+        t: 'Account requests',
+        d: 'Full flow: approve by creating a café or linking to an existing one, reject with a note, or reject and ban an email. Disposable domains blocked.',
+      },
+      {
+        t: 'Curatable referentials',
+        d: 'Review, merge, alias and hide the values proposed by cafés, to keep a clean vocabulary.',
+      },
+      {
+        t: 'Versioned form',
+        d: 'The entry schema is configurable and versioned; each café adopts its version, and old entries keep their meaning. Associated paper-form PDF generation.',
+      },
+      {
+        t: 'Translations',
+        d: 'A translation management interface, i18n covering eight languages (bonus mission BM-01 delivered).',
+      },
+      {
+        t: 'Audit log',
+        d: 'Every sensitive action is logged with its author and sub-profile (ISO 27002), for traceability and non-repudiation.',
+      },
+      {
+        t: 'Laboratory view',
+        d: 'A per-café activity summary, filterable and exportable, for the research team.',
+      },
     ],
 
     stackTitle: 'Technical choices and architecture',
@@ -1267,10 +1651,38 @@ const COPY = {
     skillsLead:
       'A complete web project, from needs analysis to pre-production hardening, which mobilised and grew a wide range of skills.',
     skillsGroups: [
-      { t: 'Design and data', items: ['Relational model guaranteeing the integrity of heterogeneous data', 'Extensible referentials and de-duplication', 'Cleaning a taxonomy of thousands of entries'] },
-      { t: 'Full-stack development', items: ['End-to-end TypeScript, shared types and validation', 'React, Node, Express, PostgreSQL', 'Conditional rendering of a complex form'] },
-      { t: 'Quality and industrialisation', items: ['Security audit and hardening', 'Test suite and CI with a blocking gate', 'Containerisation and deployment, GDPR compliance'] },
-      { t: 'Leadership and communication', items: ['Keeping a specification consistent with the code', 'Arguing choices before researchers', 'Presenting to a non-technical, senior audience'] },
+      {
+        t: 'Design and data',
+        items: [
+          'Relational model guaranteeing the integrity of heterogeneous data',
+          'Extensible referentials and de-duplication',
+          'Cleaning a taxonomy of thousands of entries',
+        ],
+      },
+      {
+        t: 'Full-stack development',
+        items: [
+          'End-to-end TypeScript, shared types and validation',
+          'React, Node, Express, PostgreSQL',
+          'Conditional rendering of a complex form',
+        ],
+      },
+      {
+        t: 'Quality and industrialisation',
+        items: [
+          'Security audit and hardening',
+          'Test suite and CI with a blocking gate',
+          'Containerisation and deployment, GDPR compliance',
+        ],
+      },
+      {
+        t: 'Leadership and communication',
+        items: [
+          'Keeping a specification consistent with the code',
+          'Arguing choices before researchers',
+          'Presenting to a non-technical, senior audience',
+        ],
+      },
     ],
     closing:
       'This internship let me turn know-how that was until then oral and scattered into reliable, shared, exploitable data, in a project built to outlast my departure. It confirmed my taste for user-oriented web development, serving a real use with a societal dimension.',
@@ -1278,14 +1690,49 @@ const COPY = {
     galleryTitle: 'Gallery',
     galleryLead: 'A few extra screens, all from fresh captures of the delivered product.',
     gallery: [
-      { name: 'wizard-step', cap: 'The Wizard mid-entry: first step, product and context.', w: 1600, h: 1000 },
-      { name: 'diagnostic-full', cap: 'The diagnostic aid: full list of similar cases found.', w: 1400, h: 875 },
-      { name: 'gestionnaire-tableau', cap: 'Interventions table, filterable and sortable by the manager.', w: 1600, h: 1000 },
-      { name: 'gestionnaire-export', cap: 'Documented, durable exports (CSV / JSON).', w: 1600, h: 1000 },
+      {
+        name: 'wizard-step',
+        cap: 'The Wizard mid-entry: first step, product and context.',
+        w: 1600,
+        h: 1000,
+      },
+      {
+        name: 'diagnostic-full',
+        cap: 'The diagnostic aid: full list of similar cases found.',
+        w: 1400,
+        h: 875,
+      },
+      {
+        name: 'gestionnaire-tableau',
+        cap: 'Interventions table, filterable and sortable by the manager.',
+        w: 1600,
+        h: 1000,
+      },
+      {
+        name: 'gestionnaire-export',
+        cap: 'Documented, durable exports (CSV / JSON).',
+        w: 1600,
+        h: 1000,
+      },
       { name: 'pending', cap: 'Pending repairs, ready to be resumed.', w: 1600, h: 1000 },
-      { name: 'admin-guide', cap: 'Back-office Guide page, designed for non-technical admins.', w: 1600, h: 1000 },
-      { name: 'admin-traductions', cap: 'Translation management: i18n covers eight languages.', w: 1600, h: 1000 },
-      { name: 'admin-laboratoire', cap: '“Laboratory” view: activity per café for the research team.', w: 1600, h: 1000 },
+      {
+        name: 'admin-guide',
+        cap: 'Back-office Guide page, designed for non-technical admins.',
+        w: 1600,
+        h: 1000,
+      },
+      {
+        name: 'admin-traductions',
+        cap: 'Translation management: i18n covers eight languages.',
+        w: 1600,
+        h: 1000,
+      },
+      {
+        name: 'admin-laboratoire',
+        cap: '“Laboratory” view: activity per café for the research team.',
+        w: 1600,
+        h: 1000,
+      },
     ],
 
     cdcLink: 'The full specification (spec, diagrams and wireframes) remains available online.',
@@ -1298,9 +1745,7 @@ const COPY = {
    ══════════════════════════════════════════════════════════════ */
 const ProjetStage = () => {
   const { i18n } = useTranslation();
-  const lang: Lang = (i18n.language || i18n.resolvedLanguage || 'fr')
-    .toLowerCase()
-    .startsWith('en')
+  const lang: Lang = (i18n.language || i18n.resolvedLanguage || 'fr').toLowerCase().startsWith('en')
     ? 'en'
     : 'fr';
   const c = COPY[lang];
@@ -1363,7 +1808,9 @@ const ProjetStage = () => {
           <h2>{c.problemTitle}</h2>
           <p className="stage-lead">{c.problemLead}</p>
           <p>{c.existingBody}</p>
-          <Pillars items={c.partisPris.map((p) => ({ icon: p.icon, title: p.title, text: p.text }))} />
+          <Pillars
+            items={c.partisPris.map((p) => ({ icon: p.icon, title: p.title, text: p.text }))}
+          />
           <div className="stage-mini-stats">
             {c.monitorStats.map((s) => (
               <div className="stage-mini-stat" key={s.label}>

@@ -211,8 +211,14 @@ class MusicPlayer {
     if (e.retractBtn) {
       // The retract button's label depends on the collapsed/expanded state.
       const expandLabel = this.t('common.musicPlayer.expand');
-      e.retractBtn.setAttribute('aria-label', this.isRetracted ? expandLabel : this.t('common.musicPlayer.retract'));
-      e.retractBtn.setAttribute('title', this.isRetracted ? expandLabel : this.t('common.musicPlayer.retractShort'));
+      e.retractBtn.setAttribute(
+        'aria-label',
+        this.isRetracted ? expandLabel : this.t('common.musicPlayer.retract')
+      );
+      e.retractBtn.setAttribute(
+        'title',
+        this.isRetracted ? expandLabel : this.t('common.musicPlayer.retractShort')
+      );
     }
     const loadingText = e.container.querySelector('.loading-text');
     if (loadingText) loadingText.textContent = this.t('common.musicPlayer.loading');
@@ -349,6 +355,8 @@ class MusicPlayer {
       return;
     // Évite les raccourcis si le focus est dans un dialog (terminal, lightbox, etc.)
     if (target.closest('[role="dialog"]')) return;
+    // Le slider de progression gère ses propres flèches (sinon seek en double)
+    if (target.closest('#music-player .progress-container')) return;
 
     switch (e.code) {
       case 'Space':
@@ -380,6 +388,29 @@ class MusicPlayer {
       0,
       Math.min(this.audio.duration, this.audio.currentTime + seconds)
     );
+  }
+
+  private onProgressKeyDown(e: KeyboardEvent): void {
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        e.preventDefault();
+        this.seekRelative(-5);
+        break;
+      case 'ArrowRight':
+      case 'ArrowUp':
+        e.preventDefault();
+        this.seekRelative(5);
+        break;
+      case 'Home':
+        e.preventDefault();
+        if (isFinite(this.audio.duration)) this.audio.currentTime = 0;
+        break;
+      case 'End':
+        e.preventDefault();
+        if (isFinite(this.audio.duration)) this.audio.currentTime = this.audio.duration;
+        break;
+    }
   }
 
   private toggleMute(): void {
@@ -510,7 +541,7 @@ class MusicPlayer {
         </div>
       </div>
       <div class="time-display"><span class="current-time">0:00</span> / <span class="duration">0:00</span></div>
-      <div class="progress-container" role="progressbar" aria-label="${this.t('common.musicPlayer.progress')}">
+      <div class="progress-container" role="slider" tabindex="0" aria-label="${this.t('common.musicPlayer.progress')}" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
         <div class="progress"></div>
       </div>
     `;
@@ -636,6 +667,7 @@ class MusicPlayer {
     document.addEventListener('click', this.boundVolumeOutsideClick);
 
     this.elements.progressContainer.addEventListener('click', (e) => this.seek(e));
+    this.elements.progressContainer.addEventListener('keydown', (e) => this.onProgressKeyDown(e));
 
     // Close queue menu when clicking outside — stored for destroy()
     this.boundQueueOutsideClick = (e) => {
@@ -886,6 +918,16 @@ class MusicPlayer {
     // Update time display
     this.elements.currentTime.textContent = this.formatTime(this.audio.currentTime);
     this.elements.duration.textContent = this.formatTime(this.audio.duration);
+
+    // Expose la position au lecteur d'ecran (role slider)
+    this.elements.progressContainer.setAttribute(
+      'aria-valuenow',
+      String(Math.round(this.audio.currentTime))
+    );
+    this.elements.progressContainer.setAttribute(
+      'aria-valuetext',
+      `${this.formatTime(this.audio.currentTime)} / ${this.formatTime(this.audio.duration)}`
+    );
   }
 
   private setupVisualizer(): void {
@@ -910,6 +952,12 @@ class MusicPlayer {
 
     // Update duration display
     this.elements.duration.textContent = this.formatTime(this.audio.duration);
+    if (isFinite(this.audio.duration)) {
+      this.elements.progressContainer.setAttribute(
+        'aria-valuemax',
+        String(Math.round(this.audio.duration))
+      );
+    }
 
     // Clamp saved time to duration
     if (this.savedTime >= this.audio.duration) {

@@ -15,6 +15,8 @@
 }
 
 #project-list .project {
+  /* Ancre du lien etendu .project-card-link::after */
+  position: relative;
   margin-bottom: var(--space-xl);
   padding: var(--space-lg);
   background: rgba(0, 0, 0, 0.3);
@@ -46,7 +48,12 @@
   inset: 0 0 auto 0;
   height: 3px;
   border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
-  background: linear-gradient(90deg, var(--mood-heading-start), var(--mood-heading-mid), var(--mood-heading-end));
+  background: linear-gradient(
+    90deg,
+    var(--mood-heading-start),
+    var(--mood-heading-mid),
+    var(--mood-heading-end)
+  );
 }
 
 #project-list .project--featured:hover {
@@ -81,14 +88,6 @@
   border-radius: var(--border-radius-sm);
   margin: var(--space-md) 0;
   border: 2px solid rgba(var(--color-primary-rgb), 0.3);
-  transition:
-    transform var(--transition-base),
-    box-shadow var(--transition-base);
-}
-
-#project-list .project > img:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 15px rgba(var(--color-primary-rgb), 0.5);
 }
 
 /* Project technology icons */
@@ -153,6 +152,28 @@
 .project-footer .btn:hover .btn-arrow,
 .project-footer .btn:focus-visible .btn-arrow {
   transform: translateX(4px);
+}
+
+/* Lien etendu : la zone cliquable du CTA couvre toute la carte */
+.project-card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Un transform sur le lien en ferait le containing block du ::after
+   (overlay reduit au bouton pendant le hover, donc clignotement) */
+.project-card-link:hover,
+.project-card-link:focus-visible,
+.project-card-link:active {
+  transform: none;
+}
+
+/* Les icones techno (tooltips) restent atteignables au-dessus de l'overlay */
+#project-list .project .project-tech {
+  position: relative;
+  z-index: 2;
 }
 
 /* Presentation grid (homepage) */
@@ -420,11 +441,6 @@
   border: 1px solid rgba(var(--color-primary-rgb), 0.18);
   border-left: 4px solid var(--color-primary);
   border-radius: var(--border-radius-md);
-  transition: box-shadow var(--transition-base);
-}
-
-.about-card:hover {
-  box-shadow: 0 4px 24px rgba(var(--color-primary-rgb), 0.15);
 }
 
 .about-card p {
@@ -450,13 +466,10 @@
   font-size: 0.85rem;
   color: var(--color-primary);
   font-weight: 500;
-  transition:
-    background var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: border-color var(--transition-fast);
 }
 
 .about-badge:hover {
-  background: rgba(var(--color-primary-rgb), 0.2);
   border-color: rgba(var(--color-primary-rgb), 0.55);
 }
 
@@ -493,22 +506,6 @@
   min-width: 0;
   overflow: hidden;
   isolation: isolate;
-}
-
-.skills-category-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at top right, rgba(var(--color-primary-rgb), 0.2), transparent 46%),
-    linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.08), transparent 58%);
-  opacity: 0;
-  transition: opacity var(--transition-base);
-  pointer-events: none;
-}
-
-.skills-category-card:hover::before {
-  opacity: 1;
 }
 
 .skills-card-heading {
@@ -562,30 +559,11 @@
     color var(--transition-base);
 }
 
-/* Sophisticated hover interaction — centered scale pop + color shift + gradient glow */
-.skills-showcase--cards .bot-skill-tag:hover {
-  transform: scale(1.08);
-  background: rgba(var(--color-primary-rgb), 0.16);
-  border-color: rgba(var(--color-primary-rgb), 0.7);
-  box-shadow: 0 0 12px rgba(var(--color-primary-rgb), 0.3);
-}
-
-.skills-showcase--cards .bot-skill-tag:focus {
-  outline: 2px solid rgba(var(--color-primary-rgb), 0.5);
-  outline-offset: 2px;
-}
-
 /* Respect motion preferences — disable animations for users with reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   .skills-showcase--cards .bot-skill-tag {
     animation: none;
-    transition:
-      background var(--transition-fast),
-      border-color var(--transition-fast);
-  }
-
-  .skills-showcase--cards .bot-skill-tag:hover {
-    transform: none;
+    transition: border-color var(--transition-fast);
   }
 }
 
@@ -1406,11 +1384,6 @@
   border: 2px solid var(--color-primary);
   border-radius: 50%;
   box-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.5);
-  transition: box-shadow var(--transition-base);
-}
-
-.timeline-item:hover::before {
-  box-shadow: 0 0 16px rgba(var(--color-primary-rgb), 0.8);
 }
 
 .timeline-year {
@@ -1429,14 +1402,11 @@
   border: 1px solid rgba(var(--color-primary-rgb), 0.15);
   border-radius: var(--border-radius-sm);
   padding: var(--space-sm) var(--space-md);
-  transition:
-    border-color var(--transition-base),
-    box-shadow var(--transition-base);
+  transition: border-color var(--transition-base);
 }
 
 .timeline-item:hover .timeline-content {
   border-color: rgba(var(--color-primary-rgb), 0.35);
-  box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.12);
 }
 
 .timeline-content strong {
@@ -1482,19 +1452,12 @@
   border: 1px solid rgba(var(--color-primary-rgb), 0.18);
   border-radius: var(--border-radius-md);
   text-align: center;
-  transition:
-    background var(--transition-base),
-    border-color var(--transition-base),
-    transform var(--transition-base),
-    box-shadow var(--transition-base);
+  transition: border-color var(--transition-base);
   cursor: default;
 }
 
 .hobby-card:hover {
-  background: rgba(var(--color-primary-rgb), 0.1);
   border-color: rgba(var(--color-primary-rgb), 0.45);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(var(--color-primary-rgb), 0.18);
 }
 
 .hobby-icon {
@@ -1502,11 +1465,6 @@
   height: 36px;
   color: var(--color-primary);
   flex-shrink: 0;
-  transition: transform var(--transition-base);
-}
-
-.hobby-card:hover .hobby-icon {
-  transform: scale(1.15);
 }
 
 .hobby-card span {

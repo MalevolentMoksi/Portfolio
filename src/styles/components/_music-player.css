@@ -108,6 +108,16 @@
   display: flex;
 }
 
+/* Cible tactile : languette de 26px, zone de tap etendue a 44px
+   vers l'interieur de l'ecran (le bord gauche est deja l'ecran) */
+@media (hover: none) and (pointer: coarse) {
+  #player-peek-btn::after {
+    content: '';
+    position: absolute;
+    inset: -8px -18px -8px 0;
+  }
+}
+
 /* Main container for album art and info */
 .player-main {
   display: flex;
@@ -356,8 +366,9 @@
   transform: scale(0.9);
 }
 
-/* Progress bar */
-.progress-container {
+/* Progress bar — scopee a #music-player : .progress-container/.progress
+   existent aussi sous les videos de /projets-personnels (non cliquables) */
+#music-player .progress-container {
   width: 100%;
   height: 8px;
   background: rgba(255, 255, 255, 0.15);
@@ -372,7 +383,7 @@
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-.progress {
+#music-player .progress {
   height: 100%;
   width: 100%;
   background: linear-gradient(
@@ -391,7 +402,7 @@
   position: relative;
 }
 
-.progress::after {
+#music-player .progress::after {
   content: '';
   position: absolute;
   right: -6px;
@@ -410,7 +421,8 @@
     box-shadow var(--transition-base);
 }
 
-.progress-container:hover {
+#music-player .progress-container:hover,
+#music-player .progress-container:focus-visible {
   height: 10px;
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(var(--color-primary-rgb), 0.4);
@@ -419,13 +431,15 @@
     0 0 8px rgba(var(--color-primary-rgb), 0.25);
 }
 
-.progress-container:hover .progress {
+#music-player .progress-container:hover .progress,
+#music-player .progress-container:focus-visible .progress {
   box-shadow:
     0 0 16px rgba(var(--color-primary-rgb), 0.9),
     inset -1px 0 2px rgba(255, 255, 255, 0.3);
 }
 
-.progress-container:hover .progress::after {
+#music-player .progress-container:hover .progress::after,
+#music-player .progress-container:focus-visible .progress::after {
   opacity: 1;
   transform: translateY(-50%) scale(1.15);
   box-shadow: 0 0 14px rgba(var(--color-primary-rgb), 0.95);

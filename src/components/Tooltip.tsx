@@ -5,6 +5,7 @@ import {
   useCallback,
   useId,
   type FocusEvent,
+  type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
 } from 'react';
@@ -16,6 +17,8 @@ import {
  * @param {string} [desc]       - Description secondaire (optionnelle, plus discrète)
  * @param {'top'|'bottom'} [position='top'] - Position préférée (bascule auto si déborde)
  * @param {number} [delay=320]  - Délai avant affichage (ms)
+ * @param {boolean} [focusable=false] - Rend le déclencheur focusable au clavier
+ *   (pour les enfants non interactifs comme une image, sinon tooltip souris seule)
  * @param {React.ReactNode} children - Élément enfant déclencheur
  */
 interface TooltipProps {
@@ -23,10 +26,18 @@ interface TooltipProps {
   desc?: string;
   position?: 'top' | 'bottom';
   delay?: number;
+  focusable?: boolean;
   children: ReactNode;
 }
 
-const Tooltip = ({ text, desc, position = 'top', delay = 320, children }: TooltipProps) => {
+const Tooltip = ({
+  text,
+  desc,
+  position = 'top',
+  delay = 320,
+  focusable = false,
+  children,
+}: TooltipProps) => {
   const [visible, setVisible] = useState(false);
   const [flipped, setFlipped] = useState(false);
   const wrapRef = useRef<HTMLSpanElement | null>(null);
@@ -80,14 +91,27 @@ const Tooltip = ({ text, desc, position = 'top', delay = 320, children }: Toolti
 
   const actualPos = flipped ? (position === 'top' ? 'bottom' : 'top') : position;
 
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLElement>) => {
+      // Pattern ARIA tooltip : Escape ferme sans quitter le déclencheur
+      if (e.key === 'Escape' && visible) {
+        e.stopPropagation();
+        hide();
+      }
+    },
+    [visible, hide]
+  );
+
   return (
     <span
       className="tooltip-wrap"
       ref={wrapRef}
+      tabIndex={focusable ? 0 : undefined}
       onMouseEnter={show}
       onMouseLeave={hide}
       onFocus={show}
       onBlur={hide}
+      onKeyDown={handleKeyDown}
       aria-describedby={visible && text ? tooltipId : undefined}
     >
       {children}

@@ -237,18 +237,11 @@
     0 6px 18px rgba(0, 0, 0, 0.45);
   background: rgba(var(--color-secondary-rgb), 0.55);
   padding: var(--space-sm);
-  transition:
-    box-shadow var(--transition-base),
-    border-color var(--transition-base),
-    transform var(--transition-base);
+  transition: border-color var(--transition-base);
 }
 
 .bot-icon:hover {
   border-color: rgba(var(--color-primary-rgb), 0.75);
-  box-shadow:
-    0 0 48px rgba(var(--color-primary-rgb), 0.4),
-    0 8px 24px rgba(0, 0, 0, 0.5);
-  transform: translateY(-4px);
 }
 
 /* Feature cards grid — flex-wrap so 5 items sit 3+2 centered */
@@ -274,16 +267,11 @@
   background: rgba(var(--color-primary-rgb), 0.05);
   border: 1px solid rgba(var(--color-primary-rgb), 0.2);
   border-radius: var(--border-radius-sm);
-  transition:
-    background var(--transition-base),
-    border-color var(--transition-base),
-    box-shadow var(--transition-base);
+  transition: border-color var(--transition-base);
 }
 
 .bot-feature-card:hover {
-  background: rgba(var(--color-primary-rgb), 0.1);
   border-color: rgba(var(--color-primary-rgb), 0.45);
-  box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .bot-feature-icon {
@@ -338,13 +326,10 @@
   border-radius: 999px;
   color: var(--color-primary);
   background: rgba(var(--color-primary-rgb), 0.08);
-  transition:
-    background var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: border-color var(--transition-fast);
 }
 
 .bot-skill-tag:hover {
-  background: rgba(var(--color-primary-rgb), 0.18);
   border-color: rgba(var(--color-primary-rgb), 0.7);
 }
 
@@ -527,15 +512,6 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-sm);
-  transition:
-    background var(--transition-base),
-    border-color var(--transition-base),
-    box-shadow var(--transition-base);
-}
-
-.presentation-notice:hover {
-  background: rgba(var(--color-primary-rgb), 0.12);
-  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb), 0.15);
 }
 
 .notice-icon {

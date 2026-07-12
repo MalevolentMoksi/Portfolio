@@ -66,7 +66,7 @@ const Projets = () => {
                 <div className="project-tech" role="list" aria-label={t('projets.technologies')}>
                   {project.technologies.map((tech: any) => (
                     <div key={tech.name} role="listitem">
-                      <Tooltip text={tech.name}>
+                      <Tooltip text={tech.name} focusable>
                         <img
                           src={tech.icon.startsWith('http') ? tech.icon : getAssetPath(tech.icon)}
                           alt={tech.name}
@@ -84,11 +84,13 @@ const Projets = () => {
               <footer className="project-footer">
                 <Link
                   to={project.path}
-                  className="btn"
+                  className="btn project-card-link"
                   aria-label={t('projets.learnMoreAria', { title: project.title })}
                 >
                   {t('projets.learnMore')}
-                  <span className="btn-arrow" aria-hidden="true">→</span>
+                  <span className="btn-arrow" aria-hidden="true">
+                    →
+                  </span>
                 </Link>
               </footer>
             </article>
