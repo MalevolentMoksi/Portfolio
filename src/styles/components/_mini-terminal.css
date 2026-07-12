@@ -124,7 +124,9 @@
 }
 
 .mini-terminal-panel--booting {
-  animation: terminal-slide-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both, terminal-boot-flicker 0.9s steps(2);
+  animation:
+    terminal-slide-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both,
+    terminal-boot-flicker 0.9s steps(2);
 }
 
 @keyframes terminal-boot-flicker {
@@ -169,13 +171,12 @@
 }
 
 .mini-terminal-crt-glare {
-  background:
-    linear-gradient(
-      138deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.06) 22%,
-      rgba(255, 255, 255, 0) 42%
-    );
+  background: linear-gradient(
+    138deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.06) 22%,
+    rgba(255, 255, 255, 0) 42%
+  );
   mix-blend-mode: screen;
   opacity: 0.42;
 }
@@ -490,6 +491,26 @@
   .header-action-btn svg {
     width: 22px;
     height: 22px;
+  }
+}
+
+/* Cibles tactiles : zone de tap >= 44px sans grossir le bouton */
+@media (hover: none) and (pointer: coarse) {
+  .header-action-btn {
+    position: relative;
+  }
+
+  .header-action-btn::after {
+    content: '';
+    position: absolute;
+    inset: -7px;
+  }
+
+  /* Pas de scale au tap : le clic est synthetise apres le touch sur une
+     re-verification du point, et la boite retrecie par :active le fait rater */
+  .header-action-btn:hover,
+  .header-action-btn:active {
+    transform: none;
   }
 }
 

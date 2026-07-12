@@ -248,9 +248,11 @@
     padding-right: 0.72rem;
   }
 
+  /* Cible tactile >= 44px (le .toast est en overflow: hidden, donc
+     taille reelle plutot que pseudo-element etendu) */
   .toast-close {
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
   }
 }
 

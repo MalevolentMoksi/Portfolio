@@ -292,6 +292,14 @@ body.hamburger-menu-open header.header--main {
   gap: 0.4rem;
 }
 
+/* Les zones de tap etendues des boutons (+7px de chaque cote) ne doivent
+   pas se chevaucher entre voisins */
+@media (hover: none) and (pointer: coarse) {
+  .header--actions {
+    gap: 14px;
+  }
+}
+
 /* ---- Hamburger dans le slot social (mobile) ---- */
 header.header--main .hamburger-toggle {
   grid-area: social;

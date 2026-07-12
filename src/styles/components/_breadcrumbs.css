@@ -39,6 +39,19 @@
   opacity: 1;
 }
 
+/* Cibles tactiles : liens fins (~22px), zone de tap etendue a ~44px */
+@media (hover: none) and (pointer: coarse) {
+  .breadcrumbs a {
+    position: relative;
+  }
+
+  .breadcrumbs a::after {
+    content: '';
+    position: absolute;
+    inset: -11px -6px;
+  }
+}
+
 .breadcrumb-separator {
   color: var(--color-accent-pale);
   opacity: 0.5;

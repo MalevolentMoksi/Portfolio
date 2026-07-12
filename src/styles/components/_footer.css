@@ -698,3 +698,40 @@
     font-size: 0.7rem;
   }
 }
+
+/* Cibles tactiles : zones de tap >= 44px (apres les blocs responsive
+   pour surcharger leurs tailles reduites) */
+@media (hover: none) and (pointer: coarse) {
+  /* overflow: hidden empeche un pseudo-element etendu : hauteur reelle */
+  .footer-top-link {
+    min-height: 44px;
+  }
+
+  .bubble {
+    position: relative;
+    width: 40px;
+    height: 40px;
+  }
+
+  .bubble img,
+  .bubble svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .bubble::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+  }
+
+  .footer-widget-orbit-trigger {
+    position: relative;
+  }
+
+  .footer-widget-orbit-trigger::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
+}
