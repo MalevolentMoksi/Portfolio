@@ -12,6 +12,28 @@ import type {
 
 const academicProjectsBase: AcademicProjectBase[] = [
   {
+    id: 'stage',
+    path: '/projet-stage',
+    featured: true,
+    badgeKey: 'projets.featuredBadge',
+    typeKey: 'data.projects.academic.stage.type',
+    titleKey: 'data.projects.academic.stage.title',
+    categoryKey: 'data.projects.academic.stage.category',
+    descriptionKey: 'data.projects.academic.stage.description',
+    teamSizeKey: 'data.projects.academic.stage.teamSize',
+    image: '/assets/images/projects/stage/login.webp',
+    tagKeys: ['typescript', 'react', 'nodejs', 'postgresql', 'docker', 'vite', 'git'],
+    technologies: [
+      { name: 'TypeScript', icon: '/assets/images/logos/typescript.svg' },
+      { name: 'React', icon: '/assets/images/logos/react.svg' },
+      { name: 'Node.js', icon: '/assets/images/logos/nodedotjs.svg' },
+      { name: 'PostgreSQL', icon: '/assets/images/logos/postgresql.svg' },
+      { name: 'Docker', icon: '/assets/images/logos/docker.svg' },
+      { name: 'Vite', icon: '/assets/images/logos/vite.svg' },
+      { name: 'GitHub Actions', icon: '/assets/images/logos/github.svg' },
+    ],
+  },
+  {
     id: 'sae301',
     path: '/projet-SAE3.01',
     typeKey: 'data.projects.academic.sae301.type',

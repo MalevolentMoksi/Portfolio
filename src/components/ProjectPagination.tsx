@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
  */
 
 const projects = [
+  { path: '/projet-stage', titleKey: 'common.pagination.projectTitles.stage' },
   { path: '/projet-SAE3.01', titleKey: 'common.pagination.projectTitles.sae301' },
   { path: '/projet-MEGASAE', titleKey: 'common.pagination.projectTitles.megasae' },
   { path: '/projet-SAE56', titleKey: 'common.pagination.projectTitles.sae56' },

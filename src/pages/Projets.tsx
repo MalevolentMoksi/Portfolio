@@ -23,7 +23,18 @@ const Projets = () => {
       <div className="projects-grid">
         {academicProjects.map((project, index) => (
           <div key={project.id}>
-            <article className="project" aria-labelledby={`project-title-${project.id}`}>
+            <article
+              className={`project${project.featured ? ' project--featured' : ''}`}
+              aria-labelledby={`project-title-${project.id}`}
+            >
+              {project.featured && project.badgeKey && (
+                <p className="project-featured-badge">
+                  <span className="project-featured-star" aria-hidden="true">
+                    ★
+                  </span>
+                  {t(project.badgeKey)}
+                </p>
+              )}
               <h2 id={`project-title-${project.id}`}>{project.title}</h2>
               {project.category && <p className="project-category">{project.category}</p>}
               {project.video ? (

@@ -48,6 +48,8 @@ export interface AcademicProjectBase {
   video?: string;
   tagKeys: string[];
   technologies: Technology[];
+  featured?: boolean;
+  badgeKey?: string;
 }
 
 export interface AcademicProject {
@@ -57,6 +59,8 @@ export interface AcademicProject {
   video?: string;
   tagKeys: string[];
   technologies: Technology[];
+  featured?: boolean;
+  badgeKey?: string;
   type: string;
   title: string;
   category: string;

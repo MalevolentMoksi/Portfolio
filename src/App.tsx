@@ -45,6 +45,7 @@ function retryLazy<T extends ComponentType<Record<string, never>>>(
 // Lazy load pages pour code splitting
 const Projets = retryLazy(() => import('./pages/Projets'));
 const ProjetsPersonnels = retryLazy(() => import('./pages/ProjetsPersonnels'));
+const ProjetStage = retryLazy(() => import('./pages/ProjetStage'));
 const ProjetMEGASAE = retryLazy(() => import('./pages/ProjetMEGASAE'));
 const ProjetSAE12 = retryLazy(() => import('./pages/ProjetSAE12'));
 const ProjetSAE3 = retryLazy(() => import('./pages/ProjetSAE3'));
@@ -69,6 +70,7 @@ const AppContent = () => {
           <Route index element={<Home />} />
           <Route path="projets" element={<Projets />} />
           <Route path="projets-personnels" element={<ProjetsPersonnels />} />
+          <Route path="projet-stage" element={<ProjetStage />} />
           <Route path="projet-MEGASAE" element={<ProjetMEGASAE />} />
           <Route path="projet-SAE12" element={<ProjetSAE12 />} />
           <Route path="projet-SAE3" element={<ProjetSAE3 />} />

@@ -183,6 +183,7 @@
       "nextAria": "Projet suivant : {{title}}",
       "allProjectsAria": "Retour à la liste des projets",
       "projectTitles": {
+        "stage": "Repairtory - Stage au laboratoire G-SCOP",
         "sae301": "SAE 3.01 - Application Web pour les aidants",
         "megasae": "MEGASAE - Application de banquets",
         "sae56": "SAE 5-6 - Site web institutionnel",
@@ -570,6 +571,12 @@
       "metaTitle": "Portfolio - Projets personnels",
       "metaDescription": "Portfolio d'Enzo Morello - Projets personnels et créations"
     },
+    "projetStage": {
+      "heading": "Repairtory",
+      "subheading": "La mémoire partagée des Repair Cafés grenoblois",
+      "metaTitle": "Repairtory · Stage au laboratoire G-SCOP | Enzo Morello",
+      "metaDescription": "Stage de 2ᵉ année : conception et développement en solo d'une application web full-stack (TypeScript, React, PostgreSQL) pour centraliser les réparations des Repair Cafés grenoblois, avec aide au diagnostic explicable."
+    },
     "projetMegasae": {
       "heading": "Projet cardinal - Application de planification de banquets",
       "metaTitle": "Projet cardinal - Application de gestion de banquets",
@@ -696,6 +703,7 @@
     "metaTitle": "Projets | Portfolio",
     "metaDescription": "Mes projets scolaires et professionnels",
     "title": "Mes Projets",
+    "featuredBadge": "Projet phare · Stage professionnel",
     "learnMore": "En savoir plus",
     "learnMoreAria": "En savoir plus sur {{title}}",
     "technologies": "Technologies utilisées",
@@ -973,6 +981,8 @@
   "data": {
     "projects": {
       "tags": {
+        "typescript": "TypeScript",
+        "nodejs": "Node.js",
         "react": "React",
         "php": "PHP",
         "sqlite": "SQLite",
@@ -1008,6 +1018,13 @@
         "visualProgramming": "Programmation visuelle"
       },
       "academic": {
+        "stage": {
+          "type": "Stage · Développement web full-stack",
+          "title": "Repairtory, la plateforme des Repair Cafés",
+          "category": "Stage professionnel · Laboratoire G-SCOP",
+          "description": "Conception et développement, seul, d'une application web pour centraliser et partager les cas de réparation de plusieurs Repair Cafés grenoblois : modèle de données, aide au diagnostic explicable sans IA, back-office multilingue et déploiement sécurisé.",
+          "teamSize": "Développeur unique · 12 semaines au G-SCOP"
+        },
         "sae301": {
           "type": "Projet SAE",
           "title": "\"Aidémé\" - Application Web pour les aidants",

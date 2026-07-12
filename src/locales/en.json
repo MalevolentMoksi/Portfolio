@@ -183,6 +183,7 @@
       "nextAria": "Next project: {{title}}",
       "allProjectsAria": "Back to project list",
       "projectTitles": {
+        "stage": "Repairtory - Internship at the G-SCOP lab",
         "sae301": "SAE 3.01 - Web app for caregivers",
         "megasae": "MEGASAE - Banquet management app",
         "sae56": "SAE 5-6 - Institutional website",
@@ -570,6 +571,12 @@
       "metaTitle": "Portfolio - Personal Projects",
       "metaDescription": "Enzo Morello Portfolio - Personal projects and creations"
     },
+    "projetStage": {
+      "heading": "Repairtory",
+      "subheading": "The shared memory of Grenoble's Repair Cafés",
+      "metaTitle": "Repairtory · Internship at the G-SCOP lab | Enzo Morello",
+      "metaDescription": "2nd-year internship: solo design and development of a full-stack web app (TypeScript, React, PostgreSQL) to centralise repairs across Grenoble's Repair Cafés, with an explainable diagnostic aid."
+    },
     "projetMegasae": {
       "heading": "Flagship project - Banquet planning application",
       "metaTitle": "Flagship project - Banquet management application",
@@ -696,6 +703,7 @@
     "metaTitle": "Projects | Portfolio",
     "metaDescription": "My academic and professional projects",
     "title": "My Projects",
+    "featuredBadge": "Flagship project · Professional internship",
     "learnMore": "Learn more",
     "learnMoreAria": "Learn more about {{title}}",
     "technologies": "Technologies used",
@@ -973,6 +981,8 @@
   "data": {
     "projects": {
       "tags": {
+        "typescript": "TypeScript",
+        "nodejs": "Node.js",
         "react": "React",
         "php": "PHP",
         "sqlite": "SQLite",
@@ -1008,6 +1018,13 @@
         "visualProgramming": "Visual programming"
       },
       "academic": {
+        "stage": {
+          "type": "Internship · Full-stack web development",
+          "title": "Repairtory, the Repair Cafés platform",
+          "category": "Professional internship · G-SCOP research lab",
+          "description": "Solo design and development of a web application to centralise and share repair cases across several of Grenoble's Repair Cafés: data model, explainable AI-free diagnostic aid, multilingual back-office and secure deployment.",
+          "teamSize": "Sole developer · 12 weeks at G-SCOP"
+        },
         "sae301": {
           "type": "SAE Project",
           "title": "\"Aideme\" - Web application for caregivers",

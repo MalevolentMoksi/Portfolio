@@ -63,6 +63,13 @@ const pageConfig: Record<string, PageConfigItem> = {
     metaTitleKey: 'pageConfig.projetsPersonnels.metaTitle',
     metaDescriptionKey: 'pageConfig.projetsPersonnels.metaDescription',
   },
+  '/projet-stage': {
+    headingKey: 'pageConfig.projetStage.heading',
+    subheadingKey: 'pageConfig.projetStage.subheading',
+    backgroundSrc: getAssetPath('assets/images/backgrounds/SpaceStation.webp'),
+    metaTitleKey: 'pageConfig.projetStage.metaTitle',
+    metaDescriptionKey: 'pageConfig.projetStage.metaDescription',
+  },
   '/projet-MEGASAE': {
     headingKey: 'pageConfig.projetMegasae.heading',
     backgroundSrc: getAssetPath('assets/images/backgrounds/beyondlight.webp'),
