@@ -14,7 +14,7 @@ const fakeT = ((key: string) => `T:${key}`) as unknown as TFunction;
 describe('projects data accessors', () => {
   it('getAcademicProjects returns every academic project with derived fields', () => {
     const projects = getAcademicProjects();
-    expect(projects).toHaveLength(7);
+    expect(projects).toHaveLength(8);
 
     const sae401 = projects.find((p) => p.id === 'sae401');
     expect(sae401).toBeDefined();
@@ -22,7 +22,7 @@ describe('projects data accessors', () => {
     // Without a translator, derived strings fall back to their keys and tags to tag keys.
     expect(sae401?.type).toBe('data.projects.academic.sae401.type');
     expect(sae401?.tags).toEqual(sae401?.tagKeys);
-    expect((sae401?.technologies.length ?? 0)).toBeGreaterThan(0);
+    expect(sae401?.technologies.length ?? 0).toBeGreaterThan(0);
   });
 
   it('applies the translation function when provided', () => {
@@ -56,7 +56,7 @@ describe('projects data accessors', () => {
 
 describe('project filtering (AND semantics)', () => {
   it('returns all projects when no tags are selected', () => {
-    expect(filterAcademicProjects([])).toHaveLength(7);
+    expect(filterAcademicProjects([])).toHaveLength(8);
     expect(filterPersonalProjects([])).toHaveLength(3);
   });
 
