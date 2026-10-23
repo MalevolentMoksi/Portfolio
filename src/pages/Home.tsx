@@ -352,6 +352,7 @@ const SkillsRadar = ({ categories, activeTab, onTabChange }: any) => {
 };
 
 const SkillsCarousel = ({ categories, activeTab, onTabChange }: any) => {
+  const { t } = useTranslation();
   const activeIndex = categories.findIndex((category: any) => category.id === activeTab);
   const resolvedActiveIndex = activeIndex >= 0 ? activeIndex : 0;
   const activeCategory = categories[resolvedActiveIndex];
@@ -399,7 +400,7 @@ const SkillsCarousel = ({ categories, activeTab, onTabChange }: any) => {
         </button>
       </div>
 
-      <div className="skills-carousel-nav" role="tablist" aria-label="Skills carousel navigation">
+      <div className="skills-carousel-nav" role="tablist" aria-label={t('home.skills.carouselNavAria')}>
         {categories.map((category: any) => (
           <button
             key={category.id}

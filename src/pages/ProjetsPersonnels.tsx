@@ -1,5 +1,5 @@
 import useDocumentMeta from '@/hooks/useDocumentMeta';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { getAssetPath } from '@/utils/assetPath';
 import Tooltip from '@/components/Tooltip';
 
@@ -34,6 +34,23 @@ const discordBotTechnologies = [
   },
 ];
 
+// Discord bot architecture: copy lives in the locales, these only fix the order.
+const BOT_TABLES = [
+  'balances',
+  'user_preferences',
+  'conversation_memories',
+  'media_cache',
+  'reminders',
+  'pending_duels',
+  'user_cooldowns',
+  'sleepy_counts',
+] as const;
+const BOT_SOFTWARE_ITEMS = ['slashCommands', 'buttonCollectors', 'asyncEvents', 'ai', 'sentiment'] as const;
+const BOT_FLOW_STEPS = ['command', 'balance', 'gameLogic', 'transaction', 'embed'] as const;
+
+// Inline markup allowed in the translated strings above.
+const richText = { strong: <strong />, code: <code /> };
+
 const ProjetsPersonnels = () => {
   const { t } = useTranslation();
   useDocumentMeta(t('projetsPersonnels.metaTitle'), t('projetsPersonnels.metaDescription'));
@@ -43,7 +60,7 @@ const ProjetsPersonnels = () => {
       <section id="presentation" aria-labelledby="personal-projects-title">
         <h2 id="personal-projects-title">{t('projetsPersonnels.presentation.title')}</h2>
         <p>{t('projetsPersonnels.presentation.description')}</p>
-        <aside className="presentation-notice" role="note" aria-label="Notice">
+        <aside className="presentation-notice" role="note" aria-label={t('projetsPersonnels.presentation.noticeAria')}>
           <svg
             className="notice-icon"
             aria-hidden="true"
@@ -324,73 +341,31 @@ const ProjetsPersonnels = () => {
                 {t('projetsPersonnels.discord.sections.infrastructure')}
               </h4>
               <p>
-                Le bot est déployé sur <strong>Railway</strong> via Docker (Node 22-slim), assurant
-                une disponibilité 24/7. Une base de données <strong>PostgreSQL</strong> (intégrée à
-                Railway) persiste l'ensemble des données utilisateur.
+                <Trans i18nKey="projetsPersonnels.discord.architecture.infrastructure" components={richText} />
               </p>
 
               <h4 className="bot-section-heading">
                 {t('projetsPersonnels.discord.sections.database')}
               </h4>
               <p>
-                PostgreSQL contient <strong>8 tables structurées</strong> :
+                <Trans i18nKey="projetsPersonnels.discord.architecture.databaseIntro" components={richText} />
               </p>
               <table className="bot-schema-table">
                 <thead>
                   <tr>
-                    <th>Table</th>
-                    <th>Rôle</th>
+                    <th>{t('projetsPersonnels.discord.architecture.tableHeader')}</th>
+                    <th>{t('projetsPersonnels.discord.architecture.roleHeader')}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>
-                      <code>balances</code>
-                    </td>
-                    <td>Solde virtuel par utilisateur, auto-seeding à $10k</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <code>user_preferences</code>
-                    </td>
-                    <td>Contexte utilisateur, attitude et sentiment score</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <code>conversation_memories</code>
-                    </td>
-                    <td>Historique IA par utilisateur, auto-cleanup après 1000 lignes</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <code>media_cache</code>
-                    </td>
-                    <td>Cache des descriptions d'images pour limiter les appels OpenRouter</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <code>reminders</code>
-                    </td>
-                    <td>Rappels persistants avec scheduling inter-redémarrages</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <code>pending_duels</code>
-                    </td>
-                    <td>Défis PvP en attente, survit aux redémarrages Docker</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <code>user_cooldowns</code>
-                    </td>
-                    <td>Cooldowns persistants anti-spam par commande</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <code>sleepy_counts</code>
-                    </td>
-                    <td>Statistiques d'usage par commande et par serveur</td>
-                  </tr>
+                  {BOT_TABLES.map((table) => (
+                    <tr key={table}>
+                      <td>
+                        <code>{table}</code>
+                      </td>
+                      <td>{t(`projetsPersonnels.discord.architecture.tables.${table}`)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
 
@@ -398,66 +373,38 @@ const ProjetsPersonnels = () => {
                 {t('projetsPersonnels.discord.sections.software')}
               </h4>
               <ul className="bot-compact-list">
-                <li>
-                  <strong>Slash Commands (discord.js v14)</strong> : 20+ commandes auto-registerées
-                  par serveur (pas de délai global)
-                </li>
-                <li>
-                  <strong>Button Collectors</strong> : jeux multi-tours (blackjack, roulette) avec
-                  interface interactive
-                </li>
-                <li>
-                  <strong>Événements asynchrones</strong> : gestion des interactions utilisateur et
-                  mises à jour en temps réel
-                </li>
-                <li>
-                  <strong>Intégration IA</strong> : OpenRouter API (DeepSeek pour chat, Gemini 2.0
-                  pour analyse d'images)
-                </li>
-                <li>
-                  <strong>Sentiment Tracking</strong> : système d'adaptation de personnalité basé
-                  sur historique de conversation
-                </li>
+                {BOT_SOFTWARE_ITEMS.map((item) => (
+                  <li key={item}>
+                    <Trans
+                      i18nKey={`projetsPersonnels.discord.architecture.software.${item}`}
+                      components={richText}
+                    />
+                  </li>
+                ))}
               </ul>
 
               <h4 className="bot-section-heading">
                 {t('projetsPersonnels.discord.sections.flow')}
               </h4>
               <ol className="bot-flow">
-                <li>
-                  <span className="bot-flow-step">1</span>
-                  <p>
-                    Utilisateur appelle une commande slash <code>/bj bet 500</code>
-                  </p>
-                </li>
-                <li>
-                  <span className="bot-flow-step">2</span>
-                  <p>
-                    Vérification du solde dans <code>balances</code>, rejet si insuffisant
-                  </p>
-                </li>
-                <li>
-                  <span className="bot-flow-step">3</span>
-                  <p>
-                    Logique du jeu avec <strong>Button Collectors</strong> discord.js pour les
-                    actions du joueur
-                  </p>
-                </li>
-                <li>
-                  <span className="bot-flow-step">4</span>
-                  <p>Mise à jour transactionnelle dans PostgreSQL</p>
-                </li>
-                <li>
-                  <span className="bot-flow-step">5</span>
-                  <p>Embed Discord renvoyé avec état et résultat de la partie</p>
-                </li>
+                {BOT_FLOW_STEPS.map((step, index) => (
+                  <li key={step}>
+                    <span className="bot-flow-step">{index + 1}</span>
+                    <p>
+                      <Trans
+                        i18nKey={`projetsPersonnels.discord.architecture.flow.${step}`}
+                        components={richText}
+                      />
+                    </p>
+                  </li>
+                ))}
               </ol>
 
               <div className="bot-dashboard-container">
                 <img
                   src={getAssetPath('assets/images/projects/railway-dashboard.png')}
                   loading="lazy"
-                  alt="Tableau de bord Railway pour le bot Discord"
+                  alt={t('projetsPersonnels.discord.dashboardAlt')}
                   className="bot-dashboard-image"
                 />
                 <figcaption className="bot-dashboard-caption">
@@ -490,7 +437,7 @@ const ProjetsPersonnels = () => {
                 height="800"
                 loading="lazy"
                 decoding="async"
-                alt="ADA-1 de Destiny 2 au crayon"
+                alt={t('projetsPersonnels.drawings.alts.ada1')}
               />
               <p>{t('projetsPersonnels.drawings.captions.ada1')}</p>
             </div>
@@ -504,7 +451,7 @@ const ProjetsPersonnels = () => {
                 height="503"
                 loading="lazy"
                 decoding="async"
-                alt="Illustration numérique"
+                alt={t('projetsPersonnels.drawings.alts.power')}
               />
               <p>{t('projetsPersonnels.drawings.captions.power')}</p>
             </div>
@@ -518,7 +465,7 @@ const ProjetsPersonnels = () => {
                 height="657"
                 loading="lazy"
                 decoding="async"
-                alt="Illustration au crayon"
+                alt={t('projetsPersonnels.drawings.alts.ramattra')}
               />
               <p>{t('projetsPersonnels.drawings.captions.ramattra')}</p>
             </div>
@@ -532,7 +479,7 @@ const ProjetsPersonnels = () => {
                 height="487"
                 loading="lazy"
                 decoding="async"
-                alt="Illustration numerique"
+                alt={t('projetsPersonnels.drawings.alts.commission')}
               />
               <p>{t('projetsPersonnels.drawings.captions.commission')}</p>
             </div>
@@ -546,7 +493,7 @@ const ProjetsPersonnels = () => {
                 height="573"
                 loading="lazy"
                 decoding="async"
-                alt="Dessin au stylo"
+                alt={t('projetsPersonnels.drawings.alts.goatLamb')}
               />
               <p>{t('projetsPersonnels.drawings.captions.goatLamb')}</p>
             </div>
@@ -560,7 +507,7 @@ const ProjetsPersonnels = () => {
                 height="733"
                 loading="lazy"
                 decoding="async"
-                alt="Illustration numerique"
+                alt={t('projetsPersonnels.drawings.alts.elsie')}
               />
               <p>{t('projetsPersonnels.drawings.captions.elsie')}</p>
             </div>
@@ -579,7 +526,7 @@ const ProjetsPersonnels = () => {
               width="800"
               height="450"
               loading="lazy"
-              alt="Logo Scratch"
+              alt={t('projetsPersonnels.scratch.logoAlt')}
             />
           </div>
 

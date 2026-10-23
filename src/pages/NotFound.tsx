@@ -49,7 +49,7 @@ const NotFound = () => {
 
       <div className="not-found__content">
         {/* Grand indicateur 404 */}
-        <h1 className="not-found__code" aria-label="Erreur 404">
+        <h1 className="not-found__code" aria-label={t('notFound.codeAria')}>
           {glitchText}
         </h1>
 

@@ -2,6 +2,7 @@
  * Lightbox Module
  * Handles image zoom functionality for gallery images
  */
+import i18n from '@/i18n';
 
 class Lightbox {
   private overlay: HTMLElement | null = null;
@@ -69,8 +70,12 @@ class Lightbox {
       // Make zoomable images keyboard-accessible
       if (!img.hasAttribute('tabindex')) img.setAttribute('tabindex', '0');
       if (!img.getAttribute('role')) img.setAttribute('role', 'button');
-      if (!img.getAttribute('aria-label')) {
-        img.setAttribute('aria-label', `Agrandir : ${(img as HTMLImageElement).alt || 'image'}`);
+      // The accessible name stays the image's alt (translated by React and updated live
+      // on language change); aria-haspopup tells assistive tech it opens a viewer.
+      // A hand-built "Agrandir : <alt>" label froze the French text in the English UI.
+      if (!img.hasAttribute('aria-haspopup')) img.setAttribute('aria-haspopup', 'dialog');
+      if (!(img as HTMLImageElement).alt && !img.getAttribute('aria-label')) {
+        img.setAttribute('aria-label', i18n.t('common.lightbox.enlarge'));
       }
       img.addEventListener('keydown', (e: KeyboardEvent) => {
         if (e.key === 'Enter' || e.key === ' ') {

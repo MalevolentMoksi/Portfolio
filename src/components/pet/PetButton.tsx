@@ -36,6 +36,9 @@ type InteractionAction = CooldownAction | 'catch';
 type FaceCombo = { eyes: string; mouth: string };
 type MoodTextPool = Record<string, string[]>;
 
+/** Default names (fr, en) that builds before the localized default used to persist. */
+const LEGACY_DEFAULT_PET_NAMES = ['Mon Robot', 'My Robot'];
+
 /* ── Component ── */
 const PetButton = () => {
   const { t, i18n } = useTranslation();
@@ -61,7 +64,13 @@ const PetButton = () => {
   // Timestamp (ms) when each cooldown expires; 0 = not cooling
   const [cdEnds, setCdEnds] = useState({ feed: 0, pet: 0, play: 0 });
   // Pet name — persisted
-  const [petName, setPetName] = useState(() => localGet(LS.name) || t('common.pet.defaultName'));
+  // Only a name the visitor chose is stored; the default is translated on the fly so
+  // it follows the language. Older builds stored the default itself: drop it.
+  const [customName, setCustomName] = useState<string | null>(() => {
+    const saved = localGet(LS.name);
+    return saved && !LEGACY_DEFAULT_PET_NAMES.includes(saved) ? saved : null;
+  });
+  const petName = customName ?? t('common.pet.defaultName');
   // Cycling food icon index — persisted
   const [feedIconIndex, setFeedIconIndex] = useState(() => {
     const v = parseInt(localGet(LS.feedIndex) || '0', 10);
@@ -131,8 +140,9 @@ const PetButton = () => {
     localSet(LS.spawned, String(isSpawned));
   }, [isSpawned]);
   useEffect(() => {
-    localSet(LS.name, petName);
-  }, [petName]);
+    if (customName) localSet(LS.name, customName);
+    else localRemove(LS.name);
+  }, [customName]);
   useEffect(() => {
     localSet(LS.feedIndex, String(feedIconIndex));
   }, [feedIconIndex]);
@@ -509,9 +519,10 @@ const PetButton = () => {
   /* ── Pet renaming ── */
   const handleRename = useCallback(
     (newName: string) => {
-      const trimmed = newName.trim().slice(0, 18) || t('common.pet.defaultName');
-      setPetName(trimmed);
-      if (trimmed !== t('common.pet.defaultName')) {
+      const trimmed = newName.trim().slice(0, 18);
+      const isDefault = !trimmed || trimmed === t('common.pet.defaultName');
+      setCustomName(isDefault ? null : trimmed);
+      if (!isDefault) {
         unlockAchievement('rename');
         showToast(t('common.pet.toast.renamed', { name: trimmed }), {
           type: 'success',
