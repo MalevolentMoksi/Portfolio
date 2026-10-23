@@ -263,7 +263,13 @@ const Layout = () => {
   // the previous unconditional scrollTo(0,0) would have overridden it anyway.
   useEffect(() => {
     if (location.hash) {
-      const targetId = decodeURIComponent(location.hash.slice(1));
+      // A malformed escape (e.g. /#%E0) makes decodeURIComponent throw; fall back to the raw id.
+      let targetId = location.hash.slice(1);
+      try {
+        targetId = decodeURIComponent(targetId);
+      } catch {
+        // keep the raw fragment
+      }
       // Double rAF: defer past the route commit + paint so the target exists.
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
