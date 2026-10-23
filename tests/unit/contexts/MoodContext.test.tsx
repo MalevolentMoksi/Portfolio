@@ -3,8 +3,9 @@ import { render, act } from '@testing-library/react';
 import { MoodProvider, useMood, MOODS } from '@/contexts/MoodContext';
 
 // MoodProvider depends on AccessibilityContext only for the highContrast flag.
+const a11y = vi.hoisted(() => ({ highContrast: false }));
 vi.mock('@/contexts/AccessibilityContext', () => ({
-  useAccessibility: () => ({ settings: { highContrast: false } }),
+  useAccessibility: () => ({ settings: { highContrast: a11y.highContrast } }),
 }));
 
 const Consumer = ({ to }: { to: 'vaporwave' | 'hacker' }) => {
@@ -49,5 +50,50 @@ describe('MoodContext — dynamic theme-color', () => {
       getByText('go').click();
     });
     expect(themeColor()).toBe(MOODS.vaporwave.color);
+  });
+});
+
+describe('MoodContext: high contrast', () => {
+  const MoodProbe = () => {
+    const { mood } = useMood();
+    return <span data-testid="mood">{mood}</span>;
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+    a11y.highContrast = false;
+  });
+
+  it('shows default while high contrast is on, then restores the chosen mood', () => {
+    localStorage.setItem('portfolio-mood', 'nightshade');
+    a11y.highContrast = true;
+    const { getByTestId, rerender } = render(
+      <MoodProvider>
+        <MoodProbe />
+      </MoodProvider>
+    );
+    expect(getByTestId('mood').textContent).toBe('default');
+    expect(document.body.getAttribute('data-mood')).toBe('default');
+    // The stored preference is left untouched.
+    expect(localStorage.getItem('portfolio-mood')).toBe('nightshade');
+
+    a11y.highContrast = false;
+    rerender(
+      <MoodProvider>
+        <MoodProbe />
+      </MoodProvider>
+    );
+    expect(getByTestId('mood').textContent).toBe('nightshade');
+    expect(document.body.getAttribute('data-mood')).toBe('nightshade');
+  });
+
+  it('ignores an inherited property name stored as mood', () => {
+    localStorage.setItem('portfolio-mood', 'toString');
+    const { getByTestId } = render(
+      <MoodProvider>
+        <MoodProbe />
+      </MoodProvider>
+    );
+    expect(getByTestId('mood').textContent).toBe('default');
   });
 });

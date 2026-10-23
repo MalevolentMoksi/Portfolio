@@ -4,14 +4,22 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
-import { safeLocalGet, safeLocalSet } from '@/utils/safeStorage';
+import { useTranslation } from 'react-i18next';
+import {
+  safeLocalGet,
+  safeLocalSet,
+  safeSessionGet,
+  safeSessionSet,
+} from '@/utils/safeStorage';
 import { getPerformanceTier } from '@/utils/performanceTier';
 import type { AccessibilitySettings, FontSize } from '@/types';
 
 const STORAGE_KEY = 'portfolio-a11y-settings';
+const AUTO_NO_MOTION_NOTIFIED_KEY = 'a11y-auto-noMotion-notified';
 
 const DEFAULT_SETTINGS: AccessibilitySettings = {
   noMotion: false,
@@ -37,10 +45,17 @@ const AccessibilityContext = createContext<AccessibilityContextValue>({
   toggleSetting: () => {},
 });
 
-const readSettings = (): AccessibilitySettings => {
+interface InitialSettings {
+  settings: AccessibilitySettings;
+  /** noMotion was switched on automatically because the device is a low-end mobile. */
+  autoLowEndNoMotion: boolean;
+}
+
+const readSettings = (): InitialSettings => {
   try {
     const raw = safeLocalGet(STORAGE_KEY);
     let settings: AccessibilitySettings;
+    let autoLowEndNoMotion = false;
 
     if (!raw) {
       // First visit — auto-enable noMotion on low-end touch devices.
@@ -58,6 +73,7 @@ const readSettings = (): AccessibilitySettings => {
         typeof window !== 'undefined' &&
         (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false);
       settings = { ...DEFAULT_SETTINGS, noMotion: isLowEndMobile || prefersReducedMotion };
+      autoLowEndNoMotion = isLowEndMobile;
     } else {
       const parsed = JSON.parse(raw) as Record<string, unknown>;
       const safeFont = FONT_SIZES.has(parsed.fontSize as FontSize)
@@ -78,9 +94,9 @@ const readSettings = (): AccessibilitySettings => {
     // UIEnhancements starts the typing animation before the class is set.
     if (typeof document !== 'undefined') applyBodyClasses(settings);
 
-    return settings;
+    return { settings, autoLowEndNoMotion };
   } catch {
-    return DEFAULT_SETTINGS;
+    return { settings: DEFAULT_SETTINGS, autoLowEndNoMotion: false };
   }
 };
 
@@ -116,7 +132,15 @@ interface AccessibilityProviderProps {
 }
 
 export const AccessibilityProvider = ({ children }: AccessibilityProviderProps) => {
-  const [settings, setSettings] = useState<AccessibilitySettings>(() => readSettings());
+  const { t } = useTranslation();
+  // Captured at first read: the settings are saved right after mount, so "no saved
+  // settings yet" can no longer be checked later on to recognise a first visit.
+  const autoLowEndNoMotionRef = useRef(false);
+  const [settings, setSettings] = useState<AccessibilitySettings>(() => {
+    const initial = readSettings();
+    autoLowEndNoMotionRef.current = initial.autoLowEndNoMotion;
+    return initial.settings;
+  });
 
   const setSetting = useCallback(
     <K extends keyof AccessibilitySettings>(key: K, value: AccessibilitySettings[K]) => {
@@ -160,30 +184,16 @@ export const AccessibilityProvider = ({ children }: AccessibilityProviderProps) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Show Toast when noMotion is auto-enabled on first visit (low-end mobile detection).
-  // Only fires once per session to avoid spamming the user.
+  // Tell the visitor once per session when noMotion was auto-enabled on first visit
+  // (low-end mobile detection). ToastProvider is a child, so its effect has already
+  // exposed window.showToast when this one runs.
   useEffect(() => {
-    const alreadyNotified = sessionStorage.getItem('a11y-auto-noMotion-notified');
-    if (alreadyNotified || !settings.noMotion) return;
-
-    // Check if this is a first visit with auto-detection:
-    // - noMotion is true (user has it enabled)
-    // - No localStorage key means readSettings() auto-detected it on first visit
-    // - Device is touch-only (hover: none) and low-end (< 4 cores)
-    const isFirstVisit = !safeLocalGet(STORAGE_KEY);
-    const isLowEndMobile =
-      typeof window !== 'undefined' &&
-      (window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches ?? false) &&
-      getPerformanceTier() === 'low';
-
-    if (isFirstVisit && isLowEndMobile && typeof window !== 'undefined' && window.showToast) {
-      sessionStorage.setItem('a11y-auto-noMotion-notified', 'true');
-      window.showToast(
-        "Optimisations d'accessibilité : les animations ont été réduites pour améliorer la performance et l'accessibilité sur votre appareil.",
-        { type: 'info', duration: 0 }
-      );
-    }
-  }, [settings.noMotion]);
+    if (!autoLowEndNoMotionRef.current) return;
+    if (safeSessionGet(AUTO_NO_MOTION_NOTIFIED_KEY)) return;
+    safeSessionSet(AUTO_NO_MOTION_NOTIFIED_KEY, 'true');
+    window.showToast?.(t('common.toast.autoNoMotion'), { type: 'info', duration: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const value = useMemo(
     () => ({ settings, setSetting, toggleSetting }),

@@ -59,7 +59,11 @@ export const MoodContext = createContext<MoodContextValue>({
 
 export const useMood = () => useContext(MoodContext);
 
-const isMoodKey = (value: string | null): value is MoodKey => value !== null && value in MOODS;
+const MOOD_STORAGE_KEY = 'portfolio-mood';
+
+// Own keys only: `in` would also accept inherited names such as "toString".
+const isMoodKey = (value: string | null): value is MoodKey =>
+  value !== null && Object.prototype.hasOwnProperty.call(MOODS, value);
 
 interface MoodProviderProps {
   children: ReactNode;
@@ -67,10 +71,13 @@ interface MoodProviderProps {
 
 export const MoodProvider = ({ children }: MoodProviderProps) => {
   const { settings: a11ySettings } = useAccessibility();
-  const [mood, setMoodState] = useState<MoodKey>(() => {
-    const saved = safeLocalGet('portfolio-mood');
+  // The visitor's chosen mood, persisted as is. High contrast only overrides what is
+  // displayed: turning it off brings the chosen mood back instead of losing it.
+  const [preferredMood, setPreferredMood] = useState<MoodKey>(() => {
+    const saved = safeLocalGet(MOOD_STORAGE_KEY);
     return isMoodKey(saved) ? saved : 'default';
   });
+  const mood: MoodKey = a11ySettings.highContrast ? 'default' : preferredMood;
 
   /* ── Appliquer le mood au DOM ── */
   const applyMood = useCallback((m: MoodKey) => {
@@ -103,44 +110,29 @@ export const MoodProvider = ({ children }: MoodProviderProps) => {
 
   const setMood = useCallback(
     (newMood: MoodKey) => {
-      if (!MOODS[newMood]) return;
-      // Enforce default mood when high contrast is on
-      const effectiveMood = a11ySettings.highContrast ? 'default' : newMood;
-      setMoodState(effectiveMood);
-      safeLocalSet('portfolio-mood', effectiveMood);
-      applyMood(effectiveMood);
+      if (!isMoodKey(newMood)) return;
+      // High contrast pins the displayed mood to default (the switcher is disabled).
+      if (a11ySettings.highContrast) return;
+      setPreferredMood(newMood);
+      safeLocalSet(MOOD_STORAGE_KEY, newMood);
+      applyMood(newMood);
     },
     [applyMood, a11ySettings.highContrast]
   );
 
   const cycleMood = useCallback(() => {
-    setMoodState((prev) => {
-      const idx = MOOD_ORDER.indexOf(prev);
-      const next = MOOD_ORDER[(idx + 1) % MOOD_ORDER.length];
-      // Enforce default mood when high contrast is on
-      const effectiveMood = a11ySettings.highContrast ? 'default' : next;
-      safeLocalSet('portfolio-mood', effectiveMood);
-      applyMood(effectiveMood);
-      return effectiveMood;
-    });
-  }, [applyMood, a11ySettings.highContrast]);
+    const idx = MOOD_ORDER.indexOf(preferredMood);
+    setMood(MOOD_ORDER[(idx + 1) % MOOD_ORDER.length]);
+  }, [preferredMood, setMood]);
 
-  /* ── Appliquer le mood initial au montage et respecter les changements d'accessibilité ── */
+  /* ── Appliquer le mood affiché au montage et quand le contraste élevé change ── */
   useEffect(() => {
-    const currentMoodOnDom = document.body.getAttribute('data-mood') as MoodKey | null;
-    
-    // If high contrast is on and current mood is not default, force default
-    if (a11ySettings.highContrast && mood !== 'default') {
-      setMoodState('default');
-      safeLocalSet('portfolio-mood', 'default');
-      applyMood('default');
-    } else if (currentMoodOnDom !== mood) {
-      // Only apply mood if it's different from what's already on the DOM
-      // (avoid double-initialization during page load when VisualEffects just set it)
+    // setMood already applied it synchronously; this covers the initial mount and
+    // high contrast being toggled (which changes the displayed mood only).
+    if (document.body.getAttribute('data-mood') !== mood) {
       applyMood(mood);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [a11ySettings.highContrast]);
+  }, [mood, applyMood]);
 
   // Memoize so consumers (Layout, every ambient layer, MoodSwitcher, useDynamicFavicon…)
   // don't re-render on unrelated provider re-renders. setMood/cycleMood are already
