@@ -7,10 +7,12 @@ import type { i18n as I18nInstance } from 'i18next';
 import { getAssetPath } from '../utils/assetPath';
 import { safeLocalGet, safeLocalSet } from '../utils/safeStorage';
 import MusicMetadataManager from './music-player-metadata';
+import { restoreSavedTrack } from './music-player-state';
 import MusicPlayerVisualizer from './music-player-visualizer';
 
 interface StorageKeys {
   TRACK_INDEX: string;
+  TRACK_FILE: string;
   CURRENT_TIME: string;
   IS_PAUSED: string;
   VOLUME: string;
@@ -112,6 +114,7 @@ class MusicPlayer {
     // Storage keys
     this.STORAGE_KEYS = {
       TRACK_INDEX: 'music-currentTrack',
+      TRACK_FILE: 'music-currentTrackFile',
       CURRENT_TIME: 'music-currentTime',
       IS_PAUSED: 'music-isPaused',
       VOLUME: 'music-volume',
@@ -200,7 +203,8 @@ class MusicPlayer {
     e.albumArt?.setAttribute('alt', this.t('common.musicPlayer.albumArtAlt'));
     e.queueBtn?.setAttribute('aria-label', this.t('common.musicPlayer.queueToggle'));
     e.queueBtn?.setAttribute('title', this.t('common.musicPlayer.queueTitle'));
-    e.playPauseBtn?.setAttribute('aria-label', this.t('common.musicPlayer.playPause'));
+    // State-aware label (play or pause), not the generic one.
+    if (e.playPauseBtn) this.updatePlayPauseButton();
     e.nextBtn?.setAttribute('aria-label', this.t('common.musicPlayer.next'));
     e.muteBtn?.setAttribute('aria-label', this.t('common.musicPlayer.mute'));
     e.volumeSlider?.setAttribute('aria-label', this.t('common.musicPlayer.volume'));
@@ -230,15 +234,14 @@ class MusicPlayer {
   }
 
   private loadState(): void {
-    // Load saved track index
-    const savedIndex = parseInt(safeLocalGet(this.STORAGE_KEYS.TRACK_INDEX) ?? '', 10);
-    if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < this.trackFiles.length) {
-      this.currentTrackIndex = savedIndex;
-    }
-
-    // Load saved time
-    const savedTime = parseFloat(safeLocalGet(this.STORAGE_KEYS.CURRENT_TIME) ?? '');
-    this.savedTime = !isNaN(savedTime) && savedTime >= 0 ? savedTime : 0;
+    // Resume the saved song (matched by filename) and, for that song only, its position.
+    const restored = restoreSavedTrack(this.trackFiles, {
+      file: safeLocalGet(this.STORAGE_KEYS.TRACK_FILE),
+      index: safeLocalGet(this.STORAGE_KEYS.TRACK_INDEX),
+      time: safeLocalGet(this.STORAGE_KEYS.CURRENT_TIME),
+    });
+    if (restored.trackIndex !== null) this.currentTrackIndex = restored.trackIndex;
+    this.savedTime = restored.time;
 
     // Load paused state
     // Première visite (clé absente) => lecteur arrêté par défaut (pas d'autoplay).
@@ -266,6 +269,14 @@ class MusicPlayer {
     if (!this.isStoredBoolean(savedRetracted)) {
       safeLocalSet(this.STORAGE_KEYS.RETRACTED, this.isRetracted.toString());
     }
+  }
+
+  /** The filename is what restores the track; the index is kept for MiniTerminal. */
+  private persistTrack(trackIndex: number): void {
+    const file = this.trackFiles[trackIndex];
+    if (file === undefined) return;
+    safeLocalSet(this.STORAGE_KEYS.TRACK_FILE, file);
+    safeLocalSet(this.STORAGE_KEYS.TRACK_INDEX, trackIndex.toString());
   }
 
   private setupAudio(): void {
@@ -448,6 +459,8 @@ class MusicPlayer {
 
   private onPause(): void {
     this.isPaused = true;
+    // Read by utils/appUpdate.ts: a pending update never interrupts the music.
+    document.documentElement.dataset.musicPlaying = 'false';
     safeLocalSet(this.STORAGE_KEYS.IS_PAUSED, 'true');
     this.updatePlayPauseButton();
     this.stopVisualizer();
@@ -455,6 +468,7 @@ class MusicPlayer {
 
   private onPlay(): void {
     this.isPaused = false;
+    document.documentElement.dataset.musicPlaying = 'true';
     safeLocalSet(this.STORAGE_KEYS.IS_PAUSED, 'false');
     this.updatePlayPauseButton();
     this.startVisualizer();
@@ -712,6 +726,7 @@ class MusicPlayer {
    * listeners or leaving a duplicate player in the DOM.
    */
   destroy(): void {
+    delete document.documentElement.dataset.musicPlaying;
     if (this.boundKeydownHandler) {
       document.removeEventListener('keydown', this.boundKeydownHandler);
     }
@@ -825,7 +840,7 @@ class MusicPlayer {
     if (!this.trackFiles.length) return;
 
     this.currentTrackIndex = (this.currentTrackIndex + 1) % this.trackFiles.length;
-    safeLocalSet(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
+    this.persistTrack(this.currentTrackIndex);
     safeLocalSet(this.STORAGE_KEYS.CURRENT_TIME, '0');
     this.savedTime = 0;
 
@@ -902,11 +917,11 @@ class MusicPlayer {
     if (this.audio.paused) {
       playIcon.style.display = 'block';
       pauseIcon.style.display = 'none';
-      this.elements.playPauseBtn.setAttribute('aria-label', 'Lecture');
+      this.elements.playPauseBtn.setAttribute('aria-label', this.t('common.musicPlayer.play'));
     } else {
       playIcon.style.display = 'none';
       pauseIcon.style.display = 'block';
-      this.elements.playPauseBtn.setAttribute('aria-label', 'Pause');
+      this.elements.playPauseBtn.setAttribute('aria-label', this.t('common.musicPlayer.pause'));
     }
   }
 
@@ -1097,7 +1112,7 @@ class MusicPlayer {
     if (trackIndex < 0 || trackIndex >= this.trackFiles.length) return;
 
     this.currentTrackIndex = trackIndex;
-    safeLocalSet(this.STORAGE_KEYS.TRACK_INDEX, trackIndex.toString());
+    this.persistTrack(trackIndex);
     safeLocalSet(this.STORAGE_KEYS.CURRENT_TIME, '0');
     this.savedTime = 0; // Reset saved time so onLoadedMetadata doesn't restore old time
 
@@ -1161,7 +1176,7 @@ class MusicPlayer {
   private saveState(): void {
     safeLocalSet(this.STORAGE_KEYS.CURRENT_TIME, this.audio.currentTime.toString());
     safeLocalSet(this.STORAGE_KEYS.IS_PAUSED, this.audio.paused.toString());
-    safeLocalSet(this.STORAGE_KEYS.TRACK_INDEX, this.currentTrackIndex.toString());
+    this.persistTrack(this.currentTrackIndex);
     safeLocalSet(this.STORAGE_KEYS.VOLUME, this.audio.volume.toString());
     safeLocalSet(this.STORAGE_KEYS.MUTED, this.isMuted.toString());
     safeLocalSet(this.STORAGE_KEYS.RETRACTED, this.isRetracted.toString());
