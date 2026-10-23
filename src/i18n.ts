@@ -54,6 +54,13 @@ export const i18nReady: Promise<unknown> = i18n
       caches: ['localStorage'],
     },
   })
-  .then(() => ensureLanguageLoaded(i18n.language));
+  .then(async () => {
+    await ensureLanguageLoaded(i18n.language);
+    // At init time only `fr` had translations, so i18next resolved a lazy-loaded
+    // detected language (e.g. `en` from an en-GB browser) to `fr`: the UI rendered
+    // English while `resolvedLanguage` (and the FR/EN toggle) still said French.
+    // Re-applying the language now that its bundle exists fixes the resolution.
+    await i18n.changeLanguage(i18n.language);
+  });
 
 export default i18n;
