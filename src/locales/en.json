@@ -1,6 +1,9 @@
 {
   "common": {
     "videoNotSupported": "Your browser does not support the video tag.",
+    "lightbox": {
+      "enlarge": "Enlarge image"
+    },
     "nav": {
       "primaryAria": "Main navigation",
       "home": "Home",
@@ -18,6 +21,7 @@
       "tooltip": "Language",
       "ariaLabel": "Change site language",
       "choose": "Choose language",
+      "switchFailed": "Couldn't switch language right now. Check your connection and try again.",
       "title": "Language",
       "names": {
         "fr": "Français",
@@ -232,6 +236,8 @@
       "queueToggle": "Show the play queue",
       "queueTitle": "Play queue",
       "playPause": "Play/Pause",
+      "play": "Play",
+      "pause": "Pause",
       "next": "Next track",
       "mute": "Mute",
       "volume": "Volume",
@@ -256,6 +262,7 @@
       "dismiss": "Dismiss",
       "region": "Notifications",
       "mobileDesktopHint": "Mobile-optimized mode is active. The interactive pet, particle effects and terminal live on desktop; visit on a PC for the full experience.",
+      "autoNoMotion": "Accessibility optimisations: animations have been reduced to improve performance and accessibility on your device.",
       "debug": {
         "success": "Operation completed successfully!",
         "error": "Unable to load resource.",
@@ -651,6 +658,7 @@
     "skills": {
       "title": "Skills",
       "intro": "Build, design, optimize and administer in:",
+      "carouselNavAria": "Skills carousel navigation",
       "cards": {
         "web": { "title": "Web development" },
         "backend": { "title": "System & back-end development" },
@@ -715,7 +723,8 @@
     "presentation": {
       "title": "Presentation",
       "description": "This page showcases various personal projects and illustrations. They reflect my interest in programming, design, and creativity.",
-      "notice": "PS: This page contains videos that play on mouse hover!"
+      "notice": "PS: This page contains videos that play on mouse hover!",
+      "noticeAria": "Note"
     },
     "discord": {
       "title": "Discord Bot",
@@ -753,12 +762,51 @@
         "software": "Software architecture",
         "flow": "Command execution flow"
       },
-      "dashboardCaption": "Railway dashboard: environment variables, PostgreSQL metrics, and application logs"
+      "dashboardCaption": "Railway dashboard: environment variables, PostgreSQL metrics, and application logs",
+      "dashboardAlt": "Railway dashboard for the Discord bot",
+      "architecture": {
+        "infrastructure": "The bot is deployed on <strong>Railway</strong> via Docker (Node 22-slim), keeping it available 24/7. A <strong>PostgreSQL</strong> database (built into Railway) persists all user data.",
+        "databaseIntro": "PostgreSQL holds <strong>8 structured tables</strong>:",
+        "tableHeader": "Table",
+        "roleHeader": "Role",
+        "tables": {
+          "balances": "Virtual balance per user, auto-seeded at $10k",
+          "user_preferences": "User context, attitude and sentiment score",
+          "conversation_memories": "AI history per user, auto-cleanup after 1000 rows",
+          "media_cache": "Cache of image descriptions to limit OpenRouter calls",
+          "reminders": "Persistent reminders, scheduled across restarts",
+          "pending_duels": "Pending PvP challenges, survive Docker restarts",
+          "user_cooldowns": "Persistent per-command anti-spam cooldowns",
+          "sleepy_counts": "Usage statistics per command and per server"
+        },
+        "software": {
+          "slashCommands": "<strong>Slash Commands (discord.js v14)</strong>: 20+ commands auto-registered per server (no global propagation delay)",
+          "buttonCollectors": "<strong>Button Collectors</strong>: multi-round games (blackjack, roulette) with an interactive interface",
+          "asyncEvents": "<strong>Asynchronous events</strong>: handling user interactions and real-time updates",
+          "ai": "<strong>AI integration</strong>: OpenRouter API (DeepSeek for chat, Gemini 2.0 for image analysis)",
+          "sentiment": "<strong>Sentiment Tracking</strong>: personality adaptation system based on conversation history"
+        },
+        "flow": {
+          "command": "The user calls a slash command <code>/bj bet 500</code>",
+          "balance": "Balance check in <code>balances</code>, rejected if insufficient",
+          "gameLogic": "Game logic with discord.js <strong>Button Collectors</strong> for the player's actions",
+          "transaction": "Transactional update in PostgreSQL",
+          "embed": "Discord embed sent back with the game state and result"
+        }
+      }
     },
     "drawings": {
       "title": "Personal drawings",
       "description1": "Since January 2025, I started digital and traditional drawing. Here are some of my illustrations, made with pencils (2H to 6B) or digitally.",
       "description2": "I explore different styles and techniques, but it remains primarily a hobby.",
+      "alts": {
+        "ada1": "Pencil drawing of ADA-1 from Destiny 2",
+        "power": "Digital illustration",
+        "ramattra": "Pencil illustration",
+        "commission": "Digital illustration",
+        "goatLamb": "Pen drawing",
+        "elsie": "Digital illustration"
+      },
       "captions": {
         "ada1": "Destiny 2 ADA-1 - Pencil portrait",
         "power": "Chainsaw Man Power - Digital illustration",
@@ -775,6 +823,7 @@
       "skills": "Algorithmic logic, interface design, animations, variable and sprite management",
       "techniquesLabel": "Techniques:",
       "techniques": "Advanced Scratch usage, script optimization, adaptation to user feedback",
+      "logoAlt": "Scratch logo",
       "profile": "View my Scratch profile",
       "captions": {
         "stickman": "Stickman Adventure gameplay",
@@ -976,6 +1025,7 @@
     "title": "Page not found",
     "description": "The page you're looking for does not exist, was moved, or simply drifted away into interstellar space.",
     "homeButton": "← Back to home",
+    "codeAria": "Error 404",
     "snakeButton": "🐍 Stay a bit longer"
   },
   "data": {

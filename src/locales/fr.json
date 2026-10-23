@@ -1,6 +1,9 @@
 {
   "common": {
     "videoNotSupported": "Votre navigateur ne supporte pas la balise video.",
+    "lightbox": {
+      "enlarge": "Agrandir l'image"
+    },
     "nav": {
       "primaryAria": "Navigation principale",
       "home": "Accueil",
@@ -18,6 +21,7 @@
       "tooltip": "Langue",
       "ariaLabel": "Changer la langue du site",
       "choose": "Choisir la langue",
+      "switchFailed": "Impossible de changer de langue pour le moment. Vérifiez votre connexion et réessayez.",
       "title": "Langue",
       "names": {
         "fr": "Français",
@@ -232,6 +236,8 @@
       "queueToggle": "Afficher la file de lecture",
       "queueTitle": "File de lecture",
       "playPause": "Lecture/Pause",
+      "play": "Lecture",
+      "pause": "Pause",
       "next": "Piste suivante",
       "mute": "Couper le son",
       "volume": "Volume",
@@ -256,6 +262,7 @@
       "dismiss": "Fermer",
       "region": "Notifications",
       "mobileDesktopHint": "Version mobile optimisée active. Le compagnon interactif, les effets de particules et le terminal sont sur ordinateur ; visitez le site sur PC pour l'expérience complète.",
+      "autoNoMotion": "Optimisations d'accessibilité : les animations ont été réduites pour améliorer la performance et l'accessibilité sur votre appareil.",
       "debug": {
         "success": "Opération réussie avec succès !",
         "error": "Impossible de charger la ressource.",
@@ -651,6 +658,7 @@
       "skills": {
       "title": "Compétences",
       "intro": "Réaliser, Concevoir, Optimiser et Administrer en :",
+      "carouselNavAria": "Navigation du carrousel de compétences",
       "cards": {
         "web": { "title": "Développement Web" },
         "backend": { "title": "Développement Système & Back-end" },
@@ -715,7 +723,8 @@
     "presentation": {
       "title": "Présentation",
       "description": "Sur cette page seront présentés divers projets personnels et illustrations. Ils reflètent mon intérêt pour la programmation, le design et la créativité.",
-      "notice": "PS : Cette page contient des videos qui se jouent au survol de la souris !"
+      "notice": "PS : Cette page contient des videos qui se jouent au survol de la souris !",
+      "noticeAria": "Remarque"
     },
     "discord": {
       "title": "Bot Discord",
@@ -753,12 +762,51 @@
         "software": "Architecture Logicielle",
         "flow": "Flux d'Exécution d'une Commande"
       },
-      "dashboardCaption": "Dashboard Railway : suivi des variables d'environnement, métriques PostgreSQL, & logs applicatifs"
+      "dashboardCaption": "Dashboard Railway : suivi des variables d'environnement, métriques PostgreSQL, & logs applicatifs",
+      "dashboardAlt": "Tableau de bord Railway pour le bot Discord",
+      "architecture": {
+        "infrastructure": "Le bot est déployé sur <strong>Railway</strong> via Docker (Node 22-slim), assurant une disponibilité 24/7. Une base de données <strong>PostgreSQL</strong> (intégrée à Railway) persiste l'ensemble des données utilisateur.",
+        "databaseIntro": "PostgreSQL contient <strong>8 tables structurées</strong> :",
+        "tableHeader": "Table",
+        "roleHeader": "Rôle",
+        "tables": {
+          "balances": "Solde virtuel par utilisateur, auto-seeding à $10k",
+          "user_preferences": "Contexte utilisateur, attitude et sentiment score",
+          "conversation_memories": "Historique IA par utilisateur, auto-cleanup après 1000 lignes",
+          "media_cache": "Cache des descriptions d'images pour limiter les appels OpenRouter",
+          "reminders": "Rappels persistants avec scheduling inter-redémarrages",
+          "pending_duels": "Défis PvP en attente, survit aux redémarrages Docker",
+          "user_cooldowns": "Cooldowns persistants anti-spam par commande",
+          "sleepy_counts": "Statistiques d'usage par commande et par serveur"
+        },
+        "software": {
+          "slashCommands": "<strong>Slash Commands (discord.js v14)</strong> : 20+ commandes auto-registerées par serveur (pas de délai global)",
+          "buttonCollectors": "<strong>Button Collectors</strong> : jeux multi-tours (blackjack, roulette) avec interface interactive",
+          "asyncEvents": "<strong>Événements asynchrones</strong> : gestion des interactions utilisateur et mises à jour en temps réel",
+          "ai": "<strong>Intégration IA</strong> : OpenRouter API (DeepSeek pour chat, Gemini 2.0 pour analyse d'images)",
+          "sentiment": "<strong>Sentiment Tracking</strong> : système d'adaptation de personnalité basé sur historique de conversation"
+        },
+        "flow": {
+          "command": "Utilisateur appelle une commande slash <code>/bj bet 500</code>",
+          "balance": "Vérification du solde dans <code>balances</code>, rejet si insuffisant",
+          "gameLogic": "Logique du jeu avec <strong>Button Collectors</strong> discord.js pour les actions du joueur",
+          "transaction": "Mise à jour transactionnelle dans PostgreSQL",
+          "embed": "Embed Discord renvoyé avec état et résultat de la partie"
+        }
+      }
     },
     "drawings": {
       "title": "Dessins personnels",
       "description1": "Depuis Janvier 2025, je me suis lancé dans le dessin numérique et traditionnel. Voici quelques-unes de mes illustrations, réalisées au crayon (2H à 6B) ou numériquement.",
       "description2": "J'explore différents styles et techniques, mais cela reste avant tout un hobby pour moi.",
+      "alts": {
+        "ada1": "ADA-1 de Destiny 2 au crayon",
+        "power": "Illustration numérique",
+        "ramattra": "Illustration au crayon",
+        "commission": "Illustration numérique",
+        "goatLamb": "Dessin au stylo",
+        "elsie": "Illustration numérique"
+      },
       "captions": {
         "ada1": "ADA-1 de Destiny 2 - Portrait au crayon",
         "power": "Power de Chainsaw Man - Illustrations numérique",
@@ -775,6 +823,7 @@
       "skills": "Logique algorithmique, design d'interfaces, animations, gestion de variables et de sprites",
       "techniquesLabel": "Techniques :",
       "techniques": "Utilisation avancée de Scratch, optimisation des scripts, adaptation aux feedbacks utilisateurs",
+      "logoAlt": "Logo Scratch",
       "profile": "Voir mon profil Scratch",
       "captions": {
         "stickman": "Démonstration du jeu Stickman Adventure",
@@ -976,6 +1025,7 @@
     "title": "Page introuvable",
     "description": "La page que vous cherchez n'existe pas, a été déplacée, ou vous a simplement échappé dans le vide interstellaire.",
     "homeButton": "← Retour à l'accueil",
+    "codeAria": "Erreur 404",
     "snakeButton": "🐍 Rester un peu plus longtemps"
   },
   "data": {

@@ -16,6 +16,10 @@ test.describe('Link Integrity Crawler', () => {
       const response = await page.goto(currentPath);
       expect(response?.status(), `Link broken: ${currentPath}`).toBeLessThan(400);
 
+      // The SPA renders after `load` (an English browser first fetches its locale
+      // chunk), so wait for the app's links before collecting them.
+      await page.waitForFunction(() => document.querySelectorAll('#root a[href]').length > 0);
+
       // Collect all internal links
       const links = await page.evaluate(() => {
         const anchors = Array.from(document.querySelectorAll('a[href]'));

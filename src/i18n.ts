@@ -14,6 +14,9 @@ const lazyLoaders: Record<string, () => Promise<{ default: Record<string, unknow
 
 const loadedLanguages = new Set<string>(['fr']);
 
+/** Where the language detector reads and caches the chosen language. */
+export const LANGUAGE_STORAGE_KEY = 'i18nextLng';
+
 /**
  * Ensures a language's translation bundle is registered before it is used. Safe to
  * call repeatedly; resolves immediately for already-loaded (or eagerly-bundled)
@@ -49,8 +52,14 @@ export const i18nReady: Promise<unknown> = i18n
       escapeValue: false, // React already escapes
     },
     detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
-      lookupLocalStorage: 'i18nextLng',
+      // No 'htmlTag': index.html is always lang="fr", and as the only exact
+      // supported code it outranked the visitor's real preferences (an en-GB, fr-FR
+      // browser got French). fallbackLng already covers "nothing detected".
+      order: ['localStorage', 'navigator'],
+      // Reduce region codes to the base language so the visitor's first preference
+      // wins: i18next prefers exact matches, so 'en-GB' lost to a later 'fr'.
+      convertDetectedLanguage: (lng: string) => lng.split('-')[0],
+      lookupLocalStorage: LANGUAGE_STORAGE_KEY,
       caches: ['localStorage'],
     },
   })

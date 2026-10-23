@@ -157,8 +157,12 @@ const Layout = () => {
     };
 
     i18n.on('languageChanged', handleLanguageChange);
+    // A failed switch never emits `languageChanged`: without this the text would stay
+    // transparent for good.
+    window.addEventListener('portfolioLanguageChangeFailed', handleLanguageChange);
     return () => {
       i18n.off('languageChanged', handleLanguageChange);
+      window.removeEventListener('portfolioLanguageChangeFailed', handleLanguageChange);
     };
   }, [i18n]);
 
