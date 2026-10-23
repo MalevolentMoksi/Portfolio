@@ -22,7 +22,7 @@ test.describe('Portfolio E2E Tests', () => {
     await expect(page).toHaveURL(/.*\/projets/);
 
     // Check if project cards are visible
-    const projectCards = page.locator('.project-card');
+    const projectCards = page.locator('#project-list article.project');
     await expect(projectCards.first()).toBeVisible();
 
     // Try a filter if it exists
@@ -64,6 +64,9 @@ test.describe('Portfolio E2E Tests', () => {
     const pages = ['/', '/projets', '/about'];
     for (const path of pages) {
       await page.goto(path);
+      // The SPA renders after `load`, so wait for the routed page before scanning.
+      await page.locator('#main-title').waitFor();
+      await page.locator('#main section').first().waitFor();
       const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
       expect(accessibilityScanResults.violations).toEqual([]);
     }

@@ -305,7 +305,7 @@ const About = () => {
         <p className="about-intro">{t('about.sections.stack.intro')}</p>
         <div className="about-stack-grid" role="list">
           {STACK.map(({ id, name, role, desc, color, icon }) => (
-            <article
+            <div
               key={name}
               className="about-tech-card"
               role="listitem"
@@ -323,7 +323,7 @@ const About = () => {
                   {t(`about.stack.${id}.desc`, { defaultValue: desc })}
                 </p>
               </div>
-            </article>
+            </div>
           ))}
         </div>
       </section>
@@ -390,7 +390,7 @@ const About = () => {
         <p className="about-intro">{t('about.sections.ambient.intro')}</p>
         <div className="about-ambient-grid" role="list">
           {AMBIENT.map(({ id, name, desc, icon }) => (
-            <article key={name} className="about-ambient-card" role="listitem">
+            <div key={name} className="about-ambient-card" role="listitem">
               <span className="about-ambient-icon" aria-hidden="true">
                 {icon}
               </span>
@@ -402,7 +402,7 @@ const About = () => {
                   {t(`about.ambient.${id}.desc`, { defaultValue: desc })}
                 </p>
               </div>
-            </article>
+            </div>
           ))}
         </div>
       </section>
