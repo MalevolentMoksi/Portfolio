@@ -6,36 +6,21 @@ import Layout from './components/Layout';
 import Loading from './components/Loading';
 import ErrorFallback from './components/ErrorFallback';
 import useAnalyticsTracking from './hooks/useAnalyticsTracking';
+import { reloadForStaleBuild } from './utils/appUpdate';
 import Home from './pages/Home';
 
-// Retry wrapper: if a lazy chunk fails to load (e.g. after a new deploy),
-// force a page reload so the browser fetches the updated index.html.
-// A sessionStorage guard prevents infinite reload loops (one reload per session).
-const CHUNK_RELOAD_KEY = 'chunk-reload-v1';
-const PERF_TOAST_KEY = 'perf-tier-initial-toast-v1';
- 
+// Retry wrapper: if a lazy chunk fails to load (e.g. a tab left open across a deploy),
+// reload once so the browser fetches the deployed build. The guard is keyed on the
+// build id, so it can never loop and never blocks a later deploy (see appUpdate.ts).
 function retryLazy<T extends ComponentType<Record<string, never>>>(
   importFn: () => Promise<{ default: T }>
 ) {
   return lazy<T>(() =>
     importFn().catch(() => {
-      let shouldReload = false;
-      try {
-        if (!sessionStorage.getItem(CHUNK_RELOAD_KEY)) {
-          sessionStorage.setItem(CHUNK_RELOAD_KEY, '1');
-          // Clear performance toast guard so it re-shows after the reload
-          sessionStorage.removeItem(PERF_TOAST_KEY);
-          shouldReload = true;
-        }
-      } catch {
-        // sessionStorage unavailable — don't reload (avoid loop); show the error UI.
-      }
-      if (shouldReload) {
-        // First failure: reload once so the browser fetches the updated index.html.
-        window.location.reload();
+      if (reloadForStaleBuild()) {
         return { default: Loading } as unknown as { default: T };
       }
-      // Second failure (reload already happened) or storage unavailable: show an
+      // Reload already tried for this build, offline, or storage unavailable: show an
       // actionable error with a manual retry instead of a permanent spinner.
       return { default: ErrorFallback } as unknown as { default: T };
     })

@@ -7,6 +7,7 @@ import { MoodProvider } from './contexts/MoodContext';
 import { PerformanceTierProvider } from './contexts/PerformanceTierContext';
 import { ToastProvider } from './contexts/ToastContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import { startAppUpdateWatcher } from './utils/appUpdate';
 import '@styles/main.css';
 
 document.documentElement.dataset.spaMode = 'true';
@@ -63,3 +64,5 @@ const renderApp = () => {
 // the first render, so a non-default-language visitor never sees a flash of fallback
 // (French) copy. Render anyway if the locale chunk fails so the app is never blank.
 i18nReady.catch(() => {}).then(renderApp);
+
+startAppUpdateWatcher();

@@ -8,6 +8,24 @@ import type { NormalizedOutputOptions, OutputBundle } from 'rollup';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const buildDate = new Date().toISOString().split('T')[0];
+// Unique per build: compared against the deployed version.json to detect new deploys.
+const buildId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+/**
+ * Plugin: publish the build id as version.json so open tabs can tell that a newer
+ * build has been deployed (see src/utils/appUpdate.ts).
+ */
+const versionManifestPlugin = {
+  name: 'version-manifest',
+  apply: 'build' as const,
+  generateBundle(this: { emitFile: (file: { type: 'asset'; fileName: string; source: string }) => void }) {
+    this.emitFile({
+      type: 'asset',
+      fileName: 'version.json',
+      source: JSON.stringify({ buildId, buildDate }),
+    });
+  },
+};
 
 /**
  * Plugin: Exclude music files from build output
@@ -31,6 +49,7 @@ export default defineConfig({
   plugins: [
     react(),
     excludeMusicFilesPlugin,
+    versionManifestPlugin,
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
@@ -53,7 +72,27 @@ export default defineConfig({
           '**/assets/**/*.{mp3,m4a,ogg}',
         ],
         navigateFallback: null,
+        // index.html stays precached (offline shell below) but must not answer
+        // navigations to `/` cache-first: that served the previous build after every
+        // deploy and forced a reload once the new worker took over.
+        directoryIndex: null,
         runtimeCaching: [
+          {
+            // Page loads always fetch fresh HTML (revalidated past GitHub Pages'
+            // 10-minute HTTP cache), so a new visit runs the latest build without any
+            // reload. Offline, every route falls back to the precached shell.
+            // Plugin functions are serialized into sw.js: keep them self-contained.
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkOnly',
+            options: {
+              fetchOptions: { cache: 'no-cache' },
+              plugins: [
+                {
+                  handlerDidError: async () => caches.match('index.html', { ignoreSearch: true }),
+                },
+              ],
+            },
+          },
           {
             urlPattern: /\/assets\/.*\.(mp3|m4a|ogg)$/i,
             handler: 'NetworkOnly',
@@ -69,6 +108,21 @@ export default defineConfig({
                 maxAgeSeconds: 60 * 60 * 24 * 30,
               },
               cacheableResponse: { statuses: [0, 200] },
+              plugins: [
+                {
+                  // After a deploy, removed chunks come back as an HTML page (GitHub
+                  // Pages' 404, or a 200 SPA rewrite elsewhere). Treat that like a
+                  // network failure: the old tab gets the chunk from cache when it has
+                  // it, and the HTML is never cached under a .js URL.
+                  fetchDidSucceed: async ({ response }) => {
+                    const type = response.headers.get('content-type') || '';
+                    if (response.status >= 400 || type.includes('text/html')) {
+                      throw new Error(`Unexpected ${response.status} ${type}`);
+                    }
+                    return response;
+                  },
+                },
+              ],
             },
           },
           {
@@ -146,6 +200,7 @@ export default defineConfig({
   publicDir: '../public',
   define: {
     __BUILD_DATE__: JSON.stringify(buildDate),
+    __APP_BUILD_ID__: JSON.stringify(buildId),
   },
 
   build: {

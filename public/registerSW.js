@@ -1,5 +1,5 @@
 /**
- * Service Worker Registration with Update & Error Handling
+ * Service Worker registration (updates never force a page reload)
  * Deferred to avoid render blocking
  */
 
@@ -18,46 +18,16 @@ const swUrl = `${basePath}sw.js`;
 
 if ('serviceWorker' in navigator && isSecureOrigin) {
   const registerServiceWorker = () => {
-    // Guard: prevent multiple reloads from SW updates
-    let hasReloadedForSwUpdate = false;
-    // Only reload on update, not on first installation (first visit has no existing controller)
-    const hasExistingController = !!navigator.serviceWorker.controller;
-
-    navigator.serviceWorker
-      .register(swUrl, { scope: basePath })
-      .then((registration) => {
-        // Listen for updates and activate new SW immediately (skip waiting)
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          newWorker?.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New SW is ready; tell it to skip waiting
-              newWorker.postMessage({ type: 'SKIP_WAITING' });
-              // Notify user of update (optional)
-              console.log('Service Worker updated — page will reload');
-            }
-          });
-        });
-
-        // Handle skip-waiting message from new SW — reload only once, and only if updating (not on first install)
-        const handleControllerChange = () => {
-          if (!hasReloadedForSwUpdate && hasExistingController) {
-            hasReloadedForSwUpdate = true;
-            // Defer reload to allow SW to fully activate
-            setTimeout(() => {
-              window.location.reload();
-            }, 100);
-          }
-        };
-        navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
-
-        // console.log('Service Worker registered:', registration);
-      })
-      .catch((error) => {
-        if (error?.name !== 'SecurityError') {
-          console.warn('Service Worker registration failed:', error);
-        }
-      });
+    // No reload on update. The worker activates itself (skipWaiting + clientsClaim)
+    // and only changes how future requests are cached: page loads always fetch fresh
+    // HTML, so the next visit runs the new build. A tab left open across a deploy is
+    // moved to the new build on its next internal link click (src/utils/appUpdate.ts),
+    // never in the middle of a read.
+    navigator.serviceWorker.register(swUrl, { scope: basePath }).catch((error) => {
+      if (error?.name !== 'SecurityError') {
+        console.warn('Service Worker registration failed:', error);
+      }
+    });
   };
 
   const runWhenIdle = () => {
