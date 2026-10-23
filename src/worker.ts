@@ -10,6 +10,8 @@
  * 3. Get your worker URL: https://portfolio-webhook-proxy.<your-name>.workers.dev
  */
 
+import { MAX_BODY_BYTES, sanitizeDiscordPayload } from './utils/discordPayload';
+
 declare global {
   interface Env {
     DISCORD_WEBHOOK_URL?: string;
@@ -122,11 +124,19 @@ export default {
       );
     }
 
+    const declaredLength = Number(request.headers.get('Content-Length') ?? 0);
+    if (declaredLength > MAX_BODY_BYTES) {
+      return responseWithCors('Payload Too Large', 413, requestOrigin, allowedOrigins);
+    }
+
     try {
       // Parse as text first so sendBeacon payloads are supported consistently.
       const rawBody = await request.text();
       if (!rawBody) {
         return responseWithCors('Bad Request: Empty body', 400, requestOrigin, allowedOrigins);
+      }
+      if (new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) {
+        return responseWithCors('Payload Too Large', 413, requestOrigin, allowedOrigins);
       }
 
       let payload: unknown;
@@ -136,11 +146,16 @@ export default {
         return responseWithCors('Bad Request: Invalid JSON', 400, requestOrigin, allowedOrigins);
       }
 
+      const safePayload = sanitizeDiscordPayload(payload);
+      if (!safePayload) {
+        return responseWithCors('Bad Request: Invalid payload', 400, requestOrigin, allowedOrigins);
+      }
+
       // Forward to Discord
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(safePayload),
       });
 
       if (!response.ok) {
