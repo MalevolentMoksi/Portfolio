@@ -98,22 +98,27 @@ export default defineConfig({
             handler: 'NetworkOnly',
           },
           {
-            urlPattern: /\/assets\/.*\.js$/i,
-            handler: 'NetworkFirst',
+            // Build output is content-hashed (`name-XXXXXXXX.js`): a URL never changes
+            // content, so the cached copy is always the right one. CacheFirst lets a
+            // returning visit boot without waiting on the network. NetworkFirst made
+            // every file wait for the server (up to 3 s each, with several waves
+            // before the first render): a blank page for 6-10 s on a slow or
+            // congested connection, while a private window stayed instant.
+            urlPattern: /\/assets\/[^/]+-[A-Za-z0-9_-]{8}\.js$/,
+            handler: 'CacheFirst',
             options: {
               cacheName: 'portfolio-assets-js',
-              networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 80,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
               },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
               plugins: [
                 {
                   // After a deploy, removed chunks come back as an HTML page (GitHub
-                  // Pages' 404, or a 200 SPA rewrite elsewhere). Treat that like a
-                  // network failure: the old tab gets the chunk from cache when it has
-                  // it, and the HTML is never cached under a .js URL.
+                  // Pages' 404, or a 200 SPA rewrite elsewhere). Treat that as a
+                  // failure so the HTML is never cached under a .js URL.
+                  // Plugin functions are serialized into sw.js: keep them self-contained.
                   fetchDidSucceed: async ({ response }) => {
                     const type = response.headers.get('content-type') || '';
                     if (response.status >= 400 || type.includes('text/html')) {
@@ -126,16 +131,26 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\/assets\/.*\.css$/i,
-            handler: 'NetworkFirst',
+            urlPattern: /\/assets\/[^/]+-[A-Za-z0-9_-]{8}\.css$/,
+            handler: 'CacheFirst',
             options: {
               cacheName: 'portfolio-assets-css',
-              networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 40,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
               },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
+              plugins: [
+                {
+                  fetchDidSucceed: async ({ response }) => {
+                    const type = response.headers.get('content-type') || '';
+                    if (response.status >= 400 || type.includes('text/html')) {
+                      throw new Error(`Unexpected ${response.status} ${type}`);
+                    }
+                    return response;
+                  },
+                },
+              ],
             },
           },
           {
@@ -221,31 +236,37 @@ export default defineConfig({
       input: resolve(__dirname, 'src/index.html'),
       external: ['react-native-fs'],
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules/framer-motion')) {
-            return 'framer';
-          }
-          if (
-            id.includes('node_modules/react') ||
-            id.includes('node_modules/react-dom') ||
-            id.includes('node_modules/react-router-dom')
-          ) {
-            return 'vendor';
-          }
-          // Separate cacheable chunks for heavy deferred subsystems
-          if (id.includes('/src/scripts/') && !id.includes('.worker.')) {
-            return 'scripts';
-          }
-          if (id.includes('/src/components/ambient/')) {
-            return 'ambient';
-          }
-          // Only the eagerly-bundled default locale belongs in the shared i18n chunk.
-          // Other languages are dynamically imported (see src/i18n.ts) and must keep
-          // their own lazy chunks, so a default-language visitor never downloads them.
-          if (id.includes('/src/locales/fr.json')) {
-            return 'i18n';
-          }
-          return undefined;
+        // A group also captures every module its matches import, unless a higher
+        // priority group took it first. The old `manualChunks` groups for
+        // src/components/ambient/ and src/scripts/ swallowed the contexts, i18n and
+        // utils they import, so the entry had to load them statically: all the lazy
+        // ambient effects and legacy scripts landed on the first-render path. Dropping
+        // those groups then let `framer` swallow React and become render-blocking.
+        // Explicit priorities keep each group to what it names; everything else is
+        // split by the lazy imports themselves.
+        codeSplitting: {
+          groups: [
+            {
+              name: 'vendor',
+              test: /node_modules[\\/](react|react-dom|react-router|react-router-dom|react-i18next|scheduler|@remix-run)[\\/]/,
+              priority: 30,
+            },
+            {
+              // Only the lazy pet components use it: stays off the first render.
+              name: 'framer',
+              test: /node_modules[\\/](framer-motion|motion-dom|motion-utils)[\\/]/,
+              priority: 20,
+            },
+            {
+              // Only the eagerly-bundled default locale belongs in the shared i18n
+              // chunk. Other languages are dynamically imported (see src/i18n.ts) and
+              // keep their own lazy chunks, so a default-language visitor never
+              // downloads them.
+              name: 'i18n',
+              test: /[\\/]src[\\/]locales[\\/]fr\.json$/,
+              priority: 10,
+            },
+          ],
         },
       },
     },

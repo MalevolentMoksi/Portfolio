@@ -180,10 +180,28 @@
             return true;
           }
 
-          timer = setTimeout(function () {
-            if (appBooted()) markHealthy();
-            else attemptRecovery();
-          }, TIMEOUT_MS);
+          // Une page lente n'est pas une page cassee. Purger le cache et recharger en
+          // plein telechargement repartait de zero (une connexion lente a 10 s en
+          // devenait une a 20 s). On ne recupere que si l'appli n'a pas pu demarrer.
+          function onTimeout() {
+            if (settled) return;
+            if (appBooted()) {
+              markHealthy();
+              return;
+            }
+            // Le module d'entree s'est execute : l'appli attend seulement (traductions,
+            // reseau lent) et rendra d'elle-meme. L'observer la marquera saine.
+            if (window.__portfolioEntryRan) return;
+            // Encore en telechargement : on patiente au lieu de tout jeter.
+            if (document.readyState !== 'complete') {
+              timer = setTimeout(onTimeout, 2000);
+              return;
+            }
+            // Page chargee mais module d'entree jamais execute : il a echoue.
+            attemptRecovery();
+          }
+
+          timer = setTimeout(onTimeout, TIMEOUT_MS);
 
           if (!startObserver()) {
             document.addEventListener('DOMContentLoaded', startObserver, { once: true });

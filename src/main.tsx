@@ -10,6 +10,11 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { startAppUpdateWatcher } from './utils/appUpdate';
 import '@styles/main.css';
 
+// Tells the boot watchdog in index.html that the entry module and all its static
+// imports loaded and ran: from here the app renders on its own, however slow the
+// network, so the watchdog must not purge caches and reload.
+(window as Window & { __portfolioEntryRan?: boolean }).__portfolioEntryRan = true;
+
 document.documentElement.dataset.spaMode = 'true';
 
 const loadDeferredStyles = () => {
